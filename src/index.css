@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* NetStart — luxury obsidian + signal gold */
+    /* NetStart - luxury obsidian + signal gold */
     --background: 0 0% 4%;
     --foreground: 210 20% 96%;
 
@@ -40,7 +40,7 @@
 
     --radius: 0.25rem;
 
-    /* Brand — steel blue (kept token names for compatibility) */
+    /* Brand - steel blue (kept token names for compatibility) */
     --gold: 215 37% 55%;
     --gold-deep: 215 40% 35%;
     --gold-glow: 215 50% 68%;

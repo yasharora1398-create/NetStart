@@ -9,12 +9,12 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
-# 1. Block by filename — files that commonly hold secrets
+# 1. Block by filename - files that commonly hold secrets
 BAD_FILES=$(git diff --cached --name-only | grep -iE "(^|/)\.env($|\.)|(^|/)credentials\.|\.pem$|\.key$|\.p12$|\.pfx$|id_rsa$|id_ed25519$|service-account.*\.json$")
 
 if [ -n "$BAD_FILES" ]; then
   git reset >/dev/null 2>&1
-  printf '%s\n' '{"systemMessage":"Auto-push aborted — sensitive filename staged (.env/.pem/credentials/key/etc). Review, add to .gitignore if needed, or commit manually."}'
+  printf '%s\n' '{"systemMessage":"Auto-push aborted - sensitive filename staged (.env/.pem/credentials/key/etc). Review, add to .gitignore if needed, or commit manually."}'
   exit 0
 fi
 
@@ -29,11 +29,11 @@ SECRETS=$(git diff --cached -U0 | grep -E "^\+[^+]" | grep -iE \
 
 if [ -n "$SECRETS" ]; then
   git reset >/dev/null 2>&1
-  printf '%s\n' '{"systemMessage":"Auto-push aborted — possible secret detected in staged diff. Review manually and commit yourself if safe."}'
+  printf '%s\n' '{"systemMessage":"Auto-push aborted - possible secret detected in staged diff. Review manually and commit yourself if safe."}'
   exit 0
 fi
 
-# 3. Safe — commit + push
+# 3. Safe - commit + push
 git commit -m "auto: update from Claude" >/dev/null 2>&1
 
 if git push -u origin HEAD >/dev/null 2>&1; then

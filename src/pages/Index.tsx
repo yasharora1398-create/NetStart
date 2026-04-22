@@ -1,11 +1,14 @@
+import { Link } from "react-router-dom";
 import { Nav } from "@/components/netstart/Nav";
 import { PhoneFrame } from "@/components/netstart/PhoneFrame";
 import { AppShell } from "@/components/netstart/AppShell";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Filter, Layers, MessageSquare, Sparkles, Apple, Smartphone } from "lucide-react";
+import { ArrowRight, Filter, MessageSquare, Sparkles, Apple, Smartphone, UserPlus, FileText, BadgeCheck } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Nav />
@@ -25,7 +28,7 @@ const Index = () => {
           <div className="animate-fade-up text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-8">
               <Sparkles className="h-3 w-3 text-gold" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">iOS · Android · Invitation only</span>
+              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">iOS · Android · For builders</span>
             </div>
 
             <h1 className="font-display text-5xl md:text-7xl lg:text-[5.25rem] leading-[0.95] mb-8">
@@ -34,22 +37,29 @@ const Index = () => {
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
-              NetStart is a closed network for founders and operators who ship.
+              NetStart is a network for founders and operators who ship.
               Decisive matching. Verified execution. In your pocket.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-10 justify-center lg:justify-start">
-              <Button variant="gold" size="xl" className="group">
-                <Apple /> Download for iOS
-              </Button>
-              <Button variant="outlineGold" size="xl">
-                <Smartphone /> Get on Android
-              </Button>
+              {user ? (
+                <a href="#download">
+                  <Button variant="gold" size="xl">Download the app</Button>
+                </a>
+              ) : (
+                <>
+                  <Link to="/signin">
+                    <Button variant="outlineGold" size="xl">Sign in</Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button variant="gold" size="xl">Sign up</Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-3 text-xs font-mono uppercase tracking-widest text-muted-foreground">
               <span><span className="text-gold">2,840</span> verified builders</span>
-              <span><span className="text-gold">17%</span> acceptance</span>
               <span><span className="text-gold">312</span> companies started</span>
             </div>
           </div>
@@ -80,78 +90,53 @@ const Index = () => {
       {/* HOW */}
       <section id="how" className="container py-28">
         <div className="max-w-2xl mb-16 mx-auto text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold mb-4">The mechanics</p>
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold mb-4">How it works</p>
           <h2 className="font-display text-4xl md:text-6xl leading-[1] mb-6">
-            Built for the<br />way operators decide.
+            From signup to<br /><em className="text-gradient-gold not-italic">shipping.</em>
           </h2>
           <p className="text-muted-foreground text-lg">
-            No infinite scroll. No vague bios. Every profile contains proof, every interaction has structure.
+            Find the right people faster, and start building real companies.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="group relative border border-border rounded-sm p-8 hover:border-gold/40 transition-all duration-500">
+        <div className="max-w-3xl mx-auto space-y-4">
+          {STEPS.map((s, i) => (
+            <div key={s.title} className="group relative border border-border rounded-sm p-8 hover:border-gold/40 transition-all duration-500">
               <div className="absolute inset-0 rounded-sm bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
-                <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center mb-6 text-gold">
-                  {f.icon}
+              <div className="relative flex gap-6 items-start">
+                <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                  <div className="font-mono text-xs text-gold">0{i + 1}</div>
+                  <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    {s.icon}
+                  </div>
                 </div>
-                <h3 className="font-display text-2xl mb-3">{f.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{f.body}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display text-2xl mb-2 group-hover:text-gold transition-colors">{s.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{s.body}</p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CONVERSATIONS */}
-      <section className="border-t border-border">
-        <div className="container py-28 grid lg:grid-cols-2 gap-16 items-center">
-          <div className="text-center lg:text-left">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold mb-4">Structured conversations</p>
-            <h2 className="font-display text-4xl md:text-5xl leading-[1.05] mb-6">
-              Skip small talk.<br />Ask what matters.
-            </h2>
-            <p className="text-muted-foreground text-lg mb-8">
-              Every connection opens with founder-grade prompts. You learn how someone thinks before you spend an hour on a call.
-            </p>
-            <Button variant="outlineGold">Browse the prompt library</Button>
-          </div>
-
-          <div className="space-y-3">
-            {PROMPTS.map((p, i) => (
-              <div
-                key={p}
-                className="group border border-border rounded-sm p-5 hover:border-gold/40 hover:bg-carbon/40 transition-all cursor-pointer"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="font-mono text-xs text-gold/60 mt-0.5">{String(i + 1).padStart(2, "0")}</span>
-                  <p className="font-display text-lg leading-snug group-hover:text-gold transition-colors">{p}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="border-t border-border relative overflow-hidden">
+      {/* DOWNLOAD */}
+      <section id="download" className="border-t border-border relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-spotlight" />
         <div className="container py-28 relative text-center">
           <h2 className="font-display text-5xl md:text-7xl leading-[1] mb-6 max-w-3xl mx-auto">
             Work with operators,<br /><em className="text-gradient-gold not-italic">not talkers.</em>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-10">
-            Applications reviewed weekly. We accept fewer than 1 in 6.
+            Download the app and start building today.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button variant="gold" size="xl" className="group">
-              <Apple /> App Store
+              <Apple /> Download for iOS
               <ArrowRight className="transition-transform group-hover:translate-x-1" />
             </Button>
             <Button variant="outlineGold" size="xl">
-              <Smartphone /> Google Play
+              <Smartphone /> Download for Android
             </Button>
           </div>
         </div>
@@ -177,18 +162,12 @@ const PRINCIPLES = [
   { title: "Decisive by design", body: "Connect, pass, or save. No likes, no maybes. Your time is the asset we protect most." },
 ];
 
-const FEATURES = [
-  { icon: <Layers className="h-5 w-5" />, title: "Builder profiles, not resumes", body: "Shipped projects, measurable outcomes, and a 30-day buildable scope. Proof over polish." },
-  { icon: <Filter className="h-5 w-5" />, title: "Compatibility scoring", body: "Skills, pace, risk tolerance, and capital expectations are weighed — not your follower count." },
-  { icon: <MessageSquare className="h-5 w-5" />, title: "Founder-grade prompts", body: "Conversations open with the questions that reveal how someone actually operates." },
-  { icon: <Shield className="h-5 w-5" />, title: "Visible verification", body: "Portfolio checks, reference signals, and execution badges. Quality stays high because we keep noise out." },
-];
-
-const PROMPTS = [
-  "What's your 90-day execution plan?",
-  "What's the biggest risk in this idea — and your honest mitigation?",
-  "Why are you the right person to build this, right now?",
-  "What have you shipped in the last 30 days?",
+const STEPS = [
+  { icon: <UserPlus className="h-5 w-5" />, title: "Create your account", body: "Sign up and choose your path: Builder or Visionary." },
+  { icon: <FileText className="h-5 w-5" />, title: "Add your credentials", body: "Link your LinkedIn or upload your resume. Include proof of work: projects or a portfolio." },
+  { icon: <BadgeCheck className="h-5 w-5" />, title: "Get verified", body: "Complete a short vetting process to confirm your skills or idea quality. This keeps the network high caliber." },
+  { icon: <Filter className="h-5 w-5" />, title: "Discover matches", body: "Browse curated profiles and startup ideas. Choose Connect, Pass, or Save. Like Tinder, but focused on building." },
+  { icon: <MessageSquare className="h-5 w-5" />, title: "Connect and build", body: "Match with people who fit your goals and skillset. Start conversations, align quickly, and begin building." },
 ];
 
 export default Index;

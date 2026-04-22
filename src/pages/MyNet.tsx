@@ -1,0 +1,533 @@
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Hourglass, Loader2, Plus, Search, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+
+import { Nav } from "@/components/netstart/Nav";
+import { AuthGate } from "@/components/netstart/AuthGate";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+
+import { ProfileCard } from "@/components/mynet/ProfileCard";
+import { ProjectCard } from "@/components/mynet/ProjectCard";
+import { ProjectDialog } from "@/components/mynet/ProjectDialog";
+import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
+import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
+
+import {
+  createProject,
+  deleteProject,
+  getProfile,
+  getResumePath,
+  listProjects,
+  removePerson,
+  removeResume,
+  setLinkedIn,
+  setPersonStatus,
+  updateProject,
+  uploadResume,
+} from "@/lib/mynet-storage";
+import {
+  emptyProfile,
+  type Profile,
+  type Project,
+  type ProjectCriteria,
+} from "@/lib/mynet-types";
+
+const SAMPLE_PROJECTS: Project[] = [
+  {
+    id: "sample",
+    title: "Your first project",
+    description:
+      "Sign in, then click + New project to define what you're building and the kind of operator you want next to you.",
+    criteria: {
+      skills: ["Sample skill"],
+      commitment: "Full-time",
+      location: "",
+      keywords: "",
+    },
+    savedPersonIds: [],
+    passedPersonIds: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+const errorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : "Something went wrong.";
+
+const MyNet = () => {
+  const { user, loading } = useAuth();
+  const uid = user?.id ?? null;
+
+  const [profile, setProfile] = useState<Profile>(emptyProfile());
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
+
+  const [openProjectId, setOpenProjectId] = useState<string | null>(null);
+  const [dialogState, setDialogState] = useState<
+    | { mode: "closed" }
+    | { mode: "new" }
+    | { mode: "edit"; project: Project }
+  >({ mode: "closed" });
+  const [findForId, setFindForId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!uid) {
+      setProfile(emptyProfile());
+      setProjects([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingData(true);
+    Promise.all([getProfile(uid), listProjects(uid)])
+      .then(([p, pr]) => {
+        if (cancelled) return;
+        setProfile(p);
+        setProjects(pr);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        toast.error(errorMessage(err));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingData(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [uid]);
+
+  const handleSaveLinkedIn = async (url: string) => {
+    if (!uid) return;
+    await setLinkedIn(uid, url);
+    setProfile((prev) => ({ ...prev, linkedinUrl: url }));
+  };
+
+  const handleUploadResume = async (file: File) => {
+    if (!uid) return;
+    const previousPath = await getResumePath(uid);
+    const meta = await uploadResume(uid, file, previousPath);
+    setProfile((prev) => ({
+      ...prev,
+      resume: { name: meta.name, size: meta.size, uploadedAt: meta.uploadedAt },
+    }));
+  };
+
+  const handleRemoveResume = async () => {
+    if (!uid) return;
+    const previousPath = await getResumePath(uid);
+    await removeResume(uid, previousPath);
+    setProfile((prev) => ({ ...prev, resume: null }));
+  };
+
+  const handleCreateProject = async (data: {
+    title: string;
+    description: string;
+    criteria: ProjectCriteria;
+  }) => {
+    if (!uid) return;
+    try {
+      const project = await createProject(uid, data);
+      setProjects((prev) => [project, ...prev]);
+      toast.success("Project created.");
+    } catch (err) {
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const handleEditProject =
+    (project: Project) =>
+    async (data: { title: string; description: string; criteria: ProjectCriteria }) => {
+      try {
+        await updateProject(project.id, data);
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === project.id
+              ? {
+                  ...p,
+                  title: data.title,
+                  description: data.description,
+                  criteria: data.criteria,
+                  updatedAt: new Date().toISOString(),
+                }
+              : p,
+          ),
+        );
+        toast.success("Project updated.");
+      } catch (err) {
+        toast.error(errorMessage(err));
+      }
+    };
+
+  const handleDeleteProject = async (project: Project) => {
+    if (!confirm(`Delete "${project.title}"? This can't be undone.`)) return;
+    const snapshot = projects;
+    setProjects((prev) => prev.filter((p) => p.id !== project.id));
+    if (openProjectId === project.id) setOpenProjectId(null);
+    try {
+      await deleteProject(project.id);
+    } catch (err) {
+      setProjects(snapshot);
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const handleSavePerson = async (projectId: string, personId: string) => {
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) return;
+    const isSaved = project.savedPersonIds.includes(personId);
+    const snapshot = projects;
+
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId
+          ? {
+              ...p,
+              savedPersonIds: isSaved
+                ? p.savedPersonIds.filter((id) => id !== personId)
+                : [...p.savedPersonIds, personId],
+              passedPersonIds: p.passedPersonIds.filter((id) => id !== personId),
+              updatedAt: new Date().toISOString(),
+            }
+          : p,
+      ),
+    );
+
+    try {
+      if (isSaved) {
+        await removePerson(projectId, personId);
+      } else {
+        await setPersonStatus(projectId, personId, "saved");
+      }
+      toast.success(isSaved ? "Removed from saved." : "Saved to project.");
+    } catch (err) {
+      setProjects(snapshot);
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const handlePassPerson = async (projectId: string, personId: string) => {
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) return;
+    const isPassed = project.passedPersonIds.includes(personId);
+    const snapshot = projects;
+
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId
+          ? {
+              ...p,
+              passedPersonIds: isPassed
+                ? p.passedPersonIds.filter((id) => id !== personId)
+                : [...p.passedPersonIds, personId],
+              savedPersonIds: p.savedPersonIds.filter((id) => id !== personId),
+              updatedAt: new Date().toISOString(),
+            }
+          : p,
+      ),
+    );
+
+    try {
+      if (isPassed) {
+        await removePerson(projectId, personId);
+      } else {
+        await setPersonStatus(projectId, personId, "passed");
+      }
+    } catch (err) {
+      setProjects(snapshot);
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const openProject = useMemo(
+    () => projects.find((p) => p.id === openProjectId) ?? null,
+    [projects, openProjectId],
+  );
+
+  const findProject = useMemo(
+    () => projects.find((p) => p.id === findForId) ?? null,
+    [projects, findForId],
+  );
+
+  const isAuthed = Boolean(user) && !loading;
+  const displayProjects = isAuthed ? projects : SAMPLE_PROJECTS;
+  const displayProfile = isAuthed ? profile : emptyProfile();
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Nav />
+
+      <main
+        className={`pt-28 pb-24 ${!isAuthed ? "pointer-events-none select-none blur-sm" : ""}`}
+      >
+        <div className="container">
+          {openProject && isAuthed ? (
+            <>
+              <button
+                onClick={() => setOpenProjectId(null)}
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="font-mono uppercase tracking-widest text-xs">
+                  All projects
+                </span>
+              </button>
+
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+                    Project
+                  </p>
+                  <h1 className="font-display text-4xl md:text-5xl leading-[1] mb-3">
+                    {openProject.title}
+                  </h1>
+                  {openProject.description && (
+                    <p className="text-muted-foreground max-w-2xl">
+                      {openProject.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant="outlineGold"
+                    size="lg"
+                    onClick={() =>
+                      setDialogState({ mode: "edit", project: openProject })
+                    }
+                  >
+                    Edit criteria
+                  </Button>
+                  <Button
+                    variant="gold"
+                    size="lg"
+                    onClick={() => setFindForId(openProject.id)}
+                  >
+                    <Search className="h-4 w-4" />
+                    Find people
+                  </Button>
+                </div>
+              </div>
+
+              <CriteriaSummary project={openProject} />
+
+              <div className="mt-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-display text-2xl">
+                    Saved people{" "}
+                    <span className="text-muted-foreground">
+                      ({openProject.savedPersonIds.length})
+                    </span>
+                  </h2>
+                </div>
+                <SavedPeopleList
+                  project={openProject}
+                  onUnsave={(personId) =>
+                    handleSavePerson(openProject.id, personId)
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <header className="mb-12">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
+                  <Sparkles className="h-3 w-3 text-gold" />
+                  <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+                    MyNet
+                  </span>
+                </div>
+                <h1 className="font-display text-4xl md:text-6xl leading-[1] mb-4">
+                  Your network,<br />
+                  <em className="text-gradient-gold not-italic">your moves.</em>
+                </h1>
+                <p className="text-muted-foreground max-w-xl">
+                  Manage your credentials, run searches by project, and save the
+                  operators worth talking to.
+                </p>
+              </header>
+
+              <section className="mb-12">
+                <ProfileCard
+                  profile={displayProfile}
+                  onSaveLinkedIn={handleSaveLinkedIn}
+                  onUploadResume={handleUploadResume}
+                  onRemoveResume={handleRemoveResume}
+                />
+              </section>
+
+              <section className="relative">
+                <div className="pointer-events-none select-none blur-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+                        Projects
+                      </p>
+                      <h2 className="font-display text-3xl">What you're building</h2>
+                    </div>
+                    <Button variant="gold" size="lg" disabled>
+                      <Plus className="h-4 w-4" />
+                      New project
+                    </Button>
+                  </div>
+
+                  {isAuthed && loadingData ? (
+                    <div className="rounded-sm border border-border bg-card/40 p-12 text-center">
+                      <Loader2 className="h-5 w-5 text-gold animate-spin mx-auto mb-3" />
+                      <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                        Loading your projects...
+                      </p>
+                    </div>
+                  ) : displayProjects.length === 0 ? (
+                    <div className="rounded-sm border border-dashed border-border bg-card/40 p-12 text-center">
+                      <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-3">
+                        Empty
+                      </p>
+                      <h3 className="font-display text-2xl mb-3">
+                        No projects yet.
+                      </h3>
+                      <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
+                        A project is what you're building plus the criteria for
+                        who you want next to you. Set one up and run Find People.
+                      </p>
+                      <Button variant="gold" size="lg" disabled>
+                        <Plus className="h-4 w-4" />
+                        Create your first project
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {displayProjects.map((p) => (
+                        <ProjectCard
+                          key={p.id}
+                          project={p}
+                          onOpen={() => undefined}
+                          onEdit={() => undefined}
+                          onDelete={() => undefined}
+                          onFindPeople={() => undefined}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="absolute inset-0 flex items-center justify-center p-6">
+                  <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
+                      <Hourglass className="h-5 w-5 text-gold" />
+                    </div>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+                      Review pending
+                    </p>
+                    <h3 className="font-display text-2xl mb-3">
+                      Hold tight.
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Wait for your resume or LinkedIn to be reviewed before you
+                      can start projects.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+        </div>
+      </main>
+
+      {!loading && !user && <AuthGate />}
+
+      {isAuthed && dialogState.mode !== "closed" && (
+        <ProjectDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setDialogState({ mode: "closed" });
+          }}
+          initial={dialogState.mode === "edit" ? dialogState.project : undefined}
+          onSubmit={
+            dialogState.mode === "edit"
+              ? handleEditProject(dialogState.project)
+              : handleCreateProject
+          }
+        />
+      )}
+
+      {isAuthed && (
+        <FindPeopleSheet
+          open={Boolean(findProject)}
+          onOpenChange={(open) => {
+            if (!open) setFindForId(null);
+          }}
+          project={findProject}
+          onSave={(personId) =>
+            findProject && handleSavePerson(findProject.id, personId)
+          }
+          onPass={(personId) =>
+            findProject && handlePassPerson(findProject.id, personId)
+          }
+        />
+      )}
+    </div>
+  );
+};
+
+const CriteriaSummary = ({ project }: { project: Project }) => {
+  const { skills, commitment, location, keywords } = project.criteria;
+  const hasAny =
+    skills.length > 0 ||
+    commitment.trim() !== "" ||
+    location.trim() !== "" ||
+    keywords.trim() !== "";
+
+  if (!hasAny) {
+    return (
+      <div className="rounded-sm border border-dashed border-border bg-card/40 p-6 text-sm text-muted-foreground">
+        No criteria set. Tap Edit criteria to define who you're looking for.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-sm border border-border bg-card p-6">
+      <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-4">
+        Criteria
+      </p>
+      <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-5">
+        {skills.length > 0 && (
+          <div className="sm:col-span-2">
+            <dt className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+              Skills
+            </dt>
+            <dd className="flex flex-wrap gap-1.5">
+              {skills.map((s) => (
+                <span
+                  key={s}
+                  className="px-2.5 py-1 text-xs border border-gold/30 bg-gold/5 rounded-sm"
+                >
+                  {s}
+                </span>
+              ))}
+            </dd>
+          </div>
+        )}
+        {commitment && <Field label="Commitment" value={commitment} />}
+        {location && <Field label="Location" value={location} />}
+        {keywords && (
+          <div className="sm:col-span-2">
+            <Field label="Keywords" value={keywords} />
+          </div>
+        )}
+      </dl>
+    </div>
+  );
+};
+
+const Field = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <dt className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+      {label}
+    </dt>
+    <dd className="text-sm">{value}</dd>
+  </div>
+);
+
+export default MyNet;
