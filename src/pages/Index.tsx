@@ -264,30 +264,6 @@ const Index = () => {
   const [howRef, howVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
   const [downloadRef, downloadVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
 
-  const pinRef = useRef<HTMLElement>(null);
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      if (!pinRef.current) return;
-      const total = pinRef.current.offsetHeight - window.innerHeight;
-      if (total <= 0) return;
-      const rect = pinRef.current.getBoundingClientRect();
-      const p = Math.max(0, Math.min(1, -rect.top / total));
-      setProgress(p);
-    };
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    update();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ overflowX: "clip" }}>
@@ -371,64 +347,35 @@ const Index = () => {
         </div>
       </section>
 
-      {/* PRINCIPLES — pinned: tree on left, horizontal scroll on right */}
-      <section
-        ref={pinRef}
-        id="standards"
-        className="relative border-y border-border bg-carbon/40"
-        style={{ height: "300vh" }}
-      >
-        <div className="sticky top-0 h-screen overflow-hidden bg-carbon/40 flex">
-          <p className="absolute top-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-gold z-10">
-            Standards
-          </p>
+      {/* PRINCIPLES — tree on left, stacked list on right */}
+      <section id="standards" className="relative border-y border-border bg-carbon/40 overflow-hidden">
+        <p className="absolute top-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-gold z-10">
+          Standards
+        </p>
 
-          {/* LEFT — 3D spinning connection tree */}
-          <div className="w-1/2 h-full hidden md:block relative">
-            <ConnectionTree3D progress={progress} />
-          </div>
-
-          {/* Divider */}
-          <div className="hidden md:block absolute left-1/2 top-20 bottom-20 w-px bg-gradient-to-b from-transparent via-border to-transparent z-10" />
-
-          {/* RIGHT — horizontal scroll (desktop). Mobile falls back to stacked. */}
-          <div className="w-full md:w-1/2 h-full overflow-hidden md:flex items-center hidden">
-            <div
-              className="flex h-full items-center"
-              style={{
-                transform: `translate3d(-${progress * 100}vw, 0, 0)`,
-                willChange: "transform",
-              }}
-            >
-              {PRINCIPLES.map((p, i) => (
-                <div
-                  key={p.title}
-                  className="flex-shrink-0 h-full flex items-center"
-                  style={{ width: "50vw" }}
-                >
-                  <div className="max-w-xl px-10 md:px-14">
-                    <div className="font-mono text-sm text-gold mb-8 tracking-[0.3em]">0{i + 1}</div>
-                    <h3 className="font-display text-4xl md:text-6xl leading-[1.05] mb-6">
-                      {p.title}
-                    </h3>
-                    <p className="text-muted-foreground text-lg md:text-xl leading-relaxed">
-                      {p.body}
-                    </p>
-                  </div>
-                </div>
-              ))}
+        <div className="container py-28 md:py-32">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+            {/* LEFT — 3D tree */}
+            <div className="relative h-[420px] md:h-[640px] hidden md:block">
+              <ConnectionTree3D progress={1} />
             </div>
-          </div>
 
-          {/* MOBILE fallback — stacked */}
-          <div className="md:hidden w-full h-full overflow-y-auto flex flex-col items-center justify-center px-6 py-16 space-y-16">
-            {PRINCIPLES.map((p, i) => (
-              <div key={p.title} className="max-w-md text-center">
-                <div className="font-mono text-sm text-gold mb-6 tracking-[0.3em]">0{i + 1}</div>
-                <h3 className="font-display text-3xl mb-4">{p.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{p.body}</p>
+            {/* RIGHT — stacked principles */}
+            <div className="relative md:pl-10">
+              <div className="hidden md:block absolute left-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-border to-transparent" />
+              <h2 className="font-display text-4xl md:text-5xl leading-[1.05] mb-12">
+                What we <em className="text-gradient-gold not-italic">stand for.</em>
+              </h2>
+              <div className="space-y-10">
+                {PRINCIPLES.map((p, i) => (
+                  <div key={p.title} className="border-l-2 border-blue-500/40 pl-6">
+                    <div className="font-mono text-sm text-blue-400 mb-3 tracking-[0.3em]">0{i + 1}</div>
+                    <h3 className="font-display text-2xl md:text-3xl mb-3">{p.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{p.body}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
