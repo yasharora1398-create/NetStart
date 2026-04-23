@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter, MessageSquare, Sparkles, Apple, Smartphone, UserPlus, FileText, BadgeCheck } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useAuth } from "@/context/AuthContext";
+import arjunImg from "@/assets/avatars/arjun.jpg";
+import claraImg from "@/assets/avatars/clara.jpg";
+import diegoImg from "@/assets/avatars/diego.jpg";
+import emmaImg from "@/assets/avatars/emma.jpg";
+import kenjiImg from "@/assets/avatars/kenji.jpg";
+import mayaImg from "@/assets/avatars/maya.jpg";
+import sofiaImg from "@/assets/avatars/sofia.jpg";
+import jamesImg from "@/assets/avatars/james.jpg";
 
 function useInViewOnce<T extends HTMLElement>(threshold = 0.2) {
   const ref = useRef<T | null>(null);
@@ -40,113 +48,227 @@ const BoxReveal = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-type TreeNode = { x: number; y: number; start: number };
-type TreeEdge = { from: number; to: number; start: number; end: number };
+type Vec3 = [number, number, number];
+type Node3D = { id: number; pos: Vec3; reveal: number; avatar?: string };
+type Edge3D = { from: number; to: number; start: number; end: number };
 
-const TREE_NODES: TreeNode[] = [
-  { x: 50, y: 112, start: 0.00 },
-  { x: 24, y: 82, start: 0.10 },
-  { x: 50, y: 82, start: 0.13 },
-  { x: 76, y: 82, start: 0.10 },
-  { x: 11, y: 48, start: 0.38 },
-  { x: 30, y: 48, start: 0.42 },
-  { x: 42, y: 48, start: 0.47 },
-  { x: 58, y: 48, start: 0.52 },
-  { x: 70, y: 48, start: 0.55 },
-  { x: 89, y: 48, start: 0.58 },
-  { x: 20, y: 18, start: 0.76 },
-  { x: 50, y: 14, start: 0.82 },
-  { x: 80, y: 18, start: 0.76 },
+const NODES_3D: Node3D[] = [
+  // Hub (always visible, pulses)
+  { id: 0, pos: [0, 0, 0], reveal: 0 },
+  // Stage 2 — primary branches in every direction
+  { id: 1, pos: [42, 0, 0], reveal: 0.20 },
+  { id: 2, pos: [-42, 0, 0], reveal: 0.22 },
+  { id: 3, pos: [0, 42, 0], reveal: 0.24 },
+  { id: 4, pos: [0, -42, 0], reveal: 0.26 },
+  { id: 5, pos: [0, 0, 42], reveal: 0.28 },
+  { id: 6, pos: [0, 0, -42], reveal: 0.30 },
+  { id: 7, pos: [28, 28, 15], reveal: 0.32 },
+  { id: 8, pos: [-28, 28, -15], reveal: 0.34 },
+  { id: 9, pos: [28, -28, -15], reveal: 0.36 },
+  { id: 10, pos: [-28, -28, 15], reveal: 0.38 },
+  // Stage 3 — profile nodes at the tips
+  { id: 11, pos: [72, 18, 18], reveal: 0.62, avatar: arjunImg },
+  { id: 12, pos: [-72, 18, -18], reveal: 0.65, avatar: claraImg },
+  { id: 13, pos: [20, 65, -30], reveal: 0.68, avatar: diegoImg },
+  { id: 14, pos: [-20, 65, 30], reveal: 0.71, avatar: emmaImg },
+  { id: 15, pos: [55, -40, 25], reveal: 0.74, avatar: kenjiImg },
+  { id: 16, pos: [-55, -40, -25], reveal: 0.77, avatar: mayaImg },
+  { id: 17, pos: [25, 10, 70], reveal: 0.80, avatar: sofiaImg },
+  { id: 18, pos: [-25, 10, -70], reveal: 0.83, avatar: jamesImg },
 ];
 
-const TREE_EDGES: TreeEdge[] = [
-  { from: 0, to: 1, start: 0.00, end: 0.15 },
-  { from: 0, to: 2, start: 0.02, end: 0.18 },
-  { from: 0, to: 3, start: 0.00, end: 0.15 },
-  { from: 1, to: 4, start: 0.18, end: 0.42 },
-  { from: 1, to: 5, start: 0.20, end: 0.46 },
-  { from: 2, to: 6, start: 0.22, end: 0.50 },
-  { from: 2, to: 7, start: 0.24, end: 0.54 },
-  { from: 3, to: 8, start: 0.26, end: 0.58 },
-  { from: 3, to: 9, start: 0.28, end: 0.62 },
-  { from: 5, to: 10, start: 0.58, end: 0.80 },
-  { from: 6, to: 11, start: 0.62, end: 0.85 },
-  { from: 7, to: 11, start: 0.64, end: 0.87 },
-  { from: 8, to: 12, start: 0.66, end: 0.90 },
+const EDGES_3D: Edge3D[] = [
+  // Hub → primary branches
+  { from: 0, to: 1, start: 0.12, end: 0.28 },
+  { from: 0, to: 2, start: 0.14, end: 0.30 },
+  { from: 0, to: 3, start: 0.16, end: 0.32 },
+  { from: 0, to: 4, start: 0.18, end: 0.34 },
+  { from: 0, to: 5, start: 0.20, end: 0.36 },
+  { from: 0, to: 6, start: 0.22, end: 0.38 },
+  { from: 0, to: 7, start: 0.24, end: 0.40 },
+  { from: 0, to: 8, start: 0.26, end: 0.42 },
+  { from: 0, to: 9, start: 0.28, end: 0.44 },
+  { from: 0, to: 10, start: 0.30, end: 0.46 },
+  // Primary → profile tips
+  { from: 1, to: 11, start: 0.55, end: 0.72 },
+  { from: 2, to: 12, start: 0.57, end: 0.74 },
+  { from: 3, to: 13, start: 0.59, end: 0.76 },
+  { from: 3, to: 14, start: 0.61, end: 0.78 },
+  { from: 9, to: 15, start: 0.63, end: 0.80 },
+  { from: 10, to: 16, start: 0.65, end: 0.82 },
+  { from: 5, to: 17, start: 0.67, end: 0.84 },
+  { from: 6, to: 18, start: 0.69, end: 0.86 },
 ];
 
-const ConnectionTree = ({ progress }: { progress: number }) => (
-  <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: "1400px" }}>
-    <div
-      className="w-[85%] h-[85%]"
-      style={{ transform: "rotateX(10deg) rotateY(-8deg)", transformStyle: "preserve-3d" }}
-    >
-      <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMid meet" className="w-full h-full overflow-visible">
+const rotY = ([x, y, z]: Vec3, a: number): Vec3 => {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [x * c + z * s, y, -x * s + z * c];
+};
+const rotX = ([x, y, z]: Vec3, a: number): Vec3 => {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [x, y * c - z * s, y * s + z * c];
+};
+const project = ([x, y, z]: Vec3) => {
+  const d = 160;
+  const f = d / (d + z);
+  return { px: x * f, py: y * f, scale: f, z };
+};
+
+const ConnectionTree3D = ({ progress }: { progress: number }) => {
+  const progressRef = useRef(progress);
+  useEffect(() => { progressRef.current = progress; }, [progress]);
+
+  const [frame, setFrame] = useState({ angle: 0, time: 0 });
+
+  useEffect(() => {
+    let rafId = 0;
+    let last = performance.now();
+    const tick = (t: number) => {
+      const dt = Math.min(0.05, (t - last) / 1000);
+      last = t;
+      // Spin speed ramps from slow to fast with scroll
+      const speed = 0.12 + progressRef.current * 1.8;
+      setFrame((f) => ({ angle: f.angle + speed * dt, time: t }));
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  const { angle, time } = frame;
+  const tiltX = 0.32;
+
+  // Pulse for the hub
+  const pulse = 0.5 + 0.5 * Math.sin(time / 380);
+  const hubBaseR = 4.2;
+  const hubR = hubBaseR + pulse * 2.2;
+  const hubHaloR = hubR * 2.4 + pulse * 4;
+
+  // Transform nodes once per frame
+  const transformed = NODES_3D.map((n) => {
+    const rotated = rotY(rotX(n.pos, tiltX), angle);
+    const proj = project(rotated);
+    return { node: n, ...proj };
+  });
+  // Sort by z so further nodes render first (back to front)
+  const sorted = [...transformed].sort((a, b) => a.z - b.z);
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center overflow-visible">
+      {/* Ambient glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, rgba(59,130,246,${0.18 + progress * 0.25}) 0%, transparent 55%)`,
+        }}
+      />
+      <svg viewBox="-110 -110 220 220" className="w-[90%] h-[90%] overflow-visible">
         <defs>
-          <filter id="edge-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <filter id="halo" x="-200%" y="-200%" width="500%" height="500%">
+            <feGaussianBlur stdDeviation="4" />
+          </filter>
+          <filter id="line-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="1.4" result="b" />
             <feMerge>
               <feMergeNode in="b" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <filter id="node-halo" x="-200%" y="-200%" width="500%" height="500%">
-            <feGaussianBlur stdDeviation="3" />
-          </filter>
-          <radialGradient id="node-core">
-            <stop offset="0%" stopColor="#dbeafe" />
-            <stop offset="35%" stopColor="#60a5fa" />
-            <stop offset="80%" stopColor="#2563eb" />
+          <radialGradient id="hubCore">
+            <stop offset="0%" stopColor="#f0f9ff" />
+            <stop offset="35%" stopColor="#93c5fd" />
+            <stop offset="75%" stopColor="#3b82f6" />
             <stop offset="100%" stopColor="#1e3a8a" />
+          </radialGradient>
+          <radialGradient id="nodeCore">
+            <stop offset="0%" stopColor="#dbeafe" />
+            <stop offset="50%" stopColor="#60a5fa" />
+            <stop offset="100%" stopColor="#1d4ed8" />
           </radialGradient>
         </defs>
 
-        {TREE_EDGES.map((e, i) => {
-          const a = TREE_NODES[e.from];
-          const b = TREE_NODES[e.to];
+        {/* Edges */}
+        {EDGES_3D.map((e, i) => {
           const p = progress < e.start ? 0 : progress > e.end ? 1 : (progress - e.start) / (e.end - e.start);
+          if (p <= 0) return null;
+          const a = transformed[e.from];
+          const b = transformed[e.to];
+          // Draw partial line from a to (a + (b-a) * p) for growing effect
+          const endX = a.px + (b.px - a.px) * p;
+          const endY = a.py + (b.py - a.py) * p;
+          const depth = Math.min(a.scale, b.scale);
           return (
             <line
               key={i}
-              x1={a.x}
-              y1={a.y}
-              x2={b.x}
-              y2={b.y}
+              x1={a.px}
+              y1={a.py}
+              x2={endX}
+              y2={endY}
               stroke="#60a5fa"
-              strokeWidth="0.55"
-              pathLength="1"
-              strokeDasharray="1"
-              strokeDashoffset={1 - p}
+              strokeWidth={0.9 * depth}
               strokeLinecap="round"
-              filter="url(#edge-glow)"
-              opacity={p > 0 ? 0.95 : 0}
+              filter="url(#line-glow)"
+              opacity={0.55 + 0.45 * depth}
             />
           );
         })}
 
-        {TREE_NODES.map((n, i) => {
-          const np = progress <= n.start ? 0 : Math.min(1, (progress - n.start) / 0.08);
+        {/* Nodes (back to front) */}
+        {sorted.map(({ node, px, py, scale, z }) => {
+          const np = node.reveal === 0 ? 1 : progress <= node.reveal ? 0 : Math.min(1, (progress - node.reveal) / 0.1);
           if (np <= 0) return null;
+          const depthOp = 0.55 + 0.45 * scale;
+
+          // Profile nodes
+          if (node.avatar) {
+            const r = 6 * scale * np;
+            const clipId = `clip-${node.id}`;
+            return (
+              <g key={node.id} transform={`translate(${px}, ${py})`} opacity={np * depthOp}>
+                <circle r={r * 1.6} fill="#60a5fa" opacity={0.4} filter="url(#halo)" />
+                <clipPath id={clipId}>
+                  <circle r={r} />
+                </clipPath>
+                <image
+                  href={node.avatar}
+                  x={-r}
+                  y={-r}
+                  width={r * 2}
+                  height={r * 2}
+                  preserveAspectRatio="xMidYMid slice"
+                  clipPath={`url(#${clipId})`}
+                />
+                <circle r={r} fill="none" stroke="#93c5fd" strokeWidth={0.6 * scale} />
+              </g>
+            );
+          }
+
+          // Hub (id 0) — big pulsing glow
+          if (node.id === 0) {
+            return (
+              <g key={node.id} transform={`translate(${px}, ${py})`}>
+                <circle r={hubHaloR} fill="#3b82f6" opacity={0.28 + pulse * 0.22} filter="url(#halo)" />
+                <circle r={hubR * 1.6} fill="#60a5fa" opacity={0.45} filter="url(#halo)" />
+                <circle r={hubR} fill="url(#hubCore)" />
+                <circle r={hubR * 0.35} fill="#ffffff" opacity={0.9} />
+              </g>
+            );
+          }
+
+          // Primary branch nodes
+          const r = 2.6 * scale * np;
           return (
-            <g key={i} transform={`translate(${n.x}, ${n.y})`}>
-              <circle r={3.2 * np} fill="#60a5fa" opacity={np * 0.45} filter="url(#node-halo)" />
-              <circle r={1.5 * np} fill="url(#node-core)" opacity={np} />
-              <circle r={0.45 * np} fill="#ffffff" opacity={np} />
+            <g key={node.id} transform={`translate(${px}, ${py})`} opacity={np * depthOp}>
+              <circle r={r * 2} fill="#60a5fa" opacity={0.35} filter="url(#halo)" />
+              <circle r={r} fill="url(#nodeCore)" />
+              <circle r={r * 0.3} fill="#ffffff" />
             </g>
           );
         })}
       </svg>
     </div>
-
-    {/* Ambient blue glow under the tree */}
-    <div
-      className="absolute inset-0 -z-10 pointer-events-none"
-      style={{
-        background: `radial-gradient(ellipse at 50% 60%, rgba(59,130,246,${0.12 + progress * 0.18}) 0%, transparent 60%)`,
-      }}
-    />
-  </div>
-);
+  );
+};
 
 const wordStyle = (visible: boolean, i: number): CSSProperties => ({
   display: "inline-block",
@@ -285,10 +407,13 @@ const Index = () => {
             Standards
           </p>
 
-          {/* LEFT — connection tree */}
-          <div className="w-1/2 h-full hidden md:block">
-            <ConnectionTree progress={progress} />
+          {/* LEFT — 3D spinning connection tree */}
+          <div className="w-1/2 h-full hidden md:block relative">
+            <ConnectionTree3D progress={progress} />
           </div>
+
+          {/* Divider */}
+          <div className="hidden md:block absolute left-1/2 top-20 bottom-20 w-px bg-gradient-to-b from-transparent via-border to-transparent z-10" />
 
           {/* RIGHT — horizontal scroll (desktop). Mobile falls back to stacked. */}
           <div className="w-full md:w-1/2 h-full overflow-hidden md:flex items-center hidden">
