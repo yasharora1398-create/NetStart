@@ -7,14 +7,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter, MessageSquare, Sparkles, Apple, Smartphone, UserPlus, FileText, BadgeCheck } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useAuth } from "@/context/AuthContext";
-import arjunImg from "@/assets/avatars/arjun.jpg";
-import claraImg from "@/assets/avatars/clara.jpg";
-import diegoImg from "@/assets/avatars/diego.jpg";
-import emmaImg from "@/assets/avatars/emma.jpg";
-import kenjiImg from "@/assets/avatars/kenji.jpg";
-import mayaImg from "@/assets/avatars/maya.jpg";
-import sofiaImg from "@/assets/avatars/sofia.jpg";
-import jamesImg from "@/assets/avatars/james.jpg";
+import builder1 from "@/assets/builder-1.jpg";
+import builder2 from "@/assets/builder-2.jpg";
+import builder3 from "@/assets/builder-3.jpg";
 
 function useInViewOnce<T extends HTMLElement>(threshold = 0.2) {
   const ref = useRef<T | null>(null);
@@ -66,15 +61,15 @@ const NODES_3D: Node3D[] = [
   { id: 8, pos: [-28, 28, -15], reveal: 0.34 },
   { id: 9, pos: [28, -28, -15], reveal: 0.36 },
   { id: 10, pos: [-28, -28, 15], reveal: 0.38 },
-  // Stage 3 — profile nodes at the tips
-  { id: 11, pos: [72, 18, 18], reveal: 0.62, avatar: arjunImg },
-  { id: 12, pos: [-72, 18, -18], reveal: 0.65, avatar: claraImg },
-  { id: 13, pos: [20, 65, -30], reveal: 0.68, avatar: diegoImg },
-  { id: 14, pos: [-20, 65, 30], reveal: 0.71, avatar: emmaImg },
-  { id: 15, pos: [55, -40, 25], reveal: 0.74, avatar: kenjiImg },
-  { id: 16, pos: [-55, -40, -25], reveal: 0.77, avatar: mayaImg },
-  { id: 17, pos: [25, 10, 70], reveal: 0.80, avatar: sofiaImg },
-  { id: 18, pos: [-25, 10, -70], reveal: 0.83, avatar: jamesImg },
+  // Stage 3 — profile nodes at the tips (cycling through the 3 available images)
+  { id: 11, pos: [72, 18, 18], reveal: 0.62, avatar: builder1 },
+  { id: 12, pos: [-72, 18, -18], reveal: 0.65, avatar: builder2 },
+  { id: 13, pos: [20, 65, -30], reveal: 0.68, avatar: builder3 },
+  { id: 14, pos: [-20, 65, 30], reveal: 0.71, avatar: builder1 },
+  { id: 15, pos: [55, -40, 25], reveal: 0.74, avatar: builder2 },
+  { id: 16, pos: [-55, -40, -25], reveal: 0.77, avatar: builder3 },
+  { id: 17, pos: [25, 10, 70], reveal: 0.80, avatar: builder1 },
+  { id: 18, pos: [-25, 10, -70], reveal: 0.83, avatar: builder2 },
 ];
 
 const EDGES_3D: Edge3D[] = [
