@@ -22,6 +22,39 @@ function useInViewOnce<T extends HTMLElement>(threshold = 0.2) {
   return [ref, visible] as const;
 }
 
+const BoxReveal = ({ children }: { children: React.ReactNode }) => {
+  const [ref, visible] = useInViewOnce<HTMLDivElement>(0.15);
+  return (
+    <div
+      ref={ref}
+      className="transition-all ease-out"
+      style={{
+        transitionDuration: "900ms",
+        opacity: visible ? 1 : 0,
+        filter: visible ? "blur(0)" : "blur(12px)",
+        transform: visible ? "translateY(0)" : "translateY(40px)",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+// Maps scroll progress (0..1) to horizontal translate percentage.
+// Holds each slide for a dwell zone so the user feels a "stop" at each.
+function computeTranslatePct(p: number): number {
+  const s0End = 0.1;    // slide 0 dwells until 10%
+  const t01End = 0.35;  // transition to slide 1 finishes at 35%
+  const s1End = 0.45;   // slide 1 dwells until 45%
+  const t12End = 0.7;   // transition to slide 2 finishes at 70%
+  // 70%-100% is slide 2 dwell ("a little more")
+  if (p <= s0End) return 0;
+  if (p <= t01End) return -100 * ((p - s0End) / (t01End - s0End));
+  if (p <= s1End) return -100;
+  if (p <= t12End) return -100 - 100 * ((p - s1End) / (t12End - s1End));
+  return -200;
+}
+
 const wordStyle = (visible: boolean, i: number): CSSProperties => ({
   display: "inline-block",
   marginRight: "0.22em",
@@ -64,7 +97,8 @@ const Index = () => {
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
-  const activeIdx = Math.min(2, Math.floor(progress * 3));
+  const translatePct = computeTranslatePct(progress);
+  const activeIdx = Math.min(2, Math.max(0, Math.round(-translatePct / 100)));
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Nav />
@@ -147,12 +181,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* PRINCIPLES — scroll-pinned horizontal */}
+      {/* PRINCIPLES — scroll-pinned horizontal with dwell zones */}
       <section
         ref={pinRef}
         id="standards"
         className="relative border-y border-border bg-carbon/40"
-        style={{ height: "300vh" }}
+        style={{ height: "400vh" }}
       >
         <div className="sticky top-0 h-screen overflow-hidden bg-carbon/40 flex items-center">
           <p className="absolute top-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.25em] text-gold z-10">
@@ -162,7 +196,7 @@ const Index = () => {
           <div
             className="flex h-full items-center"
             style={{
-              transform: `translate3d(-${progress * 200}vw, 0, 0)`,
+              transform: `translate3d(${translatePct}vw, 0, 0)`,
               willChange: "transform",
             }}
           >
@@ -227,21 +261,23 @@ const Index = () => {
 
         <div className="max-w-3xl mx-auto space-y-4">
           {STEPS.map((s, i) => (
-            <div key={s.title} className="group relative border border-border rounded-sm p-8 hover:border-gold/40 transition-all duration-500">
-              <div className="absolute inset-0 rounded-sm bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative flex gap-6 items-start">
-                <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                  <div className="font-mono text-xs text-gold">0{i + 1}</div>
-                  <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
-                    {s.icon}
+            <BoxReveal key={s.title}>
+              <div className="group relative border border-border rounded-sm p-8 hover:border-gold/40 transition-all duration-500">
+                <div className="absolute inset-0 rounded-sm bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex gap-6 items-start">
+                  <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                    <div className="font-mono text-xs text-gold">0{i + 1}</div>
+                    <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                      {s.icon}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-2xl mb-2 group-hover:text-gold transition-colors">{s.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{s.body}</p>
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-2xl mb-2 group-hover:text-gold transition-colors">{s.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{s.body}</p>
-                </div>
               </div>
-            </div>
+            </BoxReveal>
           ))}
         </div>
       </section>
