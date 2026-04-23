@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Nav } from "@/components/netstart/Nav";
 import { PhoneFrame } from "@/components/netstart/PhoneFrame";
 import { AppShell } from "@/components/netstart/AppShell";
+import { Tutorial } from "@/components/netstart/Tutorial";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter, MessageSquare, Sparkles, Apple, Smartphone, UserPlus, FileText, BadgeCheck } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -552,6 +553,8 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <Tutorial />
     </div>
   );
 };
