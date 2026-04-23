@@ -273,8 +273,10 @@ const Index = () => {
       if (!treeRef.current) return;
       const rect = treeRef.current.getBoundingClientRect();
       const h = window.innerHeight;
-      // 0 when tree top enters viewport from the bottom, 1 when tree top reaches viewport top.
-      const p = Math.max(0, Math.min(1, (h - rect.top) / h));
+      // Track the center of the tree (the dot). Progress is 0 when the dot
+      // just enters the viewport at the bottom, 1 when the dot reaches the top.
+      const dotY = rect.top + rect.height / 2;
+      const p = Math.max(0, Math.min(1, (h - dotY) / h));
       setTreeProgress(p);
     };
     const onScroll = () => {
