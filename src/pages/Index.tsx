@@ -100,7 +100,7 @@ const Index = () => {
   const translatePct = computeTranslatePct(progress);
   const activeIdx = Math.min(2, Math.max(0, Math.round(-translatePct / 100)));
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground" style={{ overflowX: "clip" }}>
       <Nav />
 
       {/* HERO */}
