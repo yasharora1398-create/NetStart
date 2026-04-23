@@ -113,7 +113,7 @@ export const Tutorial = () => {
 
   return (
     <div className="fixed bottom-5 right-5 md:bottom-8 md:right-8 z-50 animate-fade-up">
-      <div className={cardClass}>
+      <div className={cardClass.replace("border-gold/30", "border-blue-400/40")}>
         <button
           onClick={dismiss}
           className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -121,19 +121,19 @@ export const Tutorial = () => {
         >
           <X className="h-4 w-4" />
         </button>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gold mb-2">{step.label}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-blue-400 mb-2">{step.label}</p>
         <h4 className="font-display text-xl mb-2 pr-6">{step.title}</h4>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">{step.body}</p>
         <div className="flex items-center gap-2">
           <button
             onClick={dismiss}
-            className="text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground py-2 px-3 transition-colors"
+            className="text-xs font-mono uppercase tracking-widest bg-neutral-800/80 text-muted-foreground hover:bg-neutral-700 hover:text-foreground py-2.5 px-4 rounded-sm transition-colors"
           >
             Skip
           </button>
           <button
             onClick={next}
-            className="flex-1 bg-gradient-gold text-primary-foreground font-medium text-sm py-2.5 rounded-sm hover:shadow-glow transition-shadow"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium text-sm py-2.5 rounded-sm hover:from-blue-500 hover:to-blue-400 hover:shadow-[0_0_22px_rgba(59,130,246,0.55)] transition-all"
           >
             {isLast ? "Got it" : "Continue"}
           </button>
