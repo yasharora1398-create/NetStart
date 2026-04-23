@@ -264,6 +264,31 @@ const Index = () => {
   const [howRef, howVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
   const [downloadRef, downloadVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
 
+  const treeRef = useRef<HTMLDivElement>(null);
+  const [treeProgress, setTreeProgress] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (!treeRef.current) return;
+      const rect = treeRef.current.getBoundingClientRect();
+      const h = window.innerHeight;
+      // 0 when tree top enters viewport from the bottom, 1 when tree top reaches viewport top.
+      const p = Math.max(0, Math.min(1, (h - rect.top) / h));
+      setTreeProgress(p);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ overflowX: "clip" }}>
@@ -356,8 +381,8 @@ const Index = () => {
         <div className="container py-28 md:py-32">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             {/* LEFT — 3D tree */}
-            <div className="relative h-[420px] md:h-[640px] hidden md:block">
-              <ConnectionTree3D progress={1} />
+            <div ref={treeRef} className="relative h-[420px] md:h-[640px] hidden md:block">
+              <ConnectionTree3D progress={treeProgress} />
             </div>
 
             {/* RIGHT — stacked principles */}
