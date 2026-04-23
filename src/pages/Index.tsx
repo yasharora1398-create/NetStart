@@ -40,24 +40,113 @@ const BoxReveal = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const StaggerReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
-  const [ref, visible] = useInViewOnce<HTMLDivElement>(0.1);
-  return (
+type TreeNode = { x: number; y: number; start: number };
+type TreeEdge = { from: number; to: number; start: number; end: number };
+
+const TREE_NODES: TreeNode[] = [
+  { x: 50, y: 112, start: 0.00 },
+  { x: 24, y: 82, start: 0.10 },
+  { x: 50, y: 82, start: 0.13 },
+  { x: 76, y: 82, start: 0.10 },
+  { x: 11, y: 48, start: 0.38 },
+  { x: 30, y: 48, start: 0.42 },
+  { x: 42, y: 48, start: 0.47 },
+  { x: 58, y: 48, start: 0.52 },
+  { x: 70, y: 48, start: 0.55 },
+  { x: 89, y: 48, start: 0.58 },
+  { x: 20, y: 18, start: 0.76 },
+  { x: 50, y: 14, start: 0.82 },
+  { x: 80, y: 18, start: 0.76 },
+];
+
+const TREE_EDGES: TreeEdge[] = [
+  { from: 0, to: 1, start: 0.00, end: 0.15 },
+  { from: 0, to: 2, start: 0.02, end: 0.18 },
+  { from: 0, to: 3, start: 0.00, end: 0.15 },
+  { from: 1, to: 4, start: 0.18, end: 0.42 },
+  { from: 1, to: 5, start: 0.20, end: 0.46 },
+  { from: 2, to: 6, start: 0.22, end: 0.50 },
+  { from: 2, to: 7, start: 0.24, end: 0.54 },
+  { from: 3, to: 8, start: 0.26, end: 0.58 },
+  { from: 3, to: 9, start: 0.28, end: 0.62 },
+  { from: 5, to: 10, start: 0.58, end: 0.80 },
+  { from: 6, to: 11, start: 0.62, end: 0.85 },
+  { from: 7, to: 11, start: 0.64, end: 0.87 },
+  { from: 8, to: 12, start: 0.66, end: 0.90 },
+];
+
+const ConnectionTree = ({ progress }: { progress: number }) => (
+  <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: "1400px" }}>
     <div
-      ref={ref}
-      className="h-full transition-all ease-out"
-      style={{
-        transitionDuration: "1100ms",
-        transitionDelay: visible ? `${delay}ms` : "0ms",
-        opacity: visible ? 1 : 0,
-        filter: visible ? "blur(0)" : "blur(14px)",
-        transform: visible ? "translateY(0) scale(1)" : "translateY(60px) scale(1.05)",
-      }}
+      className="w-[85%] h-[85%]"
+      style={{ transform: "rotateX(10deg) rotateY(-8deg)", transformStyle: "preserve-3d" }}
     >
-      {children}
+      <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMid meet" className="w-full h-full overflow-visible">
+        <defs>
+          <filter id="edge-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.4" result="b" />
+            <feMerge>
+              <feMergeNode in="b" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="node-halo" x="-200%" y="-200%" width="500%" height="500%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+          <radialGradient id="node-core">
+            <stop offset="0%" stopColor="#dbeafe" />
+            <stop offset="35%" stopColor="#60a5fa" />
+            <stop offset="80%" stopColor="#2563eb" />
+            <stop offset="100%" stopColor="#1e3a8a" />
+          </radialGradient>
+        </defs>
+
+        {TREE_EDGES.map((e, i) => {
+          const a = TREE_NODES[e.from];
+          const b = TREE_NODES[e.to];
+          const p = progress < e.start ? 0 : progress > e.end ? 1 : (progress - e.start) / (e.end - e.start);
+          return (
+            <line
+              key={i}
+              x1={a.x}
+              y1={a.y}
+              x2={b.x}
+              y2={b.y}
+              stroke="#60a5fa"
+              strokeWidth="0.55"
+              pathLength="1"
+              strokeDasharray="1"
+              strokeDashoffset={1 - p}
+              strokeLinecap="round"
+              filter="url(#edge-glow)"
+              opacity={p > 0 ? 0.95 : 0}
+            />
+          );
+        })}
+
+        {TREE_NODES.map((n, i) => {
+          const np = progress <= n.start ? 0 : Math.min(1, (progress - n.start) / 0.08);
+          if (np <= 0) return null;
+          return (
+            <g key={i} transform={`translate(${n.x}, ${n.y})`}>
+              <circle r={3.2 * np} fill="#60a5fa" opacity={np * 0.45} filter="url(#node-halo)" />
+              <circle r={1.5 * np} fill="url(#node-core)" opacity={np} />
+              <circle r={0.45 * np} fill="#ffffff" opacity={np} />
+            </g>
+          );
+        })}
+      </svg>
     </div>
-  );
-};
+
+    {/* Ambient blue glow under the tree */}
+    <div
+      className="absolute inset-0 -z-10 pointer-events-none"
+      style={{
+        background: `radial-gradient(ellipse at 50% 60%, rgba(59,130,246,${0.12 + progress * 0.18}) 0%, transparent 60%)`,
+      }}
+    />
+  </div>
+);
 
 const wordStyle = (visible: boolean, i: number): CSSProperties => ({
   display: "inline-block",
@@ -76,6 +165,31 @@ const Index = () => {
   const [heroRef, heroVisible] = useInViewOnce<HTMLHeadingElement>(0.1);
   const [howRef, howVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
   const [downloadRef, downloadVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
+
+  const pinRef = useRef<HTMLElement>(null);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (!pinRef.current) return;
+      const total = pinRef.current.offsetHeight - window.innerHeight;
+      if (total <= 0) return;
+      const rect = pinRef.current.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, -rect.top / total));
+      setProgress(p);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ overflowX: "clip" }}>
@@ -159,28 +273,60 @@ const Index = () => {
         </div>
       </section>
 
-      {/* PRINCIPLES — staggered reveal grid */}
-      <section id="standards" className="relative border-y border-border bg-carbon/40 overflow-hidden">
-        <div className="container py-28 md:py-36">
-          <div className="text-center mb-20 max-w-2xl mx-auto">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold mb-4">Standards</p>
-            <h2 className="font-display text-4xl md:text-6xl leading-[1]">
-              What we <em className="text-gradient-gold not-italic">believe.</em>
-            </h2>
+      {/* PRINCIPLES — pinned: tree on left, horizontal scroll on right */}
+      <section
+        ref={pinRef}
+        id="standards"
+        className="relative border-y border-border bg-carbon/40"
+        style={{ height: "300vh" }}
+      >
+        <div className="sticky top-0 h-screen overflow-hidden bg-carbon/40 flex">
+          <p className="absolute top-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-gold z-10">
+            Standards
+          </p>
+
+          {/* LEFT — connection tree */}
+          <div className="w-1/2 h-full hidden md:block">
+            <ConnectionTree progress={progress} />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {PRINCIPLES.map((p, i) => (
-              <StaggerReveal key={p.title} delay={i * 180}>
-                <div className="relative h-full border border-border/60 bg-background/40 backdrop-blur-sm rounded-sm p-10 md:p-12 group hover:border-gold/40 transition-all duration-700 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="relative">
-                    <div className="font-mono text-sm tracking-[0.3em] text-gold mb-8">0{i + 1}</div>
-                    <h3 className="font-display text-3xl mb-5 group-hover:text-gold transition-colors duration-500">{p.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{p.body}</p>
+          {/* RIGHT — horizontal scroll (desktop). Mobile falls back to stacked. */}
+          <div className="w-full md:w-1/2 h-full overflow-hidden md:flex items-center hidden">
+            <div
+              className="flex h-full items-center"
+              style={{
+                transform: `translate3d(-${progress * 100}vw, 0, 0)`,
+                willChange: "transform",
+              }}
+            >
+              {PRINCIPLES.map((p, i) => (
+                <div
+                  key={p.title}
+                  className="flex-shrink-0 h-full flex items-center"
+                  style={{ width: "50vw" }}
+                >
+                  <div className="max-w-xl px-10 md:px-14">
+                    <div className="font-mono text-sm text-gold mb-8 tracking-[0.3em]">0{i + 1}</div>
+                    <h3 className="font-display text-4xl md:text-6xl leading-[1.05] mb-6">
+                      {p.title}
+                    </h3>
+                    <p className="text-muted-foreground text-lg md:text-xl leading-relaxed">
+                      {p.body}
+                    </p>
                   </div>
                 </div>
-              </StaggerReveal>
+              ))}
+            </div>
+          </div>
+
+          {/* MOBILE fallback — stacked */}
+          <div className="md:hidden w-full h-full overflow-y-auto flex flex-col items-center justify-center px-6 py-16 space-y-16">
+            {PRINCIPLES.map((p, i) => (
+              <div key={p.title} className="max-w-md text-center">
+                <div className="font-mono text-sm text-gold mb-6 tracking-[0.3em]">0{i + 1}</div>
+                <h3 className="font-display text-3xl mb-4">{p.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{p.body}</p>
+              </div>
             ))}
           </div>
         </div>
