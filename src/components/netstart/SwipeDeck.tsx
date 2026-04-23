@@ -17,7 +17,12 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
     }, 380);
   };
 
-  const imgH = compact ? "h-[300px]" : "h-[440px]";
+  const imgH = compact ? "h-[220px]" : "h-[440px]";
+  const bodyPad = compact ? "p-4 space-y-3" : "p-6 space-y-5";
+  const decisionPad = compact ? "px-4 pb-4" : "px-6 pb-6";
+  const nameSize = compact ? "text-2xl" : "text-3xl";
+  const identityPad = compact ? "p-4" : "p-6";
+  const btnHeight = compact ? "h-10" : "h-12";
 
   return (
     <div className={`relative w-full ${compact ? "" : "max-w-[380px]"} mx-auto`}>
@@ -44,45 +49,47 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent" />
 
           {/* Match badge */}
-          <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-obsidian/80 backdrop-blur border border-gold/30">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-obsidian/80 backdrop-blur border border-gold/30">
             <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-gold" />
-            <span className="font-mono text-xs text-gold">{current.match}% MATCH</span>
+            <span className="font-mono text-[10px] text-gold">{current.match}% MATCH</span>
           </div>
 
           {/* Verified */}
-          <div className="absolute top-4 left-4 flex items-center gap-1 px-2.5 py-1 rounded-sm bg-success/15 border border-success/30">
+          <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-sm bg-success/15 border border-success/30">
             <Check className="h-3 w-3 text-success" />
-            <span className="text-[10px] uppercase tracking-widest text-success font-medium">Verified</span>
+            <span className="text-[9px] uppercase tracking-widest text-success font-medium">Verified</span>
           </div>
 
           {/* Identity */}
-          <div className="absolute bottom-0 inset-x-0 p-6">
-            <h3 className="font-display text-3xl leading-none mb-1">{current.name}</h3>
-            <p className="text-sm text-muted-foreground">{current.role}</p>
-            <p className="text-xs text-muted-foreground/70 mt-1 font-mono uppercase tracking-wider">{current.location}</p>
+          <div className={`absolute bottom-0 inset-x-0 ${identityPad}`}>
+            <h3 className={`font-display ${nameSize} leading-none mb-1`}>{current.name}</h3>
+            <p className="text-xs text-muted-foreground">{current.role}</p>
+            <p className="text-[10px] text-muted-foreground/70 mt-0.5 font-mono uppercase tracking-wider">{current.location}</p>
           </div>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-5">
-          <div className="grid grid-cols-2 gap-3">
-            <Stat icon={<Zap className="h-3.5 w-3.5" />} label="Ships" value={current.ships} />
-            <Stat icon={<Clock className="h-3.5 w-3.5" />} label="Commit" value={current.commitment} />
+        <div className={bodyPad}>
+          <div className="grid grid-cols-2 gap-2">
+            <Stat icon={<Zap className="h-3 w-3" />} label="Ships" value={current.ships} compact={compact} />
+            <Stat icon={<Clock className="h-3 w-3" />} label="Commit" value={current.commitment} compact={compact} />
           </div>
 
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-mono">Proof</p>
-            <p className="text-sm leading-relaxed">{current.proof}</p>
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1 font-mono">Proof</p>
+            <p className={`${compact ? "text-xs line-clamp-2" : "text-sm"} leading-relaxed`}>{current.proof}</p>
           </div>
 
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-mono">Looking for</p>
-            <p className="text-sm leading-relaxed text-foreground/80">{current.building}</p>
-          </div>
+          {!compact && (
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-mono">Looking for</p>
+              <p className="text-sm leading-relaxed text-foreground/80">{current.building}</p>
+            </div>
+          )}
 
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {current.skills.map((s) => (
-              <span key={s} className="px-2.5 py-1 text-xs border border-border rounded-sm text-muted-foreground hover:border-gold/40 hover:text-foreground transition-colors">
+          <div className="flex flex-wrap gap-1">
+            {current.skills.slice(0, compact ? 4 : current.skills.length).map((s) => (
+              <span key={s} className={`${compact ? "px-1.5 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"} border border-border rounded-sm text-muted-foreground hover:border-gold/40 hover:text-foreground transition-colors`}>
                 {s}
               </span>
             ))}
@@ -90,41 +97,44 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
         </div>
 
         {/* Decision row */}
-        <div className="flex items-center justify-between gap-3 px-6 pb-6">
-          <DecisionBtn onClick={() => decide("left")} aria-label="Pass">
-            <X className="h-5 w-5" />
+        <div className={`flex items-center justify-between gap-2 ${decisionPad}`}>
+          <DecisionBtn onClick={() => decide("left")} aria-label="Pass" height={btnHeight}>
+            <X className="h-4 w-4" />
           </DecisionBtn>
-          <DecisionBtn variant="ghost" aria-label="Save">
-            <Bookmark className="h-5 w-5" />
+          <DecisionBtn variant="ghost" aria-label="Save" height={btnHeight}>
+            <Bookmark className="h-4 w-4" />
           </DecisionBtn>
-          <DecisionBtn variant="gold" onClick={() => decide("right")} aria-label="Connect">
-            <Target className="h-5 w-5" />
+          <DecisionBtn variant="gold" onClick={() => decide("right")} aria-label="Connect" height={btnHeight}>
+            <Target className="h-4 w-4" />
           </DecisionBtn>
         </div>
       </article>
 
-      <p className="text-center text-xs text-muted-foreground mt-6 font-mono uppercase tracking-widest">
-        Tap <span className="text-gold">target</span> to connect · <span className="text-foreground">×</span> to pass
-      </p>
+      {!compact && (
+        <p className="text-center text-xs text-muted-foreground mt-6 font-mono uppercase tracking-widest">
+          Tap <span className="text-gold">target</span> to connect · <span className="text-foreground">×</span> to pass
+        </p>
+      )}
     </div>
   );
 };
 
-const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="border border-border rounded-sm p-3">
-    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+const Stat = ({ icon, label, value, compact }: { icon: React.ReactNode; label: string; value: string; compact?: boolean }) => (
+  <div className={`border border-border rounded-sm ${compact ? "p-2" : "p-3"}`}>
+    <div className="flex items-center gap-1.5 text-muted-foreground mb-0.5">
       {icon}
-      <span className="text-[10px] uppercase tracking-widest font-mono">{label}</span>
+      <span className={`${compact ? "text-[9px]" : "text-[10px]"} uppercase tracking-widest font-mono`}>{label}</span>
     </div>
-    <p className="text-xs font-medium">{value}</p>
+    <p className={`${compact ? "text-[11px]" : "text-xs"} font-medium`}>{value}</p>
   </div>
 );
 
 const DecisionBtn = ({
   children,
   variant = "default",
+  height = "h-12",
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "gold" | "ghost" }) => {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "gold" | "ghost"; height?: string }) => {
   const styles = {
     default: "border border-border bg-card hover:border-destructive hover:text-destructive",
     gold: "bg-gradient-gold text-primary-foreground hover:shadow-glow scale-110",
@@ -133,7 +143,7 @@ const DecisionBtn = ({
   return (
     <button
       {...props}
-      className={`flex-1 h-12 rounded-sm flex items-center justify-center transition-all duration-300 ${styles}`}
+      className={`flex-1 ${height} rounded-sm flex items-center justify-center transition-all duration-300 ${styles}`}
     />
   );
 };

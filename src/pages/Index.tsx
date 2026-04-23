@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { Nav } from "@/components/netstart/Nav";
 import { PhoneFrame } from "@/components/netstart/PhoneFrame";
@@ -7,8 +8,63 @@ import { ArrowRight, Filter, MessageSquare, Sparkles, Apple, Smartphone, UserPlu
 import heroBg from "@/assets/hero-bg.jpg";
 import { useAuth } from "@/context/AuthContext";
 
+function useInViewOnce<T extends HTMLElement>(threshold = 0.2) {
+  const ref = useRef<T | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
+      { threshold }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, visible] as const;
+}
+
+const wordStyle = (visible: boolean, i: number): CSSProperties => ({
+  display: "inline-block",
+  marginRight: "0.22em",
+  transitionProperty: "opacity, filter, transform",
+  transitionDuration: "800ms",
+  transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+  opacity: visible ? 1 : 0,
+  filter: visible ? "blur(0)" : "blur(10px)",
+  transform: visible ? "translateY(0)" : "translateY(18px)",
+  transitionDelay: visible ? `${i * 90}ms` : "0ms",
+});
+
 const Index = () => {
   const { user } = useAuth();
+  const [heroRef, heroVisible] = useInViewOnce<HTMLHeadingElement>(0.1);
+  const [howRef, howVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
+  const [downloadRef, downloadVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
+
+  const pinRef = useRef<HTMLElement>(null);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (!pinRef.current) return;
+      const total = pinRef.current.offsetHeight - window.innerHeight;
+      if (total <= 0) return;
+      const rect = pinRef.current.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, -rect.top / total));
+      setProgress(p);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+  const activeIdx = Math.min(2, Math.floor(progress * 3));
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Nav />
@@ -31,9 +87,28 @@ const Index = () => {
               <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">iOS · Android · For builders</span>
             </div>
 
-            <h1 className="font-display text-5xl md:text-7xl lg:text-[5.25rem] leading-[0.95] mb-8">
-              The mobile app for<br />
-              people who <em className="text-gradient-gold not-italic">actually</em> build.
+            <h1 ref={heroRef} className="font-display text-5xl md:text-7xl lg:text-[5.25rem] leading-[0.95] mb-8">
+              {[
+                { text: "The" },
+                { text: "mobile" },
+                { text: "app" },
+                { text: "for", break: true },
+                { text: "people" },
+                { text: "who" },
+                { text: "actually", italic: true },
+                { text: "build." },
+              ].map((w, i) => (
+                <span key={i}>
+                  {w.italic ? (
+                    <em className="text-gradient-gold not-italic" style={wordStyle(heroVisible, i)}>
+                      {w.text}
+                    </em>
+                  ) : (
+                    <span style={wordStyle(heroVisible, i)}>{w.text}</span>
+                  )}
+                  {w.break && <br />}
+                </span>
+              ))}
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
@@ -72,16 +147,51 @@ const Index = () => {
         </div>
       </section>
 
-      {/* PRINCIPLES */}
-      <section id="standards" className="border-y border-border bg-carbon/40">
-        <div className="container py-20">
-          <div className="grid md:grid-cols-3 gap-px bg-border">
+      {/* PRINCIPLES — scroll-pinned horizontal */}
+      <section
+        ref={pinRef}
+        id="standards"
+        className="relative border-y border-border bg-carbon/40"
+        style={{ height: "300vh" }}
+      >
+        <div className="sticky top-0 h-screen overflow-hidden bg-carbon/40 flex items-center">
+          <p className="absolute top-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.25em] text-gold z-10">
+            Standards
+          </p>
+
+          <div
+            className="flex h-full items-center"
+            style={{
+              transform: `translate3d(-${progress * 200}vw, 0, 0)`,
+              willChange: "transform",
+            }}
+          >
             {PRINCIPLES.map((p, i) => (
-              <div key={p.title} className="bg-background p-10 hover:bg-carbon/50 transition-colors group">
-                <div className="font-mono text-xs text-gold mb-6">0{i + 1}</div>
-                <h3 className="font-display text-2xl mb-3 group-hover:text-gold transition-colors">{p.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{p.body}</p>
+              <div
+                key={p.title}
+                className="w-screen flex-shrink-0 h-full flex items-center justify-center"
+              >
+                <div className="max-w-3xl text-center px-8">
+                  <div className="font-mono text-base text-gold mb-10 tracking-[0.3em]">0{i + 1}</div>
+                  <h3 className="font-display text-5xl md:text-7xl leading-[1.05] mb-8">
+                    {p.title}
+                  </h3>
+                  <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto">
+                    {p.body}
+                  </p>
+                </div>
               </div>
+            ))}
+          </div>
+
+          <div className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-3">
+            {PRINCIPLES.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1 rounded-full transition-all duration-500 ${
+                  i === activeIdx ? "w-14 bg-gold" : "w-6 bg-border"
+                }`}
+              />
             ))}
           </div>
         </div>
@@ -91,8 +201,24 @@ const Index = () => {
       <section id="how" className="container py-28">
         <div className="max-w-2xl mb-16 mx-auto text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold mb-4">How it works</p>
-          <h2 className="font-display text-4xl md:text-6xl leading-[1] mb-6">
-            From signup to<br /><em className="text-gradient-gold not-italic">shipping.</em>
+          <h2 ref={howRef} className="font-display text-4xl md:text-6xl leading-[1] mb-6">
+            {[
+              { text: "From" },
+              { text: "signup" },
+              { text: "to", break: true },
+              { text: "shipping.", italic: true },
+            ].map((w, i) => (
+              <span key={i}>
+                {w.italic ? (
+                  <em className="text-gradient-gold not-italic" style={wordStyle(howVisible, i)}>
+                    {w.text}
+                  </em>
+                ) : (
+                  <span style={wordStyle(howVisible, i)}>{w.text}</span>
+                )}
+                {w.break && <br />}
+              </span>
+            ))}
           </h2>
           <p className="text-muted-foreground text-lg">
             Find the right people faster, and start building real companies.
@@ -124,8 +250,25 @@ const Index = () => {
       <section id="download" className="border-t border-border relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-spotlight" />
         <div className="container py-28 relative text-center">
-          <h2 className="font-display text-5xl md:text-7xl leading-[1] mb-6 max-w-3xl mx-auto">
-            Work with operators,<br /><em className="text-gradient-gold not-italic">not talkers.</em>
+          <h2 ref={downloadRef} className="font-display text-5xl md:text-7xl leading-[1] mb-6 max-w-3xl mx-auto">
+            {[
+              { text: "Work" },
+              { text: "with" },
+              { text: "operators,", break: true },
+              { text: "not", italic: true },
+              { text: "talkers.", italic: true },
+            ].map((w, i) => (
+              <span key={i}>
+                {w.italic ? (
+                  <em className="text-gradient-gold not-italic" style={wordStyle(downloadVisible, i)}>
+                    {w.text}
+                  </em>
+                ) : (
+                  <span style={wordStyle(downloadVisible, i)}>{w.text}</span>
+                )}
+                {w.break && <br />}
+              </span>
+            ))}
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-10">
             Download the app and start building today.
