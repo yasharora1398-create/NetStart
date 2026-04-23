@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Nav } from "@/components/netstart/Nav";
 import { PhoneFrame } from "@/components/netstart/PhoneFrame";
 import { AppShell } from "@/components/netstart/AppShell";
-import { Tutorial } from "@/components/netstart/Tutorial";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter, MessageSquare, Sparkles, Apple, Smartphone, UserPlus, FileText, BadgeCheck } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -51,49 +50,30 @@ type Edge3D = { from: number; to: number; start: number; end: number };
 const NODES_3D: Node3D[] = [
   // Hub (always visible, pulses)
   { id: 0, pos: [0, 0, 0], reveal: 0 },
-  // Stage 2 — primary branches in every direction
-  { id: 1, pos: [42, 0, 0], reveal: 0.20 },
-  { id: 2, pos: [-42, 0, 0], reveal: 0.22 },
-  { id: 3, pos: [0, 42, 0], reveal: 0.24 },
-  { id: 4, pos: [0, -42, 0], reveal: 0.26 },
-  { id: 5, pos: [0, 0, 42], reveal: 0.28 },
-  { id: 6, pos: [0, 0, -42], reveal: 0.30 },
-  { id: 7, pos: [28, 28, 15], reveal: 0.32 },
-  { id: 8, pos: [-28, 28, -15], reveal: 0.34 },
-  { id: 9, pos: [28, -28, -15], reveal: 0.36 },
-  { id: 10, pos: [-28, -28, 15], reveal: 0.38 },
-  // Stage 3 — profile nodes at the tips (cycling through the 3 available images)
-  { id: 11, pos: [72, 18, 18], reveal: 0.62, avatar: builder1 },
-  { id: 12, pos: [-72, 18, -18], reveal: 0.65, avatar: builder2 },
-  { id: 13, pos: [20, 65, -30], reveal: 0.68, avatar: builder3 },
-  { id: 14, pos: [-20, 65, 30], reveal: 0.71, avatar: builder1 },
-  { id: 15, pos: [55, -40, 25], reveal: 0.74, avatar: builder2 },
-  { id: 16, pos: [-55, -40, -25], reveal: 0.77, avatar: builder3 },
-  { id: 17, pos: [25, 10, 70], reveal: 0.80, avatar: builder1 },
-  { id: 18, pos: [-25, 10, -70], reveal: 0.83, avatar: builder2 },
+  // Stage 2 — six primary branches, one along each axis
+  { id: 1, pos: [48, 0, 0], reveal: 0.22 },
+  { id: 2, pos: [-48, 0, 0], reveal: 0.26 },
+  { id: 3, pos: [0, 48, 0], reveal: 0.30 },
+  { id: 4, pos: [0, -48, 0], reveal: 0.34 },
+  { id: 5, pos: [0, 0, 48], reveal: 0.38 },
+  { id: 6, pos: [0, 0, -48], reveal: 0.42 },
+  // Stage 3 — three profile nodes, each on its own diagonal from the hub
+  { id: 7, pos: [58, 28, 22], reveal: 0.70, avatar: builder1 },
+  { id: 8, pos: [-55, -22, 28], reveal: 0.76, avatar: builder2 },
+  { id: 9, pos: [22, -50, -40], reveal: 0.82, avatar: builder3 },
 ];
 
+// Every edge goes from the hub straight to a node, nothing chains.
 const EDGES_3D: Edge3D[] = [
-  // Hub → primary branches
-  { from: 0, to: 1, start: 0.12, end: 0.28 },
-  { from: 0, to: 2, start: 0.14, end: 0.30 },
-  { from: 0, to: 3, start: 0.16, end: 0.32 },
-  { from: 0, to: 4, start: 0.18, end: 0.34 },
-  { from: 0, to: 5, start: 0.20, end: 0.36 },
-  { from: 0, to: 6, start: 0.22, end: 0.38 },
-  { from: 0, to: 7, start: 0.24, end: 0.40 },
-  { from: 0, to: 8, start: 0.26, end: 0.42 },
-  { from: 0, to: 9, start: 0.28, end: 0.44 },
-  { from: 0, to: 10, start: 0.30, end: 0.46 },
-  // Primary → profile tips
-  { from: 1, to: 11, start: 0.55, end: 0.72 },
-  { from: 2, to: 12, start: 0.57, end: 0.74 },
-  { from: 3, to: 13, start: 0.59, end: 0.76 },
-  { from: 3, to: 14, start: 0.61, end: 0.78 },
-  { from: 9, to: 15, start: 0.63, end: 0.80 },
-  { from: 10, to: 16, start: 0.65, end: 0.82 },
-  { from: 5, to: 17, start: 0.67, end: 0.84 },
-  { from: 6, to: 18, start: 0.69, end: 0.86 },
+  { from: 0, to: 1, start: 0.16, end: 0.32 },
+  { from: 0, to: 2, start: 0.20, end: 0.36 },
+  { from: 0, to: 3, start: 0.24, end: 0.40 },
+  { from: 0, to: 4, start: 0.28, end: 0.44 },
+  { from: 0, to: 5, start: 0.32, end: 0.48 },
+  { from: 0, to: 6, start: 0.36, end: 0.52 },
+  { from: 0, to: 7, start: 0.62, end: 0.78 },
+  { from: 0, to: 8, start: 0.68, end: 0.84 },
+  { from: 0, to: 9, start: 0.74, end: 0.90 },
 ];
 
 const rotY = ([x, y, z]: Vec3, a: number): Vec3 => {
@@ -122,8 +102,8 @@ const ConnectionTree3D = ({ progress }: { progress: number }) => {
     const tick = (t: number) => {
       const dt = Math.min(0.05, (t - last) / 1000);
       last = t;
-      // Spin speed ramps from slow to fast with scroll
-      const speed = 0.12 + progressRef.current * 1.8;
+      // Constant slow rotation at all times
+      const speed = 0.09;
       setFrame((f) => ({ angle: f.angle + speed * dt, time: t }));
       rafId = requestAnimationFrame(tick);
     };
@@ -553,8 +533,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-
-      <Tutorial />
     </div>
   );
 };
