@@ -40,20 +40,24 @@ const BoxReveal = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Maps scroll progress (0..1) to horizontal translate percentage.
-// Holds each slide for a dwell zone so the user feels a "stop" at each.
-function computeTranslatePct(p: number): number {
-  const s0End = 0.1;    // slide 0 dwells until 10%
-  const t01End = 0.35;  // transition to slide 1 finishes at 35%
-  const s1End = 0.45;   // slide 1 dwells until 45%
-  const t12End = 0.7;   // transition to slide 2 finishes at 70%
-  // 70%-100% is slide 2 dwell ("a little more")
-  if (p <= s0End) return 0;
-  if (p <= t01End) return -100 * ((p - s0End) / (t01End - s0End));
-  if (p <= s1End) return -100;
-  if (p <= t12End) return -100 - 100 * ((p - s1End) / (t12End - s1End));
-  return -200;
-}
+const StaggerReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
+  const [ref, visible] = useInViewOnce<HTMLDivElement>(0.1);
+  return (
+    <div
+      ref={ref}
+      className="h-full transition-all ease-out"
+      style={{
+        transitionDuration: "1100ms",
+        transitionDelay: visible ? `${delay}ms` : "0ms",
+        opacity: visible ? 1 : 0,
+        filter: visible ? "blur(0)" : "blur(14px)",
+        transform: visible ? "translateY(0) scale(1)" : "translateY(60px) scale(1.05)",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const wordStyle = (visible: boolean, i: number): CSSProperties => ({
   display: "inline-block",
@@ -73,32 +77,6 @@ const Index = () => {
   const [howRef, howVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
   const [downloadRef, downloadVisible] = useInViewOnce<HTMLHeadingElement>(0.3);
 
-  const pinRef = useRef<HTMLElement>(null);
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      if (!pinRef.current) return;
-      const total = pinRef.current.offsetHeight - window.innerHeight;
-      if (total <= 0) return;
-      const rect = pinRef.current.getBoundingClientRect();
-      const p = Math.max(0, Math.min(1, -rect.top / total));
-      setProgress(p);
-    };
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    update();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
-  const translatePct = computeTranslatePct(progress);
-  const activeIdx = Math.min(2, Math.max(0, Math.round(-translatePct / 100)));
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ overflowX: "clip" }}>
       <Nav />
@@ -181,51 +159,28 @@ const Index = () => {
         </div>
       </section>
 
-      {/* PRINCIPLES — scroll-pinned horizontal with dwell zones */}
-      <section
-        ref={pinRef}
-        id="standards"
-        className="relative border-y border-border bg-carbon/40"
-        style={{ height: "400vh" }}
-      >
-        <div className="sticky top-0 h-screen overflow-hidden bg-carbon/40 flex items-center">
-          <p className="absolute top-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.25em] text-gold z-10">
-            Standards
-          </p>
-
-          <div
-            className="flex h-full items-center"
-            style={{
-              transform: `translate3d(${translatePct}vw, 0, 0)`,
-              willChange: "transform",
-            }}
-          >
-            {PRINCIPLES.map((p, i) => (
-              <div
-                key={p.title}
-                className="w-screen flex-shrink-0 h-full flex items-center justify-center"
-              >
-                <div className="max-w-3xl text-center px-8">
-                  <div className="font-mono text-base text-gold mb-10 tracking-[0.3em]">0{i + 1}</div>
-                  <h3 className="font-display text-5xl md:text-7xl leading-[1.05] mb-8">
-                    {p.title}
-                  </h3>
-                  <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto">
-                    {p.body}
-                  </p>
-                </div>
-              </div>
-            ))}
+      {/* PRINCIPLES — staggered reveal grid */}
+      <section id="standards" className="relative border-y border-border bg-carbon/40 overflow-hidden">
+        <div className="container py-28 md:py-36">
+          <div className="text-center mb-20 max-w-2xl mx-auto">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold mb-4">Standards</p>
+            <h2 className="font-display text-4xl md:text-6xl leading-[1]">
+              What we <em className="text-gradient-gold not-italic">believe.</em>
+            </h2>
           </div>
 
-          <div className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-3">
-            {PRINCIPLES.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1 rounded-full transition-all duration-500 ${
-                  i === activeIdx ? "w-14 bg-gold" : "w-6 bg-border"
-                }`}
-              />
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            {PRINCIPLES.map((p, i) => (
+              <StaggerReveal key={p.title} delay={i * 180}>
+                <div className="relative h-full border border-border/60 bg-background/40 backdrop-blur-sm rounded-sm p-10 md:p-12 group hover:border-gold/40 transition-all duration-700 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <div className="relative">
+                    <div className="font-mono text-sm tracking-[0.3em] text-gold mb-8">0{i + 1}</div>
+                    <h3 className="font-display text-3xl mb-5 group-hover:text-gold transition-colors duration-500">{p.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{p.body}</p>
+                  </div>
+                </div>
+              </StaggerReveal>
             ))}
           </div>
         </div>
