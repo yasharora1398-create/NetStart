@@ -1,13 +1,15 @@
+import logoSrc from "@/assets/netstart-logo.png";
+
 export const Logo = ({ className = "" }: { className?: string }) => (
-  <div className={`flex items-center gap-2 ${className}`}>
-    <div className="relative h-7 w-7">
-      <div className="absolute inset-0 rounded-sm bg-gradient-gold" />
-      <div className="absolute inset-[3px] rounded-[2px] bg-obsidian flex items-center justify-center">
-        <span className="font-display text-gold text-sm leading-none">N</span>
-      </div>
-    </div>
-    <span className="font-display text-lg tracking-tight">
-      Net<span className="text-gradient-gold">Start</span>
-    </span>
+  <div
+    className={`relative h-9 w-36 overflow-hidden rounded-sm ${className}`}
+    aria-label="NetStart"
+  >
+    <img
+      src={logoSrc}
+      alt="NetStart"
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-auto scale-[3.4]"
+      draggable={false}
+    />
   </div>
 );
