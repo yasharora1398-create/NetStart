@@ -6,6 +6,7 @@ import {
   type Project,
   type ProjectCriteria,
   type ResumeMeta,
+  type ReviewStatus,
 } from "./mynet-types";
 
 const RESUMES_BUCKET = "resumes";
@@ -18,6 +19,8 @@ type ProfileRow = {
   resume_name: string | null;
   resume_size: number | null;
   resume_uploaded_at: string | null;
+  review_status: ReviewStatus | null;
+  review_reason: string | null;
 };
 
 type ProjectRow = {
@@ -46,6 +49,8 @@ const profileFromRow = (row: ProfileRow): Profile => ({
           uploadedAt: row.resume_uploaded_at ?? new Date().toISOString(),
         }
       : null,
+  reviewStatus: row.review_status ?? "pending",
+  reviewReason: row.review_reason ?? null,
 });
 
 const criteriaFromJson = (raw: Partial<ProjectCriteria> | null): ProjectCriteria => {
@@ -170,12 +175,16 @@ export type AdminProfile = {
     | { name: string; size: number; uploadedAt: string; path: string }
     | null;
   createdAt: string;
+  reviewStatus: ReviewStatus;
+  reviewReason: string | null;
+  reviewedAt: string | null;
 };
 
 type AdminProfileRow = ProfileRow & {
   email: string | null;
   is_admin: boolean | null;
   created_at: string;
+  reviewed_at: string | null;
 };
 
 export const isAdminUser = async (userId: string): Promise<boolean> => {
@@ -192,7 +201,7 @@ export const listAllProfiles = async (): Promise<AdminProfile[]> => {
   const { data, error } = await getSupabase()
     .from("profiles")
     .select(
-      "user_id, full_name, email, linkedin_url, resume_path, resume_name, resume_size, resume_uploaded_at, created_at, is_admin",
+      "user_id, full_name, email, linkedin_url, resume_path, resume_name, resume_size, resume_uploaded_at, created_at, is_admin, review_status, review_reason, reviewed_at",
     )
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -211,7 +220,23 @@ export const listAllProfiles = async (): Promise<AdminProfile[]> => {
           }
         : null,
     createdAt: row.created_at,
+    reviewStatus: row.review_status ?? "pending",
+    reviewReason: row.review_reason ?? null,
+    reviewedAt: row.reviewed_at ?? null,
   }));
+};
+
+export const reviewProfile = async (
+  targetUserId: string,
+  status: ReviewStatus,
+  reason: string | null = null,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("review_profile", {
+    target_user_id: targetUserId,
+    new_status: status,
+    new_reason: reason,
+  });
+  if (error) throw error;
 };
 
 export const getResumeSignedUrl = async (

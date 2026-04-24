@@ -1,23 +1,36 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import {
+  Check,
   ExternalLink,
   FileText,
   Linkedin,
   Loader2,
   ShieldCheck,
   Users,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import {
   getResumeSignedUrl,
   listAllProfiles,
+  reviewProfile,
   type AdminProfile,
 } from "@/lib/mynet-storage";
+import type { ReviewStatus } from "@/lib/mynet-types";
 
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -42,6 +55,9 @@ const Admin = () => {
   const [rows, setRows] = useState<AdminProfile[]>([]);
   const [loadingRows, setLoadingRows] = useState(false);
   const [openingPath, setOpeningPath] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<AdminProfile | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     if (!user || !isAdmin) return;
@@ -93,8 +109,64 @@ const Admin = () => {
     }
   };
 
+  const applyReview = async (
+    row: AdminProfile,
+    status: ReviewStatus,
+    reason: string | null,
+  ) => {
+    setWorkingId(row.userId);
+    try {
+      await reviewProfile(row.userId, status, reason);
+      setRows((prev) =>
+        prev.map((r) =>
+          r.userId === row.userId
+            ? {
+                ...r,
+                reviewStatus: status,
+                reviewReason: status === "rejected" ? reason : null,
+                reviewedAt: new Date().toISOString(),
+              }
+            : r,
+        ),
+      );
+      toast.success(
+        status === "accepted"
+          ? "Accepted."
+          : status === "rejected"
+            ? "Rejected."
+            : "Reset to pending.",
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update.");
+    } finally {
+      setWorkingId(null);
+    }
+  };
+
+  const handleAccept = (row: AdminProfile) => applyReview(row, "accepted", null);
+
+  const handleReset = (row: AdminProfile) => applyReview(row, "pending", null);
+
+  const openReject = (row: AdminProfile) => {
+    setRejectTarget(row);
+    setRejectReason(row.reviewStatus === "rejected" ? row.reviewReason ?? "" : "");
+  };
+
+  const submitReject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (reason.length < 3) {
+      toast.error("Give a short reason (at least 3 characters).");
+      return;
+    }
+    await applyReview(rejectTarget, "rejected", reason);
+    setRejectTarget(null);
+    setRejectReason("");
+  };
+
   const totalResumes = rows.filter((r) => r.resume).length;
   const totalLinkedIn = rows.filter((r) => r.linkedinUrl.trim() !== "").length;
+  const totalPending = rows.filter((r) => r.reviewStatus === "pending").length;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -113,12 +185,14 @@ const Admin = () => {
               Submissions
             </h1>
             <p className="text-muted-foreground max-w-xl">
-              Every applicant's resume and LinkedIn profile, in one place.
+              Review every applicant's resume and LinkedIn. Accept to unlock their
+              projects, or reject with a reason they'll see.
             </p>
           </header>
 
-          <div className="grid sm:grid-cols-3 gap-3 mb-10">
+          <div className="grid sm:grid-cols-4 gap-3 mb-10">
             <StatCard label="Members" value={rows.length} icon={Users} />
+            <StatCard label="Pending" value={totalPending} icon={ShieldCheck} />
             <StatCard label="Resumes" value={totalResumes} icon={FileText} />
             <StatCard label="LinkedIn" value={totalLinkedIn} icon={Linkedin} />
           </div>
@@ -139,90 +213,220 @@ const Admin = () => {
             </div>
           ) : (
             <div className="rounded-sm border border-border bg-card overflow-hidden">
-              <div className="hidden md:grid grid-cols-[1.4fr_1.4fr_1fr_1.6fr] gap-4 px-6 py-3 border-b border-border bg-background/40">
+              <div className="hidden md:grid grid-cols-[1.2fr_1.3fr_1.5fr_1.5fr] gap-4 px-6 py-3 border-b border-border bg-background/40">
                 <ColHeader label="Member" />
                 <ColHeader label="LinkedIn" />
-                <ColHeader label="Joined" />
                 <ColHeader label="Resume" />
+                <ColHeader label="Review" />
               </div>
               <ul className="divide-y divide-border">
-                {rows.map((row) => (
-                  <li
-                    key={row.userId}
-                    className="grid md:grid-cols-[1.4fr_1.4fr_1fr_1.6fr] gap-4 px-6 py-5 items-center"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm truncate">
-                        {row.fullName || "Unnamed"}
-                      </p>
-                      <p className="text-[11px] font-mono text-muted-foreground truncate">
-                        {row.email || row.userId.slice(0, 8)}
-                      </p>
-                    </div>
+                {rows.map((row) => {
+                  const busy = workingId === row.userId;
+                  return (
+                    <li
+                      key={row.userId}
+                      className="grid md:grid-cols-[1.2fr_1.3fr_1.5fr_1.5fr] gap-4 px-6 py-5 items-start"
+                    >
+                      <div className="min-w-0 pt-1">
+                        <p className="text-sm truncate">
+                          {row.fullName || "Unnamed"}
+                        </p>
+                        <p className="text-[11px] font-mono text-muted-foreground truncate">
+                          {row.email || row.userId.slice(0, 8)}
+                        </p>
+                        <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
+                          Joined {formatDate(row.createdAt)}
+                        </p>
+                      </div>
 
-                    <div className="min-w-0">
-                      {row.linkedinUrl ? (
-                        <a
-                          href={row.linkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-gold hover:underline truncate"
-                        >
-                          <Linkedin className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span className="truncate">{row.linkedinUrl}</span>
-                          <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
-                        </a>
-                      ) : (
-                        <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                          None
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                      {formatDate(row.createdAt)}
-                    </div>
-
-                    <div className="min-w-0">
-                      {row.resume ? (
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-                            <FileText className="h-4 w-4 text-gold" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm truncate">{row.resume.name}</p>
-                            <p className="text-[11px] font-mono text-muted-foreground">
-                              {formatBytes(row.resume.size)} ·{" "}
-                              {formatDate(row.resume.uploadedAt)}
-                            </p>
-                          </div>
-                          <Button
-                            variant="outlineGold"
-                            size="sm"
-                            onClick={() => openResume(row.resume!.path)}
-                            disabled={openingPath === row.resume.path}
+                      <div className="min-w-0 pt-1">
+                        {row.linkedinUrl ? (
+                          <a
+                            href={row.linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-gold hover:underline truncate max-w-full"
                           >
-                            {openingPath === row.resume.path ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              "Open"
-                            )}
-                          </Button>
+                            <Linkedin className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="truncate">{row.linkedinUrl}</span>
+                            <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
+                          </a>
+                        ) : (
+                          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                            None
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        {row.resume ? (
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                              <FileText className="h-4 w-4 text-gold" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm truncate">
+                                {row.resume.name}
+                              </p>
+                              <p className="text-[11px] font-mono text-muted-foreground">
+                                {formatBytes(row.resume.size)} ·{" "}
+                                {formatDate(row.resume.uploadedAt)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="outlineGold"
+                              size="sm"
+                              onClick={() => openResume(row.resume!.path)}
+                              disabled={openingPath === row.resume.path}
+                            >
+                              {openingPath === row.resume.path ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Open"
+                              )}
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                            None
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <StatusBadge status={row.reviewStatus} />
+                        {row.reviewStatus === "rejected" && row.reviewReason && (
+                          <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+                            <span className="font-mono uppercase tracking-widest text-destructive/80">
+                              Reason:
+                            </span>{" "}
+                            {row.reviewReason}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {row.reviewStatus !== "accepted" && (
+                            <Button
+                              variant="gold"
+                              size="sm"
+                              onClick={() => handleAccept(row)}
+                              disabled={busy}
+                            >
+                              {busy ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4" />
+                              )}
+                              Accept
+                            </Button>
+                          )}
+                          {row.reviewStatus !== "rejected" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openReject(row)}
+                              disabled={busy}
+                            >
+                              <X className="h-4 w-4" />
+                              Reject
+                            </Button>
+                          )}
+                          {row.reviewStatus !== "pending" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleReset(row)}
+                              disabled={busy}
+                            >
+                              Reset
+                            </Button>
+                          )}
                         </div>
-                      ) : (
-                        <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                          None
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
         </div>
       </main>
+
+      <Dialog
+        open={Boolean(rejectTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRejectTarget(null);
+            setRejectReason("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject submission</DialogTitle>
+            <DialogDescription>
+              {rejectTarget?.fullName || rejectTarget?.email || "Member"} will see
+              this reason on their MyNet page.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Be direct. What specifically is missing or insufficient?"
+            rows={5}
+            className="bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+          />
+          <DialogFooter className="gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setRejectTarget(null);
+                setRejectReason("");
+              }}
+              disabled={workingId === rejectTarget?.userId}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="gold"
+              onClick={submitReject}
+              disabled={workingId === rejectTarget?.userId}
+            >
+              {workingId === rejectTarget?.userId ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : null}
+              Send rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+};
+
+const StatusBadge = ({ status }: { status: ReviewStatus }) => {
+  const { label, className } = {
+    pending: {
+      label: "Pending",
+      className:
+        "border-gold/40 bg-gold/10 text-gold",
+    },
+    accepted: {
+      label: "Accepted",
+      className:
+        "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
+    },
+    rejected: {
+      label: "Rejected",
+      className:
+        "border-destructive/40 bg-destructive/10 text-destructive",
+    },
+  }[status];
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-sm border text-[11px] font-mono uppercase tracking-widest ${className}`}
+    >
+      {label}
+    </span>
   );
 };
 

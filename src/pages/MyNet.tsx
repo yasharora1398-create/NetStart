@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Hourglass, Loader2, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, Hourglass, Loader2, Plus, Search, Sparkles, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
@@ -357,7 +357,13 @@ const MyNet = () => {
               </section>
 
               <section className="relative">
-                <div className="pointer-events-none select-none blur-sm">
+                <div
+                  className={
+                    isAuthed && displayProfile.reviewStatus === "accepted"
+                      ? ""
+                      : "pointer-events-none select-none blur-sm"
+                  }
+                >
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
@@ -365,7 +371,14 @@ const MyNet = () => {
                       </p>
                       <h2 className="font-display text-3xl">What you're building</h2>
                     </div>
-                    <Button variant="gold" size="lg" disabled>
+                    <Button
+                      variant="gold"
+                      size="lg"
+                      onClick={() => setDialogState({ mode: "new" })}
+                      disabled={
+                        !isAuthed || displayProfile.reviewStatus !== "accepted"
+                      }
+                    >
                       <Plus className="h-4 w-4" />
                       New project
                     </Button>
@@ -390,7 +403,12 @@ const MyNet = () => {
                         A project is what you're building plus the criteria for
                         who you want next to you. Set one up and run Find People.
                       </p>
-                      <Button variant="gold" size="lg" disabled>
+                      <Button
+                        variant="gold"
+                        size="lg"
+                        onClick={() => setDialogState({ mode: "new" })}
+                        disabled={displayProfile.reviewStatus !== "accepted"}
+                      >
                         <Plus className="h-4 w-4" />
                         Create your first project
                       </Button>
@@ -401,33 +419,64 @@ const MyNet = () => {
                         <ProjectCard
                           key={p.id}
                           project={p}
-                          onOpen={() => undefined}
-                          onEdit={() => undefined}
-                          onDelete={() => undefined}
-                          onFindPeople={() => undefined}
+                          onOpen={() => setOpenProjectId(p.id)}
+                          onEdit={() =>
+                            setDialogState({ mode: "edit", project: p })
+                          }
+                          onDelete={() => handleDeleteProject(p)}
+                          onFindPeople={() => setFindForId(p.id)}
                         />
                       ))}
                     </div>
                   )}
                 </div>
 
-                <div className="absolute inset-0 flex items-center justify-center p-6">
-                  <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
-                      <Hourglass className="h-5 w-5 text-gold" />
-                    </div>
-                    <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-                      Review pending
-                    </p>
-                    <h3 className="font-display text-2xl mb-3">
-                      Hold tight.
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Wait for your resume or LinkedIn to be reviewed before you
-                      can start projects.
-                    </p>
+                {isAuthed && displayProfile.reviewStatus !== "accepted" && (
+                  <div className="absolute inset-0 flex items-center justify-center p-6">
+                    {displayProfile.reviewStatus === "rejected" ? (
+                      <div className="max-w-md w-full rounded-sm border border-destructive/40 bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-destructive/40 bg-destructive/10 mb-4">
+                          <XCircle className="h-5 w-5 text-destructive" />
+                        </div>
+                        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-destructive mb-3">
+                          Submission rejected
+                        </p>
+                        <h3 className="font-display text-2xl mb-3">
+                          Not a fit yet.
+                        </h3>
+                        {displayProfile.reviewReason && (
+                          <div className="rounded-sm border border-border bg-background/60 p-4 mb-4 text-left">
+                            <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+                              Reviewer note
+                            </p>
+                            <p className="text-sm leading-relaxed">
+                              {displayProfile.reviewReason}
+                            </p>
+                          </div>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                          Update your resume or LinkedIn above and we'll re-review.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
+                          <Hourglass className="h-5 w-5 text-gold" />
+                        </div>
+                        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+                          Review pending
+                        </p>
+                        <h3 className="font-display text-2xl mb-3">
+                          Hold tight.
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Wait for your resume or LinkedIn to be reviewed before you
+                          can start projects.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </section>
             </>
           )}

@@ -22,9 +22,13 @@ export type ResumeMeta = {
   uploadedAt: string;
 };
 
+export type ReviewStatus = "pending" | "accepted" | "rejected";
+
 export type Profile = {
   linkedinUrl: string;
   resume: ResumeMeta | null;
+  reviewStatus: ReviewStatus;
+  reviewReason: string | null;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({
@@ -37,4 +41,6 @@ export const emptyCriteria = (): ProjectCriteria => ({
 export const emptyProfile = (): Profile => ({
   linkedinUrl: "",
   resume: null,
+  reviewStatus: "pending",
+  reviewReason: null,
 });
