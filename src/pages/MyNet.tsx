@@ -23,9 +23,11 @@ import {
   removeResume,
   setLinkedIn,
   setPersonStatus,
+  submitProfile,
   updateProject,
   uploadResume,
 } from "@/lib/mynet-storage";
+import type { ProfileSubmission } from "@/components/mynet/ProfileCard";
 import {
   emptyProfile,
   type Profile,
@@ -97,27 +99,31 @@ const MyNet = () => {
     };
   }, [uid]);
 
-  const handleSaveLinkedIn = async (url: string) => {
+  const handleSubmitProfile = async (changes: ProfileSubmission) => {
     if (!uid) return;
-    await setLinkedIn(uid, url);
-    setProfile((prev) => ({ ...prev, linkedinUrl: url }));
-  };
-
-  const handleUploadResume = async (file: File) => {
-    if (!uid) return;
-    const previousPath = await getResumePath(uid);
-    const meta = await uploadResume(uid, file, previousPath);
-    setProfile((prev) => ({
-      ...prev,
-      resume: { name: meta.name, size: meta.size, uploadedAt: meta.uploadedAt },
-    }));
-  };
-
-  const handleRemoveResume = async () => {
-    if (!uid) return;
-    const previousPath = await getResumePath(uid);
-    await removeResume(uid, previousPath);
-    setProfile((prev) => ({ ...prev, resume: null }));
+    try {
+      if (changes.linkedin !== undefined) {
+        await setLinkedIn(uid, changes.linkedin);
+      }
+      if (changes.file) {
+        const previousPath = await getResumePath(uid);
+        await uploadResume(uid, changes.file, previousPath);
+      } else if (changes.removeResume) {
+        const previousPath = await getResumePath(uid);
+        await removeResume(uid, previousPath);
+      }
+      await submitProfile();
+      const fresh = await getProfile(uid);
+      setProfile(fresh);
+      toast.success(
+        fresh.reviewStatus === "pending"
+          ? "Submitted for review."
+          : "Profile updated.",
+      );
+    } catch (err) {
+      toast.error(errorMessage(err));
+      throw err;
+    }
   };
 
   const handleCreateProject = async (data: {
@@ -350,9 +356,7 @@ const MyNet = () => {
               <section className="mb-12">
                 <ProfileCard
                   profile={displayProfile}
-                  onSaveLinkedIn={handleSaveLinkedIn}
-                  onUploadResume={handleUploadResume}
-                  onRemoveResume={handleRemoveResume}
+                  onSubmit={handleSubmitProfile}
                 />
               </section>
 
@@ -455,7 +459,23 @@ const MyNet = () => {
                           </div>
                         )}
                         <p className="text-sm text-muted-foreground">
-                          Update your resume or LinkedIn above and we'll re-review.
+                          Update your resume or LinkedIn above and resubmit.
+                        </p>
+                      </div>
+                    ) : displayProfile.reviewStatus === "draft" ? (
+                      <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
+                          <Hourglass className="h-5 w-5 text-gold" />
+                        </div>
+                        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+                          Profile not submitted
+                        </p>
+                        <h3 className="font-display text-2xl mb-3">
+                          Submit your credentials.
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Add your LinkedIn or resume above and click Submit for
+                          review to unlock projects.
                         </p>
                       </div>
                     ) : (
@@ -470,8 +490,8 @@ const MyNet = () => {
                           Hold tight.
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Wait for your resume or LinkedIn to be reviewed before you
-                          can start projects.
+                          Your submission is in the queue. We'll review your
+                          resume or LinkedIn shortly.
                         </p>
                       </div>
                     )}

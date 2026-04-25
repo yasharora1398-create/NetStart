@@ -1,10 +1,20 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { Linkedin, FileText, Upload, Trash2, Save, Check, Loader2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  FileText,
+  Linkedin,
+  Loader2,
+  Send,
+  Trash2,
+  Upload,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Profile } from "@/lib/mynet-types";
+import type { Profile, ReviewStatus } from "@/lib/mynet-types";
 
 const MAX_RESUME_BYTES = 4 * 1024 * 1024;
 
@@ -24,88 +34,124 @@ const isValidLinkedIn = (url: string): boolean => {
   }
 };
 
-type ProfileCardProps = {
-  profile: Profile;
-  onSaveLinkedIn: (url: string) => Promise<void> | void;
-  onUploadResume: (file: File) => Promise<void> | void;
-  onRemoveResume: () => Promise<void> | void;
+export type ProfileSubmission = {
+  linkedin?: string;
+  file?: File;
+  removeResume?: boolean;
 };
 
-export const ProfileCard = ({
-  profile,
-  onSaveLinkedIn,
-  onUploadResume,
-  onRemoveResume,
-}: ProfileCardProps) => {
+type ProfileCardProps = {
+  profile: Profile;
+  onSubmit: (changes: ProfileSubmission) => Promise<void>;
+};
+
+export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
   const [linkedin, setLinkedin] = useState(profile.linkedinUrl);
   const [linkedinDirty, setLinkedinDirty] = useState(false);
-  const [savingLinkedIn, setSavingLinkedIn] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [removeRequested, setRemoveRequested] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!linkedinDirty) setLinkedin(profile.linkedinUrl);
   }, [profile.linkedinUrl, linkedinDirty]);
 
-  const onFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const linkedinChanged = linkedin.trim() !== profile.linkedinUrl.trim();
+  const resumeChanged = pendingFile !== null || removeRequested;
+  const hasChanges = linkedinChanged || resumeChanged;
+  const isDraftLike =
+    profile.reviewStatus === "draft" || profile.reviewStatus === "rejected";
+  const canSubmit = hasChanges || isDraftLike;
+
+  const submitLabel =
+    profile.reviewStatus === "draft"
+      ? "Submit for review"
+      : profile.reviewStatus === "rejected"
+        ? "Resubmit for review"
+        : hasChanges
+          ? "Update submission"
+          : "Submitted";
+
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-
     if (file.size > MAX_RESUME_BYTES) {
       toast.error(`File too large. Max ${formatBytes(MAX_RESUME_BYTES)}.`);
       return;
     }
+    setPendingFile(file);
+    setRemoveRequested(false);
+  };
 
-    setUploading(true);
-    try {
-      await onUploadResume(file);
-      toast.success("Resume uploaded.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed.");
-    } finally {
-      setUploading(false);
+  const handleClearResume = () => {
+    if (pendingFile) {
+      setPendingFile(null);
+    } else if (profile.resume) {
+      setRemoveRequested(true);
     }
   };
 
-  const handleSaveLinkedIn = async () => {
+  const handleUndoRemove = () => setRemoveRequested(false);
+
+  const handleSubmit = async () => {
     if (!isValidLinkedIn(linkedin)) {
       toast.error("Enter a valid LinkedIn URL.");
       return;
     }
-    setSavingLinkedIn(true);
+    setSubmitting(true);
     try {
-      await onSaveLinkedIn(linkedin.trim());
+      const changes: ProfileSubmission = {};
+      if (linkedinChanged) changes.linkedin = linkedin.trim();
+      if (pendingFile) changes.file = pendingFile;
+      else if (removeRequested) changes.removeResume = true;
+
+      await onSubmit(changes);
+
+      setPendingFile(null);
+      setRemoveRequested(false);
       setLinkedinDirty(false);
-      toast.success("LinkedIn saved.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save.");
+    } catch {
+      // parent already toasts; keep local state for retry
     } finally {
-      setSavingLinkedIn(false);
+      setSubmitting(false);
     }
   };
 
-  const handleRemove = async () => {
-    try {
-      await onRemoveResume();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not remove resume.");
-    }
-  };
+  const displayResume = pendingFile
+    ? { name: pendingFile.name, size: pendingFile.size, isPending: true }
+    : profile.resume && !removeRequested
+      ? {
+          name: profile.resume.name,
+          size: profile.resume.size,
+          isPending: false,
+        }
+      : null;
 
   return (
     <div className="rounded-sm border border-border bg-card overflow-hidden">
       <div className="p-6 md:p-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
               Your profile
             </p>
             <h2 className="font-display text-2xl md:text-3xl">Credentials</h2>
           </div>
+          <StatusPill status={profile.reviewStatus} />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        {profile.reviewStatus === "rejected" && profile.reviewReason && (
+          <div className="rounded-sm border border-destructive/40 bg-destructive/5 p-4 mb-6">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-destructive mb-1">
+              Reviewer note
+            </p>
+            <p className="text-sm leading-relaxed">{profile.reviewReason}</p>
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           {/* LinkedIn */}
           <div>
             <Label
@@ -115,40 +161,26 @@ export const ProfileCard = ({
               <Linkedin className="h-3.5 w-3.5 text-gold" />
               LinkedIn
             </Label>
-            <div className="flex gap-2">
-              <Input
-                id="linkedin"
-                type="url"
-                value={linkedin}
-                onChange={(e) => {
-                  setLinkedin(e.target.value);
-                  setLinkedinDirty(true);
-                }}
-                placeholder="https://linkedin.com/in/your-handle"
-                className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-              />
-              <Button
-                variant={linkedinDirty ? "gold" : "outlineGold"}
-                size="sm"
-                onClick={handleSaveLinkedIn}
-                disabled={!linkedinDirty || savingLinkedIn}
-                className="h-11 px-4 flex-shrink-0"
-                aria-label="Save LinkedIn"
-              >
-                {savingLinkedIn ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : linkedinDirty ? (
-                  <Save className="h-4 w-4" />
-                ) : (
-                  <Check className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {profile.linkedinUrl && !linkedinDirty && (
+            <Input
+              id="linkedin"
+              type="url"
+              value={linkedin}
+              onChange={(e) => {
+                setLinkedin(e.target.value);
+                setLinkedinDirty(true);
+              }}
+              placeholder="https://linkedin.com/in/your-handle"
+              className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+            />
+            {linkedinChanged ? (
+              <p className="text-[11px] font-mono uppercase tracking-widest text-gold mt-2">
+                Unsaved change
+              </p>
+            ) : profile.linkedinUrl ? (
               <p className="text-[11px] text-muted-foreground mt-2">
                 Saved · <span className="text-foreground/80">{profile.linkedinUrl}</span>
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Resume */}
@@ -167,31 +199,39 @@ export const ProfileCard = ({
               aria-label="Upload resume"
             />
 
-            {profile.resume ? (
-              <div className="rounded-sm border border-border bg-background p-3 flex items-center gap-3">
+            {displayResume ? (
+              <div
+                className={`rounded-sm border bg-background p-3 flex items-center gap-3 ${
+                  displayResume.isPending ? "border-gold/50" : "border-border"
+                }`}
+              >
                 <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
                   <FileText className="h-4 w-4 text-gold" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{profile.resume.name}</p>
+                  <p className="text-sm truncate">{displayResume.name}</p>
                   <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                    {formatBytes(profile.resume.size)}
+                    {formatBytes(displayResume.size)}
+                    {displayResume.isPending && (
+                      <span className="text-gold normal-case tracking-normal">
+                        {" "}
+                        · Ready to submit
+                      </span>
+                    )}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
                 >
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Replace"}
+                  Replace
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleRemove}
+                  onClick={handleClearResume}
                   aria-label="Remove resume"
-                  disabled={uploading}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
@@ -202,22 +242,90 @@ export const ProfileCard = ({
                 size="lg"
                 onClick={() => fileRef.current?.click()}
                 className="w-full h-11"
-                disabled={uploading}
               >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4" />
-                )}
-                {uploading ? "Uploading..." : "Upload resume"}
+                <Upload className="h-4 w-4" />
+                Upload resume
               </Button>
             )}
+
+            {removeRequested && !pendingFile && (
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <p className="text-[11px] font-mono uppercase tracking-widest text-destructive">
+                  Will be removed on submit
+                </p>
+                <button
+                  type="button"
+                  onClick={handleUndoRemove}
+                  className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Undo
+                </button>
+              </div>
+            )}
+
             <p className="text-[11px] text-muted-foreground mt-2">
               PDF or DOC, max 4 MB.
             </p>
           </div>
         </div>
+
+        <div className="border-t border-border pt-6 flex items-center justify-between gap-4 flex-wrap">
+          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+            {hasChanges
+              ? "Click submit to send for review"
+              : profile.reviewStatus === "draft"
+                ? "Add your details, then submit"
+                : "Your submission is up to date"}
+          </p>
+          <Button
+            variant="gold"
+            size="lg"
+            onClick={handleSubmit}
+            disabled={!canSubmit || submitting}
+          >
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+            {submitLabel}
+          </Button>
+        </div>
       </div>
     </div>
+  );
+};
+
+const StatusPill = ({ status }: { status: ReviewStatus }) => {
+  const config = {
+    draft: {
+      label: "Draft",
+      className: "border-border bg-background text-muted-foreground",
+      Icon: Clock,
+    },
+    pending: {
+      label: "Under review",
+      className: "border-gold/40 bg-gold/10 text-gold",
+      Icon: Clock,
+    },
+    accepted: {
+      label: "Accepted",
+      className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
+      Icon: CheckCircle2,
+    },
+    rejected: {
+      label: "Rejected",
+      className: "border-destructive/40 bg-destructive/10 text-destructive",
+      Icon: XCircle,
+    },
+  }[status];
+  const Icon = config.Icon;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border text-[11px] font-mono uppercase tracking-widest ${config.className}`}
+    >
+      <Icon className="h-3 w-3" />
+      {config.label}
+    </span>
   );
 };

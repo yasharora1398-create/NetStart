@@ -49,7 +49,7 @@ const profileFromRow = (row: ProfileRow): Profile => ({
           uploadedAt: row.resume_uploaded_at ?? new Date().toISOString(),
         }
       : null,
-  reviewStatus: row.review_status ?? "pending",
+  reviewStatus: row.review_status ?? "draft",
   reviewReason: row.review_reason ?? null,
 });
 
@@ -131,6 +131,11 @@ export const uploadResume = async (
   return { name: file.name, size: file.size, uploadedAt, path };
 };
 
+export const submitProfile = async (): Promise<void> => {
+  const { error } = await getSupabase().rpc("submit_profile");
+  if (error) throw error;
+};
+
 export const removeResume = async (
   userId: string,
   path: string | null,
@@ -203,6 +208,7 @@ export const listAllProfiles = async (): Promise<AdminProfile[]> => {
     .select(
       "user_id, full_name, email, linkedin_url, resume_path, resume_name, resume_size, resume_uploaded_at, created_at, is_admin, review_status, review_reason, reviewed_at",
     )
+    .neq("review_status", "draft")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return ((data ?? []) as AdminProfileRow[]).map((row) => ({
