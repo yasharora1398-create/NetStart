@@ -35,6 +35,7 @@ type CandidateCardProps = {
     candidate: CandidateProfile;
     fullName: string;
   }) => Promise<void>;
+  onToggleOpenToWork: (value: boolean) => Promise<void>;
   onUploadAvatar: (file: File) => Promise<void>;
   onRemoveAvatar: () => Promise<void>;
 };
@@ -42,6 +43,7 @@ type CandidateCardProps = {
 export const CandidateCard = ({
   profile,
   onSave,
+  onToggleOpenToWork,
   onUploadAvatar,
   onRemoveAvatar,
 }: CandidateCardProps) => {
@@ -54,6 +56,7 @@ export const CandidateCard = ({
   const [open, setOpen] = useState(profile.candidate.isOpenToWork);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [togglingOpen, setTogglingOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarRef = useRef<HTMLInputElement | null>(null);
   const avatarUrl = getAvatarUrl(profile.avatarPath);
@@ -93,7 +96,16 @@ export const CandidateCard = ({
       return;
     }
     setOpen(next);
-    setDirty(true);
+    setTogglingOpen(true);
+    try {
+      await onToggleOpenToWork(next);
+      toast.success(next ? "Visible to founders." : "Hidden from search.");
+    } catch (err) {
+      setOpen(!next);
+      toast.error(err instanceof Error ? err.message : "Could not update.");
+    } finally {
+      setTogglingOpen(false);
+    }
   };
 
   const onAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +189,7 @@ export const CandidateCard = ({
             <Switch
               checked={open}
               onCheckedChange={handleToggleOpen}
-              disabled={!isAccepted}
+              disabled={!isAccepted || togglingOpen}
               aria-label="Open to work"
             />
           </div>

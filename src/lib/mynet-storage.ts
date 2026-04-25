@@ -442,6 +442,19 @@ export const updateCandidate = async (
   if (error) throw error;
 };
 
+export const setOpenToWork = async (
+  userId: string,
+  value: boolean,
+): Promise<void> => {
+  const { error } = await getSupabase()
+    .from("profiles")
+    .upsert(
+      { user_id: userId, is_open_to_work: value },
+      { onConflict: "user_id" },
+    );
+  if (error) throw error;
+};
+
 type CandidateRpcRow = {
   user_id: string;
   full_name: string;

@@ -25,6 +25,7 @@ import {
   removePerson,
   removeResume,
   setLinkedIn,
+  setOpenToWork,
   setPersonStatus,
   setProjectPublished,
   submitProfile,
@@ -117,6 +118,15 @@ const MyNet = () => {
       ...prev,
       fullName: data.fullName,
       candidate: data.candidate,
+    }));
+  };
+
+  const handleToggleOpenToWork = async (value: boolean) => {
+    if (!uid) return;
+    await setOpenToWork(uid, value);
+    setProfile((prev) => ({
+      ...prev,
+      candidate: { ...prev.candidate, isOpenToWork: value },
     }));
   };
 
@@ -413,6 +423,7 @@ const MyNet = () => {
                   <CandidateCard
                     profile={displayProfile}
                     onSave={handleSaveCandidate}
+                    onToggleOpenToWork={handleToggleOpenToWork}
                     onUploadAvatar={handleUploadAvatar}
                     onRemoveAvatar={handleRemoveAvatar}
                   />
