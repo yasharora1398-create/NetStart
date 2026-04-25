@@ -56,6 +56,16 @@ export const Nav = () => {
           >
             MyNet
           </NavLink>
+          <NavLink
+            to="/talent"
+            className={({ isActive }) =>
+              `transition-colors ${
+                isActive ? "text-gold" : "hover:text-foreground"
+              }`
+            }
+          >
+            Talent
+          </NavLink>
           {user && isAdmin && (
             <NavLink
               to="/admin"

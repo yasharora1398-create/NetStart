@@ -1,10 +1,17 @@
 import { getSupabase } from "./supabase";
 import {
+  emptyCandidate,
   emptyCriteria,
   emptyProfile,
+  type ApplicationStatus,
+  type Candidate,
+  type CandidateProfile,
+  type IncomingApplication,
+  type OutgoingApplication,
   type Profile,
   type Project,
   type ProjectCriteria,
+  type PublicProject,
   type ResumeMeta,
   type ReviewStatus,
 } from "./mynet-types";
@@ -21,6 +28,12 @@ type ProfileRow = {
   resume_uploaded_at: string | null;
   review_status: ReviewStatus | null;
   review_reason: string | null;
+  headline: string | null;
+  bio: string | null;
+  skills: unknown;
+  candidate_location: string | null;
+  candidate_commitment: string | null;
+  is_open_to_work: boolean | null;
 };
 
 type ProjectRow = {
@@ -29,6 +42,7 @@ type ProjectRow = {
   title: string;
   description: string;
   criteria: Partial<ProjectCriteria> | null;
+  is_published: boolean | null;
   created_at: string;
   updated_at: string;
 };
@@ -38,6 +52,20 @@ type SavedPersonRow = {
   person_id: string;
   status: "saved" | "passed";
 };
+
+const skillsFromJson = (raw: unknown): string[] => {
+  if (Array.isArray(raw)) return raw.filter((x): x is string => typeof x === "string");
+  return [];
+};
+
+const candidateFromRow = (row: ProfileRow): CandidateProfile => ({
+  headline: row.headline ?? "",
+  bio: row.bio ?? "",
+  skills: skillsFromJson(row.skills),
+  location: row.candidate_location ?? "",
+  commitment: row.candidate_commitment ?? "",
+  isOpenToWork: Boolean(row.is_open_to_work),
+});
 
 const profileFromRow = (row: ProfileRow): Profile => ({
   linkedinUrl: row.linkedin_url ?? "",
@@ -51,6 +79,8 @@ const profileFromRow = (row: ProfileRow): Profile => ({
       : null,
   reviewStatus: row.review_status ?? "draft",
   reviewReason: row.review_reason ?? null,
+  fullName: row.full_name ?? "",
+  candidate: candidateFromRow(row),
 });
 
 const criteriaFromJson = (raw: Partial<ProjectCriteria> | null): ProjectCriteria => {
@@ -294,6 +324,7 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
       criteria: criteriaFromJson(p.criteria),
       savedPersonIds: people.saved,
       passedPersonIds: people.passed,
+      isPublished: Boolean(p.is_published),
       createdAt: p.created_at,
       updatedAt: p.updated_at,
     };
@@ -324,6 +355,7 @@ export const createProject = async (
     criteria: criteriaFromJson(r.criteria),
     savedPersonIds: [],
     passedPersonIds: [],
+    isPublished: Boolean(r.is_published),
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -379,3 +411,212 @@ export const removePerson = async (
     .eq("person_id", personId);
   if (error) throw error;
 };
+
+// ---- Candidate side ------------------------------------------------
+
+export const updateCandidate = async (
+  userId: string,
+  candidate: CandidateProfile,
+  fullName: string,
+): Promise<void> => {
+  const { error } = await getSupabase()
+    .from("profiles")
+    .upsert(
+      {
+        user_id: userId,
+        full_name: fullName,
+        headline: candidate.headline,
+        bio: candidate.bio,
+        skills: candidate.skills,
+        candidate_location: candidate.location,
+        candidate_commitment: candidate.commitment,
+        is_open_to_work: candidate.isOpenToWork,
+      },
+      { onConflict: "user_id" },
+    );
+  if (error) throw error;
+};
+
+type CandidateRpcRow = {
+  user_id: string;
+  full_name: string;
+  linkedin_url: string;
+  headline: string;
+  bio: string;
+  skills: unknown;
+  candidate_location: string;
+  candidate_commitment: string;
+  resume_name: string | null;
+  resume_path: string | null;
+};
+
+const candidateFromRpc = (row: CandidateRpcRow): Candidate => ({
+  userId: row.user_id,
+  fullName: row.full_name ?? "",
+  linkedinUrl: row.linkedin_url ?? "",
+  headline: row.headline ?? "",
+  bio: row.bio ?? "",
+  skills: skillsFromJson(row.skills),
+  location: row.candidate_location ?? "",
+  commitment: row.candidate_commitment ?? "",
+  resumeName: row.resume_name ?? null,
+  resumePath: row.resume_path ?? null,
+});
+
+export const listOpenCandidates = async (): Promise<Candidate[]> => {
+  const { data, error } = await getSupabase().rpc("list_open_candidates");
+  if (error) throw error;
+  return ((data ?? []) as CandidateRpcRow[]).map(candidateFromRpc);
+};
+
+export const getCandidatesByIds = async (
+  ids: string[],
+): Promise<Candidate[]> => {
+  if (ids.length === 0) return [];
+  const { data, error } = await getSupabase().rpc("get_candidates_by_ids", {
+    ids,
+  });
+  if (error) throw error;
+  return ((data ?? []) as CandidateRpcRow[]).map(candidateFromRpc);
+};
+
+// ---- Public projects (candidate browsing) -------------------------
+
+export const listPublishedProjects = async (): Promise<PublicProject[]> => {
+  const { data, error } = await getSupabase()
+    .from("projects")
+    .select("id, owner_id, title, description, criteria, created_at")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return ((data ?? []) as ProjectRow[]).map((p) => ({
+    id: p.id,
+    ownerId: p.owner_id,
+    title: p.title,
+    description: p.description,
+    criteria: criteriaFromJson(p.criteria),
+    createdAt: p.created_at,
+  }));
+};
+
+export const setProjectPublished = async (
+  projectId: string,
+  isPublished: boolean,
+): Promise<void> => {
+  const { error } = await getSupabase()
+    .from("projects")
+    .update({ is_published: isPublished })
+    .eq("id", projectId);
+  if (error) throw error;
+};
+
+// ---- Applications -------------------------------------------------
+
+export const createApplication = async (
+  projectId: string,
+  message: string,
+): Promise<void> => {
+  const { data: userResp } = await getSupabase().auth.getUser();
+  const candidateId = userResp.user?.id;
+  if (!candidateId) throw new Error("Sign in required to apply.");
+  const { error } = await getSupabase()
+    .from("applications")
+    .insert({
+      project_id: projectId,
+      candidate_user_id: candidateId,
+      message,
+    });
+  if (error) throw error;
+};
+
+type IncomingAppRow = {
+  application_id: string;
+  message: string;
+  status: ApplicationStatus;
+  created_at: string;
+  candidate_user_id: string;
+  candidate_full_name: string;
+  candidate_linkedin: string;
+  candidate_headline: string;
+  candidate_skills: unknown;
+  candidate_location: string;
+  candidate_commitment: string;
+  candidate_resume_name: string | null;
+  candidate_resume_path: string | null;
+};
+
+export const listApplicationsForProject = async (
+  projectId: string,
+): Promise<IncomingApplication[]> => {
+  const { data, error } = await getSupabase().rpc(
+    "list_applications_for_project",
+    { p_id: projectId },
+  );
+  if (error) throw error;
+  return ((data ?? []) as IncomingAppRow[]).map((r) => ({
+    id: r.application_id,
+    message: r.message ?? "",
+    status: r.status,
+    createdAt: r.created_at,
+    candidate: {
+      userId: r.candidate_user_id,
+      fullName: r.candidate_full_name ?? "",
+      linkedinUrl: r.candidate_linkedin ?? "",
+      headline: r.candidate_headline ?? "",
+      bio: "",
+      skills: skillsFromJson(r.candidate_skills),
+      location: r.candidate_location ?? "",
+      commitment: r.candidate_commitment ?? "",
+      resumeName: r.candidate_resume_name ?? null,
+      resumePath: r.candidate_resume_path ?? null,
+    },
+  }));
+};
+
+type OutgoingAppRow = {
+  application_id: string;
+  message: string;
+  status: ApplicationStatus;
+  created_at: string;
+  project_id: string;
+  project_title: string;
+  project_description: string;
+};
+
+export const listMyApplications = async (): Promise<OutgoingApplication[]> => {
+  const { data, error } = await getSupabase().rpc("list_my_applications");
+  if (error) throw error;
+  return ((data ?? []) as OutgoingAppRow[]).map((r) => ({
+    id: r.application_id,
+    message: r.message ?? "",
+    status: r.status,
+    createdAt: r.created_at,
+    projectId: r.project_id,
+    projectTitle: r.project_title,
+    projectDescription: r.project_description ?? "",
+  }));
+};
+
+export const updateApplicationStatus = async (
+  applicationId: string,
+  status: "accepted" | "rejected" | "pending",
+): Promise<void> => {
+  const { error } = await getSupabase()
+    .from("applications")
+    .update({ status })
+    .eq("id", applicationId);
+  if (error) throw error;
+};
+
+export const withdrawApplication = async (
+  applicationId: string,
+): Promise<void> => {
+  const { error } = await getSupabase()
+    .from("applications")
+    .update({ status: "withdrawn" })
+    .eq("id", applicationId);
+  if (error) throw error;
+};
+
+// Re-export shared types so consumers can import from one module
+export { emptyCandidate };

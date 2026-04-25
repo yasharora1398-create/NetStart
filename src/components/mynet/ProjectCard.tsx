@@ -1,4 +1,4 @@
-import { MoreVertical, Pencil, Search, Trash2, Users } from "lucide-react";
+import { Eye, EyeOff, MoreVertical, Pencil, Search, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ type ProjectCardProps = {
   onDelete: () => void;
   onFindPeople: () => void;
   onOpen: () => void;
+  onTogglePublish: () => void;
 };
 
 export const ProjectCard = ({
@@ -24,6 +25,7 @@ export const ProjectCard = ({
   onDelete,
   onFindPeople,
   onOpen,
+  onTogglePublish,
 }: ProjectCardProps) => {
   const savedCount = project.savedPersonIds.length;
   const criteriaSet = hasAnyCriteria(project.criteria);
@@ -44,6 +46,16 @@ export const ProjectCard = ({
             </h3>
           </button>
 
+          <span
+            className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest flex-shrink-0 ${
+              project.isPublished
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                : "border-border bg-background text-muted-foreground"
+            }`}
+          >
+            {project.isPublished ? "Public" : "Draft"}
+          </span>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -57,6 +69,19 @@ export const ProjectCard = ({
               <DropdownMenuItem onClick={onEdit}>
                 <Pencil className="h-4 w-4" />
                 Edit project
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onTogglePublish}>
+                {project.isPublished ? (
+                  <>
+                    <EyeOff className="h-4 w-4" />
+                    Unpublish
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    Publish to talent
+                  </>
+                )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

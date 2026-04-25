@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
 import { ProfileCard } from "@/components/mynet/ProfileCard";
+import { CandidateCard } from "@/components/mynet/CandidateCard";
 import { ProjectCard } from "@/components/mynet/ProjectCard";
 import { ProjectDialog } from "@/components/mynet/ProjectDialog";
 import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
+import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 
 import {
   createProject,
@@ -23,13 +25,16 @@ import {
   removeResume,
   setLinkedIn,
   setPersonStatus,
+  setProjectPublished,
   submitProfile,
+  updateCandidate,
   updateProject,
   uploadResume,
 } from "@/lib/mynet-storage";
 import type { ProfileSubmission } from "@/components/mynet/ProfileCard";
 import {
   emptyProfile,
+  type CandidateProfile,
   type Profile,
   type Project,
   type ProjectCriteria,
@@ -49,6 +54,7 @@ const SAMPLE_PROJECTS: Project[] = [
     },
     savedPersonIds: [],
     passedPersonIds: [],
+    isPublished: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -98,6 +104,34 @@ const MyNet = () => {
       cancelled = true;
     };
   }, [uid]);
+
+  const handleSaveCandidate = async (data: {
+    candidate: CandidateProfile;
+    fullName: string;
+  }) => {
+    if (!uid) return;
+    await updateCandidate(uid, data.candidate, data.fullName);
+    setProfile((prev) => ({
+      ...prev,
+      fullName: data.fullName,
+      candidate: data.candidate,
+    }));
+  };
+
+  const handleTogglePublish = async (project: Project) => {
+    const next = !project.isPublished;
+    const snapshot = projects;
+    setProjects((prev) =>
+      prev.map((p) => (p.id === project.id ? { ...p, isPublished: next } : p)),
+    );
+    try {
+      await setProjectPublished(project.id, next);
+      toast.success(next ? "Project published." : "Project unpublished.");
+    } catch (err) {
+      setProjects(snapshot);
+      toast.error(errorMessage(err));
+    }
+  };
 
   const handleSubmitProfile = async (changes: ProfileSubmission) => {
     if (!uid) return;
@@ -360,6 +394,21 @@ const MyNet = () => {
                 />
               </section>
 
+              {isAuthed && (
+                <section className="mb-12">
+                  <CandidateCard
+                    profile={displayProfile}
+                    onSave={handleSaveCandidate}
+                  />
+                </section>
+              )}
+
+              {isAuthed && (
+                <section className="mb-12">
+                  <ApplicationsPanel ownedProjects={projects} />
+                </section>
+              )}
+
               <section className="relative">
                 <div
                   className={
@@ -429,6 +478,7 @@ const MyNet = () => {
                           }
                           onDelete={() => handleDeleteProject(p)}
                           onFindPeople={() => setFindForId(p.id)}
+                          onTogglePublish={() => handleTogglePublish(p)}
                         />
                       ))}
                     </div>
