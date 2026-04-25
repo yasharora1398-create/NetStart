@@ -46,7 +46,7 @@ const Talent = () => {
     Promise.all([listPublishedProjects(), listMyApplications()])
       .then(([list, mine]) => {
         if (cancelled) return;
-        setProjects(list.filter((p) => p.ownerId !== user.id));
+        setProjects(list);
         const map = new Map<string, ApplicationStatus>();
         for (const a of mine) map.set(a.projectId, a.status);
         setApplied(map);
@@ -144,14 +144,22 @@ const Talent = () => {
             <div className="grid md:grid-cols-2 gap-4">
               {filtered.map((p) => {
                 const status = applied.get(p.id);
+                const isOwn = p.ownerId === user?.id;
                 return (
                   <article
                     key={p.id}
                     className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-6"
                   >
-                    <h3 className="font-display text-2xl leading-tight mb-2">
-                      {p.title}
-                    </h3>
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <h3 className="font-display text-2xl leading-tight">
+                        {p.title}
+                      </h3>
+                      {isOwn && (
+                        <span className="px-2 py-1 rounded-sm border border-gold/40 bg-gold/10 text-[10px] font-mono uppercase tracking-widest text-gold flex-shrink-0">
+                          Your project
+                        </span>
+                      )}
+                    </div>
                     {p.description && (
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
                         {p.description}
@@ -192,7 +200,11 @@ const Talent = () => {
                       <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
                         Posted {formatDate(p.createdAt)}
                       </span>
-                      {status ? (
+                      {isOwn ? (
+                        <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                          Public listing
+                        </span>
+                      ) : status ? (
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-sm border text-[11px] font-mono uppercase tracking-widest ${
                             status === "accepted"
