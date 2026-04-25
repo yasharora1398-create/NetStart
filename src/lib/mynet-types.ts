@@ -40,6 +40,7 @@ export type Profile = {
   reviewStatus: ReviewStatus;
   reviewReason: string | null;
   fullName: string;
+  avatarPath: string | null;
   candidate: CandidateProfile;
 };
 
@@ -54,6 +55,7 @@ export type Candidate = {
   commitment: string;
   resumeName: string | null;
   resumePath: string | null;
+  avatarPath: string | null;
 };
 
 export type ApplicationStatus =
@@ -78,6 +80,25 @@ export type OutgoingApplication = {
   projectId: string;
   projectTitle: string;
   projectDescription: string;
+  founderFullName: string | null;
+  founderLinkedin: string | null;
+};
+
+export type NotificationType =
+  | "application_received"
+  | "application_accepted"
+  | "application_rejected"
+  | "profile_accepted"
+  | "profile_rejected";
+
+export type AppNotification = {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link: string | null;
+  readAt: string | null;
+  createdAt: string;
 };
 
 export type PublicProject = {
@@ -111,5 +132,6 @@ export const emptyProfile = (): Profile => ({
   reviewStatus: "draft",
   reviewReason: null,
   fullName: "",
+  avatarPath: null,
   candidate: emptyCandidate(),
 });

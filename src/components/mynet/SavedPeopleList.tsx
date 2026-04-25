@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Linkedin, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCandidatesByIds } from "@/lib/mynet-storage";
+import { getAvatarUrl, getCandidatesByIds } from "@/lib/mynet-storage";
 import type { Candidate, Project } from "@/lib/mynet-types";
 
 const initials = (name: string): string => {
@@ -24,7 +24,8 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const ids = project.savedPersonIds;
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const ids = project.savedPersonIds.filter((id) => uuidRe.test(id));
     if (ids.length === 0) {
       setCandidates([]);
       return;
@@ -75,11 +76,23 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
           className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors overflow-hidden"
         >
           <div className="flex gap-4 p-5">
-            <div className="h-14 w-14 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-              <span className="font-display text-base text-gold">
-                {initials(c.fullName)}
-              </span>
-            </div>
+            {(() => {
+              const url = getAvatarUrl(c.avatarPath);
+              return url ? (
+                <img
+                  src={url}
+                  alt={c.fullName}
+                  className="h-14 w-14 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="h-14 w-14 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                  <span className="font-display text-base text-gold">
+                    {initials(c.fullName)}
+                  </span>
+                </div>
+              );
+            })()}
             <div className="flex-1 min-w-0">
               <h4 className="font-display text-lg leading-tight truncate">
                 {c.fullName || "Unnamed"}

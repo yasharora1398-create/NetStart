@@ -21,6 +21,7 @@ import {
   getProfile,
   getResumePath,
   listProjects,
+  removeAvatar,
   removePerson,
   removeResume,
   setLinkedIn,
@@ -29,6 +30,7 @@ import {
   submitProfile,
   updateCandidate,
   updateProject,
+  uploadAvatar,
   uploadResume,
 } from "@/lib/mynet-storage";
 import type { ProfileSubmission } from "@/components/mynet/ProfileCard";
@@ -116,6 +118,18 @@ const MyNet = () => {
       fullName: data.fullName,
       candidate: data.candidate,
     }));
+  };
+
+  const handleUploadAvatar = async (file: File) => {
+    if (!uid) return;
+    const newPath = await uploadAvatar(uid, file, profile.avatarPath);
+    setProfile((prev) => ({ ...prev, avatarPath: newPath }));
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!uid) return;
+    await removeAvatar(uid, profile.avatarPath);
+    setProfile((prev) => ({ ...prev, avatarPath: null }));
   };
 
   const handleTogglePublish = async (project: Project) => {
@@ -399,6 +413,8 @@ const MyNet = () => {
                   <CandidateCard
                     profile={displayProfile}
                     onSave={handleSaveCandidate}
+                    onUploadAvatar={handleUploadAvatar}
+                    onRemoveAvatar={handleRemoveAvatar}
                   />
                 </section>
               )}

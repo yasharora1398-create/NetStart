@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
+import { NotificationsBell } from "./NotificationsBell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
@@ -81,7 +82,10 @@ export const Nav = () => {
         </nav>
         <div className="flex items-center gap-3 min-h-9">
           {loading ? null : user ? (
-            <UserMenu />
+            <>
+              <NotificationsBell />
+              <UserMenu />
+            </>
           ) : (
             <>
               <Link

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { hasAnyCriteria, scoreCandidate } from "@/lib/matching";
-import { listOpenCandidates } from "@/lib/mynet-storage";
+import { getAvatarUrl, listOpenCandidates } from "@/lib/mynet-storage";
 import type { Candidate, Project } from "@/lib/mynet-types";
 
 const initials = (name: string): string => {
@@ -129,11 +129,23 @@ export const FindPeopleSheet = ({
                   }`}
                 >
                   <div className="flex gap-4 p-5">
-                    <div className="h-16 w-16 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-                      <span className="font-display text-lg text-gold">
-                        {initials(candidate.fullName)}
-                      </span>
-                    </div>
+                    {(() => {
+                      const url = getAvatarUrl(candidate.avatarPath);
+                      return url ? (
+                        <img
+                          src={url}
+                          alt={candidate.fullName}
+                          className="h-16 w-16 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                          <span className="font-display text-lg text-gold">
+                            {initials(candidate.fullName)}
+                          </span>
+                        </div>
+                      );
+                    })()}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3 mb-1">
                         <h3 className="font-display text-xl leading-tight">

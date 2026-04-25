@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Check,
   ExternalLink,
+  Handshake,
   Inbox,
   Linkedin,
   Loader2,
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  getAvatarUrl,
   listApplicationsForProject,
   listMyApplications,
   updateApplicationStatus,
@@ -192,13 +194,24 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
                       </span>
                     </h3>
                     <ul className="divide-y divide-border border border-border rounded-sm bg-background/40">
-                      {group.apps.map((app) => (
+                      {group.apps.map((app) => {
+                        const avatarUrl = getAvatarUrl(app.candidate.avatarPath);
+                        return (
                         <li key={app.id} className="p-4 flex gap-4">
-                          <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-                            <span className="font-display text-xs text-gold">
-                              {initials(app.candidate.fullName)}
-                            </span>
-                          </div>
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={app.candidate.fullName}
+                              className="h-10 w-10 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                              <span className="font-display text-xs text-gold">
+                                {initials(app.candidate.fullName)}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h4 className="text-sm font-medium truncate">
@@ -286,7 +299,8 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
                             </div>
                           </div>
                         </li>
-                      ))}
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}
@@ -323,6 +337,30 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
                         {app.message}
                       </p>
                     )}
+                    {app.status === "accepted" &&
+                      (app.founderLinkedin || app.founderFullName) && (
+                        <div className="rounded-sm border border-emerald-500/30 bg-emerald-500/5 p-3 mt-2 mb-2">
+                          <p className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 mb-1 flex items-center gap-1.5">
+                            <Handshake className="h-3 w-3" />
+                            You're in. Reach out:
+                          </p>
+                          {app.founderFullName && (
+                            <p className="text-sm">{app.founderFullName}</p>
+                          )}
+                          {app.founderLinkedin && (
+                            <a
+                              href={app.founderLinkedin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline mt-1"
+                            >
+                              <Linkedin className="h-3 w-3" />
+                              {app.founderLinkedin}
+                              <ExternalLink className="h-3 w-3 opacity-60" />
+                            </a>
+                          )}
+                        </div>
+                      )}
                     {app.status === "pending" && (
                       <Button
                         variant="ghost"

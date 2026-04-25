@@ -1,5 +1,13 @@
-import { useEffect, useState } from "react";
-import { Briefcase, Loader2, MapPin, User, UserCheck } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+  Briefcase,
+  Camera,
+  Loader2,
+  MapPin,
+  Trash2,
+  User,
+  UserCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +16,18 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TagInput } from "@/components/mynet/TagInput";
+import { getAvatarUrl } from "@/lib/mynet-storage";
 import type { CandidateProfile, Profile } from "@/lib/mynet-types";
+
+const initials = (name: string): string => {
+  if (!name.trim()) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+};
 
 type CandidateCardProps = {
   profile: Profile;
@@ -16,9 +35,16 @@ type CandidateCardProps = {
     candidate: CandidateProfile;
     fullName: string;
   }) => Promise<void>;
+  onUploadAvatar: (file: File) => Promise<void>;
+  onRemoveAvatar: () => Promise<void>;
 };
 
-export const CandidateCard = ({ profile, onSave }: CandidateCardProps) => {
+export const CandidateCard = ({
+  profile,
+  onSave,
+  onUploadAvatar,
+  onRemoveAvatar,
+}: CandidateCardProps) => {
   const [fullName, setFullName] = useState(profile.fullName);
   const [headline, setHeadline] = useState(profile.candidate.headline);
   const [bio, setBio] = useState(profile.candidate.bio);
@@ -28,6 +54,9 @@ export const CandidateCard = ({ profile, onSave }: CandidateCardProps) => {
   const [open, setOpen] = useState(profile.candidate.isOpenToWork);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarRef = useRef<HTMLInputElement | null>(null);
+  const avatarUrl = getAvatarUrl(profile.avatarPath);
 
   useEffect(() => {
     if (dirty) return;
@@ -65,6 +94,37 @@ export const CandidateCard = ({ profile, onSave }: CandidateCardProps) => {
     }
     setOpen(next);
     setDirty(true);
+  };
+
+  const onAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Pick an image file.");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      await onUploadAvatar(file);
+      toast.success("Photo updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not upload.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setUploadingAvatar(true);
+    try {
+      await onRemoveAvatar();
+      toast.success("Photo removed.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not remove.");
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleSave = async () => {
@@ -133,6 +193,59 @@ export const CandidateCard = ({ profile, onSave }: CandidateCardProps) => {
             </p>
           </div>
         )}
+
+        <div className="flex items-center gap-4 mb-6">
+          <input
+            ref={avatarRef}
+            type="file"
+            accept="image/*"
+            onChange={onAvatarChange}
+            className="sr-only"
+            aria-label="Upload photo"
+          />
+          <div className="relative h-20 w-20 flex-shrink-0">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={fullName || "Avatar"}
+                className="h-20 w-20 rounded-sm object-cover border border-gold/30"
+              />
+            ) : (
+              <div className="h-20 w-20 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center">
+                <span className="font-display text-2xl text-gold">
+                  {initials(fullName)}
+                </span>
+              </div>
+            )}
+            {uploadingAvatar && (
+              <div className="absolute inset-0 bg-background/70 flex items-center justify-center rounded-sm">
+                <Loader2 className="h-4 w-4 text-gold animate-spin" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outlineGold"
+              size="sm"
+              onClick={() => avatarRef.current?.click()}
+              disabled={uploadingAvatar}
+            >
+              <Camera className="h-4 w-4" />
+              {avatarUrl ? "Change photo" : "Upload photo"}
+            </Button>
+            {avatarUrl && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveAvatar}
+                disabled={uploadingAvatar}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+                Remove
+              </Button>
+            )}
+          </div>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           <div>

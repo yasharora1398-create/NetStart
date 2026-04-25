@@ -3,10 +3,12 @@ import {
   emptyCandidate,
   emptyCriteria,
   emptyProfile,
+  type AppNotification,
   type ApplicationStatus,
   type Candidate,
   type CandidateProfile,
   type IncomingApplication,
+  type NotificationType,
   type OutgoingApplication,
   type Profile,
   type Project,
@@ -17,6 +19,7 @@ import {
 } from "./mynet-types";
 
 const RESUMES_BUCKET = "resumes";
+const AVATARS_BUCKET = "avatars";
 
 type ProfileRow = {
   user_id: string;
@@ -34,6 +37,7 @@ type ProfileRow = {
   candidate_location: string | null;
   candidate_commitment: string | null;
   is_open_to_work: boolean | null;
+  avatar_path: string | null;
 };
 
 type ProjectRow = {
@@ -80,6 +84,7 @@ const profileFromRow = (row: ProfileRow): Profile => ({
   reviewStatus: row.review_status ?? "draft",
   reviewReason: row.review_reason ?? null,
   fullName: row.full_name ?? "",
+  avatarPath: row.avatar_path ?? null,
   candidate: candidateFromRow(row),
 });
 
@@ -448,6 +453,7 @@ type CandidateRpcRow = {
   candidate_commitment: string;
   resume_name: string | null;
   resume_path: string | null;
+  avatar_path: string | null;
 };
 
 const candidateFromRpc = (row: CandidateRpcRow): Candidate => ({
@@ -461,6 +467,7 @@ const candidateFromRpc = (row: CandidateRpcRow): Candidate => ({
   commitment: row.candidate_commitment ?? "",
   resumeName: row.resume_name ?? null,
   resumePath: row.resume_path ?? null,
+  avatarPath: row.avatar_path ?? null,
 });
 
 export const listOpenCandidates = async (): Promise<Candidate[]> => {
@@ -543,6 +550,7 @@ type IncomingAppRow = {
   candidate_commitment: string;
   candidate_resume_name: string | null;
   candidate_resume_path: string | null;
+  candidate_avatar_path: string | null;
 };
 
 export const listApplicationsForProject = async (
@@ -569,6 +577,7 @@ export const listApplicationsForProject = async (
       commitment: r.candidate_commitment ?? "",
       resumeName: r.candidate_resume_name ?? null,
       resumePath: r.candidate_resume_path ?? null,
+      avatarPath: r.candidate_avatar_path ?? null,
     },
   }));
 };
@@ -581,6 +590,8 @@ type OutgoingAppRow = {
   project_id: string;
   project_title: string;
   project_description: string;
+  founder_full_name: string | null;
+  founder_linkedin: string | null;
 };
 
 export const listMyApplications = async (): Promise<OutgoingApplication[]> => {
@@ -594,6 +605,8 @@ export const listMyApplications = async (): Promise<OutgoingApplication[]> => {
     projectId: r.project_id,
     projectTitle: r.project_title,
     projectDescription: r.project_description ?? "",
+    founderFullName: r.founder_full_name ?? null,
+    founderLinkedin: r.founder_linkedin ?? null,
   }));
 };
 
@@ -615,6 +628,126 @@ export const withdrawApplication = async (
     .from("applications")
     .update({ status: "withdrawn" })
     .eq("id", applicationId);
+  if (error) throw error;
+};
+
+// ---- Avatars ------------------------------------------------------
+
+const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+
+export const uploadAvatar = async (
+  userId: string,
+  file: File,
+  previousPath: string | null,
+): Promise<string> => {
+  if (file.size > AVATAR_MAX_BYTES) {
+    throw new Error("Avatar too large. Max 2 MB.");
+  }
+  const supabase = getSupabase();
+  const ext = (file.name.split(".").pop() ?? "png").toLowerCase();
+  const path = `${userId}/${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(AVATARS_BUCKET)
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || undefined,
+    });
+  if (uploadError) throw uploadError;
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .upsert(
+      { user_id: userId, avatar_path: path },
+      { onConflict: "user_id" },
+    );
+  if (profileError) {
+    await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+    throw profileError;
+  }
+
+  if (previousPath) {
+    await supabase.storage.from(AVATARS_BUCKET).remove([previousPath]);
+  }
+
+  return path;
+};
+
+export const removeAvatar = async (
+  userId: string,
+  path: string | null,
+): Promise<void> => {
+  const supabase = getSupabase();
+  if (path) {
+    await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+  }
+  const { error } = await supabase
+    .from("profiles")
+    .upsert(
+      { user_id: userId, avatar_path: null },
+      { onConflict: "user_id" },
+    );
+  if (error) throw error;
+};
+
+export const getAvatarUrl = (path: string | null): string | null => {
+  if (!path) return null;
+  const { data } = getSupabase().storage.from(AVATARS_BUCKET).getPublicUrl(path);
+  return data.publicUrl ?? null;
+};
+
+// ---- Notifications ------------------------------------------------
+
+type NotificationRow = {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
+};
+
+export const listNotifications = async (
+  limit = 30,
+): Promise<AppNotification[]> => {
+  const { data, error } = await getSupabase()
+    .from("notifications")
+    .select("id, type, title, body, link, read_at, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return ((data ?? []) as NotificationRow[]).map((r) => ({
+    id: r.id,
+    type: r.type,
+    title: r.title,
+    body: r.body ?? "",
+    link: r.link ?? null,
+    readAt: r.read_at ?? null,
+    createdAt: r.created_at,
+  }));
+};
+
+export const markNotificationsRead = async (ids: string[]): Promise<void> => {
+  if (ids.length === 0) return;
+  const { error } = await getSupabase()
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .in("id", ids)
+    .is("read_at", null);
+  if (error) throw error;
+};
+
+export const markAllNotificationsRead = async (): Promise<void> => {
+  const { data: userResp } = await getSupabase().auth.getUser();
+  const uid = userResp.user?.id;
+  if (!uid) return;
+  const { error } = await getSupabase()
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", uid)
+    .is("read_at", null);
   if (error) throw error;
 };
 
