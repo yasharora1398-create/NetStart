@@ -1,4 +1,4 @@
-import { Eye, EyeOff, MoreVertical, Pencil, Search, Trash2, Users } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, MoreVertical, Pencil, Search, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -141,6 +141,24 @@ export const ProjectCard = ({
           </Button>
         </div>
       </div>
+
+      {savedCount > 0 && (
+        <button
+          type="button"
+          onClick={onOpen}
+          className="relative w-full px-6 py-3 border-t border-border bg-background/40 hover:bg-gold/5 transition-colors flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-gold"
+          aria-label={`View ${savedCount} saved profiles`}
+        >
+          <span className="flex items-center gap-2">
+            <Users className="h-3.5 w-3.5 text-gold" />
+            View saved profiles
+            <span className="text-foreground/80 normal-case tracking-normal">
+              ({savedCount})
+            </span>
+          </span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   );
 };
