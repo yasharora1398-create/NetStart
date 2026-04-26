@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   ArrowRight,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Circle,
@@ -9,6 +10,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   candidateGapLabel,
   candidateGaps,
@@ -103,12 +106,17 @@ export const OnboardingChecklist = ({
   const total = steps.length;
   const allDone = completedCount === total;
 
-  if (allDone) return null;
-
   const pct = Math.round((completedCount / total) * 100);
 
   return (
-    <div className="rounded-sm border border-gold-soft bg-gradient-to-br from-gold/5 to-transparent overflow-hidden">
+    <div className="relative rounded-sm border border-gold-soft bg-gradient-to-br from-gold/5 to-transparent overflow-hidden">
+      <div
+        className={
+          allDone
+            ? "pointer-events-none select-none blur-sm"
+            : ""
+        }
+      >
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
@@ -193,6 +201,35 @@ export const OnboardingChecklist = ({
             </li>
           ))}
         </ol>
+      )}
+      </div>
+
+      {allDone && (
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <div className="w-3/4 max-w-md rounded-sm border border-gold/50 bg-card/95 backdrop-blur-md shadow-2xl p-5 sm:p-6 text-center">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-3">
+              <CheckCircle2 className="h-5 w-5 text-gold" />
+            </div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+              All set
+            </p>
+            <h3 className="font-display text-xl sm:text-2xl mb-2">
+              You're live on NetStart.
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+              Time to find your match. Browse projects or run Find People on
+              one of yours.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Link to="/talent">
+                <Button variant="gold" size="sm">
+                  Browse projects
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
