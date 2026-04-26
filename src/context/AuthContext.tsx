@@ -11,9 +11,14 @@ type AuthContextValue = {
   loading: boolean;
   configured: boolean;
   isAdmin: boolean;
+  emailVerified: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, name: string) => Promise<AuthResult>;
-  signOut: () => Promise<void>;
+  signOut: (scope?: "local" | "global") => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<AuthResult>;
+  updatePassword: (newPassword: string) => Promise<AuthResult>;
+  updateEmail: (newEmail: string) => Promise<AuthResult>;
+  resendVerification: (email: string) => Promise<AuthResult>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -78,10 +83,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
-  const signOut = async () => {
+  const signOut = async (scope: "local" | "global" = "local") => {
     if (!isSupabaseConfigured) return;
-    await getSupabase().auth.signOut();
+    await getSupabase().auth.signOut({ scope });
   };
+
+  const requestPasswordReset: AuthContextValue["requestPasswordReset"] = async (
+    email,
+  ) => {
+    if (!isSupabaseConfigured) return notConfigured();
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+    return { error };
+  };
+
+  const updatePassword: AuthContextValue["updatePassword"] = async (
+    newPassword,
+  ) => {
+    if (!isSupabaseConfigured) return notConfigured();
+    const { error } = await getSupabase().auth.updateUser({
+      password: newPassword,
+    });
+    return { error };
+  };
+
+  const updateEmail: AuthContextValue["updateEmail"] = async (newEmail) => {
+    if (!isSupabaseConfigured) return notConfigured();
+    const { error } = await getSupabase().auth.updateUser({ email: newEmail });
+    return { error };
+  };
+
+  const resendVerification: AuthContextValue["resendVerification"] = async (
+    email,
+  ) => {
+    if (!isSupabaseConfigured) return notConfigured();
+    const { error } = await getSupabase().auth.resend({
+      type: "signup",
+      email,
+    });
+    return { error };
+  };
+
+  const emailVerified = Boolean(session?.user?.email_confirmed_at);
 
   return (
     <AuthContext.Provider
@@ -91,9 +136,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         configured: isSupabaseConfigured,
         isAdmin,
+        emailVerified,
         signIn,
         signUp,
         signOut,
+        requestPasswordReset,
+        updatePassword,
+        updateEmail,
+        resendVerification,
       }}
     >
       {children}

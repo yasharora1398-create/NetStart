@@ -778,6 +778,88 @@ export const notifyCandidates = async (
   return typeof data === "number" ? data : candidateIds.length;
 };
 
+// ---- Public founder profile --------------------------------------
+
+export type PublicFounder = {
+  userId: string;
+  fullName: string;
+  headline: string;
+  bio: string;
+  skills: string[];
+  location: string;
+  commitment: string;
+  linkedinUrl: string;
+  avatarPath: string | null;
+  isOpenToWork: boolean;
+};
+
+type PublicFounderRow = {
+  user_id: string;
+  full_name: string;
+  headline: string;
+  bio: string;
+  skills: unknown;
+  candidate_location: string;
+  candidate_commitment: string;
+  linkedin_url: string;
+  avatar_path: string | null;
+  is_open_to_work: boolean;
+};
+
+export const getPublicFounder = async (
+  userId: string,
+): Promise<PublicFounder | null> => {
+  const { data, error } = await getSupabase().rpc("get_public_founder", {
+    target_user_id: userId,
+  });
+  if (error) throw error;
+  const rows = (data ?? []) as PublicFounderRow[];
+  if (rows.length === 0) return null;
+  const r = rows[0];
+  return {
+    userId: r.user_id,
+    fullName: r.full_name ?? "",
+    headline: r.headline ?? "",
+    bio: r.bio ?? "",
+    skills: skillsFromJson(r.skills),
+    location: r.candidate_location ?? "",
+    commitment: r.candidate_commitment ?? "",
+    linkedinUrl: r.linkedin_url ?? "",
+    avatarPath: r.avatar_path ?? null,
+    isOpenToWork: Boolean(r.is_open_to_work),
+  };
+};
+
+type FounderProjectRow = {
+  id: string;
+  owner_id: string;
+  title: string;
+  description: string;
+  criteria: Partial<ProjectCriteria> | null;
+  created_at: string;
+};
+
+export const listPublishedProjectsForOwner = async (
+  userId: string,
+): Promise<PublicProject[]> => {
+  const { data, error } = await getSupabase().rpc(
+    "list_published_projects_for_owner",
+    { target_user_id: userId },
+  );
+  if (error) throw error;
+  return ((data ?? []) as FounderProjectRow[]).map((p) => ({
+    id: p.id,
+    ownerId: p.owner_id,
+    title: p.title,
+    description: p.description,
+    criteria: criteriaFromJson(p.criteria),
+    createdAt: p.created_at,
+    founderFullName: "",
+    founderHeadline: "",
+    founderAvatarPath: null,
+  }));
+};
+
 // ---- Avatars ------------------------------------------------------
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;

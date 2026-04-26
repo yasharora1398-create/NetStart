@@ -1,4 +1,5 @@
-import { LogOut } from "lucide-react";
+import { LogOut, Settings as SettingsIcon, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ const initials = (name: string | undefined, email: string | undefined) => {
 
 export const UserMenu = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   if (!user) return null;
 
   const name = (user.user_metadata?.name as string | undefined) ?? undefined;
@@ -28,6 +30,7 @@ export const UserMenu = () => {
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out.");
+    navigate("/", { replace: true });
   };
 
   return (
@@ -51,6 +54,19 @@ export const UserMenu = () => {
             {email && <span className="text-xs text-muted-foreground truncate">{email}</span>}
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to={`/u/${user.id}`}>
+            <User className="mr-2 h-4 w-4" />
+            View public profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/settings">
+            <SettingsIcon className="mr-2 h-4 w-4" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

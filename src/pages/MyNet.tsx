@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
+import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -680,6 +681,8 @@ const MyNet = () => {
       </main>
 
       {!loading && !user && <AuthGate />}
+
+      <Footer />
 
       {isAuthed && dialogState.mode !== "closed" && (
         <ProjectDialog

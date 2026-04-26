@@ -12,10 +12,20 @@ import {
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
+import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ApplyDialog } from "@/components/mynet/ApplyDialog";
+import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
 import { useAuth } from "@/context/AuthContext";
 import { isAiConfigured } from "@/lib/ai";
 import {
@@ -61,6 +71,9 @@ const Talent = () => {
   );
   const [loadingData, setLoadingData] = useState(false);
   const [query, setQuery] = useState("");
+  const [skillFilter, setSkillFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [commitmentFilter, setCommitmentFilter] = useState("");
   const [applyTarget, setApplyTarget] = useState<PublicProject | null>(null);
   const [aiRanked, setAiRanked] = useState(false);
 
@@ -96,14 +109,48 @@ const Talent = () => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return projects;
+    const skill = skillFilter.trim().toLowerCase();
+    const location = locationFilter.trim().toLowerCase();
+    const commitment = commitmentFilter.trim().toLowerCase();
     return projects.filter((p) => {
-      const haystack = `${p.title} ${p.description} ${p.criteria.skills.join(
-        " ",
-      )} ${p.criteria.commitment} ${p.criteria.location} ${p.criteria.keywords}`.toLowerCase();
-      return haystack.includes(q);
+      if (q) {
+        const haystack = `${p.title} ${p.description} ${p.criteria.skills.join(
+          " ",
+        )} ${p.criteria.commitment} ${p.criteria.location} ${p.criteria.keywords} ${p.founderFullName} ${p.founderHeadline}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      if (skill) {
+        const ok = p.criteria.skills.some((s) =>
+          s.toLowerCase().includes(skill),
+        );
+        if (!ok) return false;
+      }
+      if (location) {
+        if (!p.criteria.location.toLowerCase().includes(location)) return false;
+      }
+      if (commitment) {
+        if (!p.criteria.commitment.toLowerCase().includes(commitment))
+          return false;
+      }
+      return true;
     });
-  }, [projects, query]);
+  }, [projects, query, skillFilter, locationFilter, commitmentFilter]);
+
+  const hasActiveFilters =
+    Boolean(skillFilter || locationFilter || commitmentFilter || query);
+
+  const clearFilters = () => {
+    setQuery("");
+    setSkillFilter("");
+    setLocationFilter("");
+    setCommitmentFilter("");
+  };
+
+  const allSkills = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of projects) for (const s of p.criteria.skills) set.add(s);
+    return Array.from(set).sort();
+  }, [projects]);
 
   const handleApplied = (projectId: string) => {
     setApplied((prev) => {
@@ -142,14 +189,59 @@ const Talent = () => {
             )}
           </header>
 
-          <div className="relative mb-8 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search title, skills, location..."
-              className="pl-10 h-11 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-            />
+          <div className="space-y-3 mb-8">
+            <div className="relative max-w-xl">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search title, skills, founder..."
+                className="pl-10 h-11 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Autocomplete
+                value={skillFilter}
+                onChange={setSkillFilter}
+                options={allSkills}
+                placeholder="Filter by skill"
+                allowCustom
+              />
+              <Autocomplete
+                value={locationFilter}
+                onChange={setLocationFilter}
+                options={LOCATION_OPTIONS}
+                placeholder="Filter by location"
+                allowCustom
+              />
+              <Select
+                value={commitmentFilter || "any"}
+                onValueChange={(v) =>
+                  setCommitmentFilter(v === "any" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20">
+                  <SelectValue placeholder="Any commitment" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="any">Any commitment</SelectItem>
+                  {COMMITMENT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
 
           {loadingData ? (
@@ -206,7 +298,10 @@ const Talent = () => {
                     </div>
 
                     {(p.founderFullName || p.founderHeadline) && (
-                      <div className="flex items-center gap-2.5 mb-4">
+                      <Link
+                        to={`/u/${p.ownerId}`}
+                        className="flex items-center gap-2.5 mb-4 group"
+                      >
                         {(() => {
                           const url = getAvatarUrl(p.founderAvatarPath);
                           return url ? (
@@ -227,7 +322,7 @@ const Talent = () => {
                         <div className="min-w-0">
                           <p className="text-xs truncate">
                             <span className="text-muted-foreground">by </span>
-                            <span className="text-foreground">
+                            <span className="text-foreground group-hover:text-gold transition-colors">
                               {p.founderFullName || "Anonymous"}
                             </span>
                           </p>
@@ -237,7 +332,7 @@ const Talent = () => {
                             </p>
                           )}
                         </div>
-                      </div>
+                      </Link>
                     )}
                     {p.description && (
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
@@ -323,6 +418,8 @@ const Talent = () => {
       </main>
 
       {!loading && !user && <AuthGate />}
+
+      <Footer />
 
       <ApplyDialog
         project={applyTarget}

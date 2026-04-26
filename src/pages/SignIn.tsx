@@ -165,9 +165,17 @@ const SignIn = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Password
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                          Password
+                        </FormLabel>
+                        <Link
+                          to="/forgot-password"
+                          className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-gold transition-colors"
+                        >
+                          Forgot?
+                        </Link>
+                      </div>
                       <FormControl>
                         <Input
                           type="password"
