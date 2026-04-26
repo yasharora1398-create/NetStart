@@ -76,11 +76,17 @@ const statusBadge = (status: ApplicationStatus) => {
   );
 };
 
+type ApplicationsPanelMode = "all" | "received" | "sent";
+
 type ApplicationsPanelProps = {
   ownedProjects: Project[];
+  mode?: ApplicationsPanelMode;
 };
 
-export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => {
+export const ApplicationsPanel = ({
+  ownedProjects,
+  mode = "all",
+}: ApplicationsPanelProps) => {
   const [incoming, setIncoming] = useState<
     Array<{ projectId: string; projectTitle: string; apps: IncomingApplication[] }>
   >([]);
@@ -152,6 +158,13 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
 
   const totalIncoming = incoming.reduce((acc, g) => acc + g.apps.length, 0);
 
+  const heading =
+    mode === "received"
+      ? "Applications received"
+      : mode === "sent"
+        ? "Applications sent"
+        : "Inbox";
+
   return (
     <div className="rounded-sm border border-border bg-card overflow-hidden">
       <div className="p-6 md:p-8">
@@ -159,20 +172,29 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
           <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
             Applications
           </p>
-          <h2 className="font-display text-2xl md:text-3xl">Inbox</h2>
+          <h2 className="font-display text-2xl md:text-3xl">{heading}</h2>
         </div>
 
-        <Tabs defaultValue="incoming">
-          <TabsList className="bg-background border border-border">
-            <TabsTrigger value="incoming">
-              Received <span className="ml-2 text-muted-foreground">({totalIncoming})</span>
-            </TabsTrigger>
-            <TabsTrigger value="outgoing">
-              Sent <span className="ml-2 text-muted-foreground">({outgoing.length})</span>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue={mode === "sent" ? "outgoing" : "incoming"}>
+          {mode === "all" && (
+            <TabsList className="bg-background border border-border">
+              <TabsTrigger value="incoming">
+                Received{" "}
+                <span className="ml-2 text-muted-foreground">
+                  ({totalIncoming})
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="outgoing">
+                Sent{" "}
+                <span className="ml-2 text-muted-foreground">
+                  ({outgoing.length})
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          )}
 
-          <TabsContent value="incoming" className="mt-6">
+          {mode !== "sent" && (
+          <TabsContent value="incoming" className={mode === "all" ? "mt-6" : ""}>
             {loading ? (
               <div className="flex items-center justify-center py-10">
                 <Loader2 className="h-5 w-5 text-gold animate-spin" />
@@ -307,8 +329,10 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
               </div>
             )}
           </TabsContent>
+          )}
 
-          <TabsContent value="outgoing" className="mt-6">
+          {mode !== "received" && (
+          <TabsContent value="outgoing" className={mode === "all" ? "mt-6" : ""}>
             {loading ? (
               <div className="flex items-center justify-center py-10">
                 <Loader2 className="h-5 w-5 text-gold animate-spin" />
@@ -376,6 +400,7 @@ export const ApplicationsPanel = ({ ownedProjects }: ApplicationsPanelProps) => 
               </ul>
             )}
           </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

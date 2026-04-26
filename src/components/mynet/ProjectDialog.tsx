@@ -20,9 +20,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Autocomplete } from "@/components/ui/autocomplete";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TagInput } from "./TagInput";
+import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
 import { type Project, type ProjectCriteria, emptyCriteria } from "@/lib/mynet-types";
 
 const schema = z.object({
@@ -181,11 +190,21 @@ export const ProjectDialog = ({
                       Commitment
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g. Full-time, Equity-first"
-                        className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-                        {...field}
-                      />
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20">
+                          <SelectValue placeholder="What you need from them" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card border-border">
+                          {COMMITMENT_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt}>
+                              {opt}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -201,10 +220,11 @@ export const ProjectDialog = ({
                       Location
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g. San Francisco, Remote"
-                        className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-                        {...field}
+                      <Autocomplete
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={LOCATION_OPTIONS}
+                        placeholder="Type a city or pick remote..."
                       />
                     </FormControl>
                     <FormMessage />

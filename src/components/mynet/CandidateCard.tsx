@@ -10,13 +10,26 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TagInput } from "@/components/mynet/TagInput";
 import { getAvatarUrl } from "@/lib/mynet-storage";
+import {
+  COMMITMENT_OPTIONS,
+  HEADLINE_OPTIONS,
+  LOCATION_OPTIONS,
+} from "@/lib/options";
 import type { CandidateProfile, Profile } from "@/lib/mynet-types";
 
 const initials = (name: string): string => {
@@ -287,16 +300,27 @@ export const CandidateCard = ({
               <UserCheck className="h-3.5 w-3.5 text-gold" />
               Headline
             </Label>
-            <Input
-              id="headline"
+            <Select
               value={headline}
-              onChange={(e) => {
-                setHeadline(e.target.value);
+              onValueChange={(v) => {
+                setHeadline(v);
                 markDirty();
               }}
-              placeholder="Senior backend engineer, ex-Stripe"
-              className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-            />
+            >
+              <SelectTrigger
+                id="headline"
+                className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20"
+              >
+                <SelectValue placeholder="Pick the role you fit best" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border max-h-72">
+                {HEADLINE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -329,16 +353,27 @@ export const CandidateCard = ({
               <Briefcase className="h-3.5 w-3.5 text-gold" />
               Commitment
             </Label>
-            <Input
-              id="commitment"
+            <Select
               value={commitment}
-              onChange={(e) => {
-                setCommitment(e.target.value);
+              onValueChange={(v) => {
+                setCommitment(v);
                 markDirty();
               }}
-              placeholder="Full-time, advisor, contract..."
-              className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-            />
+            >
+              <SelectTrigger
+                id="commitment"
+                className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20"
+              >
+                <SelectValue placeholder="How much can you give?" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                {COMMITMENT_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label
@@ -348,15 +383,15 @@ export const CandidateCard = ({
               <MapPin className="h-3.5 w-3.5 text-gold" />
               Location
             </Label>
-            <Input
+            <Autocomplete
               id="location"
               value={location}
-              onChange={(e) => {
-                setLocation(e.target.value);
+              onChange={(v) => {
+                setLocation(v);
                 markDirty();
               }}
-              placeholder="NYC, remote..."
-              className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+              options={LOCATION_OPTIONS}
+              placeholder="Type a city or pick remote..."
             />
           </div>
         </div>

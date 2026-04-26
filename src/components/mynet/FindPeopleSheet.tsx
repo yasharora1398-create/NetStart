@@ -25,8 +25,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { isAiConfigured } from "@/lib/ai";
 import { hasAnyCriteria, scoreCandidate } from "@/lib/matching";
-import { getAvatarUrl, listOpenCandidates } from "@/lib/mynet-storage";
+import {
+  getAvatarUrl,
+  listOpenCandidates,
+  matchCandidatesForProject,
+} from "@/lib/mynet-storage";
 import type { Candidate, Project } from "@/lib/mynet-types";
 
 const initials = (name: string): string => {
@@ -54,19 +59,27 @@ export const FindPeopleSheet = ({
   onSave,
   onPass,
 }: FindPeopleSheetProps) => {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidates, setCandidates] = useState<
+    Array<Candidate & { similarity?: number }>
+  >([]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [usingAi, setUsingAi] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !project) {
       setSelectedId(null);
       return;
     }
     let cancelled = false;
     setLoading(true);
-    listOpenCandidates()
+    const useAi = isAiConfigured();
+    setUsingAi(useAi);
+    const loader = useAi
+      ? matchCandidatesForProject(project.id)
+      : listOpenCandidates();
+    loader
       .then((list) => {
         if (!cancelled) setCandidates(list);
       })
@@ -79,17 +92,24 @@ export const FindPeopleSheet = ({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, project]);
 
   const ranked = useMemo(() => {
     if (!project) return [];
     const noCriteria = !hasAnyCriteria(project.criteria);
-    const scored = candidates.map((c) => scoreCandidate(c, project.criteria));
-    if (noCriteria) return scored;
+    const scored = candidates.map((c) => {
+      const local = scoreCandidate(c, project.criteria);
+      const aiScore = (c.similarity ?? 0) * 100;
+      const blended = usingAi && aiScore > 0
+        ? Math.round(local.score * 0.4 + aiScore * 0.6)
+        : local.score;
+      return { ...local, score: blended };
+    });
+    if (noCriteria && !usingAi) return scored;
     return scored
       .filter((r) => r.score > 0)
       .sort((a, b) => b.score - a.score);
-  }, [project, candidates]);
+  }, [project, candidates, usingAi]);
 
   const selected = useMemo(() => {
     if (!selectedId) return null;

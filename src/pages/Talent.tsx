@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApplyDialog } from "@/components/mynet/ApplyDialog";
 import { useAuth } from "@/context/AuthContext";
+import { isAiConfigured } from "@/lib/ai";
 import {
   listMyApplications,
   listPublishedProjects,
+  matchProjectsForMe,
 } from "@/lib/mynet-storage";
 import type {
   ApplicationStatus,
@@ -31,19 +33,25 @@ const formatDate = (iso: string): string => {
 
 const Talent = () => {
   const { user, loading } = useAuth();
-  const [projects, setProjects] = useState<PublicProject[]>([]);
+  const [projects, setProjects] = useState<
+    Array<PublicProject & { similarity?: number }>
+  >([]);
   const [applied, setApplied] = useState<Map<string, ApplicationStatus>>(
     new Map(),
   );
   const [loadingData, setLoadingData] = useState(false);
   const [query, setQuery] = useState("");
   const [applyTarget, setApplyTarget] = useState<PublicProject | null>(null);
+  const [aiRanked, setAiRanked] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     setLoadingData(true);
-    Promise.all([listPublishedProjects(), listMyApplications()])
+    const useAi = isAiConfigured();
+    setAiRanked(useAi);
+    const projectLoader = useAi ? matchProjectsForMe() : listPublishedProjects();
+    Promise.all([projectLoader, listMyApplications()])
       .then(([list, mine]) => {
         if (cancelled) return;
         setProjects(list);
@@ -107,6 +115,11 @@ const Talent = () => {
               Founders looking for operators right now. Pitch yourself if it's a
               fit.
             </p>
+            {aiRanked && (
+              <p className="text-[11px] font-mono uppercase tracking-widest text-gold mt-3">
+                AI-ranked for your profile
+              </p>
+            )}
           </header>
 
           <div className="relative mb-8 max-w-md">

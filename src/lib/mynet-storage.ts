@@ -1,5 +1,12 @@
 import { getSupabase } from "./supabase";
 import {
+  embedCandidateText,
+  embedProjectText,
+  embedText,
+  formatVector,
+  isAiConfigured,
+} from "./ai";
+import {
   emptyCandidate,
   emptyCriteria,
   emptyProfile,
@@ -20,6 +27,41 @@ import {
 
 const RESUMES_BUCKET = "resumes";
 const AVATARS_BUCKET = "avatars";
+
+const refreshCandidateEmbedding = async (
+  userId: string,
+  data: {
+    fullName: string;
+    headline: string;
+    bio: string;
+    skills: string[];
+    location: string;
+    commitment: string;
+  },
+): Promise<void> => {
+  if (!isAiConfigured()) return;
+  const text = embedCandidateText(data);
+  const vec = await embedText(text);
+  if (!vec) return;
+  await getSupabase()
+    .from("profiles")
+    .update({ embedding: formatVector(vec) })
+    .eq("user_id", userId);
+};
+
+const refreshProjectEmbedding = async (
+  projectId: string,
+  data: { title: string; description: string; criteria: ProjectCriteria },
+): Promise<void> => {
+  if (!isAiConfigured()) return;
+  const text = embedProjectText(data);
+  const vec = await embedText(text);
+  if (!vec) return;
+  await getSupabase()
+    .from("projects")
+    .update({ embedding: formatVector(vec) })
+    .eq("id", projectId);
+};
 
 type ProfileRow = {
   user_id: string;
@@ -353,6 +395,11 @@ export const createProject = async (
   if (error) throw error;
 
   const r = row as ProjectRow;
+  void refreshProjectEmbedding(r.id, {
+    title: r.title,
+    description: r.description,
+    criteria: criteriaFromJson(r.criteria),
+  });
   return {
     id: r.id,
     title: r.title,
@@ -379,6 +426,7 @@ export const updateProject = async (
     })
     .eq("id", projectId);
   if (error) throw error;
+  void refreshProjectEmbedding(projectId, data);
 };
 
 export const deleteProject = async (projectId: string): Promise<void> => {
@@ -440,6 +488,14 @@ export const updateCandidate = async (
       { onConflict: "user_id" },
     );
   if (error) throw error;
+  void refreshCandidateEmbedding(userId, {
+    fullName,
+    headline: candidate.headline,
+    bio: candidate.bio,
+    skills: candidate.skills,
+    location: candidate.location,
+    commitment: candidate.commitment,
+  });
 };
 
 export const setOpenToWork = async (
@@ -487,6 +543,48 @@ export const listOpenCandidates = async (): Promise<Candidate[]> => {
   const { data, error } = await getSupabase().rpc("list_open_candidates");
   if (error) throw error;
   return ((data ?? []) as CandidateRpcRow[]).map(candidateFromRpc);
+};
+
+type CandidateMatchRow = CandidateRpcRow & { similarity: number };
+
+export const matchCandidatesForProject = async (
+  projectId: string,
+): Promise<Array<Candidate & { similarity: number }>> => {
+  const { data, error } = await getSupabase().rpc(
+    "match_candidates_for_project",
+    { p_id: projectId },
+  );
+  if (error) throw error;
+  return ((data ?? []) as CandidateMatchRow[]).map((row) => ({
+    ...candidateFromRpc(row),
+    similarity: row.similarity ?? 0,
+  }));
+};
+
+type ProjectMatchRow = {
+  id: string;
+  owner_id: string;
+  title: string;
+  description: string;
+  criteria: Partial<ProjectCriteria> | null;
+  created_at: string;
+  similarity: number;
+};
+
+export const matchProjectsForMe = async (): Promise<
+  Array<PublicProject & { similarity: number }>
+> => {
+  const { data, error } = await getSupabase().rpc("match_projects_for_me");
+  if (error) throw error;
+  return ((data ?? []) as ProjectMatchRow[]).map((p) => ({
+    id: p.id,
+    ownerId: p.owner_id,
+    title: p.title,
+    description: p.description,
+    criteria: criteriaFromJson(p.criteria),
+    createdAt: p.created_at,
+    similarity: p.similarity ?? 0,
+  }));
 };
 
 export const getCandidatesByIds = async (

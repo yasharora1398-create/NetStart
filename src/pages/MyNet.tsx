@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Hourglass, Loader2, Plus, Search, Sparkles, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Hammer,
+  Hourglass,
+  Loader2,
+  Plus,
+  Search,
+  Sparkles,
+  Telescope,
+  XCircle,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
@@ -418,51 +431,87 @@ const MyNet = () => {
                 />
               </section>
 
-              {isAuthed && (
-                <section className="mb-12">
-                  <CandidateCard
-                    profile={displayProfile}
-                    onSave={handleSaveCandidate}
-                    onToggleOpenToWork={handleToggleOpenToWork}
-                    onUploadAvatar={handleUploadAvatar}
-                    onRemoveAvatar={handleRemoveAvatar}
-                  />
-                </section>
-              )}
+              {isAuthed ? (
+                <Tabs defaultValue="building" className="w-full">
+                  <TabsList className="grid grid-cols-2 w-full max-w-md mb-8 bg-background border border-border h-12 p-1">
+                    <TabsTrigger value="building" className="gap-2 text-sm">
+                      <Hammer className="h-4 w-4" />
+                      I'm building
+                    </TabsTrigger>
+                    <TabsTrigger value="looking" className="gap-2 text-sm">
+                      <Telescope className="h-4 w-4" />
+                      I'm looking
+                    </TabsTrigger>
+                  </TabsList>
 
-              {isAuthed && (
-                <section className="mb-12">
-                  <ApplicationsPanel ownedProjects={projects} />
-                </section>
-              )}
+                  <TabsContent value="looking" className="space-y-12">
+                    <CandidateCard
+                      profile={displayProfile}
+                      onSave={handleSaveCandidate}
+                      onToggleOpenToWork={handleToggleOpenToWork}
+                      onUploadAvatar={handleUploadAvatar}
+                      onRemoveAvatar={handleRemoveAvatar}
+                    />
 
-              <section className="relative">
-                <div
-                  className={
-                    isAuthed && displayProfile.reviewStatus === "accepted"
-                      ? ""
-                      : "pointer-events-none select-none blur-sm"
-                  }
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-                        Projects
-                      </p>
-                      <h2 className="font-display text-3xl">What you're building</h2>
-                    </div>
-                    <Button
-                      variant="gold"
-                      size="lg"
-                      onClick={() => setDialogState({ mode: "new" })}
-                      disabled={
-                        !isAuthed || displayProfile.reviewStatus !== "accepted"
-                      }
-                    >
-                      <Plus className="h-4 w-4" />
-                      New project
-                    </Button>
-                  </div>
+                    {displayProfile.reviewStatus === "accepted" && (
+                      <Link
+                        to="/talent"
+                        className="block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
+                              Find projects
+                            </p>
+                            <h3 className="font-display text-2xl mb-1">
+                              Browse open projects
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              Ranked by AI against your profile. Apply with one
+                              pitch.
+                            </p>
+                          </div>
+                          <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                        </div>
+                      </Link>
+                    )}
+
+                    <ApplicationsPanel
+                      ownedProjects={projects}
+                      mode="sent"
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="building" className="space-y-12">
+                    <section className="relative">
+                      <div
+                        className={
+                          displayProfile.reviewStatus === "accepted"
+                            ? ""
+                            : "pointer-events-none select-none blur-sm"
+                        }
+                      >
+                        <div className="flex items-center justify-between mb-6">
+                          <div>
+                            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+                              Projects
+                            </p>
+                            <h2 className="font-display text-3xl">
+                              What you're building
+                            </h2>
+                          </div>
+                          <Button
+                            variant="gold"
+                            size="lg"
+                            onClick={() => setDialogState({ mode: "new" })}
+                            disabled={
+                              displayProfile.reviewStatus !== "accepted"
+                            }
+                          >
+                            <Plus className="h-4 w-4" />
+                            New project
+                          </Button>
+                        </div>
 
                   {isAuthed && loadingData ? (
                     <div className="rounded-sm border border-border bg-card/40 p-12 text-center">
@@ -574,7 +623,47 @@ const MyNet = () => {
                     )}
                   </div>
                 )}
-              </section>
+                    </section>
+
+                    <ApplicationsPanel
+                      ownedProjects={projects}
+                      mode="received"
+                    />
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <section className="relative">
+                  <div className="pointer-events-none select-none blur-sm">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+                          Projects
+                        </p>
+                        <h2 className="font-display text-3xl">
+                          What you're building
+                        </h2>
+                      </div>
+                      <Button variant="gold" size="lg" disabled>
+                        <Plus className="h-4 w-4" />
+                        New project
+                      </Button>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {SAMPLE_PROJECTS.map((p) => (
+                        <ProjectCard
+                          key={p.id}
+                          project={p}
+                          onOpen={() => undefined}
+                          onEdit={() => undefined}
+                          onDelete={() => undefined}
+                          onFindPeople={() => undefined}
+                          onTogglePublish={() => undefined}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              )}
             </>
           )}
         </div>
