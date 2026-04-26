@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Check, CheckCircle2, Inbox, Loader2, XCircle } from "lucide-react";
+import {
+  Bell,
+  Check,
+  CheckCircle2,
+  Handshake,
+  Inbox,
+  Loader2,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Popover,
@@ -40,6 +48,8 @@ const iconFor = (type: NotificationType) => {
     case "application_rejected":
     case "profile_rejected":
       return XCircle;
+    case "founder_outreach":
+      return Handshake;
     default:
       return Inbox;
   }
@@ -53,6 +63,8 @@ const colorFor = (type: NotificationType): string => {
     case "application_rejected":
     case "profile_rejected":
       return "text-destructive";
+    case "founder_outreach":
+      return "text-gold";
     default:
       return "text-gold";
   }
@@ -190,7 +202,7 @@ export const NotificationsBell = () => {
                           </span>
                         </div>
                         {n.body && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-4 whitespace-pre-line">
                             {n.body}
                           </p>
                         )}

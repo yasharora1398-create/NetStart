@@ -644,6 +644,23 @@ export const withdrawApplication = async (
   if (error) throw error;
 };
 
+// ---- Founder outreach ---------------------------------------------
+
+export const notifyCandidates = async (
+  projectId: string,
+  candidateIds: string[],
+  message: string | null = null,
+): Promise<number> => {
+  if (candidateIds.length === 0) return 0;
+  const { data, error } = await getSupabase().rpc("notify_candidates", {
+    p_id: projectId,
+    candidate_ids: candidateIds,
+    outreach_message: message,
+  });
+  if (error) throw error;
+  return typeof data === "number" ? data : candidateIds.length;
+};
+
 // ---- Avatars ------------------------------------------------------
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;

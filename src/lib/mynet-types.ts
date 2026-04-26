@@ -89,7 +89,8 @@ export type NotificationType =
   | "application_accepted"
   | "application_rejected"
   | "profile_accepted"
-  | "profile_rejected";
+  | "profile_rejected"
+  | "founder_outreach";
 
 export type AppNotification = {
   id: string;
