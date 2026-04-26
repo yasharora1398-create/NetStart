@@ -569,6 +569,9 @@ type ProjectMatchRow = {
   criteria: Partial<ProjectCriteria> | null;
   created_at: string;
   similarity: number;
+  founder_full_name: string;
+  founder_headline: string;
+  founder_avatar: string | null;
 };
 
 export const matchProjectsForMe = async (): Promise<
@@ -584,6 +587,9 @@ export const matchProjectsForMe = async (): Promise<
     criteria: criteriaFromJson(p.criteria),
     createdAt: p.created_at,
     similarity: p.similarity ?? 0,
+    founderFullName: p.founder_full_name ?? "",
+    founderHeadline: p.founder_headline ?? "",
+    founderAvatarPath: p.founder_avatar ?? null,
   }));
 };
 
@@ -600,20 +606,33 @@ export const getCandidatesByIds = async (
 
 // ---- Public projects (candidate browsing) -------------------------
 
+type PublishedRpcRow = {
+  id: string;
+  owner_id: string;
+  title: string;
+  description: string;
+  criteria: Partial<ProjectCriteria> | null;
+  created_at: string;
+  founder_full_name: string;
+  founder_headline: string;
+  founder_avatar: string | null;
+};
+
 export const listPublishedProjects = async (): Promise<PublicProject[]> => {
-  const { data, error } = await getSupabase()
-    .from("projects")
-    .select("id, owner_id, title, description, criteria, created_at")
-    .eq("is_published", true)
-    .order("created_at", { ascending: false });
+  const { data, error } = await getSupabase().rpc(
+    "list_published_projects_with_founder",
+  );
   if (error) throw error;
-  return ((data ?? []) as ProjectRow[]).map((p) => ({
+  return ((data ?? []) as PublishedRpcRow[]).map((p) => ({
     id: p.id,
     ownerId: p.owner_id,
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
     createdAt: p.created_at,
+    founderFullName: p.founder_full_name ?? "",
+    founderHeadline: p.founder_headline ?? "",
+    founderAvatarPath: p.founder_avatar ?? null,
   }));
 };
 

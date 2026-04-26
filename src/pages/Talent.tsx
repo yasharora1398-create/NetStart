@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Briefcase, Loader2, MapPin, Search, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  Briefcase,
+  Compass,
+  Loader2,
+  MapPin,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
@@ -10,6 +19,7 @@ import { ApplyDialog } from "@/components/mynet/ApplyDialog";
 import { useAuth } from "@/context/AuthContext";
 import { isAiConfigured } from "@/lib/ai";
 import {
+  getAvatarUrl,
   listMyApplications,
   listPublishedProjects,
   matchProjectsForMe,
@@ -18,6 +28,16 @@ import type {
   ApplicationStatus,
   PublicProject,
 } from "@/lib/mynet-types";
+
+const initials = (name: string): string => {
+  if (!name.trim()) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+};
 
 const formatDate = (iso: string): string => {
   try {
@@ -141,17 +161,28 @@ const Talent = () => {
             </div>
           ) : filtered.length === 0 ? (
             <div className="rounded-sm border border-dashed border-border bg-card/40 p-12 text-center">
+              <Compass className="h-6 w-6 text-gold mx-auto mb-3" />
               <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-3">
-                Nothing yet
+                {query ? "No matches" : "Be early"}
               </p>
-              <h3 className="font-display text-2xl mb-2">
-                {query ? "No projects match." : "No published projects yet."}
-              </h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-display text-2xl mb-3">
                 {query
-                  ? "Try a different search."
-                  : "Check back soon. Founders are spinning things up."}
+                  ? "No projects match that search."
+                  : "No published projects yet."}
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+                {query
+                  ? "Try fewer or different keywords."
+                  : "You're early. Be the first to post your own project, then start scouting cofounders."}
               </p>
+              {!query && (
+                <Link to="/mynet">
+                  <Button variant="gold" size="lg">
+                    <ArrowRight className="h-4 w-4" />
+                    Post a project
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
@@ -161,10 +192,10 @@ const Talent = () => {
                 return (
                   <article
                     key={p.id}
-                    className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-6"
+                    className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-5 sm:p-6"
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
-                      <h3 className="font-display text-2xl leading-tight">
+                      <h3 className="font-display text-xl sm:text-2xl leading-tight">
                         {p.title}
                       </h3>
                       {isOwn && (
@@ -173,6 +204,41 @@ const Talent = () => {
                         </span>
                       )}
                     </div>
+
+                    {(p.founderFullName || p.founderHeadline) && (
+                      <div className="flex items-center gap-2.5 mb-4">
+                        {(() => {
+                          const url = getAvatarUrl(p.founderAvatarPath);
+                          return url ? (
+                            <img
+                              src={url}
+                              alt={p.founderFullName}
+                              className="h-8 w-8 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="h-8 w-8 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                              <span className="font-display text-[11px] text-gold">
+                                {initials(p.founderFullName)}
+                              </span>
+                            </div>
+                          );
+                        })()}
+                        <div className="min-w-0">
+                          <p className="text-xs truncate">
+                            <span className="text-muted-foreground">by </span>
+                            <span className="text-foreground">
+                              {p.founderFullName || "Anonymous"}
+                            </span>
+                          </p>
+                          {p.founderHeadline && (
+                            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/80 truncate">
+                              {p.founderHeadline}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     {p.description && (
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
                         {p.description}

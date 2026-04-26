@@ -149,10 +149,18 @@ export const FindPeopleSheet = ({
               )}
 
               {!loading && ranked.length === 0 && (
-                <div className="text-center py-12 text-sm text-muted-foreground">
-                  {candidates.length === 0
-                    ? "No accepted candidates are open to work yet."
-                    : "No candidates match these criteria. Loosen them and try again."}
+                <div className="text-center py-12 px-4">
+                  <Sparkles className="h-5 w-5 text-gold mx-auto mb-3" />
+                  <h3 className="font-display text-lg mb-2">
+                    {candidates.length === 0
+                      ? "No candidates yet"
+                      : "Nothing matches"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    {candidates.length === 0
+                      ? "Be early. Once accepted operators flip Open to work, they'll show up here ranked against your project."
+                      : "Loosen the criteria on this project and try again."}
+                  </p>
                 </div>
               )}
 
@@ -307,7 +315,7 @@ const CandidateProfileModal = ({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="p-0 bg-card border-gold-soft w-[min(60vw,800px)] max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col"
+        className="p-0 bg-card border-gold-soft w-[95vw] sm:w-[min(60vw,800px)] max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col"
       >
         <DialogTitle className="sr-only">
           {match?.candidate.fullName || "Candidate profile"}

@@ -1,16 +1,27 @@
+import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { Menu } from "lucide-react";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
 import { NotificationsBell } from "./NotificationsBell";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 
 export const Nav = () => {
   const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
   const onLanding = location.pathname === "/";
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLandingScroll = (id: string) => (e: React.MouseEvent) => {
+    setMobileOpen(false);
     if (!onLanding) return;
     e.preventDefault();
     document.getElementById(id)?.scrollIntoView({
@@ -19,68 +30,81 @@ export const Nav = () => {
     });
   };
 
+  const closeMobile = () => setMobileOpen(false);
+
+  const navLinks = (
+    <>
+      <a
+        href={onLanding ? "#how" : "/#how"}
+        onClick={handleLandingScroll("how")}
+        className="hover:text-foreground transition-colors"
+      >
+        How it works
+      </a>
+      <a
+        href={onLanding ? "#standards" : "/#standards"}
+        onClick={handleLandingScroll("standards")}
+        className="hover:text-foreground transition-colors"
+      >
+        Standards
+      </a>
+      <a
+        href={onLanding ? "#download" : "/#download"}
+        onClick={handleLandingScroll("download")}
+        className="hover:text-foreground transition-colors"
+      >
+        Download
+      </a>
+      <NavLink
+        to="/mynet"
+        onClick={closeMobile}
+        className={({ isActive }) =>
+          `transition-colors ${
+            isActive ? "text-gold" : "hover:text-foreground"
+          }`
+        }
+      >
+        MyNet
+      </NavLink>
+      <NavLink
+        to="/talent"
+        onClick={closeMobile}
+        className={({ isActive }) =>
+          `transition-colors ${
+            isActive ? "text-gold" : "hover:text-foreground"
+          }`
+        }
+      >
+        Talent
+      </NavLink>
+      {user && isAdmin && (
+        <NavLink
+          to="/admin"
+          onClick={closeMobile}
+          className={({ isActive }) =>
+            `transition-colors ${
+              isActive ? "text-gold" : "hover:text-foreground"
+            }`
+          }
+        >
+          Admin
+        </NavLink>
+      )}
+    </>
+  );
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-gold-soft">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" aria-label="NetStart home">
           <Logo />
         </Link>
+
         <nav className="hidden md:flex items-center gap-10 text-sm text-muted-foreground">
-          <a
-            href={onLanding ? "#how" : "/#how"}
-            onClick={handleLandingScroll("how")}
-            className="hover:text-foreground transition-colors"
-          >
-            How it works
-          </a>
-          <a
-            href={onLanding ? "#standards" : "/#standards"}
-            onClick={handleLandingScroll("standards")}
-            className="hover:text-foreground transition-colors"
-          >
-            Standards
-          </a>
-          <a
-            href={onLanding ? "#download" : "/#download"}
-            onClick={handleLandingScroll("download")}
-            className="hover:text-foreground transition-colors"
-          >
-            Download
-          </a>
-          <NavLink
-            to="/mynet"
-            className={({ isActive }) =>
-              `transition-colors ${
-                isActive ? "text-gold" : "hover:text-foreground"
-              }`
-            }
-          >
-            MyNet
-          </NavLink>
-          <NavLink
-            to="/talent"
-            className={({ isActive }) =>
-              `transition-colors ${
-                isActive ? "text-gold" : "hover:text-foreground"
-              }`
-            }
-          >
-            Talent
-          </NavLink>
-          {user && isAdmin && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `transition-colors ${
-                  isActive ? "text-gold" : "hover:text-foreground"
-                }`
-              }
-            >
-              Admin
-            </NavLink>
-          )}
+          {navLinks}
         </nav>
-        <div className="flex items-center gap-3 min-h-9">
+
+        <div className="flex items-center gap-2 sm:gap-3 min-h-9">
           {loading ? null : user ? (
             <>
               <NotificationsBell />
@@ -101,6 +125,45 @@ export const Nav = () => {
               </Link>
             </>
           )}
+
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="Open menu"
+                className="md:hidden h-9 w-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold/40 transition-colors"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-[80vw] sm:w-72 bg-background border-l border-gold-soft"
+            >
+              <SheetHeader className="mb-6">
+                <SheetTitle className="font-display text-2xl text-left">
+                  Menu
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-5 text-base text-muted-foreground">
+                {navLinks}
+              </nav>
+              {!user && !loading && (
+                <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3">
+                  <Link to="/signin" onClick={closeMobile}>
+                    <Button variant="outlineGold" size="lg" className="w-full">
+                      Sign in
+                    </Button>
+                  </Link>
+                  <Link to="/signup" onClick={closeMobile}>
+                    <Button variant="gold" size="lg" className="w-full">
+                      Sign up
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

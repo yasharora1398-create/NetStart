@@ -27,6 +27,7 @@ import { ProjectDialog } from "@/components/mynet/ProjectDialog";
 import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
+import { OnboardingChecklist } from "@/components/mynet/OnboardingChecklist";
 
 import {
   createProject,
@@ -414,7 +415,7 @@ const MyNet = () => {
                     MyNet
                   </span>
                 </div>
-                <h1 className="font-display text-4xl md:text-6xl leading-[1] mb-4">
+                <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-4">
                   Your network,<br />
                   <em className="text-gradient-gold not-italic">your moves.</em>
                 </h1>
@@ -423,6 +424,15 @@ const MyNet = () => {
                   operators worth talking to.
                 </p>
               </header>
+
+              {isAuthed && (
+                <section className="mb-8">
+                  <OnboardingChecklist
+                    profile={displayProfile}
+                    projects={projects}
+                  />
+                </section>
+              )}
 
               <section className="mb-12">
                 <ProfileCard

@@ -11,8 +11,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { createApplication } from "@/lib/mynet-storage";
+import { createApplication, getAvatarUrl } from "@/lib/mynet-storage";
 import type { PublicProject } from "@/lib/mynet-types";
+
+const initials = (name: string): string => {
+  if (!name.trim()) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+};
 
 type ApplyDialogProps = {
   project: PublicProject | null;
@@ -60,7 +70,7 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
         }
       }}
     >
-      <DialogContent>
+      <DialogContent className="w-[95vw] max-w-lg">
         <DialogHeader>
           <DialogTitle>Apply to {project?.title}</DialogTitle>
           <DialogDescription>
@@ -68,6 +78,40 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
             your candidate profile.
           </DialogDescription>
         </DialogHeader>
+        {project && (project.founderFullName || project.founderHeadline) && (
+          <div className="rounded-sm border border-border bg-background/40 p-3 flex items-center gap-3">
+            {(() => {
+              const url = getAvatarUrl(project.founderAvatarPath);
+              return url ? (
+                <img
+                  src={url}
+                  alt={project.founderFullName}
+                  className="h-10 w-10 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                  <span className="font-display text-xs text-gold">
+                    {initials(project.founderFullName)}
+                  </span>
+                </div>
+              );
+            })()}
+            <div className="min-w-0">
+              <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                Founder
+              </p>
+              <p className="text-sm truncate">
+                {project.founderFullName || "Anonymous"}
+                {project.founderHeadline && (
+                  <span className="text-muted-foreground">
+                    {" "}
+                    — {project.founderHeadline}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        )}
         <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}

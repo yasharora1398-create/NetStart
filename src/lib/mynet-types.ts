@@ -109,6 +109,9 @@ export type PublicProject = {
   description: string;
   criteria: ProjectCriteria;
   createdAt: string;
+  founderFullName: string;
+  founderHeadline: string;
+  founderAvatarPath: string | null;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({
@@ -136,3 +139,26 @@ export const emptyProfile = (): Profile => ({
   avatarPath: null,
   candidate: emptyCandidate(),
 });
+
+export const CANDIDATE_BIO_MIN = 60;
+export const CANDIDATE_SKILLS_MIN = 2;
+
+export type CandidateGap =
+  | "headline"
+  | "bio"
+  | "skills"
+  | "location"
+  | "commitment";
+
+export const candidateGaps = (c: CandidateProfile): CandidateGap[] => {
+  const gaps: CandidateGap[] = [];
+  if (!c.headline.trim()) gaps.push("headline");
+  if (c.bio.trim().length < CANDIDATE_BIO_MIN) gaps.push("bio");
+  if (c.skills.length < CANDIDATE_SKILLS_MIN) gaps.push("skills");
+  if (!c.location.trim()) gaps.push("location");
+  if (!c.commitment.trim()) gaps.push("commitment");
+  return gaps;
+};
+
+export const isCandidateProfileComplete = (c: CandidateProfile): boolean =>
+  candidateGaps(c).length === 0;

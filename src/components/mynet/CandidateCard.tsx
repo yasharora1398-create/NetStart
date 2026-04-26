@@ -30,7 +30,12 @@ import {
   HEADLINE_OPTIONS,
   LOCATION_OPTIONS,
 } from "@/lib/options";
-import type { CandidateProfile, Profile } from "@/lib/mynet-types";
+import {
+  candidateGaps,
+  isCandidateProfileComplete,
+  type CandidateProfile,
+  type Profile,
+} from "@/lib/mynet-types";
 
 const initials = (name: string): string => {
   if (!name.trim()) return "?";
@@ -86,6 +91,17 @@ export const CandidateCard = ({
   }, [profile, dirty]);
 
   const isAccepted = profile.reviewStatus === "accepted";
+  const liveCandidate: CandidateProfile = {
+    headline: headline.trim(),
+    bio: bio.trim(),
+    skills,
+    location: location.trim(),
+    commitment: commitment.trim(),
+    isOpenToWork: open,
+  };
+  const profileComplete = isCandidateProfileComplete(liveCandidate);
+  const missing = candidateGaps(liveCandidate);
+  const canGoOpen = isAccepted && profileComplete;
   const arraysEqual = (a: string[], b: string[]) =>
     a.length === b.length && a.every((v, i) => v === b[i]);
 
@@ -106,6 +122,12 @@ export const CandidateCard = ({
   const handleToggleOpen = async (next: boolean) => {
     if (!isAccepted) {
       toast.error("Get accepted before going live as a candidate.");
+      return;
+    }
+    if (next && !profileComplete) {
+      toast.error(
+        `Fill in: ${missing.join(", ")}. Founders skip thin profiles.`,
+      );
       return;
     }
     setOpen(next);
@@ -202,13 +224,13 @@ export const CandidateCard = ({
             <Switch
               checked={open}
               onCheckedChange={handleToggleOpen}
-              disabled={!isAccepted || togglingOpen}
+              disabled={(!canGoOpen && !open) || togglingOpen}
               aria-label="Open to work"
             />
           </div>
         </div>
 
-        {!isAccepted && (
+        {!isAccepted ? (
           <div className="rounded-sm border border-border bg-background/40 p-4 mb-6">
             <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
               Locked
@@ -217,7 +239,18 @@ export const CandidateCard = ({
               Your credentials need to be accepted before you can be discovered.
             </p>
           </div>
-        )}
+        ) : !profileComplete ? (
+          <div className="rounded-sm border border-gold/40 bg-gold/5 p-4 mb-6">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-gold mb-1">
+              Almost there
+            </p>
+            <p className="text-sm">
+              Fill in <span className="text-foreground">{missing.join(", ")}</span>
+              {" "}
+              before you can flip Open to work. Founders ignore thin profiles.
+            </p>
+          </div>
+        ) : null}
 
         <div className="flex items-center gap-4 mb-6">
           <input
