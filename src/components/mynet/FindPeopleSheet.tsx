@@ -413,7 +413,7 @@ const PublicProfileBody = ({
         {candidate.bio ? (
           <section>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-              Pitch
+              Pitch / Bio
             </p>
             <p className="text-sm leading-relaxed whitespace-pre-line">
               {candidate.bio}
@@ -422,7 +422,7 @@ const PublicProfileBody = ({
         ) : (
           <section className="rounded-sm border border-dashed border-border bg-background/40 p-4">
             <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-              No pitch yet
+              No pitch / bio yet
             </p>
           </section>
         )}

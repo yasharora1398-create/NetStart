@@ -31,6 +31,9 @@ import {
   LOCATION_OPTIONS,
 } from "@/lib/options";
 import {
+  CANDIDATE_BIO_MIN,
+  CANDIDATE_SKILLS_MIN,
+  candidateGapLabel,
   candidateGaps,
   isCandidateProfileComplete,
   type CandidateProfile,
@@ -101,6 +104,7 @@ export const CandidateCard = ({
   };
   const profileComplete = isCandidateProfileComplete(liveCandidate);
   const missing = candidateGaps(liveCandidate);
+  const missingText = missing.map((g) => candidateGapLabel(g, liveCandidate));
   const canGoOpen = isAccepted && profileComplete;
   const arraysEqual = (a: string[], b: string[]) =>
     a.length === b.length && a.every((v, i) => v === b[i]);
@@ -126,7 +130,7 @@ export const CandidateCard = ({
     }
     if (next && !profileComplete) {
       toast.error(
-        `Fill in: ${missing.join(", ")}. Founders skip thin profiles.`,
+        `Fill in: ${missingText.join(", ")}. Founders skip thin profiles.`,
       );
       return;
     }
@@ -360,9 +364,18 @@ export const CandidateCard = ({
         <div className="mb-6">
           <Label
             htmlFor="bio"
-            className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2 block"
+            className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2 flex items-center justify-between"
           >
-            Pitch
+            <span>Pitch / Bio</span>
+            <span
+              className={`font-normal normal-case tracking-normal text-[11px] ${
+                bio.trim().length >= CANDIDATE_BIO_MIN
+                  ? "text-emerald-400"
+                  : "text-muted-foreground/70"
+              }`}
+            >
+              {bio.trim().length}/{CANDIDATE_BIO_MIN}
+            </span>
           </Label>
           <Textarea
             id="bio"
@@ -432,9 +445,18 @@ export const CandidateCard = ({
         <div className="mb-8">
           <Label
             htmlFor="skills"
-            className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2 block"
+            className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2 flex items-center justify-between"
           >
-            Skills
+            <span>Skills</span>
+            <span
+              className={`font-normal normal-case tracking-normal text-[11px] ${
+                skills.length >= CANDIDATE_SKILLS_MIN
+                  ? "text-emerald-400"
+                  : "text-muted-foreground/70"
+              }`}
+            >
+              {skills.length}/{CANDIDATE_SKILLS_MIN} min
+            </span>
           </Label>
           <TagInput
             id="skills"
@@ -443,7 +465,7 @@ export const CandidateCard = ({
               setSkills(next);
               markDirty();
             }}
-            placeholder="React, Solidity, Go..."
+            placeholder="React, Solidity, Go... (Enter to add)"
           />
         </div>
 

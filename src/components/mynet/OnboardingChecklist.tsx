@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import {
+  candidateGapLabel,
   candidateGaps,
   isCandidateProfileComplete,
   type Profile,
@@ -44,6 +45,9 @@ export const OnboardingChecklist = ({
 
     const profileComplete = isCandidateProfileComplete(profile.candidate);
     const gaps = candidateGaps(profile.candidate);
+    const gapText = gaps
+      .map((g) => candidateGapLabel(g, profile.candidate))
+      .join(", ");
     const hasOpenToWork = profile.candidate.isOpenToWork && profileComplete;
 
     const ownsProject = projects.length > 0;
@@ -78,7 +82,7 @@ export const OnboardingChecklist = ({
           ? undefined
           : profileComplete
             ? undefined
-            : `Still need: ${gaps.join(", ")}.`,
+            : `Still need: ${gapText}.`,
       },
       {
         key: "act",

@@ -160,5 +160,27 @@ export const candidateGaps = (c: CandidateProfile): CandidateGap[] => {
   return gaps;
 };
 
+export const candidateGapLabel = (
+  gap: CandidateGap,
+  c: CandidateProfile,
+): string => {
+  switch (gap) {
+    case "headline":
+      return "headline";
+    case "bio": {
+      const have = c.bio.trim().length;
+      return `pitch/bio (${have}/${CANDIDATE_BIO_MIN} chars)`;
+    }
+    case "skills":
+      return `${CANDIDATE_SKILLS_MIN - c.skills.length} more skill${
+        CANDIDATE_SKILLS_MIN - c.skills.length === 1 ? "" : "s"
+      }`;
+    case "location":
+      return "location";
+    case "commitment":
+      return "commitment";
+  }
+};
+
 export const isCandidateProfileComplete = (c: CandidateProfile): boolean =>
   candidateGaps(c).length === 0;
