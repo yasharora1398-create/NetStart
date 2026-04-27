@@ -778,6 +778,28 @@ export const notifyCandidates = async (
   return typeof data === "number" ? data : candidateIds.length;
 };
 
+// ---- Lightweight requests (chat / review) -------------------------
+
+// Founder pings an operator asking to chat. Lands in their notifications.
+export const requestChat = async (
+  targetUserId: string,
+  projectId: string | null = null,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("request_chat", {
+    target_user_id: targetUserId,
+    project_id: projectId,
+  });
+  if (error) throw error;
+};
+
+// Operator pings a founder asking them to look at their profile.
+export const requestReview = async (projectId: string): Promise<void> => {
+  const { error } = await getSupabase().rpc("request_review", {
+    p_id: projectId,
+  });
+  if (error) throw error;
+};
+
 // ---- Public founder profile --------------------------------------
 
 export type PublicFounder = {

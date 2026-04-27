@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
 import { NotificationsBell } from "./NotificationsBell";
@@ -107,6 +107,19 @@ export const Nav = () => {
         <div className="flex items-center gap-2 sm:gap-3 min-h-9">
           {loading ? null : user ? (
             <>
+              <NavLink
+                to="/chats"
+                aria-label="Chats"
+                className={({ isActive }) =>
+                  `relative h-9 w-9 flex items-center justify-center rounded-sm border transition-colors ${
+                    isActive
+                      ? "border-gold/60 text-gold bg-gold/5"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-gold/40"
+                  }`
+                }
+              >
+                <MessageCircle className="h-4 w-4" />
+              </NavLink>
               <NotificationsBell />
               <UserMenu />
             </>

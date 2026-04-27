@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Briefcase,
+  Check,
   Compass,
+  Eye,
   Loader2,
   MapPin,
   Search,
@@ -33,6 +35,7 @@ import {
   listMyApplications,
   listPublishedProjects,
   matchProjectsForMe,
+  requestReview,
 } from "@/lib/mynet-storage";
 import type {
   ApplicationStatus,
@@ -399,14 +402,17 @@ const Talent = () => {
                                 : "Withdrawn"}
                         </span>
                       ) : (
-                        <Button
-                          variant="gold"
-                          size="sm"
-                          onClick={() => setApplyTarget(p)}
-                        >
-                          Apply
-                          <ArrowRight className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <RequestReviewButton projectId={p.id} />
+                          <Button
+                            variant="gold"
+                            size="sm"
+                            onClick={() => setApplyTarget(p)}
+                          >
+                            Apply
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </article>
@@ -427,6 +433,44 @@ const Talent = () => {
         onApplied={handleApplied}
       />
     </div>
+  );
+};
+
+const RequestReviewButton = ({ projectId }: { projectId: string }) => {
+  const [working, setWorking] = useState(false);
+  const [done, setDone] = useState(false);
+  const handle = async () => {
+    if (working || done) return;
+    setWorking(true);
+    try {
+      await requestReview(projectId);
+      setDone(true);
+      toast.success("Review request sent. The founder will see it in their notifications.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send request.");
+    } finally {
+      setWorking(false);
+    }
+  };
+  return (
+    <Button
+      variant="outlineGold"
+      size="sm"
+      onClick={handle}
+      disabled={working || done}
+    >
+      {done ? (
+        <>
+          <Check className="h-4 w-4" />
+          Requested
+        </>
+      ) : (
+        <>
+          <Eye className="h-4 w-4" />
+          {working ? "Sending..." : "Request review"}
+        </>
+      )}
+    </Button>
   );
 };
 

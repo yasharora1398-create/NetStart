@@ -90,7 +90,9 @@ export type NotificationType =
   | "application_rejected"
   | "profile_accepted"
   | "profile_rejected"
-  | "founder_outreach";
+  | "founder_outreach"
+  | "chat_request"
+  | "review_request";
 
 export type AppNotification = {
   id: string;

@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import MyNet from "./pages/MyNet.tsx";
 import Talent from "./pages/Talent.tsx";
 import Admin from "./pages/Admin.tsx";
+import Chats from "./pages/Chats.tsx";
 import Settings from "./pages/Settings.tsx";
 import FounderProfile from "./pages/FounderProfile.tsx";
 import Terms from "./pages/Terms.tsx";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/mynet" element={<MyNet />} />
             <Route path="/talent" element={<Talent />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/chats" element={<Chats />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/u/:id" element={<FounderProfile />} />
             <Route path="/terms" element={<Terms />} />

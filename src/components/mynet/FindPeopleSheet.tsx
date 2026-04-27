@@ -9,9 +9,11 @@ import {
   Linkedin,
   Loader2,
   MapPin,
+  MessageCircle,
   Sparkles,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -31,6 +33,7 @@ import {
   getAvatarUrl,
   listOpenCandidates,
   matchCandidatesForProject,
+  requestChat,
 } from "@/lib/mynet-storage";
 import type { Candidate, Project } from "@/lib/mynet-types";
 
@@ -474,25 +477,26 @@ const PublicProfileBody = ({
         )}
       </div>
 
-      <div className="border-t border-border bg-background/40 px-8 py-4 flex items-center gap-2">
+      <div className="border-t border-border bg-background/40 px-8 py-4 flex items-center gap-2 flex-wrap">
         <Button
           variant="outlineGold"
           size="lg"
           onClick={() => onSave(candidate.userId)}
-          className="flex-1"
+          className="flex-1 min-w-[160px]"
         >
           {saved ? (
             <>
               <BookmarkCheck className="h-4 w-4" />
-              Saved to project
+              Saved for later
             </>
           ) : (
             <>
               <Bookmark className="h-4 w-4" />
-              Save to project
+              Save for later
             </>
           )}
         </Button>
+        <RequestChatButton targetUserId={candidate.userId} projectId={project?.id ?? null} />
         <Button
           variant="ghost"
           size="lg"
@@ -513,5 +517,50 @@ const PublicProfileBody = ({
         </Button>
       </div>
     </>
+  );
+};
+
+const RequestChatButton = ({
+  targetUserId,
+  projectId,
+}: {
+  targetUserId: string;
+  projectId: string | null;
+}) => {
+  const [working, setWorking] = useState(false);
+  const [done, setDone] = useState(false);
+  const handle = async () => {
+    if (working || done) return;
+    setWorking(true);
+    try {
+      await requestChat(targetUserId, projectId);
+      setDone(true);
+      toast.success("Chat request sent.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send request.");
+    } finally {
+      setWorking(false);
+    }
+  };
+  return (
+    <Button
+      variant="gold"
+      size="lg"
+      onClick={handle}
+      disabled={working || done}
+      className="flex-1 min-w-[170px]"
+    >
+      {done ? (
+        <>
+          <Check className="h-4 w-4" />
+          Chat requested
+        </>
+      ) : (
+        <>
+          <MessageCircle className="h-4 w-4" />
+          {working ? "Sending..." : "Request to chat"}
+        </>
+      )}
+    </Button>
   );
 };
