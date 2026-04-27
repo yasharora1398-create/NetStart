@@ -34,6 +34,7 @@ import {
 import {
   createProject,
   getResumePath,
+  removeResume,
   setLinkedIn,
   submitProfile,
   updateCandidate,
@@ -130,6 +131,21 @@ export const MyNetWizard = ({
       return;
     }
     setPendingResume(file);
+  };
+
+  const handleRemoveExistingResume = async () => {
+    if (!profile.resume || working) return;
+    setWorking(true);
+    try {
+      const previousPath = await getResumePath(uid);
+      await removeResume(uid, previousPath);
+      await onProfileRefresh();
+      toast.success("Resume removed.");
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setWorking(false);
+    }
   };
 
   const credentialsValid = Boolean(
@@ -304,6 +320,7 @@ export const MyNetWizard = ({
                   name={profile.resume.name}
                   size={formatBytes(profile.resume.size)}
                   onReplace={() => fileRef.current?.click()}
+                  onClear={handleRemoveExistingResume}
                 />
               ) : (
                 <Button
