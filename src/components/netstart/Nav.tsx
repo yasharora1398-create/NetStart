@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
@@ -13,12 +13,39 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
+import { listNotifications } from "@/lib/mynet-storage";
 
 export const Nav = () => {
   const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
   const onLanding = location.pathname === "/";
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadChats, setUnreadChats] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadChats(0);
+      return;
+    }
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const list = await listNotifications();
+        if (cancelled) return;
+        setUnreadChats(
+          list.filter((n) => n.type === "chat_request" && !n.readAt).length,
+        );
+      } catch {
+        // silent — this is just a badge, don't toast
+      }
+    };
+    refresh();
+    const t = setInterval(refresh, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, [user, location.pathname]);
 
   const handleLandingScroll = (id: string) => (e: React.MouseEvent) => {
     setMobileOpen(false);
@@ -132,6 +159,11 @@ export const Nav = () => {
                 }
               >
                 <MessageCircle className="h-4 w-4" />
+                {unreadChats > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-gold text-obsidian text-[10px] font-mono font-semibold flex items-center justify-center">
+                    {unreadChats > 9 ? "9+" : unreadChats}
+                  </span>
+                )}
               </NavLink>
               <NotificationsBell />
               <UserMenu />
