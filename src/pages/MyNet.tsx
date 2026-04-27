@@ -375,57 +375,19 @@ const MyNet = () => {
     );
   }
 
-  if (showPending) {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Nav />
-        <main className="pt-28 pb-24 relative min-h-[80vh]">
-          {/* Blurred backdrop */}
-          <div className="absolute inset-0 pointer-events-none select-none">
-            <div className="container py-12 blur-md opacity-60">
-              <div className="max-w-3xl mx-auto space-y-6">
-                <div className="h-32 rounded-sm bg-card border border-border" />
-                <div className="h-48 rounded-sm bg-card border border-border" />
-                <div className="h-32 rounded-sm bg-card border border-border" />
-              </div>
-            </div>
-          </div>
-
-          {/* Centered pending card */}
-          <div className="relative flex items-center justify-center min-h-[60vh] px-6">
-            <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-10 text-center">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-5">
-                <Hourglass className="h-5 w-5 text-gold" />
-              </div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-                Review pending
-              </p>
-              <h3 className="font-display text-3xl mb-3">Hold tight.</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                Your submission is in the queue. We&apos;ll review your resume
-                or LinkedIn shortly.
-              </p>
-              <button
-                onClick={() => setEditingPending(true)}
-                className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border hover:border-gold/40 bg-background/60 rounded-sm px-4 py-2.5 transition-colors"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Edit my submission
-              </button>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
 
       <main
-        className={`pt-28 pb-24 ${!isAuthed ? "pointer-events-none select-none blur-sm" : ""}`}
+        className={`pt-28 pb-24 ${
+          !isAuthed
+            ? "pointer-events-none select-none blur-sm"
+            : showPending
+              ? "pointer-events-none select-none blur-md"
+              : ""
+        }`}
       >
         <div className="container">
           {openProject && isAuthed ? (
@@ -769,6 +731,31 @@ const MyNet = () => {
       </main>
 
       {!loading && !user && <AuthGate />}
+
+      {showPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6 pt-28 pb-12">
+          <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-10 text-center">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-5">
+              <Hourglass className="h-5 w-5 text-gold" />
+            </div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+              Review pending
+            </p>
+            <h3 className="font-display text-3xl mb-3">Hold tight.</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+              Your submission is in the queue. We&apos;ll review your resume or
+              LinkedIn shortly.
+            </p>
+            <button
+              onClick={() => setEditingPending(true)}
+              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border hover:border-gold/40 bg-background/60 rounded-sm px-4 py-2.5 transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Edit my submission
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
 
