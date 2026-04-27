@@ -100,8 +100,17 @@ export type AppNotification = {
   title: string;
   body: string;
   link: string | null;
+  fromUserId: string | null;
   readAt: string | null;
   createdAt: string;
+};
+
+export type ChatContact = {
+  contactId: string;
+  fullName: string;
+  linkedinUrl: string;
+  avatarPath: string | null;
+  connectedAt: string;
 };
 
 export type PublicProject = {

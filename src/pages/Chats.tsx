@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Hourglass,
+  Briefcase,
+  Check,
+  ExternalLink,
   Inbox,
+  Linkedin,
   Loader2,
   MessageCircle,
   Sparkles,
@@ -11,12 +15,26 @@ import { toast } from "sonner";
 import { Nav } from "@/components/netstart/Nav";
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import {
+  acceptChatRequest,
+  getAvatarUrl,
+  listChatContacts,
   listNotifications,
   markNotificationsRead,
 } from "@/lib/mynet-storage";
-import type { AppNotification } from "@/lib/mynet-types";
+import type { AppNotification, ChatContact } from "@/lib/mynet-types";
+
+const initials = (name: string): string => {
+  if (!name.trim()) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+};
 
 const formatWhen = (iso: string): string => {
   try {
@@ -38,22 +56,52 @@ const formatWhen = (iso: string): string => {
 const Chats = () => {
   const { user, loading } = useAuth();
   const [items, setItems] = useState<AppNotification[]>([]);
+  const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
+
+  const refresh = async () => {
+    setLoadingData(true);
+    try {
+      const [list, c] = await Promise.all([
+        listNotifications(50),
+        listChatContacts().catch(() => [] as ChatContact[]),
+      ]);
+      setItems(list);
+      setContacts(c);
+      const unreadIds = list
+        .filter((n) => n.type === "chat_request" && !n.readAt)
+        .map((n) => n.id);
+      if (unreadIds.length > 0) {
+        markNotificationsRead(unreadIds).catch(() => {
+          /* swallow */
+        });
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load.");
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     setLoadingData(true);
-    listNotifications(50)
-      .then((list) => {
+    Promise.all([
+      listNotifications(50),
+      listChatContacts().catch(() => [] as ChatContact[]),
+    ])
+      .then(([list, c]) => {
         if (cancelled) return;
         setItems(list);
+        setContacts(c);
         const unreadIds = list
           .filter((n) => n.type === "chat_request" && !n.readAt)
           .map((n) => n.id);
         if (unreadIds.length > 0) {
           markNotificationsRead(unreadIds).catch(() => {
-            /* swallow; non-critical */
+            /* swallow */
           });
         }
       })
@@ -71,7 +119,28 @@ const Chats = () => {
   }, [user]);
 
   const isAuthed = Boolean(user) && !loading;
-  const requests = items.filter((n) => n.type === "chat_request");
+  // Hide chat requests from contacts we've already accepted, so the
+  // request doesn't linger after Accept.
+  const acceptedIds = new Set(contacts.map((c) => c.contactId));
+  const requests = items.filter(
+    (n) =>
+      n.type === "chat_request" &&
+      (n.fromUserId == null || !acceptedIds.has(n.fromUserId)),
+  );
+
+  const handleAccept = async (n: AppNotification) => {
+    if (acceptingId) return;
+    setAcceptingId(n.id);
+    try {
+      await acceptChatRequest(n.id);
+      toast.success("Chat accepted. They're now in your DMs.");
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not accept.");
+    } finally {
+      setAcceptingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -92,8 +161,8 @@ const Chats = () => {
               Conversations.
             </h1>
             <p className="text-muted-foreground max-w-xl">
-              Chat requests land here first. Once you both connect, the thread
-              moves into Active.
+              Chat requests land in Requests. Once you accept, they show up in
+              your DMs.
             </p>
           </header>
 
@@ -108,24 +177,13 @@ const Chats = () => {
             </div>
 
             {loadingData ? (
-              <div className="rounded-sm border border-border bg-card/40 p-8 text-center">
-                <Loader2 className="h-5 w-5 text-gold animate-spin mx-auto mb-3" />
-                <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                  Loading...
-                </p>
-              </div>
+              <Loading />
             ) : requests.length === 0 ? (
-              <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
-                <Inbox className="h-6 w-6 text-gold mx-auto mb-3" />
-                <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-2">
-                  Empty
-                </p>
-                <h3 className="font-display text-2xl mb-2">No requests yet.</h3>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  When a founder asks you to chat, or you ask one to look at
-                  your profile, it will show up here.
-                </p>
-              </div>
+              <Empty
+                icon={<Inbox className="h-6 w-6 text-gold mx-auto mb-3" />}
+                title="No requests yet."
+                body="When a founder asks you to chat, or you ask one to look at your profile, it will show up here."
+              />
             ) : (
               <ul className="space-y-3">
                 {requests.map((r) => (
@@ -147,10 +205,50 @@ const Chats = () => {
                           </span>
                         </div>
                         {r.body && (
-                          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line mb-4">
                             {r.body}
                           </p>
                         )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {r.fromUserId ? (
+                            <Link to={`/u/${r.fromUserId}`}>
+                              <Button variant="outlineGold" size="sm">
+                                <Briefcase className="h-4 w-4" />
+                                Check out their business
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Button
+                              variant="outlineGold"
+                              size="sm"
+                              disabled
+                              title="Sender info missing on this request"
+                            >
+                              <Briefcase className="h-4 w-4" />
+                              Check out their business
+                            </Button>
+                          )}
+                          <Button
+                            variant="gold"
+                            size="sm"
+                            onClick={() => handleAccept(r)}
+                            disabled={
+                              acceptingId === r.id || r.fromUserId == null
+                            }
+                          >
+                            {acceptingId === r.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Accepting...
+                              </>
+                            ) : (
+                              <>
+                                <Check className="h-4 w-4" />
+                                Accept chat
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </li>
@@ -161,21 +259,80 @@ const Chats = () => {
 
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-2xl">Active</h2>
+              <h2 className="font-display text-2xl">
+                DMs{" "}
+                <span className="text-muted-foreground">
+                  ({contacts.length})
+                </span>
+              </h2>
             </div>
-            <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
-              <Hourglass className="h-6 w-6 text-gold mx-auto mb-3" />
-              <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-2">
-                Coming soon
-              </p>
-              <h3 className="font-display text-2xl mb-2">
-                In-app messaging is on the way.
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                For now, accepted requests exchange contact info so you can
-                connect over LinkedIn or email.
-              </p>
-            </div>
+
+            {contacts.length === 0 ? (
+              <Empty
+                icon={
+                  <MessageCircle className="h-6 w-6 text-gold mx-auto mb-3" />
+                }
+                title="No contacts yet."
+                body="Accept a chat request and they'll show up here. In-app messaging is coming soon — for now, reach out via LinkedIn."
+              />
+            ) : (
+              <ul className="space-y-3">
+                {contacts.map((c) => {
+                  const avatar = getAvatarUrl(c.avatarPath);
+                  return (
+                    <li
+                      key={c.contactId}
+                      className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-5"
+                    >
+                      <div className="flex items-center gap-4">
+                        {avatar ? (
+                          <img
+                            src={avatar}
+                            alt={c.fullName}
+                            className="h-12 w-12 rounded-sm object-cover border border-gold/40 flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-sm bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
+                            <span className="font-display text-base text-gold">
+                              {initials(c.fullName)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-display text-lg leading-tight truncate">
+                            {c.fullName || "Unnamed"}
+                          </h3>
+                          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                            Connected {formatWhen(c.connectedAt)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Link to={`/u/${c.contactId}`}>
+                            <Button variant="ghost" size="sm">
+                              <Briefcase className="h-4 w-4" />
+                              View
+                            </Button>
+                          </Link>
+                          {c.linkedinUrl && (
+                            <a
+                              href={c.linkedinUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button variant="outlineGold" size="sm">
+                                <Linkedin className="h-4 w-4" />
+                                Message
+                                <ExternalLink className="h-3 w-3 opacity-60" />
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </section>
         </div>
       </main>
@@ -186,5 +343,33 @@ const Chats = () => {
     </div>
   );
 };
+
+const Loading = () => (
+  <div className="rounded-sm border border-border bg-card/40 p-8 text-center">
+    <Loader2 className="h-5 w-5 text-gold animate-spin mx-auto mb-3" />
+    <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+      Loading...
+    </p>
+  </div>
+);
+
+const Empty = ({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) => (
+  <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
+    {icon}
+    <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-2">
+      Empty
+    </p>
+    <h3 className="font-display text-2xl mb-2">{title}</h3>
+    <p className="text-sm text-muted-foreground max-w-md mx-auto">{body}</p>
+  </div>
+);
 
 export default Chats;

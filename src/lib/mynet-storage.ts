@@ -956,6 +956,7 @@ type NotificationRow = {
   title: string;
   body: string;
   link: string | null;
+  from_user_id: string | null;
   read_at: string | null;
   created_at: string;
 };
@@ -965,7 +966,7 @@ export const listNotifications = async (
 ): Promise<AppNotification[]> => {
   const { data, error } = await getSupabase()
     .from("notifications")
-    .select("id, type, title, body, link, read_at, created_at")
+    .select("id, type, title, body, link, from_user_id, read_at, created_at")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
@@ -975,8 +976,42 @@ export const listNotifications = async (
     title: r.title,
     body: r.body ?? "",
     link: r.link ?? null,
+    fromUserId: r.from_user_id ?? null,
     readAt: r.read_at ?? null,
     createdAt: r.created_at,
+  }));
+};
+
+// ---- Chat contacts ------------------------------------------------
+
+type ChatContactRow = {
+  contact_id: string;
+  full_name: string;
+  linkedin_url: string;
+  avatar_path: string | null;
+  connected_at: string;
+};
+
+export const acceptChatRequest = async (
+  notificationId: string,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("accept_chat_request", {
+    notification_id: notificationId,
+  });
+  if (error) throw error;
+};
+
+export const listChatContacts = async (): Promise<
+  import("@/lib/mynet-types").ChatContact[]
+> => {
+  const { data, error } = await getSupabase().rpc("list_chat_contacts");
+  if (error) throw error;
+  return ((data ?? []) as ChatContactRow[]).map((r) => ({
+    contactId: r.contact_id,
+    fullName: r.full_name ?? "",
+    linkedinUrl: r.linkedin_url ?? "",
+    avatarPath: r.avatar_path ?? null,
+    connectedAt: r.connected_at,
   }));
 };
 
