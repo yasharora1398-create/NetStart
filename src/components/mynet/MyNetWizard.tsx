@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Camera,
   Check,
   FileText,
   Hammer,
@@ -33,11 +34,13 @@ import {
 
 import {
   createProject,
+  getAvatarUrl,
   getResumePath,
   removeResume,
   setLinkedIn,
   submitProfile,
   updateCandidate,
+  uploadAvatar,
   uploadResume,
 } from "@/lib/mynet-storage";
 import {
@@ -98,6 +101,12 @@ export const MyNetWizard = ({
   const [pendingResume, setPendingResume] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Step 3 — profile picture (required, both modes)
+  const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
+  const existingAvatarUrl = getAvatarUrl(profile.avatarPath);
+
   // Step 3 — looking
   const [fullName, setFullName] = useState(profile.fullName);
   const [headline, setHeadline] = useState(profile.candidate.headline);
@@ -133,6 +142,26 @@ export const MyNetWizard = ({
     setPendingResume(file);
   };
 
+  const onAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_RESUME_BYTES) {
+      toast.error(`Image too large. Max ${formatBytes(MAX_RESUME_BYTES)}.`);
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Pick an image file.");
+      return;
+    }
+    setPendingAvatar(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") setAvatarPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleRemoveExistingResume = async () => {
     if (!profile.resume || working) return;
     setWorking(true);
@@ -154,20 +183,24 @@ export const MyNetWizard = ({
       profile.resume,
   );
 
+  const hasAvatar = Boolean(pendingAvatar || profile.avatarPath);
+
   const lookingValid =
     fullName.trim() !== "" &&
     headline.trim() !== "" &&
     bio.trim().length >= CANDIDATE_BIO_MIN &&
     lookingSkills.length >= CANDIDATE_SKILLS_MIN &&
     lookingLocation.trim() !== "" &&
-    lookingCommitment.trim() !== "";
+    lookingCommitment.trim() !== "" &&
+    hasAvatar;
 
   const buildingValid =
     projectTitle.trim().length >= 2 &&
     projectDesc.trim() !== "" &&
     projectSkills.length >= 1 &&
     projectCommitment.trim() !== "" &&
-    projectLocation.trim() !== "";
+    projectLocation.trim() !== "" &&
+    hasAvatar;
 
   const goCredentials = async () => {
     if (linkedin.trim() && !isValidLinkedIn(linkedin)) {
@@ -204,6 +237,11 @@ export const MyNetWizard = ({
     }
     setWorking(true);
     try {
+      if (pendingAvatar) {
+        await uploadAvatar(uid, pendingAvatar, profile.avatarPath);
+        setPendingAvatar(null);
+        setAvatarPreview(null);
+      }
       await updateCandidate(
         uid,
         {
@@ -234,6 +272,11 @@ export const MyNetWizard = ({
     }
     setWorking(true);
     try {
+      if (pendingAvatar) {
+        await uploadAvatar(uid, pendingAvatar, profile.avatarPath);
+        setPendingAvatar(null);
+        setAvatarPreview(null);
+      }
       await createProject(uid, {
         title: projectTitle.trim(),
         description: projectDesc.trim(),
@@ -379,6 +422,15 @@ export const MyNetWizard = ({
           onBack={() => setStage("mode")}
         >
           <div className="space-y-6 mb-10">
+            <AvatarField
+              required
+              previewUrl={avatarPreview ?? existingAvatarUrl}
+              hasFile={Boolean(pendingAvatar || profile.avatarPath)}
+              onPick={() => avatarRef.current?.click()}
+              fileRef={avatarRef}
+              onChange={onAvatarChange}
+            />
+
             <div className="grid md:grid-cols-2 gap-6">
               <Field label="Full name" required>
                 <Input
@@ -481,6 +533,15 @@ export const MyNetWizard = ({
           onBack={() => setStage("mode")}
         >
           <div className="space-y-6 mb-10">
+            <AvatarField
+              required
+              previewUrl={avatarPreview ?? existingAvatarUrl}
+              hasFile={Boolean(pendingAvatar || profile.avatarPath)}
+              onPick={() => avatarRef.current?.click()}
+              fileRef={avatarRef}
+              onChange={onAvatarChange}
+            />
+
             <Field label="Project name" required>
               <Input
                 value={projectTitle}
@@ -758,6 +819,67 @@ const Field = ({
     {hint && (
       <p className="text-[11px] text-muted-foreground mt-2">{hint}</p>
     )}
+  </div>
+);
+
+const AvatarField = ({
+  required,
+  previewUrl,
+  hasFile,
+  onPick,
+  fileRef,
+  onChange,
+}: {
+  required?: boolean;
+  previewUrl: string | null;
+  hasFile: boolean;
+  onPick: () => void;
+  fileRef: React.RefObject<HTMLInputElement>;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div>
+    <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
+      <Camera className="h-3.5 w-3.5 text-gold" />
+      Profile picture
+      {required && <span className="text-gold">*</span>}
+    </Label>
+    <div className="flex items-center gap-4">
+      <button
+        type="button"
+        onClick={onPick}
+        aria-label="Upload profile picture"
+        className="h-24 w-24 rounded-sm border-2 border-dashed border-border hover:border-gold/60 transition-colors bg-background overflow-hidden flex items-center justify-center flex-shrink-0"
+      >
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt="Profile preview"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Camera className="h-6 w-6 text-muted-foreground" />
+        )}
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm mb-1">
+          {hasFile ? "Looking sharp." : "Add a clear, professional headshot."}
+        </p>
+        <p className="text-[11px] text-muted-foreground mb-3">
+          PNG or JPG, max 4 MB. This shows on your Match card.
+        </p>
+        <Button variant="outlineGold" size="sm" onClick={onPick}>
+          <Upload className="h-4 w-4" />
+          {hasFile ? "Replace photo" : "Upload photo"}
+        </Button>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/png,image/jpeg,image/jpg,image/webp"
+        onChange={onChange}
+        className="sr-only"
+      />
+    </div>
   </div>
 );
 

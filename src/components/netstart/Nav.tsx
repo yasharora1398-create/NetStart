@@ -77,6 +77,19 @@ export const Nav = () => {
       >
         Talent
       </NavLink>
+      {user && (
+        <NavLink
+          to="/match"
+          onClick={closeMobile}
+          className={({ isActive }) =>
+            `transition-colors ${
+              isActive ? "text-gold" : "hover:text-foreground"
+            }`
+          }
+        >
+          Match
+        </NavLink>
+      )}
       {user && isAdmin && (
         <NavLink
           to="/admin"
