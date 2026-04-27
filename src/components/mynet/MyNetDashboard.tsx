@@ -86,6 +86,7 @@ export const MyNetDashboard = ({
     profile.candidate.headline.trim() !== "" ||
     profile.candidate.bio.trim() !== "" ||
     profile.candidate.skills.length > 0;
+  const hasProjects = projects.length > 0;
 
   return (
     <>
@@ -116,116 +117,108 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
-      {/* LOOKING — always visible */}
-      <Section
-        title="How operators find you"
-        eyebrow="02"
-        icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
-      >
-        {editing ? (
-          <CandidateCard
-            profile={profile}
-            onSave={onSaveCandidate}
-            onToggleOpenToWork={onToggleOpenToWork}
-            onUploadAvatar={onUploadAvatar}
-            onRemoveAvatar={onRemoveAvatar}
-          />
-        ) : hasCandidate ? (
-          <CandidateDisplay profile={profile} />
-        ) : (
-          <EmptyPlaceholder
-            label="Not set up"
-            title="Tell operators how to find you."
-            body="Add a headline, a short pitch, and the skills you bring. Then flip Open to work and you'll show up in Find People."
-            cta="Set up your candidate profile"
-            onClick={() => setEditing(true)}
-          />
-        )}
+      {/* LOOKING — only if they signed up as a looker */}
+      {hasCandidate && (
+        <Section
+          title="How operators find you"
+          eyebrow="02"
+          icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
+        >
+          {editing ? (
+            <CandidateCard
+              profile={profile}
+              onSave={onSaveCandidate}
+              onToggleOpenToWork={onToggleOpenToWork}
+              onUploadAvatar={onUploadAvatar}
+              onRemoveAvatar={onRemoveAvatar}
+            />
+          ) : (
+            <CandidateDisplay profile={profile} />
+          )}
 
-        {!editing && profile.candidate.isOpenToWork && (
-          <Link
-            to="/talent"
-            className="mt-6 block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
-                  Find projects
-                </p>
-                <h3 className="font-display text-2xl mb-1">
-                  Browse open projects
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Ranked against your profile.
-                </p>
+          {!editing && profile.candidate.isOpenToWork && (
+            <Link
+              to="/talent"
+              className="mt-6 block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
+                    Find projects
+                  </p>
+                  <h3 className="font-display text-2xl mb-1">
+                    Browse open projects
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Ranked against your profile.
+                  </p>
+                </div>
+                <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />
               </div>
-              <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            </Link>
+          )}
+        </Section>
+      )}
+
+      {/* BUILDING — only if they have projects */}
+      {hasProjects && (
+        <Section
+          title="What you're building"
+          eyebrow="03"
+          icon={<Hammer className="h-3.5 w-3.5 text-gold" />}
+          action={
+            editing ? (
+              <Button variant="gold" size="lg" onClick={onNewProject}>
+                <Plus className="h-4 w-4" />
+                New project
+              </Button>
+            ) : null
+          }
+        >
+          {editing ? (
+            <div className="grid md:grid-cols-2 gap-4">
+              {projects.map((p) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  onOpen={() => onOpenProject(p.id)}
+                  onEdit={() => onEditProject(p)}
+                  onDelete={() => onDeleteProject(p)}
+                  onFindPeople={() => onFindPeople(p.id)}
+                  onTogglePublish={() => onTogglePublish(p)}
+                />
+              ))}
             </div>
-          </Link>
-        )}
-      </Section>
+          ) : (
+            <ProjectsDisplay
+              projects={projects}
+              onOpen={onOpenProject}
+              onFindPeople={onFindPeople}
+            />
+          )}
+        </Section>
+      )}
 
-      {/* BUILDING — always visible */}
-      <Section
-        title="What you're building"
-        eyebrow="03"
-        icon={<Hammer className="h-3.5 w-3.5 text-gold" />}
-        action={
-          editing && projects.length > 0 ? (
-            <Button variant="gold" size="lg" onClick={onNewProject}>
-              <Plus className="h-4 w-4" />
-              New project
-            </Button>
-          ) : null
-        }
-      >
-        {projects.length === 0 ? (
-          <EmptyPlaceholder
-            label="No projects"
-            title="Spin up your first project."
-            body="A project is what you're building plus the kind of person you want next to you. Once it's set up, run Find People."
-            cta="Create your first project"
-            onClick={onNewProject}
-          />
-        ) : editing ? (
-          <div className="grid md:grid-cols-2 gap-4">
-            {projects.map((p) => (
-              <ProjectCard
-                key={p.id}
-                project={p}
-                onOpen={() => onOpenProject(p.id)}
-                onEdit={() => onEditProject(p)}
-                onDelete={() => onDeleteProject(p)}
-                onFindPeople={() => onFindPeople(p.id)}
-                onTogglePublish={() => onTogglePublish(p)}
-              />
-            ))}
-          </div>
-        ) : (
-          <ProjectsDisplay
-            projects={projects}
-            onOpen={onOpenProject}
-            onFindPeople={onFindPeople}
-          />
-        )}
-      </Section>
+      {/* APPLICATIONS */}
+      {hasCandidate && (
+        <Section
+          title="My applications"
+          eyebrow="04"
+          icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
+        >
+          <ApplicationsPanel ownedProjects={projects} mode="sent" />
+        </Section>
+      )}
 
-      {/* APPLICATIONS — both panels, always visible */}
-      <Section
-        title="My applications"
-        eyebrow="04"
-        icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
-      >
-        <ApplicationsPanel ownedProjects={projects} mode="sent" />
-      </Section>
-
-      <Section
-        title="Applications received"
-        eyebrow="05"
-        icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
-      >
-        <ApplicationsPanel ownedProjects={projects} mode="received" />
-      </Section>
+      {hasProjects && (
+        <Section
+          title="Applications received"
+          eyebrow={hasCandidate ? "05" : "04"}
+          icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
+        >
+          <ApplicationsPanel ownedProjects={projects} mode="received" />
+        </Section>
+      )}
 
       {/* EDIT / DONE TOGGLE */}
       <div className="flex justify-end pt-8 mt-8 border-t border-border">
@@ -254,34 +247,6 @@ export const MyNetDashboard = ({
 };
 
 // ===== Display sub-components =====
-
-const EmptyPlaceholder = ({
-  label,
-  title,
-  body,
-  cta,
-  onClick,
-}: {
-  label: string;
-  title: string;
-  body: string;
-  cta: string;
-  onClick: () => void;
-}) => (
-  <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
-    <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-3">
-      {label}
-    </p>
-    <h3 className="font-display text-2xl mb-3">{title}</h3>
-    <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-      {body}
-    </p>
-    <Button variant="gold" size="lg" onClick={onClick}>
-      <Pencil className="h-4 w-4" />
-      {cta}
-    </Button>
-  </div>
-);
 
 const Section = ({
   title,
