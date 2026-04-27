@@ -740,8 +740,8 @@ const MyNet = () => {
       {!loading && !user && <AuthGate />}
 
       {showPending && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-6 pt-28 pb-12">
-          <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-10 text-center">
+        <div className="fixed inset-0 z-40 flex items-center justify-center px-6 pt-28 pb-12 pointer-events-none">
+          <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-10 text-center pointer-events-auto">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-5">
               <Hourglass className="h-5 w-5 text-gold" />
             </div>
