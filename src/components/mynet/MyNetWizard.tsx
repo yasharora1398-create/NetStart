@@ -60,6 +60,7 @@ type Props = {
   uid: string;
   profile: Profile;
   onProfileRefresh: () => void | Promise<void>;
+  onSubmitComplete?: () => void;
 };
 
 const isValidLinkedIn = (url: string): boolean => {
@@ -80,7 +81,12 @@ const formatBytes = (bytes: number): string => {
 const errMsg = (e: unknown): string =>
   e instanceof Error ? e.message : "Something went wrong.";
 
-export const MyNetWizard = ({ uid, profile, onProfileRefresh }: Props) => {
+export const MyNetWizard = ({
+  uid,
+  profile,
+  onProfileRefresh,
+  onSubmitComplete,
+}: Props) => {
   // Rejected users start at credentials so they can update and resubmit.
   const [stage, setStage] = useState<Stage>(
     profile.reviewStatus === "rejected" ? "credentials" : "intro",
@@ -197,6 +203,7 @@ export const MyNetWizard = ({ uid, profile, onProfileRefresh }: Props) => {
       await submitProfile();
       await onProfileRefresh();
       toast.success("Submitted for review.");
+      onSubmitComplete?.();
     } catch (err) {
       toast.error(errMsg(err));
     } finally {
@@ -224,6 +231,7 @@ export const MyNetWizard = ({ uid, profile, onProfileRefresh }: Props) => {
       await submitProfile();
       await onProfileRefresh();
       toast.success("Submitted for review.");
+      onSubmitComplete?.();
     } catch (err) {
       toast.error(errMsg(err));
     } finally {

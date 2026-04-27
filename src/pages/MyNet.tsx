@@ -97,6 +97,7 @@ const MyNet = () => {
     | { mode: "edit"; project: Project }
   >({ mode: "closed" });
   const [findForId, setFindForId] = useState<string | null>(null);
+  const [editingPending, setEditingPending] = useState(false);
 
   const refreshAll = async () => {
     if (!uid) return;
@@ -351,8 +352,11 @@ const MyNet = () => {
   // fall through to the existing dashboard render below.
   const showWizard =
     isAuthed &&
-    (profile.reviewStatus === "draft" || profile.reviewStatus === "rejected");
-  const showPending = isAuthed && profile.reviewStatus === "pending";
+    (profile.reviewStatus === "draft" ||
+      profile.reviewStatus === "rejected" ||
+      (profile.reviewStatus === "pending" && editingPending));
+  const showPending =
+    isAuthed && profile.reviewStatus === "pending" && !editingPending;
 
   if (showWizard && uid) {
     return (
@@ -363,6 +367,7 @@ const MyNet = () => {
             uid={uid}
             profile={profile}
             onProfileRefresh={refreshAll}
+            onSubmitComplete={() => setEditingPending(false)}
           />
         </main>
         <Footer />
@@ -396,10 +401,17 @@ const MyNet = () => {
                 Review pending
               </p>
               <h3 className="font-display text-3xl mb-3">Hold tight.</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                 Your submission is in the queue. We&apos;ll review your resume
                 or LinkedIn shortly.
               </p>
+              <button
+                onClick={() => setEditingPending(true)}
+                className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border hover:border-gold/40 bg-background/60 rounded-sm px-4 py-2.5 transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Edit my submission
+              </button>
             </div>
           </div>
         </main>
