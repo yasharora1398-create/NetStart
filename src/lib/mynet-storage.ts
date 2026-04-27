@@ -964,13 +964,40 @@ type NotificationRow = {
 export const listNotifications = async (
   limit = 30,
 ): Promise<AppNotification[]> => {
-  const { data, error } = await getSupabase()
-    .from("notifications")
-    .select("id, type, title, body, link, from_user_id, read_at, created_at")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return ((data ?? []) as NotificationRow[]).map((r) => ({
+  const supabase = getSupabase();
+
+  // Try the new schema first (with from_user_id from migration 0011).
+  let rows: NotificationRow[] | null = null;
+  let useFromUserId = true;
+  {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id, type, title, body, link, from_user_id, read_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) {
+      // Migration 0011 hasn't been applied yet — fall back to the
+      // pre-migration schema so the page still loads.
+      useFromUserId = false;
+    } else {
+      rows = (data ?? []) as NotificationRow[];
+    }
+  }
+
+  if (!useFromUserId) {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id, type, title, body, link, read_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    rows = (data ?? []).map((r) => ({
+      ...(r as Omit<NotificationRow, "from_user_id">),
+      from_user_id: null,
+    })) as NotificationRow[];
+  }
+
+  return (rows ?? []).map((r) => ({
     id: r.id,
     type: r.type,
     title: r.title,

@@ -44,6 +44,7 @@ import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
 import {
   getAvatarUrl,
   getProfile,
+  getResumeSignedUrl,
   listMyApplications,
   listOpenCandidates,
   listProjects,
@@ -381,11 +382,28 @@ const CandidateDetailDialog = ({
   const [saved, setSaved] = useState(false);
   const [chatRequested, setChatRequested] = useState(false);
   const [working, setWorking] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeError, setResumeError] = useState<string | null>(null);
 
   useEffect(() => {
     setSaved(false);
     setChatRequested(false);
-  }, [candidate?.userId]);
+    setResumeUrl(null);
+    setResumeError(null);
+    const path = candidate?.resumePath;
+    if (!path) return;
+    let cancelled = false;
+    getResumeSignedUrl(path)
+      .then((url) => {
+        if (!cancelled) setResumeUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setResumeError("Resume not accessible yet.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [candidate?.userId, candidate?.resumePath]);
 
   if (!candidate) {
     return (
@@ -498,10 +516,37 @@ const CandidateDetailDialog = ({
                   <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
                     Resume
                   </p>
-                  <div className="inline-flex items-center gap-2 text-sm">
-                    <FileText className="h-4 w-4 text-gold" />
-                    <span className="truncate">{candidate.resumeName}</span>
-                  </div>
+                  {resumeUrl ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={resumeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span className="truncate max-w-[260px]">
+                          {candidate.resumeName}
+                        </span>
+                        <ExternalLink className="h-3 w-3 opacity-60" />
+                      </a>
+                      <a
+                        href={resumeUrl}
+                        download={candidate.resumeName}
+                        className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Download
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4 text-gold" />
+                      <span className="truncate">{candidate.resumeName}</span>
+                      <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground/70">
+                        {resumeError ? "· not accessible" : "· loading..."}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </section>
