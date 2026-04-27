@@ -29,6 +29,7 @@ import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 import { OnboardingChecklist } from "@/components/mynet/OnboardingChecklist";
+import { MyNetWizard } from "@/components/mynet/MyNetWizard";
 
 import {
   createProject,
@@ -96,6 +97,17 @@ const MyNet = () => {
     | { mode: "edit"; project: Project }
   >({ mode: "closed" });
   const [findForId, setFindForId] = useState<string | null>(null);
+
+  const refreshAll = async () => {
+    if (!uid) return;
+    try {
+      const [p, pr] = await Promise.all([getProfile(uid), listProjects(uid)]);
+      setProfile(p);
+      setProjects(pr);
+    } catch (err) {
+      toast.error(errorMessage(err));
+    }
+  };
 
   useEffect(() => {
     if (!uid) {
@@ -331,6 +343,70 @@ const MyNet = () => {
   const isAuthed = Boolean(user) && !loading;
   const displayProjects = isAuthed ? projects : SAMPLE_PROJECTS;
   const displayProfile = isAuthed ? profile : emptyProfile();
+
+  // Pre-acceptance flow: show the step-by-step wizard or the pending screen.
+  // Authed users with status draft/rejected go through the wizard.
+  // Authed users with status pending see the "hold tight" overlay.
+  // Authed users with status accepted (and unauthed users seeing the preview)
+  // fall through to the existing dashboard render below.
+  const showWizard =
+    isAuthed &&
+    (profile.reviewStatus === "draft" || profile.reviewStatus === "rejected");
+  const showPending = isAuthed && profile.reviewStatus === "pending";
+
+  if (showWizard && uid) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Nav />
+        <main className="pt-28 pb-24">
+          <MyNetWizard
+            uid={uid}
+            profile={profile}
+            onProfileRefresh={refreshAll}
+          />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (showPending) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Nav />
+        <main className="pt-28 pb-24 relative min-h-[80vh]">
+          {/* Blurred backdrop */}
+          <div className="absolute inset-0 pointer-events-none select-none">
+            <div className="container py-12 blur-md opacity-60">
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div className="h-32 rounded-sm bg-card border border-border" />
+                <div className="h-48 rounded-sm bg-card border border-border" />
+                <div className="h-32 rounded-sm bg-card border border-border" />
+              </div>
+            </div>
+          </div>
+
+          {/* Centered pending card */}
+          <div className="relative flex items-center justify-center min-h-[60vh] px-6">
+            <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-10 text-center">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-5">
+                <Hourglass className="h-5 w-5 text-gold" />
+              </div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+                Review pending
+              </p>
+              <h3 className="font-display text-3xl mb-3">Hold tight.</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Your submission is in the queue. We&apos;ll review your resume
+                or LinkedIn shortly.
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
