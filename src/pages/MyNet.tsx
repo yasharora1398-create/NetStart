@@ -28,8 +28,8 @@ import { ProjectDialog } from "@/components/mynet/ProjectDialog";
 import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
-import { OnboardingChecklist } from "@/components/mynet/OnboardingChecklist";
 import { MyNetWizard } from "@/components/mynet/MyNetWizard";
+import { MyNetDashboard } from "@/components/mynet/MyNetDashboard";
 
 import {
   createProject,
@@ -457,6 +457,22 @@ const MyNet = () => {
                 />
               </div>
             </>
+          ) : isAuthed && profile.reviewStatus === "accepted" ? (
+            <MyNetDashboard
+              profile={profile}
+              projects={projects}
+              onSubmitProfile={handleSubmitProfile}
+              onSaveCandidate={handleSaveCandidate}
+              onToggleOpenToWork={handleToggleOpenToWork}
+              onUploadAvatar={handleUploadAvatar}
+              onRemoveAvatar={handleRemoveAvatar}
+              onNewProject={() => setDialogState({ mode: "new" })}
+              onOpenProject={(id) => setOpenProjectId(id)}
+              onEditProject={(p) => setDialogState({ mode: "edit", project: p })}
+              onDeleteProject={handleDeleteProject}
+              onFindPeople={(id) => setFindForId(id)}
+              onTogglePublish={handleTogglePublish}
+            />
           ) : (
             <>
               <header className="mb-12">
@@ -475,15 +491,6 @@ const MyNet = () => {
                   operators worth talking to.
                 </p>
               </header>
-
-              {isAuthed && (
-                <section className="mb-8">
-                  <OnboardingChecklist
-                    profile={displayProfile}
-                    projects={projects}
-                  />
-                </section>
-              )}
 
               <section className="mb-12">
                 <ProfileCard
