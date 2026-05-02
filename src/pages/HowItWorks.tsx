@@ -84,7 +84,7 @@ const HowItWorks = () => (
       className="transition-[padding] duration-300"
       style={{ paddingLeft: "var(--sidebar-width, 248px)" }}
     >
-      <div className="max-w-4xl mx-auto px-6 md:px-10 py-20 md:py-28">
+      <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
         <Reveal>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
             How it works

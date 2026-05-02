@@ -18,7 +18,7 @@ const Index = () => {
       >
         <div className="max-w-5xl mx-auto px-6 md:px-10 min-h-screen flex flex-col">
           {/* HERO */}
-          <section className="flex-1 flex flex-col justify-center pt-20 pb-12">
+          <section className="flex-1 flex flex-col justify-center pt-6 pb-12 md:pt-10">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
               netstart / for builders
             </p>
