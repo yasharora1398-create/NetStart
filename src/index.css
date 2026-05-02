@@ -113,9 +113,13 @@
 
   /* Real frosted glass with a top edge highlight, soft outer glow,
      and a scroll-reactive specular reflection that runs down the
-     surface as the page scrolls. Drop into any container.  */
+     surface as the page scrolls. Drop into any container.
+     Note: don't set `position` here — it would override `fixed` /
+     `absolute` etc. set via Tailwind utilities on the same element.
+     The pseudo-elements still position correctly relative to a
+     positioned ancestor, which any consumer of this class will
+     have.  */
   .glass {
-    position: relative;
     background: rgba(255, 255, 255, 0.035);
     backdrop-filter: blur(28px) saturate(180%) brightness(108%);
     -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(108%);
