@@ -4,6 +4,10 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
+  Compass,
+  Download,
+  Layers,
+  LogIn,
   LogOut,
   MessageCircle,
   Search,
@@ -117,24 +121,60 @@ export const Sidebar = () => {
 
       {/* Nav items */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {!user ? (
-          <NavItem
-            to="/signin"
-            label="Sign in"
-            Icon={User}
-            collapsed={collapsed}
-          />
-        ) : (
-          items.map((item) => (
+        {/* Marketing anchors — always visible for any visitor */}
+        <SidebarSectionLabel collapsed={collapsed}>About</SidebarSectionLabel>
+        <AnchorItem
+          hash="how"
+          label="How it works"
+          Icon={Compass}
+          collapsed={collapsed}
+        />
+        <AnchorItem
+          hash="standards"
+          label="Standards"
+          Icon={Layers}
+          collapsed={collapsed}
+        />
+        <AnchorItem
+          hash="download"
+          label="Download"
+          Icon={Download}
+          collapsed={collapsed}
+        />
+
+        {/* Authed app pages */}
+        {user && (
+          <>
+            <div className="h-px bg-border my-3 mx-2" />
+            <SidebarSectionLabel collapsed={collapsed}>App</SidebarSectionLabel>
+            {items.map((item) => (
+              <NavItem
+                key={item.to}
+                to={item.to}
+                label={item.label}
+                Icon={item.icon}
+                collapsed={collapsed}
+                badge={item.badge}
+              />
+            ))}
+          </>
+        )}
+        {!user && (
+          <>
+            <div className="h-px bg-border my-3 mx-2" />
             <NavItem
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              Icon={item.icon}
+              to="/signin"
+              label="Sign in"
+              Icon={LogIn}
               collapsed={collapsed}
-              badge={item.badge}
             />
-          ))
+            <NavItem
+              to="/signup"
+              label="Sign up"
+              Icon={User}
+              collapsed={collapsed}
+            />
+          </>
         )}
       </nav>
 
@@ -169,6 +209,54 @@ export const Sidebar = () => {
         </div>
       )}
     </aside>
+  );
+};
+
+const SidebarSectionLabel = ({
+  children,
+  collapsed,
+}: {
+  children: React.ReactNode;
+  collapsed: boolean;
+}) => {
+  if (collapsed) return null;
+  return (
+    <p className="px-3 mt-2 mb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/60">
+      {children}
+    </p>
+  );
+};
+
+const AnchorItem = ({
+  hash,
+  label,
+  Icon,
+  collapsed,
+}: {
+  hash: string;
+  label: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  collapsed: boolean;
+}) => {
+  const location = useLocation();
+  const onLanding = location.pathname === "/";
+  const handleClick = (e: React.MouseEvent) => {
+    if (!onLanding) return;
+    e.preventDefault();
+    document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+  };
+  return (
+    <a
+      href={onLanding ? `#${hash}` : `/#${hash}`}
+      onClick={handleClick}
+      title={collapsed ? label : undefined}
+      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-sm border border-transparent text-muted-foreground hover:text-foreground hover:bg-card transition-colors ${
+        collapsed ? "justify-center" : ""
+      }`}
+    >
+      <Icon className="h-4 w-4 flex-shrink-0" />
+      {!collapsed && <span className="text-sm flex-1">{label}</span>}
+    </a>
   );
 };
 
