@@ -158,7 +158,7 @@
         rgba(180, 230, 255, 0.20),
         rgba(80, 180, 255, 0.10)
       )
-      0 0 / 250% 18px no-repeat,
+      0 0 / 250% 1px no-repeat,
 
       /* BOTTOM edge — cooler palette, 14px tall, 250% wide */
       linear-gradient(
@@ -169,7 +169,7 @@
         rgba(180, 220, 255, 0.10),
         rgba(255, 200, 170, 0.06)
       )
-      0 100% / 250% 14px no-repeat,
+      0 100% / 250% 1px no-repeat,
 
       /* LEFT edge — subtle vertical highlight */
       linear-gradient(
@@ -178,7 +178,7 @@
         rgba(255, 255, 255, 0.04),
         rgba(255, 200, 220, 0.04)
       )
-      0 0 / 12px 100% no-repeat,
+      0 0 / 1px 100% no-repeat,
 
       /* RIGHT edge */
       linear-gradient(
@@ -187,7 +187,7 @@
         rgba(255, 255, 255, 0.04),
         rgba(180, 220, 255, 0.04)
       )
-      100% 0 / 12px 100% no-repeat;
+      100% 0 / 1px 100% no-repeat;
 
     /* Pan the top rainbow LEFT and the bottom rainbow RIGHT as
        --scroll-progress goes 0..1, so they appear to flow in
