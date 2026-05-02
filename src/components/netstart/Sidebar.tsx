@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   Bell,
@@ -34,42 +34,8 @@ export const Sidebar = () => {
   const { collapsed, setCollapsed } = useSidebar();
   const [unreadChats, setUnreadChats] = useState(0);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
-  const asideRef = useRef<HTMLElement>(null);
-
-  // Sidebar position is static — only the frosted-glass reflection
-  // moves. The blue specular highlight sweeps top-to-bottom with page
-  // scroll and tracks the mouse horizontally on hover.
-  useEffect(() => {
-    const el = asideRef.current;
-    if (!el) return;
-    let raf = 0;
-    const apply = () => {
-      raf = 0;
-      const docMax = Math.max(
-        1,
-        document.documentElement.scrollHeight - window.innerHeight,
-      );
-      const t = Math.min(1, Math.max(0, window.scrollY / docMax));
-      el.style.setProperty("--reflect-y", `${-10 + t * 120}%`);
-    };
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(apply);
-    };
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width) * 100;
-      el.style.setProperty("--reflect-x", `${Math.max(0, Math.min(100, x))}%`);
-    };
-    apply();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    el.addEventListener("mousemove", onMove);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      el.removeEventListener("mousemove", onMove);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
+  // Sidebar is fully static. Edge reflections are baked into .glass
+  // via CSS, no JS-driven highlights.
 
   useEffect(() => {
     if (!user) {
@@ -124,7 +90,6 @@ export const Sidebar = () => {
 
   return (
     <aside
-      ref={asideRef}
       className={`fixed left-3 top-3 bottom-3 z-40 glass rounded-2xl flex flex-col transition-[width] duration-300 ${
         collapsed ? "w-14" : "w-56"
       }`}
