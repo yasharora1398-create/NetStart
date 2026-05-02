@@ -7,24 +7,24 @@ import { useAuth } from "@/context/AuthContext";
 const PRINCIPLES = [
   {
     title: "Vetted, not viral.",
-    body: "Every member is reviewed for shipped work, references, and execution signal. No growth-hacked accounts.",
+    body: "Members are reviewed for shipped work and execution.",
   },
   {
     title: "Skill, not surface.",
-    body: "Matching prioritizes complementary capability over background, school, or city.",
+    body: "Matched on capability, not background or city.",
   },
   {
     title: "Decisive by design.",
-    body: "Connect, pass, or save. No likes, no maybes. Your time is the asset we protect.",
+    body: "Connect, pass, or save. No likes. No maybes.",
   },
 ];
 
 const STEPS = [
-  { n: "01", title: "Create your account", body: "Sign up and choose your path: Builder or Visionary." },
-  { n: "02", title: "Add your credentials", body: "Link your LinkedIn, upload your resume, or both." },
-  { n: "03", title: "Get verified", body: "A short vetting process to confirm shipped work." },
-  { n: "04", title: "Discover matches", body: "Browse curated profiles. Connect, pass, or save." },
-  { n: "05", title: "Connect and build", body: "Match with people who fit, then ship." },
+  { n: "01", title: "Sign up", body: "Builder or Visionary." },
+  { n: "02", title: "Add credentials", body: "LinkedIn, resume, or both." },
+  { n: "03", title: "Get verified", body: "Quick vet for shipped work." },
+  { n: "04", title: "Match", body: "Browse profiles. Connect or pass." },
+  { n: "05", title: "Build", body: "Align fast. Ship together." },
 ];
 
 const Index = () => {
@@ -40,74 +40,67 @@ const Index = () => {
         className="transition-[padding] duration-300"
         style={{ paddingLeft: "var(--sidebar-width, 240px)" }}
       >
-        {/* HERO */}
-        <section className="border-b border-border">
-          <div className="max-w-5xl mx-auto px-6 md:px-12 py-24 md:py-40">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-8">
+        <div className="max-w-5xl mx-auto px-6 md:px-10">
+          {/* HERO */}
+          <section className="pt-20 pb-16 md:pt-28 md:pb-20">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
               NetStart · for builders
             </p>
-            <h1 className="font-display text-5xl md:text-7xl lg:text-[6.5rem] leading-[0.95] tracking-tight mb-8">
+            <h1 className="font-display text-5xl md:text-7xl lg:text-[5.75rem] leading-[0.95] tracking-tight mb-5">
               The mobile app for people who actually build.
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-12 leading-relaxed">
-              A network for founders and operators who ship. Decisive matching.
-              Verified execution. In your pocket.
+            <p className="text-base md:text-lg text-muted-foreground max-w-xl mb-8 leading-relaxed">
+              A network for founders and operators who ship. Verified. Decisive.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 mb-10">
               {user ? (
                 <Link to="/mynet">
-                  <Button variant="default" size="xl" className="bg-blue-500 hover:bg-blue-400 text-white">
+                  <GlassButton primary>
                     Open MyNet
                     <ArrowRight className="h-4 w-4" />
-                  </Button>
+                  </GlassButton>
                 </Link>
               ) : (
                 <>
                   <Link to="/signup">
-                    <Button variant="default" size="xl" className="bg-blue-500 hover:bg-blue-400 text-white">
+                    <GlassButton primary>
                       Sign up
                       <ArrowRight className="h-4 w-4" />
-                    </Button>
+                    </GlassButton>
                   </Link>
                   <Link to="/signin">
-                    <Button variant="ghost" size="xl">
-                      Sign in
-                    </Button>
+                    <GlassButton>Sign in</GlassButton>
                   </Link>
                 </>
               )}
             </div>
-            <div className="mt-16 flex flex-wrap gap-x-12 gap-y-3 text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="flex flex-wrap gap-x-10 gap-y-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
               <span>
-                <span className="text-foreground">2,840</span> verified builders
+                <span className="text-foreground">2,840</span> verified
               </span>
               <span>
                 <span className="text-foreground">312</span> companies started
               </span>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* STANDARDS */}
-        <section id="standards" className="border-b border-border">
-          <div className="max-w-5xl mx-auto px-6 md:px-12 py-24 md:py-32">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-6">
-              Standards
-            </p>
-            <h2 className="font-display text-4xl md:text-6xl tracking-tight mb-16">
-              What we believe.
-            </h2>
-
-            <div className="grid md:grid-cols-3 gap-px bg-border">
+          {/* STANDARDS */}
+          <section id="standards" className="py-12 md:py-16">
+            <div className="flex items-baseline justify-between mb-6">
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400">
+                Standards
+              </p>
+              <h2 className="font-display text-2xl md:text-4xl tracking-tight">
+                What we believe.
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-3">
               {PRINCIPLES.map((p, i) => (
-                <div
-                  key={p.title}
-                  className="bg-background p-8 md:p-10 hover:bg-card transition-colors"
-                >
-                  <div className="font-mono text-sm text-blue-400 mb-6 tracking-[0.25em]">
+                <div key={p.title} className={GLASS_CARD}>
+                  <div className="font-mono text-xs text-blue-400 mb-3 tracking-[0.25em]">
                     0{i + 1}
                   </div>
-                  <h3 className="font-display text-2xl md:text-3xl mb-4 tracking-tight">
+                  <h3 className="font-display text-xl md:text-2xl mb-2 tracking-tight">
                     {p.title}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -116,66 +109,64 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* HOW */}
-        <section id="how" className="border-b border-border">
-          <div className="max-w-5xl mx-auto px-6 md:px-12 py-24 md:py-32">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-6">
-              How it works
-            </p>
-            <h2 className="font-display text-4xl md:text-6xl tracking-tight mb-16">
-              From signup to shipping.
-            </h2>
-
-            <ol className="divide-y divide-border border-y border-border">
+          {/* HOW */}
+          <section id="how" className="py-12 md:py-16">
+            <div className="flex items-baseline justify-between mb-6">
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400">
+                How it works
+              </p>
+              <h2 className="font-display text-2xl md:text-4xl tracking-tight">
+                Signup to shipping.
+              </h2>
+            </div>
+            <ol className="space-y-2">
               {STEPS.map((s) => (
-                <li key={s.n} className="py-8 grid grid-cols-[80px_1fr] md:grid-cols-[120px_1fr] gap-6 items-baseline">
-                  <span className="font-mono text-sm text-blue-400 tracking-[0.25em]">
+                <li
+                  key={s.n}
+                  className={`${GLASS_CARD} flex items-baseline gap-5`}
+                >
+                  <span className="font-mono text-xs text-blue-400 tracking-[0.25em] flex-shrink-0">
                     {s.n}
                   </span>
-                  <div>
-                    <h3 className="font-display text-2xl md:text-3xl mb-2 tracking-tight">
+                  <div className="flex-1">
+                    <h3 className="font-display text-xl mb-0.5 tracking-tight">
                       {s.title}
                     </h3>
-                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
-                      {s.body}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{s.body}</p>
                   </div>
                 </li>
               ))}
             </ol>
-          </div>
-        </section>
+          </section>
 
-        {/* DOWNLOAD */}
-        <section id="download">
-          <div className="max-w-5xl mx-auto px-6 md:px-12 py-24 md:py-40">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-6">
-              Download
-            </p>
-            <h2 className="font-display text-4xl md:text-6xl lg:text-7xl tracking-tight mb-8 max-w-3xl">
-              Work with operators, not talkers.
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-xl mb-12 leading-relaxed">
-              Download the app and start building today.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button variant="default" size="xl" className="bg-blue-500 hover:bg-blue-400 text-white">
-                Download for iOS
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="xl">
-                Download for Android
-              </Button>
+          {/* DOWNLOAD */}
+          <section id="download" className="py-16 md:py-24">
+            <div className={`${GLASS_CARD} text-center md:text-left md:flex md:items-center md:justify-between md:gap-8 !p-8 md:!p-12`}>
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-3">
+                  Download
+                </p>
+                <h2 className="font-display text-3xl md:text-5xl tracking-tight mb-2">
+                  Operators, not talkers.
+                </h2>
+                <p className="text-sm md:text-base text-muted-foreground">
+                  Available on iOS and Android.
+                </p>
+              </div>
+              <div className="mt-6 md:mt-0 flex flex-wrap items-center gap-3 justify-center">
+                <GlassButton primary>
+                  iOS
+                  <ArrowRight className="h-4 w-4" />
+                </GlassButton>
+                <GlassButton>Android</GlassButton>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <footer className="border-t border-border">
-          <div className="max-w-5xl mx-auto px-6 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
-            <p>© NetStart · A network for builders</p>
+          <footer className="border-t border-white/10 mt-8 mb-6 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+            <p>© NetStart</p>
             <div className="flex gap-6">
               <a href="#" className="hover:text-foreground transition-colors">
                 Manifesto
@@ -187,11 +178,33 @@ const Index = () => {
                 Contact
               </a>
             </div>
-          </div>
-        </footer>
+          </footer>
+        </div>
       </div>
     </div>
   );
 };
+
+const GLASS_CARD =
+  "rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 p-5 md:p-6 hover:bg-white/[0.05] hover:border-white/20 transition-colors";
+
+const GlassButton = ({
+  children,
+  primary,
+}: {
+  children: React.ReactNode;
+  primary?: boolean;
+}) => (
+  <button
+    type="button"
+    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all border ${
+      primary
+        ? "bg-blue-500 hover:bg-blue-400 text-white border-blue-400/40 hover:shadow-[0_0_22px_rgba(59,130,246,0.45)]"
+        : "bg-white/[0.04] hover:bg-white/[0.08] border-white/15 hover:border-white/25 backdrop-blur-xl text-foreground"
+    }`}
+  >
+    {children}
+  </button>
+);
 
 export default Index;

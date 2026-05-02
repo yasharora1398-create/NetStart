@@ -89,7 +89,7 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 border-r border-border bg-background flex flex-col transition-[width] duration-300 ${
+      className={`fixed left-0 top-0 bottom-0 z-40 border-r border-white/10 bg-background/60 backdrop-blur-xl backdrop-saturate-150 flex flex-col transition-[width] duration-300 ${
         collapsed ? "w-16" : "w-60"
       }`}
     >
@@ -107,7 +107,7 @@ export const Sidebar = () => {
           type="button"
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={`h-8 w-8 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-blue-400/40 transition-colors ${
+          className={`h-8 w-8 flex items-center justify-center rounded-xl border border-white/10 text-muted-foreground hover:text-foreground hover:border-blue-400/40 hover:bg-white/5 transition-colors ${
             collapsed ? "mx-auto" : ""
           }`}
         >
@@ -120,8 +120,45 @@ export const Sidebar = () => {
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {/* Marketing anchors — always visible for any visitor */}
+      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
+        {/* Sign in / Sign up always at the top for visitors */}
+        {!user && (
+          <>
+            <NavItem
+              to="/signin"
+              label="Sign in"
+              Icon={LogIn}
+              collapsed={collapsed}
+            />
+            <NavItem
+              to="/signup"
+              label="Sign up"
+              Icon={User}
+              collapsed={collapsed}
+            />
+            <div className="h-px bg-border/60 my-2 mx-2" />
+          </>
+        )}
+
+        {/* Authed app pages first when signed in */}
+        {user && (
+          <>
+            <SidebarSectionLabel collapsed={collapsed}>App</SidebarSectionLabel>
+            {items.map((item) => (
+              <NavItem
+                key={item.to}
+                to={item.to}
+                label={item.label}
+                Icon={item.icon}
+                collapsed={collapsed}
+                badge={item.badge}
+              />
+            ))}
+            <div className="h-px bg-border/60 my-2 mx-2" />
+          </>
+        )}
+
+        {/* Marketing anchors */}
         <SidebarSectionLabel collapsed={collapsed}>About</SidebarSectionLabel>
         <AnchorItem
           hash="how"
@@ -141,41 +178,6 @@ export const Sidebar = () => {
           Icon={Download}
           collapsed={collapsed}
         />
-
-        {/* Authed app pages */}
-        {user && (
-          <>
-            <div className="h-px bg-border my-3 mx-2" />
-            <SidebarSectionLabel collapsed={collapsed}>App</SidebarSectionLabel>
-            {items.map((item) => (
-              <NavItem
-                key={item.to}
-                to={item.to}
-                label={item.label}
-                Icon={item.icon}
-                collapsed={collapsed}
-                badge={item.badge}
-              />
-            ))}
-          </>
-        )}
-        {!user && (
-          <>
-            <div className="h-px bg-border my-3 mx-2" />
-            <NavItem
-              to="/signin"
-              label="Sign in"
-              Icon={LogIn}
-              collapsed={collapsed}
-            />
-            <NavItem
-              to="/signup"
-              label="Sign up"
-              Icon={User}
-              collapsed={collapsed}
-            />
-          </>
-        )}
       </nav>
 
       {/* Bottom: notifications + settings + sign out */}
@@ -198,7 +200,7 @@ export const Sidebar = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-sm text-muted-foreground hover:text-foreground hover:bg-card border border-transparent transition-colors ${
+            className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent transition-colors ${
               collapsed ? "justify-center" : ""
             }`}
             aria-label="Sign out"
@@ -250,7 +252,7 @@ const AnchorItem = ({
       href={onLanding ? `#${hash}` : `/#${hash}`}
       onClick={handleClick}
       title={collapsed ? label : undefined}
-      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-sm border border-transparent text-muted-foreground hover:text-foreground hover:bg-card transition-colors ${
+      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors ${
         collapsed ? "justify-center" : ""
       }`}
     >
@@ -282,10 +284,10 @@ const NavItem = ({
       to={to}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
-        `relative flex items-center gap-3 px-3 py-2.5 rounded-sm transition-colors border ${
+        `relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors border ${
           isActive
             ? "bg-blue-500/10 text-blue-300 border-blue-500/30"
-            : "text-muted-foreground hover:text-foreground hover:bg-card border-transparent"
+            : "text-muted-foreground hover:text-foreground hover:bg-white/5 border-transparent"
         } ${collapsed ? "justify-center" : ""}`
       }
     >
