@@ -125,14 +125,9 @@ export const Sidebar = () => {
   return (
     <aside
       ref={asideRef}
-      className={`fixed left-3 z-40 glass rounded-2xl flex flex-col transition-[width] duration-300 ${
+      className={`fixed left-3 top-3 bottom-3 z-40 glass rounded-2xl flex flex-col transition-[width] duration-300 ${
         collapsed ? "w-14" : "w-56"
       }`}
-      style={{
-        top: "50%",
-        transform: "translateY(-50%)",
-        maxHeight: "calc(100vh - 1.5rem)",
-      }}
     >
       {/* Top: brand + toggle */}
       <div className="relative flex items-center px-3 h-14 border-b border-white/10">
