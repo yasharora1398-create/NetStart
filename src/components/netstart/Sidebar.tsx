@@ -36,28 +36,42 @@ export const Sidebar = () => {
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const asideRef = useRef<HTMLElement>(null);
 
-  // Scroll- and mouse-driven reflection that moves across the glass.
+  // Sidebar drifts with scroll (subtle parallax) and the glass
+  // reflection moves with both scroll and mouse hover.
   useEffect(() => {
     const el = asideRef.current;
     if (!el) return;
-    const onScroll = () => {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const max = Math.max(
+        1,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
       const t = Math.min(1, Math.max(0, window.scrollY / max));
-      // Reflection sweeps from -10% (above) to 110% (below) of the
-      // sidebar height as the page scrolls top to bottom.
+      // Reflection sweeps from above the sidebar to below as the page
+      // scrolls top to bottom.
       el.style.setProperty("--reflect-y", `${-10 + t * 120}%`);
+      // Parallax: sidebar drifts down ~36px over the full page scroll.
+      const drift = Math.min(36, window.scrollY * 0.06);
+      el.style.transform = `translate3d(0, ${drift}px, 0)`;
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(apply);
     };
     const onMove = (e: MouseEvent) => {
       const r = el.getBoundingClientRect();
       const x = ((e.clientX - r.left) / r.width) * 100;
       el.style.setProperty("--reflect-x", `${Math.max(0, Math.min(100, x))}%`);
     };
-    onScroll();
+    apply();
     window.addEventListener("scroll", onScroll, { passive: true });
     el.addEventListener("mousemove", onMove);
     return () => {
       window.removeEventListener("scroll", onScroll);
       el.removeEventListener("mousemove", onMove);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
