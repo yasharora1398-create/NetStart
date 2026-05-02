@@ -36,6 +36,37 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
     );
   }, [collapsed]);
 
+  // Drive a global --scroll-progress (0..1) that .glass::before
+  // reads to modulate edge reflections — the only thing that should
+  // visibly react to page scroll on liquid-glass surfaces.
+  useEffect(() => {
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const max = Math.max(
+        1,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+      const t = Math.min(1, Math.max(0, window.scrollY / max));
+      document.documentElement.style.setProperty(
+        "--scroll-progress",
+        t.toFixed(4),
+      );
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(apply);
+    };
+    apply();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", apply);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", apply);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <SidebarContext.Provider
       value={{
