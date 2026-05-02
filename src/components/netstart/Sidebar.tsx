@@ -36,27 +36,20 @@ export const Sidebar = () => {
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const asideRef = useRef<HTMLElement>(null);
 
-  // Sidebar tracks the user's scroll position — as you scroll the
-  // page from top to bottom, the sidebar drifts from the top edge of
-  // the viewport to as close to the bottom as it can get without
-  // clipping. The blue specular highlight tracks scroll-y and mouse-x
-  // independently.
+  // Sidebar position is static — only the frosted-glass reflection
+  // moves. The blue specular highlight sweeps top-to-bottom with page
+  // scroll and tracks the mouse horizontally on hover.
   useEffect(() => {
     const el = asideRef.current;
     if (!el) return;
     let raf = 0;
     const apply = () => {
       raf = 0;
-      const winH = window.innerHeight;
-      const sidebarH = el.offsetHeight;
-      // The most we can drift before the sidebar bottom would clip
-      // the viewport. 24 = 12px top + 12px bottom margins.
-      const maxDrift = Math.max(0, winH - sidebarH - 24);
-      const docMax = Math.max(1, document.documentElement.scrollHeight - winH);
+      const docMax = Math.max(
+        1,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
       const t = Math.min(1, Math.max(0, window.scrollY / docMax));
-      el.style.transform = `translate3d(0, ${t * maxDrift}px, 0)`;
-      // Reflection sweeps from above the sidebar to below as the page
-      // scrolls top to bottom.
       el.style.setProperty("--reflect-y", `${-10 + t * 120}%`);
     };
     const onScroll = () => {
@@ -70,11 +63,9 @@ export const Sidebar = () => {
     };
     apply();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", apply);
     el.addEventListener("mousemove", onMove);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", apply);
       el.removeEventListener("mousemove", onMove);
       if (raf) cancelAnimationFrame(raf);
     };
@@ -134,10 +125,9 @@ export const Sidebar = () => {
   return (
     <aside
       ref={asideRef}
-      className={`fixed left-3 top-3 z-40 glass rounded-2xl flex flex-col transition-[width] duration-300 ${
+      className={`fixed left-3 top-3 bottom-3 z-40 glass rounded-2xl flex flex-col transition-[width] duration-300 ${
         collapsed ? "w-14" : "w-56"
       }`}
-      style={{ maxHeight: "calc(100vh - 1.5rem)" }}
     >
       {/* Top: brand + toggle */}
       <div className="relative flex items-center px-3 h-14 border-b border-white/10">
