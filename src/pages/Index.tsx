@@ -18,7 +18,7 @@ const Index = () => {
       >
         <div className="max-w-5xl mx-auto px-6 md:px-10">
           {/* HERO */}
-          <section className="pt-6 md:pt-10 pb-16 md:pb-20">
+          <section className="pt-6 md:pt-10 pb-20 md:pb-24">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
               netstart / for builders
             </p>
@@ -29,7 +29,7 @@ const Index = () => {
             <p className="text-base md:text-lg text-muted-foreground max-w-md mb-8 leading-relaxed">
               A network for founders and operators who ship.
             </p>
-            <div className="flex items-center gap-6 mb-10">
+            <div className="flex items-center gap-6 mb-12">
               {user ? (
                 <Link to="/mynet" className={CTA}>
                   Open MyNet
@@ -57,59 +57,78 @@ const Index = () => {
             </div>
           </section>
 
-          {/* STANDARDS — terse three-line statement */}
-          <section className="border-t border-white/10 py-12 md:py-16">
-            <div className="grid md:grid-cols-[140px_1fr] gap-6 md:gap-12">
+          {/* PULL QUOTE — large, asymmetric, the "what we believe" */}
+          <section className="border-t border-white/10 py-20 md:py-28 relative">
+            <div className="absolute left-0 top-12 font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400">
+              ¶ Standards
+            </div>
+            <blockquote className="max-w-4xl pl-0 md:pl-24">
+              <p className="font-display text-3xl md:text-5xl lg:text-6xl leading-[1.05] tracking-[-0.04em]">
+                We <span className="text-blue-400">vet for shipped work</span>,
+                match on capability, and make every action decisive.{" "}
+                <span className="text-muted-foreground">
+                  The network shrinks if it has to.
+                </span>
+              </p>
               <Link
                 to="/standards"
-                className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 hover:text-blue-300 transition-colors"
+                className="group inline-flex items-center gap-2 mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors"
               >
-                Standards
-                <ArrowRight className="h-3 w-3 mt-0.5 transition-transform group-hover:translate-x-0.5" />
+                Read the rules
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <p className="font-display text-2xl md:text-4xl tracking-[-0.03em] leading-[1.15] max-w-3xl">
-                Vetted, not viral.{" "}
-                <span className="text-muted-foreground">
-                  Skill, not surface.
-                </span>{" "}
-                Decisive,{" "}
-                <span className="text-muted-foreground">by design.</span>
-              </p>
-            </div>
+            </blockquote>
           </section>
 
-          {/* HOW IT WORKS — single line */}
-          <section className="border-t border-white/10 py-12 md:py-16">
-            <div className="grid md:grid-cols-[140px_1fr] gap-6 md:gap-12">
-              <Link
-                to="/how"
-                className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                How it works
-                <ArrowRight className="h-3 w-3 mt-0.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <p className="font-display text-2xl md:text-4xl tracking-[-0.03em] leading-[1.15] max-w-3xl">
-                Sign up. Verify. Match.{" "}
-                <span className="text-blue-400">Build.</span>
-              </p>
+          {/* FLOW — horizontal stepper with chevrons */}
+          <section className="border-t border-white/10 py-20 md:py-28">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-8">
+              How it works
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 font-display text-3xl md:text-5xl lg:text-6xl tracking-[-0.04em] leading-[1]">
+              <Step n="01">Sign up</Step>
+              <Arrow />
+              <Step n="02">Verify</Step>
+              <Arrow />
+              <Step n="03">Match</Step>
+              <Arrow />
+              <Step n="04" highlight>
+                Build
+              </Step>
             </div>
+            <Link
+              to="/how"
+              className="group inline-flex items-center gap-2 mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Walk through it
+              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </section>
 
-          {/* DOWNLOAD */}
-          <section className="border-t border-white/10 py-12 md:py-16">
-            <div className="grid md:grid-cols-[140px_1fr] gap-6 md:gap-12">
-              <Link
-                to="/download"
-                className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                Download
-                <ArrowRight className="h-3 w-3 mt-0.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <p className="font-display text-2xl md:text-4xl tracking-[-0.03em] leading-[1.15] max-w-3xl">
-                Operators,{" "}
-                <span className="text-muted-foreground">not talkers.</span>{" "}
-                <span className="text-blue-400">iOS &amp; Android.</span>
-              </p>
+          {/* CLOSING — big asymmetric closer */}
+          <section className="border-t border-white/10 py-20 md:py-32">
+            <div className="grid md:grid-cols-[1fr_auto] gap-10 items-end">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
+                  Download
+                </p>
+                <h2 className="font-display text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.95] tracking-[-0.04em]">
+                  Operators,
+                  <br />
+                  <span className="text-muted-foreground">not talkers.</span>
+                </h2>
+              </div>
+              <div className="flex flex-col items-start md:items-end gap-3">
+                <Link to="/download" className={CTA}>
+                  iOS &amp; Android
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+                {!user && (
+                  <Link to="/signup" className={MUTE}>
+                    Sign up on the web
+                  </Link>
+                )}
+              </div>
             </div>
           </section>
 
@@ -138,6 +157,32 @@ const Index = () => {
     </div>
   );
 };
+
+const Step = ({
+  n,
+  children,
+  highlight = false,
+}: {
+  n: string;
+  children: React.ReactNode;
+  highlight?: boolean;
+}) => (
+  <span className="inline-flex items-baseline gap-2">
+    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-blue-400/70 align-top">
+      {n}
+    </span>
+    <span className={highlight ? "text-blue-400" : ""}>{children}</span>
+  </span>
+);
+
+const Arrow = () => (
+  <span
+    aria-hidden
+    className="text-muted-foreground/40 font-display text-3xl md:text-5xl lg:text-6xl tracking-[-0.04em] leading-[1]"
+  >
+    /
+  </span>
+);
 
 const CTA =
   "group inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors";
