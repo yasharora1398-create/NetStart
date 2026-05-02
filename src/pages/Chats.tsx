@@ -12,8 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Nav } from "@/components/netstart/Nav";
-import { Footer } from "@/components/netstart/Footer";
+import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -143,12 +142,7 @@ const Chats = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Nav />
-
-      <main
-        className={`pt-28 pb-24 ${!isAuthed ? "pointer-events-none select-none blur-sm" : ""}`}
-      >
+    <AppLayout blurred={!isAuthed}>
         <div className="container max-w-3xl">
           <header className="mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
@@ -335,12 +329,9 @@ const Chats = () => {
             )}
           </section>
         </div>
-      </main>
 
       {!loading && !user && <AuthGate />}
-
-      <Footer />
-    </div>
+    </AppLayout>
   );
 };
 

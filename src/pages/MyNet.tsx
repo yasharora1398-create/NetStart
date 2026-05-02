@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-import { Nav } from "@/components/netstart/Nav";
+import { Sidebar } from "@/components/netstart/Sidebar";
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { Button } from "@/components/ui/button";
@@ -361,16 +361,21 @@ const MyNet = () => {
   if (showWizard && uid) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <Nav />
-        <main className="pt-28 pb-24">
-          <MyNetWizard
-            uid={uid}
-            profile={profile}
-            onProfileRefresh={refreshAll}
-            onSubmitComplete={() => setEditingPending(false)}
-          />
-        </main>
-        <Footer />
+        <Sidebar />
+        <div
+          className="transition-[padding] duration-300"
+          style={{ paddingLeft: "var(--sidebar-width, 240px)" }}
+        >
+          <main className="pt-12 pb-24">
+            <MyNetWizard
+              uid={uid}
+              profile={profile}
+              onProfileRefresh={refreshAll}
+              onSubmitComplete={() => setEditingPending(false)}
+            />
+          </main>
+          <Footer />
+        </div>
       </div>
     );
   }
@@ -378,10 +383,14 @@ const MyNet = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Nav />
+      <Sidebar />
 
+      <div
+        className="transition-[padding] duration-300"
+        style={{ paddingLeft: "var(--sidebar-width, 240px)" }}
+      >
       <main
-        className={`pt-28 pb-24 ${
+        className={`pt-12 pb-24 ${
           !isAuthed
             ? "pointer-events-none select-none blur-sm"
             : showPending
@@ -736,6 +745,7 @@ const MyNet = () => {
           )}
         </div>
       </main>
+      </div>
 
       {!loading && !user && <AuthGate />}
 
