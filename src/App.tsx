@@ -17,6 +17,9 @@ import Admin from "./pages/Admin.tsx";
 import Chats from "./pages/Chats.tsx";
 import Match from "./pages/Match.tsx";
 import Settings from "./pages/Settings.tsx";
+import Standards from "./pages/Standards.tsx";
+import HowItWorks from "./pages/HowItWorks.tsx";
+import DownloadPage from "./pages/DownloadPage.tsx";
 import FounderProfile from "./pages/FounderProfile.tsx";
 import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
@@ -44,6 +47,9 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/match" element={<Match />} />
             <Route path="/chats" element={<Chats />} />
+            <Route path="/standards" element={<Standards />} />
+            <Route path="/how" element={<HowItWorks />} />
+            <Route path="/download" element={<DownloadPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/u/:id" element={<FounderProfile />} />
             <Route path="/terms" element={<Terms />} />

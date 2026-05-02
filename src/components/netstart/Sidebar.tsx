@@ -52,8 +52,9 @@ export const Sidebar = () => {
       // Reflection sweeps from above the sidebar to below as the page
       // scrolls top to bottom.
       el.style.setProperty("--reflect-y", `${-10 + t * 120}%`);
-      // Parallax: sidebar drifts down ~36px over the full page scroll.
-      const drift = Math.min(36, window.scrollY * 0.06);
+      // Parallax: sidebar drifts down up to 120px over the full
+      // page scroll so it visibly moves with you, not just sits.
+      const drift = Math.min(120, window.scrollY * 0.18);
       el.style.transform = `translate3d(0, ${drift}px, 0)`;
     };
     const onScroll = () => {
@@ -195,20 +196,20 @@ export const Sidebar = () => {
         <Sep />
 
         <SectionLabel collapsed={collapsed}>About</SectionLabel>
-        <AnchorItem
-          hash="how"
+        <NavItem
+          to="/how"
           label="How it works"
           Icon={Compass}
           collapsed={collapsed}
         />
-        <AnchorItem
-          hash="standards"
+        <NavItem
+          to="/standards"
           label="Standards"
           Icon={Layers}
           collapsed={collapsed}
         />
-        <AnchorItem
-          hash="download"
+        <NavItem
+          to="/download"
           label="Download"
           Icon={Download}
           collapsed={collapsed}
