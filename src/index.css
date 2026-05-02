@@ -171,32 +171,39 @@
       )
       0 100% / 250% 1px no-repeat,
 
-      /* LEFT edge — subtle vertical highlight */
+      /* LEFT edge — vertical chromatic strip 250% tall so we can
+         pan it as scroll progresses */
       linear-gradient(
         180deg,
-        rgba(180, 220, 255, 0.05),
-        rgba(255, 255, 255, 0.04),
-        rgba(255, 200, 220, 0.04)
+        rgba(80, 180, 255, 0.10),
+        rgba(200, 230, 255, 0.18),
+        rgba(220, 200, 255, 0.16),
+        rgba(255, 200, 220, 0.12),
+        rgba(180, 230, 255, 0.18),
+        rgba(80, 180, 255, 0.10)
       )
-      0 0 / 1px 100% no-repeat,
+      0 0 / 1px 250% no-repeat,
 
-      /* RIGHT edge */
+      /* RIGHT edge — same height, opposite color order so the two
+         sides drift toward each other */
       linear-gradient(
         180deg,
-        rgba(255, 200, 220, 0.05),
-        rgba(255, 255, 255, 0.04),
-        rgba(180, 220, 255, 0.04)
+        rgba(255, 200, 220, 0.10),
+        rgba(180, 230, 255, 0.18),
+        rgba(255, 230, 180, 0.14),
+        rgba(220, 200, 255, 0.16),
+        rgba(255, 200, 220, 0.10)
       )
-      100% 0 / 1px 100% no-repeat;
+      100% 0 / 1px 250% no-repeat;
 
-    /* Pan the top rainbow LEFT and the bottom rainbow RIGHT as
-       --scroll-progress goes 0..1, so they appear to flow in
-       opposite directions like light bending through glass. */
+    /* All four edges pan with --scroll-progress: top slides left,
+       bottom slides right, left slides up, right slides down — so
+       the rim looks like it's flowing as you scroll.  */
     background-position:
       calc(var(--scroll-progress, 0) * -150%) 0,
       calc(50% + var(--scroll-progress, 0) * 150%) 100%,
-      0 0,
-      100% 0;
+      0 calc(var(--scroll-progress, 0) * -150%),
+      100% calc(50% + var(--scroll-progress, 0) * 150%);
 
     transition: background-position 100ms linear;
   }
