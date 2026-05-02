@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { Nav } from "@/components/netstart/Nav";
+import { Sidebar } from "@/components/netstart/Sidebar";
 import { PhoneFrame } from "@/components/netstart/PhoneFrame";
 import { AppShell } from "@/components/netstart/AppShell";
 import { Button } from "@/components/ui/button";
@@ -294,7 +294,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ overflowX: "clip" }}>
-      <Nav />
+      <Sidebar />
+      <div
+        className="transition-[padding] duration-300"
+        style={{ paddingLeft: "var(--sidebar-width, 240px)" }}
+      >
 
       {/* HERO */}
       <section className="relative pt-28 pb-20 md:pt-36 md:pb-28">
@@ -507,6 +511,7 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 };
