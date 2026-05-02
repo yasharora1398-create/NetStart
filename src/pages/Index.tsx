@@ -105,29 +105,41 @@ const Index = () => {
             </Link>
           </section>
 
-          {/* CLOSING — big asymmetric closer */}
-          <section className="border-t border-white/10 py-20 md:py-32">
-            <div className="grid md:grid-cols-[1fr_auto] gap-10 items-end">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
-                  Download
-                </p>
-                <h2 className="font-display text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.95] tracking-[-0.04em]">
-                  Operators,
-                  <br />
-                  <span className="text-muted-foreground">not talkers.</span>
-                </h2>
-              </div>
-              <div className="flex flex-col items-start md:items-end gap-3">
-                <Link to="/download" className={CTA}>
-                  iOS &amp; Android
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-                {!user && (
-                  <Link to="/signup" className={MUTE}>
-                    Sign up on the web
-                  </Link>
-                )}
+          {/* DOWNLOAD — frosted glass card */}
+          <section className="py-16 md:py-20">
+            <div
+              className="glass rounded-2xl p-8 md:p-12"
+              style={{ fontFamily: "'Geist', ui-sans-serif, system-ui, sans-serif" }}
+            >
+              <div className="grid md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-end">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-4 inline-flex items-center gap-2">
+                    <span
+                      className="inline-block h-1.5 w-1.5 rounded-full"
+                      style={{
+                        background: "#3a7bff",
+                        boxShadow: "0 0 8px rgba(58,123,255,0.55)",
+                      }}
+                    />
+                    Download
+                  </p>
+                  <h2
+                    className="text-4xl md:text-6xl tracking-[-0.04em] leading-[0.98] mb-3"
+                    style={{ fontWeight: 600 }}
+                  >
+                    Operators,
+                    <br />
+                    <span className="text-muted-foreground">not talkers.</span>
+                  </h2>
+                  <p className="text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
+                    Native apps for iOS and Android. The phone is where the
+                    swiping lives.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2.5">
+                  <DownloadButton primary label="Download for iOS" sub="Requires iOS 16+" />
+                  <DownloadButton label="Get it on Android" sub="Requires Android 12+" />
+                </div>
               </div>
             </div>
           </section>
@@ -188,5 +200,53 @@ const CTA =
   "group inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors";
 const MUTE =
   "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
+
+const DownloadButton = ({
+  label,
+  sub,
+  primary = false,
+}: {
+  label: string;
+  sub: string;
+  primary?: boolean;
+}) => (
+  <a
+    href="#"
+    className="group inline-flex items-center gap-3 rounded-xl px-5 py-3 transition-all min-w-[220px]"
+    style={
+      primary
+        ? {
+            background:
+              "linear-gradient(180deg, #4a86ff 0%, #2f6fff 100%)",
+            color: "#fff",
+            boxShadow:
+              "0 1px 0 rgba(255,255,255,0.25) inset, 0 -8px 16px rgba(0,0,0,0.18) inset, 0 6px 20px rgba(58,123,255,0.35), 0 1px 2px rgba(0,0,0,0.4)",
+          }
+        : {
+            background: "rgba(255,255,255,0.04)",
+            color: "#eef1f6",
+            border: "0.5px solid rgba(255,255,255,0.14)",
+            boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset",
+          }
+    }
+  >
+    <span
+      className="text-sm font-medium block flex-1"
+      style={{ fontFamily: "'Geist', ui-sans-serif, system-ui, sans-serif" }}
+    >
+      <span className="block leading-tight">{label}</span>
+      <span
+        className="block text-[10px] font-mono uppercase tracking-[0.18em] opacity-60 mt-0.5"
+        style={{
+          fontFamily:
+            "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+        }}
+      >
+        {sub}
+      </span>
+    </span>
+    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+  </a>
+);
 
 export default Index;
