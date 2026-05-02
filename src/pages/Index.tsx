@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BadgeCheck, Sparkles, Zap } from "lucide-react";
 import { Sidebar } from "@/components/netstart/Sidebar";
-import { StepMatch } from "@/components/mockups/Steps";
 import { useAuth } from "@/context/AuthContext";
 
 const WHY = [
@@ -36,63 +35,48 @@ const Index = () => {
         style={{ paddingLeft: "var(--sidebar-width, 248px)" }}
       >
         <div className="max-w-6xl mx-auto px-6 md:px-10">
-          {/* HERO — text + product visual side-by-side */}
-          <section className="pt-6 md:pt-12 pb-12 md:pb-16">
-            <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
-                  netstart / for builders
-                </p>
-                <h1
-                  className="text-4xl md:text-6xl lg:text-[5.5rem] leading-[0.92] tracking-[-0.04em] mb-5"
-                  style={{ fontWeight: 600 }}
-                >
-                  The mobile app for people who actually
-                  <span className="text-blue-400"> build.</span>
-                </h1>
-                <p className="text-base md:text-lg text-muted-foreground max-w-md mb-8 leading-relaxed">
-                  Vetted founders and operators. AI-ranked matches. Connect,
-                  pass, or save — no maybes.
-                </p>
-                <div className="flex flex-wrap items-center gap-4 mb-10">
-                  {user ? (
-                    <Link to="/mynet">
-                      <PrimaryButton>Open MyNet</PrimaryButton>
-                    </Link>
-                  ) : (
-                    <>
-                      <Link to="/signup">
-                        <PrimaryButton>Sign up free</PrimaryButton>
-                      </Link>
-                      <Link to="/signin" className={MUTE_LINK}>
-                        Sign in
-                      </Link>
-                    </>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-x-8 gap-y-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-                  <span>
-                    <span className="text-foreground">2,840</span> verified
-                  </span>
-                  <span>
-                    <span className="text-foreground">312</span> companies
-                  </span>
-                  <span>
-                    <span className="text-foreground">&lt; 24h</span> review
-                  </span>
-                </div>
-              </div>
-
-              <div className="hidden lg:flex justify-center">
-                <div
-                  style={{
-                    transform: "rotate(-3deg) scale(0.85)",
-                    transformOrigin: "center",
-                  }}
-                >
-                  <StepMatch />
-                </div>
-              </div>
+          {/* HERO */}
+          <section className="pt-6 md:pt-12 pb-12 md:pb-16 max-w-3xl">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
+              netstart / for builders
+            </p>
+            <h1
+              className="text-4xl md:text-6xl lg:text-[6rem] leading-[0.92] tracking-[-0.04em] mb-5"
+              style={{ fontWeight: 600 }}
+            >
+              The mobile app for people who actually
+              <span className="text-blue-400"> build.</span>
+            </h1>
+            <p className="text-base md:text-lg text-muted-foreground max-w-md mb-8 leading-relaxed">
+              Vetted founders and operators. AI-ranked matches. Connect, pass,
+              or save — no maybes.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 mb-10">
+              {user ? (
+                <Link to="/mynet">
+                  <PrimaryButton>Open MyNet</PrimaryButton>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/signup">
+                    <PrimaryButton>Sign up free</PrimaryButton>
+                  </Link>
+                  <Link to="/signin" className={MUTE_LINK}>
+                    Sign in
+                  </Link>
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-x-8 gap-y-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+              <span>
+                <span className="text-foreground">2,840</span> verified
+              </span>
+              <span>
+                <span className="text-foreground">312</span> companies
+              </span>
+              <span>
+                <span className="text-foreground">&lt; 24h</span> review
+              </span>
             </div>
           </section>
 
