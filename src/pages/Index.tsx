@@ -51,7 +51,7 @@ const Index = () => {
               Vetted founders and operators. AI-ranked matches. Connect, pass,
               or save — no maybes.
             </p>
-            <div className="flex flex-wrap items-center gap-4 mb-10">
+            <div className="flex flex-wrap items-center gap-4">
               {user ? (
                 <Link to="/mynet">
                   <PrimaryButton>Open MyNet</PrimaryButton>
@@ -66,17 +66,6 @@ const Index = () => {
                   </Link>
                 </>
               )}
-            </div>
-            <div className="flex flex-wrap gap-x-8 gap-y-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-              <span>
-                <span className="text-foreground">2,840</span> verified
-              </span>
-              <span>
-                <span className="text-foreground">312</span> companies
-              </span>
-              <span>
-                <span className="text-foreground">&lt; 24h</span> review
-              </span>
             </div>
           </section>
 
@@ -168,7 +157,7 @@ const Index = () => {
                     <span className="text-muted-foreground">not talkers.</span>
                   </h2>
                   <p className="text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
-                    Free to apply. Verification is usually under 24 hours.
+                    Free to apply. Quick manual review.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2.5 min-w-[220px]">
@@ -182,7 +171,7 @@ const Index = () => {
                         <DownloadButton
                           primary
                           label="Sign up free"
-                          sub="Takes 2 minutes"
+                          sub="Free to apply"
                         />
                       </Link>
                       <Link to="/download">
