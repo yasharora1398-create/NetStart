@@ -8,8 +8,10 @@ type SidebarContextValue = {
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
 
-const COLLAPSED_W = 64;
-const EXPANDED_W = 240;
+// Floating sidebar: width includes the 12px left/right margins so the
+// content column sits just past the sidebar's right edge.
+const COLLAPSED_W = 80;
+const EXPANDED_W = 248;
 const LS_KEY = "netstart_sidebar_collapsed";
 
 export const SidebarProvider = ({ children }: { children: ReactNode }) => {
