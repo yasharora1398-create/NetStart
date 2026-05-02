@@ -129,40 +129,76 @@
       0 30px 60px -20px rgba(0, 0, 0, 0.7);
     overflow: hidden;
   }
-  /* Edge reflections — only the rim pixels catch light, and they
-     subtly react to scroll like real liquid glass bending light as
-     content moves past it. The intensity of the top/bottom edges
-     and a faint blue chromatic shift on the top edge are driven by
-     --scroll-progress (0..1, set globally on :root by a scroll
-     listener). The body stays still; only edges react.  */
+  /* LIQUID GLASS RIM — Apple iOS 26 style. Each edge carries a
+     wide multi-stop chromatic gradient (cyan -> white -> magenta ->
+     amber -> back) that's twice as wide as the element. We shift
+     its background-position with --scroll-progress so the rainbow
+     literally slides along the rim as the page scrolls. Only the
+     rim pixels show the color; the body is left alone.
+
+     The trick: each gradient strip is positioned and sized to only
+     cover its own edge (16px tall on top, etc.), with no-repeat
+     and a wide background-size so we have headroom to pan.  */
   .glass::before {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
+    border-radius: inherit;
+
     background:
-      /* TOP — sharp white sliver + faint blue chromatic tint that
-         strengthens as you scroll down */
+      /* TOP edge — wide rainbow strip 18px tall, 250% wide */
+      linear-gradient(
+        90deg,
+        rgba(80, 180, 255, 0.10),
+        rgba(200, 230, 255, 0.22),
+        rgba(220, 200, 255, 0.18),
+        rgba(255, 200, 220, 0.14),
+        rgba(255, 230, 180, 0.12),
+        rgba(180, 230, 255, 0.20),
+        rgba(80, 180, 255, 0.10)
+      )
+      0 0 / 250% 18px no-repeat,
+
+      /* BOTTOM edge — cooler palette, 14px tall, 250% wide */
+      linear-gradient(
+        90deg,
+        rgba(255, 200, 170, 0.06),
+        rgba(255, 180, 220, 0.12),
+        rgba(220, 180, 255, 0.14),
+        rgba(180, 220, 255, 0.10),
+        rgba(255, 200, 170, 0.06)
+      )
+      0 100% / 250% 14px no-repeat,
+
+      /* LEFT edge — subtle vertical highlight */
       linear-gradient(
         180deg,
-        rgba(140, 180, 255, calc(0.04 + var(--scroll-progress, 0) * 0.08)) 0px,
-        rgba(255, 255, 255, calc(0.05 + var(--scroll-progress, 0) * 0.04)) 3px,
-        rgba(255, 255, 255, 0) 16px
-      ),
-      /* BOTTOM — warm tint that strengthens as you scroll up
-         (i.e. fades as scroll-progress grows) */
+        rgba(180, 220, 255, 0.05),
+        rgba(255, 255, 255, 0.04),
+        rgba(255, 200, 220, 0.04)
+      )
+      0 0 / 12px 100% no-repeat,
+
+      /* RIGHT edge */
       linear-gradient(
-        0deg,
-        rgba(255, 200, 170, calc(0.02 + (1 - var(--scroll-progress, 0)) * 0.04)) 0px,
-        rgba(255, 255, 255, 0.02) 4px,
-        rgba(255, 255, 255, 0) 14px
-      ),
-      /* LEFT */
-      linear-gradient(90deg,  rgba(255,255,255,0.025) 0px, rgba(255,255,255,0) 12px),
-      /* RIGHT */
-      linear-gradient(270deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0) 12px);
-    border-radius: inherit;
-    transition: background 90ms linear;
+        180deg,
+        rgba(255, 200, 220, 0.05),
+        rgba(255, 255, 255, 0.04),
+        rgba(180, 220, 255, 0.04)
+      )
+      100% 0 / 12px 100% no-repeat;
+
+    /* Pan the top rainbow LEFT and the bottom rainbow RIGHT as
+       --scroll-progress goes 0..1, so they appear to flow in
+       opposite directions like light bending through glass. */
+    background-position:
+      calc(var(--scroll-progress, 0) * -150%) 0,
+      calc(50% + var(--scroll-progress, 0) * 150%) 100%,
+      0 0,
+      100% 0;
+
+    transition: background-position 100ms linear;
   }
 
   /* Outlined / stroke text used for the giant numerals on the
