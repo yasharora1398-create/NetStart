@@ -9,6 +9,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import Index from "./pages/Index.tsx";
 import Waitlist from "./pages/Waitlist.tsx";
+import Authenticated from "./pages/Authenticated.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import SignUp from "./pages/SignUp.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
@@ -65,6 +66,12 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+
+            {/* Hidden post-verification landing — reachable only by
+                URL or by Supabase's confirmation redirect. Not linked
+                from any nav. Public so unauthenticated users coming
+                back from the email link can see it. */}
+            <Route path="/authenticated" element={<Authenticated />} />
 
             {/* Internal product routes — wrapped with <Internal> so
                 they redirect to "/" in production. In dev they work
