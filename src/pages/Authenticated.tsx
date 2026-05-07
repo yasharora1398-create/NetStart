@@ -1,34 +1,18 @@
 /**
- * Hidden post-verification landing — reached only by typing
- * /authenticated directly (or by Supabase redirecting here after a
- * confirmation link is clicked). Not linked from the waitlist or any
- * other surface.
+ * Hidden post-verification landing — reached only by Supabase
+ * redirecting here after a confirmation link is clicked, or by
+ * typing /authenticated directly. Not linked from any nav.
  *
- * Supabase auto-creates a session when its /verify endpoint succeeds,
- * which would silently log the user in. We want the opposite: the
- * user should land here, see the confirmation, and then go sign in
- * themselves with the credentials they just made. So we drop any
- * session that's been set as soon as the page mounts.
- *
- * Same near-black background as the rest of the marketing site, with
- * two green glow orbs floating behind a centered card. The card
- * confirms the email is verified and points the user at /signin.
+ * Supabase already created a session at verify-time, so the user is
+ * now signed in. The card just confirms that and reminds them to go
+ * fill out their MyNet. The CTA returns them to "/" (the homepage)
+ * with the session intact, where they'll see the signed-in nav
+ * (Sign out + Edit MyNet).
  */
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 
 const Authenticated = () => {
-  const { signOut } = useAuth();
-  useEffect(() => {
-    // Drop the session Supabase auto-created at verify-time. We don't
-    // wait on the promise — by the time the user reads the card and
-    // clicks "Sign in," the sign-out has resolved and /signin won't
-    // bounce them via its already-authed redirect.
-    void signOut();
-  }, [signOut]);
-
   return (
   <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
     {/* Blurred green orbs — mirror of the waitlist backdrop. */}
@@ -66,22 +50,29 @@ const Authenticated = () => {
           />
         </div>
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-3">
-          Verified
+          Signed in
         </p>
         <h1 className="font-display text-3xl md:text-4xl tracking-[-0.025em] text-foreground mb-4">
           You&apos;re in.
         </h1>
+        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-3">
+          Your account is verified and you&apos;re signed in. We&apos;ll
+          have a spot waiting the day Polln8 launches.
+        </p>
         <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-8">
-          Your account is fully authenticated. Head back to the sign-in
-          page and use the email and password you just created to access
-          your Polln8 account.
+          One thing left:{" "}
+          <span className="text-foreground font-semibold">
+            edit your MyNet
+          </span>{" "}
+          so we know who you are and what you&apos;re building. You can
+          do that from the homepage anytime.
         </p>
         <Link
-          to="/signin"
+          to="/"
           className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           style={{ boxShadow: "var(--shadow-glow)" }}
         >
-          Sign in
+          Back to homepage
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
