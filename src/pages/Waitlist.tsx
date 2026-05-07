@@ -65,13 +65,23 @@ const Waitlist = () => {
               </Link>
             )}
             <ThemeToggle mode={mode} onToggle={toggle} />
-            <Link
-              to="/signup"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              Get started
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            {user ? (
+              <Link
+                to="/mynet"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Edit MyNet
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : (
+              <Link
+                to="/signup"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Get started
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
           </div>
         </div>
       </header>
