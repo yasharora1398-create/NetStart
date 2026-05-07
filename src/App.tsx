@@ -68,8 +68,11 @@ const App = () => (
 
             {/* Internal product routes — wrapped with <Internal> so
                 they redirect to "/" in production. In dev they work
-                exactly as before. */}
-            <Route path="/mynet" element={<Internal><MyNet /></Internal>} />
+                exactly as before.
+                Exception: /mynet is public so the post-signup flow
+                can land users on the MyNetWizard. The page itself
+                already gates content behind auth via <AuthGate>. */}
+            <Route path="/mynet" element={<MyNet />} />
             <Route path="/talent" element={<Internal><Talent /></Internal>} />
             <Route path="/admin" element={<Internal><Admin /></Internal>} />
             <Route path="/match" element={<Internal><Match /></Internal>} />

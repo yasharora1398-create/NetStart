@@ -46,7 +46,12 @@ const SignUp = () => {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const redirectTo = (location.state as { from?: string } | null)?.from ?? "/";
+  // Default landing after signup is /mynet, where the MyNetWizard
+  // auto-renders for draft profiles and walks the new user through
+  // setting up their network. If they were bounced here from a
+  // gated page, return them there instead via location.state.from.
+  const redirectTo =
+    (location.state as { from?: string } | null)?.from ?? "/mynet";
 
   useEffect(() => {
     if (!loading && user) navigate(redirectTo, { replace: true });
