@@ -17,13 +17,17 @@ import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { StepMatch } from "@/components/mockups/Steps";
 
-// Business-portrait stock photos (Unsplash, hot-linked). These swap
-// the casual builder-1/2/3 portraits used on the How it works page
-// for something more polished / suit-looking on the marketing hero.
+// Business-portrait stock photos (Unsplash, hot-linked). All three
+// are men in business attire — replaces the casual builder-1/2/3
+// photos used on the How it works step. If any look off, swap the
+// URL with another Unsplash men's-business portrait.
 const HERO_PORTRAITS: [string, string, string] = [
-  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
+  // Front card — Joel Mott portrait, black male in suit + glasses
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+  // Back-1 card — male in suit, smiling
   "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=600&q=80",
+  // Back-2 card — male in business attire
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80",
 ];
 
 const Waitlist = () => {
