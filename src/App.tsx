@@ -1,5 +1,6 @@
+import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import Index from "./pages/Index.tsx";
+import Waitlist from "./pages/Waitlist.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import SignUp from "./pages/SignUp.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
@@ -27,6 +29,24 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
+// Production (Vercel) ships ONLY the waitlist + the routes needed to
+// actually sign up / sign in. Every internal product route (mynet,
+// match, chats, admin, /u/:id, etc.) redirects to "/" so the
+// unfinished product stays hidden from the public.
+//
+// In dev (localhost) every route works exactly as it always did, so
+// we can keep iterating the full app.
+//
+// `import.meta.env.PROD` is true under `vite build` (what Vercel
+// runs) and false under `vite dev` (localhost).
+const PROD = import.meta.env.PROD;
+const HomePage = PROD ? Waitlist : Index;
+
+// Wraps an internal route's element. In prod, hard-redirects to the
+// waitlist; in dev, passes through unchanged.
+const Internal = ({ children }: { children: ReactNode }) =>
+  PROD ? <Navigate to="/" replace /> : <>{children}</>;
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -37,25 +57,36 @@ const App = () => (
           <SidebarProvider>
             <EmailVerifyBanner />
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* Public routes — accessible in both dev and prod. */}
+            <Route path="/" element={<HomePage />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/mynet" element={<MyNet />} />
-            <Route path="/talent" element={<Talent />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/match" element={<Match />} />
-            <Route path="/chats" element={<Chats />} />
-            <Route path="/standards" element={<Standards />} />
-            <Route path="/how" element={<HowItWorks />} />
-            <Route path="/download" element={<DownloadPage />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/u/:id" element={<FounderProfile />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+
+            {/* Internal product routes — wrapped with <Internal> so
+                they redirect to "/" in production. In dev they work
+                exactly as before. */}
+            <Route path="/mynet" element={<Internal><MyNet /></Internal>} />
+            <Route path="/talent" element={<Internal><Talent /></Internal>} />
+            <Route path="/admin" element={<Internal><Admin /></Internal>} />
+            <Route path="/match" element={<Internal><Match /></Internal>} />
+            <Route path="/chats" element={<Internal><Chats /></Internal>} />
+            <Route path="/standards" element={<Internal><Standards /></Internal>} />
+            <Route path="/how" element={<Internal><HowItWorks /></Internal>} />
+            <Route path="/download" element={<Internal><DownloadPage /></Internal>} />
+            <Route path="/settings" element={<Internal><Settings /></Internal>} />
+            <Route path="/u/:id" element={<Internal><FounderProfile /></Internal>} />
+
+            {/* In prod, send unknown routes home so people who guess
+                URLs land on the waitlist instead of a 404. In dev,
+                show the regular NotFound page. */}
+            <Route
+              path="*"
+              element={PROD ? <Navigate to="/" replace /> : <NotFound />}
+            />
           </Routes>
           </SidebarProvider>
         </AuthProvider>

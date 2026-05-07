@@ -1,305 +1,248 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  Compass,
-  Download,
-  Layers,
-  LogIn,
-  LogOut,
-  MessageCircle,
-  Search,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  User,
-} from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { useSidebar } from "@/context/SidebarContext";
-import { listNotifications } from "@/lib/mynet-storage";
-import { getSupabase } from "@/lib/supabase";
+/**
+ * Sidebar — frosted-glass nav panel. App + About sections of NavLink
+ * items, each with a 16x16 stroke icon. Light/Dark segmented toggle
+ * at the bottom drives the global theme via `useTheme()`.
+ */
+import { NavLink } from "react-router-dom";
+import { useTheme } from "@/hooks/useTheme";
 
-type Item = {
-  to: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: number;
-};
+type IconType = React.ComponentType;
+
+type Item = { to: string; label: string; icon: IconType };
+
+const APP_ITEMS: Item[] = [
+  { to: "/mynet", label: "MyNet", icon: MyNetIcon },
+  { to: "/match", label: "Match", icon: MatchIcon },
+  { to: "/talent", label: "Talents", icon: TalentsIcon },
+  { to: "/chats", label: "Chat", icon: ChatIcon },
+];
+
+const ABOUT_ITEMS: Item[] = [
+  { to: "/how", label: "How it works", icon: HowItWorksIcon },
+  { to: "/standards", label: "Standards", icon: StandardsIcon },
+  { to: "/download", label: "Download", icon: DownloadIcon },
+];
 
 export const Sidebar = () => {
-  const { user, isAdmin } = useAuth();
-  const location = useLocation();
-  const { collapsed, setCollapsed } = useSidebar();
-  const [unreadChats, setUnreadChats] = useState(0);
-  const [unreadNotifs, setUnreadNotifs] = useState(0);
-  // Sidebar is fully static. Edge reflections are baked into .glass
-  // via CSS, no JS-driven highlights.
-
-  useEffect(() => {
-    if (!user) {
-      setUnreadChats(0);
-      setUnreadNotifs(0);
-      return;
-    }
-    let cancelled = false;
-    const refresh = async () => {
-      try {
-        const list = await listNotifications();
-        if (cancelled) return;
-        setUnreadChats(
-          list.filter((n) => n.type === "chat_request" && !n.readAt).length,
-        );
-        setUnreadNotifs(list.filter((n) => !n.readAt).length);
-      } catch {
-        // silent
-      }
-    };
-    refresh();
-    const t = setInterval(refresh, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, [user, location.pathname]);
-
-  const items: Item[] = [
-    { to: "/mynet", label: "MyNet", icon: User },
-    { to: "/match", label: "Match", icon: Sparkles },
-    { to: "/talent", label: "Talent", icon: Search },
-    {
-      to: "/chats",
-      label: "Chats",
-      icon: MessageCircle,
-      badge: unreadChats || undefined,
-    },
-  ];
-  if (isAdmin) {
-    items.push({ to: "/admin", label: "Admin", icon: ShieldCheck });
-  }
-
-  const handleSignOut = async () => {
-    try {
-      await getSupabase().auth.signOut();
-      window.location.href = "/";
-    } catch {
-      // noop
-    }
-  };
+  const { mode, setMode } = useTheme();
 
   return (
-    <aside
-      className={`fixed left-3 top-3 bottom-3 z-40 glass rounded-2xl flex flex-col transition-[width] duration-300 ${
-        collapsed ? "w-14" : "w-56"
-      }`}
-    >
-      {/* Top: brand + toggle */}
-      <div className="relative flex items-center px-3 h-14 border-b border-white/10">
-        {!collapsed && (
-          <Link
-            to="/"
-            className="font-display text-base ml-1 mr-auto text-foreground"
-          >
-            netstart
-          </Link>
-        )}
-        <button
-          type="button"
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={`h-7 w-7 flex items-center justify-center rounded-lg border border-white/10 text-muted-foreground hover:text-foreground hover:border-blue-400/40 hover:bg-white/5 transition-colors ${
-            collapsed ? "mx-auto" : ""
-          }`}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronLeft className="h-3.5 w-3.5" />
-          )}
-        </button>
+    <aside className="glass-sidebar" aria-label="Sidebar">
+      {/* Brand */}
+      <div className="gs-brand">
+        <div className="gs-brand-mark">V</div>
+        <div>
+          <div className="gs-brand-name">Vettd</div>
+          <div className="gs-brand-sub">Build with intent</div>
+        </div>
       </div>
 
-      {/* Sign in / Sign up at top for visitors */}
-      <nav className="relative flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        {!user && (
-          <>
-            <NavItem
-              to="/signin"
-              label="Sign in"
-              Icon={LogIn}
-              collapsed={collapsed}
-            />
-            <NavItem
-              to="/signup"
-              label="Sign up"
-              Icon={User}
-              collapsed={collapsed}
-            />
-            <Sep />
-          </>
-        )}
-
-        {/* App pages — always visible */}
-        <SectionLabel collapsed={collapsed}>App</SectionLabel>
-        {items.map((item) => (
-          <NavItem
-            key={item.to}
-            to={item.to}
-            label={item.label}
-            Icon={item.icon}
-            collapsed={collapsed}
-            badge={item.badge}
-          />
+      {/* App */}
+      <div className="gs-section">
+        <div className="gs-section-label">App</div>
+        {APP_ITEMS.map((item) => (
+          <SideLink key={item.to} item={item} />
         ))}
+      </div>
 
-        <Sep />
+      {/* About */}
+      <div className="gs-section">
+        <div className="gs-section-label">About</div>
+        {ABOUT_ITEMS.map((item) => (
+          <SideLink key={item.to} item={item} />
+        ))}
+      </div>
 
-        <SectionLabel collapsed={collapsed}>About</SectionLabel>
-        <NavItem
-          to="/how"
-          label="How it works"
-          Icon={Compass}
-          collapsed={collapsed}
-        />
-        <NavItem
-          to="/standards"
-          label="Standards"
-          Icon={Layers}
-          collapsed={collapsed}
-        />
-        <NavItem
-          to="/download"
-          label="Download"
-          Icon={Download}
-          collapsed={collapsed}
-        />
-      </nav>
+      <div className="gs-spacer" />
 
-      {/* Bottom */}
-      {user && (
-        <div className="relative px-2 py-3 border-t border-white/10 space-y-0.5">
-          <NavItem
-            to="/chats"
-            label="Notifications"
-            Icon={Bell}
-            collapsed={collapsed}
-            badge={unreadNotifs || undefined}
-            hideWhenActiveOn={["/chats"]}
-          />
-          <NavItem
-            to="/settings"
-            label="Settings"
-            Icon={Settings}
-            collapsed={collapsed}
-          />
+      {/* Theme toggle — wired to global useTheme so it flips the
+          .dark class on <html> and persists to localStorage. */}
+      <div className="gs-theme">
+        <div className="gs-theme-label">Theme</div>
+        <div className="gs-seg" role="group" aria-label="Theme">
           <button
             type="button"
-            onClick={handleSignOut}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors ${
-              collapsed ? "justify-center" : ""
-            }`}
-            aria-label="Sign out"
+            aria-pressed={mode === "light"}
+            onClick={() => setMode("light")}
           >
-            <LogOut className="h-4 w-4 flex-shrink-0" />
-            {!collapsed && <span className="text-sm">Sign out</span>}
+            <SunIcon />
+            Light
+          </button>
+          <button
+            type="button"
+            aria-pressed={mode === "dark"}
+            onClick={() => setMode("dark")}
+          >
+            <MoonIcon />
+            Dark
           </button>
         </div>
-      )}
+      </div>
     </aside>
   );
 };
 
-const Sep = () => <div className="h-px bg-white/8 my-2 mx-2" />;
-
-const SectionLabel = ({
-  children,
-  collapsed,
-}: {
-  children: React.ReactNode;
-  collapsed: boolean;
-}) => {
-  if (collapsed) return null;
-  return (
-    <p className="px-3 mt-1 mb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/50">
-      {children}
-    </p>
-  );
-};
-
-const AnchorItem = ({
-  hash,
-  label,
-  Icon,
-  collapsed,
-}: {
-  hash: string;
-  label: string;
-  Icon: React.ComponentType<{ className?: string }>;
-  collapsed: boolean;
-}) => {
-  const location = useLocation();
-  const onLanding = location.pathname === "/";
-  const handleClick = (e: React.MouseEvent) => {
-    if (!onLanding) return;
-    e.preventDefault();
-    document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
-  };
-  return (
-    <a
-      href={onLanding ? `#${hash}` : `/#${hash}`}
-      onClick={handleClick}
-      title={collapsed ? label : undefined}
-      className={`relative flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors ${
-        collapsed ? "justify-center" : ""
-      }`}
-    >
-      <Icon className="h-4 w-4 flex-shrink-0" />
-      {!collapsed && <span className="text-sm flex-1">{label}</span>}
-    </a>
-  );
-};
-
-const NavItem = ({
-  to,
-  label,
-  Icon,
-  collapsed,
-  badge,
-  hideWhenActiveOn,
-}: {
-  to: string;
-  label: string;
-  Icon: React.ComponentType<{ className?: string }>;
-  collapsed: boolean;
-  badge?: number;
-  hideWhenActiveOn?: string[];
-}) => {
-  const location = useLocation();
-  if (hideWhenActiveOn?.includes(location.pathname)) return null;
+const SideLink = ({ item }: { item: Item }) => {
+  const Icon = item.icon;
   return (
     <NavLink
-      to={to}
-      title={collapsed ? label : undefined}
+      to={item.to}
       className={({ isActive }) =>
-        `relative flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-          isActive
-            ? "bg-blue-500/15 text-blue-300"
-            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-        } ${collapsed ? "justify-center" : ""}`
+        `gs-item${isActive ? " gs-active" : ""}`
       }
     >
-      <Icon className="h-4 w-4 flex-shrink-0" />
-      {!collapsed && <span className="text-sm flex-1">{label}</span>}
-      {badge != null && badge > 0 && (
-        <span
-          className={`${
-            collapsed ? "absolute -top-1 -right-1" : ""
-          } h-4 min-w-4 px-1 rounded-full bg-blue-500 text-white text-[10px] font-mono font-semibold flex items-center justify-center`}
-        >
-          {badge > 9 ? "9+" : badge}
-        </span>
-      )}
+      <span className="gs-ico" aria-hidden="true">
+        <Icon />
+      </span>
+      <span>{item.label}</span>
     </NavLink>
   );
 };
+
+// ============== ICONS — verbatim paths from Sidebar.html ==============
+
+function MyNetIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="3.5" cy="4" r="1.5" />
+      <circle cx="12.5" cy="4" r="1.5" />
+      <circle cx="8" cy="12" r="1.5" />
+      <path d="M5 4 H11 M4.4 5.2 L7.2 10.8 M11.6 5.2 L8.8 10.8" />
+    </svg>
+  );
+}
+
+function MatchIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 5 H10 L8.2 3.2 M2.5 5 L4.3 6.8" />
+      <path d="M13.5 11 H6 L7.8 12.8 M13.5 11 L11.7 9.2" />
+    </svg>
+  );
+}
+
+function TalentsIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 2.2 L9.3 6.7 L13.8 8 L9.3 9.3 L8 13.8 L6.7 9.3 L2.2 8 L6.7 6.7 Z" />
+      <path d="M13 2.2 L13.5 3.5 L14.8 4 L13.5 4.5 L13 5.8 L12.5 4.5 L11.2 4 L12.5 3.5 Z" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 4.2 a1.7 1.7 0 0 1 1.7-1.7 h7.6 a1.7 1.7 0 0 1 1.7 1.7 v5.1 a1.7 1.7 0 0 1 -1.7 1.7 H7 L4 13.5 v-2.5 H4.2 A1.7 1.7 0 0 1 2.5 9.3 Z" />
+    </svg>
+  );
+}
+
+function HowItWorksIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="8" cy="8" r="5.6" />
+      <path d="M6.4 6.4 a1.6 1.6 0 1 1 2.4 1.4 c-0.5 0.3 -0.8 0.6 -0.8 1.2" />
+      <circle cx="8" cy="11.4" r="0.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function StandardsIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 2 L13 4 v3.5 c0 3.2 -2.2 5.6 -5 6.5 c-2.8 -0.9 -5 -3.3 -5 -6.5 V4 Z" />
+      <path d="M5.8 8.1 L7.4 9.6 L10.4 6.6" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 2.5 V10" />
+      <path d="M5 7 L8 10 L11 7" />
+      <path d="M3 12.5 H13" />
+    </svg>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="8" cy="8" r="3" />
+      <path d="M8 1.5 V3 M8 13 V14.5 M1.5 8 H3 M13 8 H14.5 M3.4 3.4 L4.5 4.5 M11.5 11.5 L12.6 12.6 M3.4 12.6 L4.5 11.5 M11.5 4.5 L12.6 3.4" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M13 9.5 A5.5 5.5 0 1 1 6.5 3 A4.4 4.4 0 0 0 13 9.5 Z" />
+    </svg>
+  );
+}

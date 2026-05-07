@@ -1,71 +1,70 @@
 /**
  * Step mockups — implementations of the Claude Design HTML prototypes
  * for the How it works page (Signup, Credentials, Accepted, Match,
- * Chat). Each component is self-contained: brings its own glass
- * background, blue accent, and Geist typography.
+ * Chat). Each component is self-contained: brings its own card
+ * background, rust accent, and Inter typography matching the warm
+ * earth palette used across the rest of the site.
  */
 import builder1 from "@/assets/builder-1.jpg";
 import builder2 from "@/assets/builder-2.jpg";
 import builder3 from "@/assets/builder-3.jpg";
 
-// Shared design tokens from the prototype CSS variables.
-const FONT = "'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif";
-const FONT_MONO = "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
-const INK = "#eef1f6";
-const INK_DIM = "#c5cad4";
-const INK_MUTED = "#6b7280";
-const LINE = "rgba(255,255,255,0.08)";
-const LINE_STRONG = "rgba(255,255,255,0.14)";
-const GLASS_BG = "rgba(20,22,30,0.55)";
-const GLASS_BG_DENSE = "rgba(20,22,30,0.62)";
-const FIELD_BG = "rgba(255,255,255,0.03)";
-const BLUE = "#3a7bff";
-const BLUE_GLOW = "rgba(58,123,255,0.35)";
-const GREEN = "#2fbf71";
-const GREEN_GLOW = "rgba(47,191,113,0.35)";
+// Shared design tokens — Vettd forest-green palette. Originally used
+// hardcoded rust hexes; retargeted at brand rename. The "RUST" /
+// "MARIGOLD" names are kept as a stable identifier for the accent
+// throughout this mockup, but they all point at the forest green.
+const FONT = "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif";
+const FONT_MONO =
+  "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+const INK = "#0F1410";                          // text primary
+const INK_DIM = "#3A3D42";
+const INK_MUTED = "#6B6E73";
+const LINE = "rgba(15, 20, 16, 0.08)";
+const LINE_STRONG = "#E1E1DC";                  // border default
+const CARD_BG = "rgba(255, 255, 255, 0.55)";
+const CARD_BG_OPAQUE = "#FFFFFF";
+const CARD_BG_TINT = "rgba(232, 240, 234, 0.85)";   // gold-glow tint
+const FIELD_BG = "rgba(232, 240, 234, 0.6)";
+const RUST = "#1F5F3E";                         // primary forest green
+const RUST_GLOW = "rgba(31, 95, 62, 0.35)";
+const RUST_LIGHT = "#1F5F3E";
+const RUST_DEEP = "#174A30";                    // hover deep
+const MARIGOLD = "#1F5F3E";
+const GREEN = "#1F5F3E";                        // semantic green = primary
+const GREEN_GLOW = "rgba(31, 95, 62, 0.30)";
 
-const baseGlass = {
+// Subtle photo tint — neutral now (sepia/orange tint removed when the
+// palette flipped from rust to forest green). Just a hair desaturated
+// so portraits sit against the page without screaming.
+const photoFilter = "saturate(0.95)";
+
+// Frosted-glass base — semi-transparent body picks up the page bg
+// through backdrop-filter. The float comes from a layered drop shadow
+// (tight contact + soft halo). The bevel comes from inset highlights:
+// bright top, soft sand bottom, faint white inner outline.
+const baseCard = {
   fontFamily: FONT,
   color: INK,
-  background: GLASS_BG,
-  border: `0.5px solid ${LINE_STRONG}`,
+  background: CARD_BG,
+  backdropFilter: "blur(24px) saturate(150%)",
+  WebkitBackdropFilter: "blur(24px) saturate(150%)",
+  border: "1px solid rgba(255, 255, 255, 0.6)",
   borderRadius: 14,
-  backdropFilter: "blur(28px) saturate(140%)",
-  WebkitBackdropFilter: "blur(28px) saturate(140%)",
-  boxShadow:
-    "0 1px 0 rgba(255,255,255,0.06) inset, 0 30px 80px rgba(0,0,0,0.55), 0 8px 24px rgba(0,0,0,0.35)",
+  boxShadow: [
+    "0 1px 2px rgba(21, 23, 26, 0.04)",
+    "0 4px 12px rgba(21, 23, 26, 0.06)",
+    "0 16px 40px -8px rgba(21, 23, 26, 0.10)",
+    "inset 0 1px 0 rgba(255, 255, 255, 0.85)",
+    "inset 0 -1px 0 rgba(199, 184, 158, 0.25)",
+    "inset 0 0 0 0.5px rgba(255, 255, 255, 0.5)",
+  ].join(", "),
   position: "relative" as const,
 };
-
-const topHighlight: React.CSSProperties = {
-  content: '""',
-  position: "absolute",
-  left: 16,
-  right: 16,
-  top: 0,
-  height: 1,
-  background:
-    "linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent)",
-};
-
-const TopEdge = ({ inset = 16 }: { inset?: number }) => (
-  <span
-    aria-hidden
-    style={{
-      ...topHighlight,
-      left: inset,
-      right: inset,
-      borderRadius: 2,
-      pointerEvents: "none",
-    }}
-  />
-);
 
 // ============= 1. SIGNUP =============================================
 
 export const StepSignup = () => (
-  <div style={{ ...baseGlass, width: 380, padding: "28px 28px 22px" }}>
-    <TopEdge />
+  <div style={{ ...baseCard, width: 380, padding: "28px 28px 22px" }}>
     <div
       style={{
         fontFamily: FONT_MONO,
@@ -73,7 +72,7 @@ export const StepSignup = () => (
         fontWeight: 500,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
-        color: "#5b95ff",
+        color: RUST,
         display: "inline-flex",
         alignItems: "center",
         gap: 8,
@@ -85,8 +84,8 @@ export const StepSignup = () => (
           width: 5,
           height: 5,
           borderRadius: "50%",
-          background: BLUE,
-          boxShadow: `0 0 8px ${BLUE_GLOW}`,
+          background: MARIGOLD,
+          boxShadow: `0 0 8px rgba(31, 95, 62,0.55)`,
           display: "inline-block",
         }}
       />
@@ -145,7 +144,7 @@ const inputStyle: React.CSSProperties = {
   font: "inherit",
   fontSize: 14,
   letterSpacing: "0.005em",
-  caretColor: BLUE,
+  caretColor: RUST,
 };
 
 const Field = ({ children }: { children: React.ReactNode }) => (
@@ -157,8 +156,8 @@ const Field = ({ children }: { children: React.ReactNode }) => (
       height: 44,
       padding: "0 14px",
       background: FIELD_BG,
-      border: `0.5px solid ${LINE}`,
-      borderRadius: 10,
+      border: `1.5px solid #9DA1A8`,
+      borderRadius: 8,
     }}
   >
     {children}
@@ -183,15 +182,15 @@ const Choice = ({
       padding: "14px 14px 13px",
       borderRadius: 10,
       background: selected
-        ? "linear-gradient(180deg, rgba(58,123,255,0.10), rgba(58,123,255,0.04))"
-        : "rgba(255,255,255,0.02)",
+        ? "linear-gradient(180deg, rgba(31, 95, 62,0.10), rgba(31, 95, 62,0.04))"
+        : FIELD_BG,
       border: selected
-        ? "0.5px solid rgba(58,123,255,0.55)"
-        : `0.5px solid ${LINE}`,
+        ? `1.5px solid ${RUST}`
+        : `1px solid ${LINE_STRONG}`,
       boxShadow: selected
-        ? "0 0 0 1px rgba(58,123,255,0.35) inset, 0 0 24px -2px rgba(58,123,255,0.35), 0 0 60px -20px #3a7bff"
+        ? `0 0 0 3px rgba(31, 95, 62,0.15), 0 4px 12px rgba(31, 95, 62,0.10)`
         : undefined,
-      opacity: selected ? 1 : 0.72,
+      opacity: selected ? 1 : 0.78,
     }}
   >
     <span
@@ -202,17 +201,17 @@ const Choice = ({
         width: 14,
         height: 14,
         borderRadius: "50%",
-        border: selected ? "1px solid #5b95ff" : `1px solid ${LINE_STRONG}`,
-        background: selected ? BLUE : "rgba(255,255,255,0.02)",
+        border: selected ? `1.5px solid ${RUST}` : `1px solid #9DA1A8`,
+        background: selected ? RUST : "#FFFFFF",
         boxShadow: selected
-          ? "0 0 0 3px rgba(58,123,255,0.18), 0 0 10px rgba(58,123,255,0.35)"
+          ? "0 0 0 3px rgba(31, 95, 62,0.18)"
           : undefined,
       }}
     />
     <span
       style={{
         fontSize: 13.5,
-        fontWeight: 500,
+        fontWeight: 600,
         color: selected ? INK : INK_DIM,
         letterSpacing: "-0.005em",
       }}
@@ -222,7 +221,7 @@ const Choice = ({
     <span
       style={{
         fontSize: 11,
-        color: selected ? "#b9c8ee" : INK_MUTED,
+        color: selected ? INK_DIM : INK_MUTED,
         letterSpacing: "0.005em",
       }}
     >
@@ -239,8 +238,8 @@ const CTA = ({ label }: { label: string }) => (
       width: "100%",
       height: 44,
       border: 0,
-      borderRadius: 10,
-      background: "linear-gradient(180deg, #4a86ff 0%, #2f6fff 100%)",
+      borderRadius: 8,
+      background: RUST,
       color: "#fff",
       font: "inherit",
       fontSize: 14,
@@ -248,7 +247,7 @@ const CTA = ({ label }: { label: string }) => (
       letterSpacing: "0.005em",
       cursor: "default",
       boxShadow:
-        "0 1px 0 rgba(255,255,255,0.25) inset, 0 -8px 16px rgba(0,0,0,0.18) inset, 0 6px 20px rgba(58,123,255,0.35), 0 1px 2px rgba(0,0,0,0.4)",
+        "0 1px 0 rgba(255,255,255,0.25) inset, 0 -6px 14px rgba(0,0,0,0.10) inset, 0 4px 14px rgba(31, 95, 62,0.30)",
     }}
   >
     {label}
@@ -258,8 +257,7 @@ const CTA = ({ label }: { label: string }) => (
 // ============= 2. CREDENTIALS ========================================
 
 export const StepCredentials = () => (
-  <div style={{ ...baseGlass, width: 400, padding: "24px 22px 20px" }}>
-    <TopEdge />
+  <div style={{ ...baseCard, width: 400, padding: "24px 22px 20px" }}>
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <CredRow
         icon={
@@ -308,26 +306,26 @@ const CredRow = ({
   <div
     style={{
       display: "grid",
-      gridTemplateColumns: "28px 1fr auto",
+      gridTemplateColumns: "32px 1fr auto",
       alignItems: "center",
       gap: 12,
       height: 56,
       padding: "0 14px",
       background: FIELD_BG,
-      border: `0.5px solid ${LINE}`,
-      borderRadius: 10,
+      border: `1px solid ${LINE_STRONG}`,
+      borderRadius: 8,
     }}
   >
     <span
       style={{
-        width: 28,
-        height: 28,
+        width: 32,
+        height: 32,
         display: "grid",
         placeItems: "center",
         borderRadius: 7,
-        background: "rgba(255,255,255,0.04)",
-        border: `0.5px solid ${LINE}`,
-        color: INK_DIM,
+        background: "rgba(31, 95, 62,0.10)",
+        border: `1px solid rgba(31, 95, 62,0.25)`,
+        color: RUST,
       }}
     >
       {icon}
@@ -344,7 +342,7 @@ const CredRow = ({
       <span
         style={{
           fontSize: 13.5,
-          fontWeight: 500,
+          fontWeight: 600,
           color: INK,
           letterSpacing: "-0.005em",
           whiteSpace: "nowrap",
@@ -372,15 +370,15 @@ const CredRow = ({
     <span
       aria-label="Verified"
       style={{
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         borderRadius: "50%",
         display: "grid",
         placeItems: "center",
-        background: "rgba(47,191,113,0.14)",
-        border: "0.5px solid rgba(47,191,113,0.45)",
+        background: "rgba(31, 95, 62,0.14)",
+        border: `1px solid rgba(31, 95, 62,0.45)`,
         color: GREEN,
-        boxShadow: `0 0 0 3px rgba(47,191,113,0.06), 0 0 16px -2px ${GREEN_GLOW}`,
+        boxShadow: `0 0 0 3px rgba(31, 95, 62,0.06)`,
         flexShrink: 0,
       }}
     >
@@ -405,7 +403,7 @@ const CredRow = ({
 export const StepAccepted = () => (
   <div
     style={{
-      ...baseGlass,
+      ...baseCard,
       width: 360,
       padding: "44px 28px 30px",
       display: "flex",
@@ -413,7 +411,6 @@ export const StepAccepted = () => (
       alignItems: "center",
     }}
   >
-    <TopEdge />
     <div
       style={{
         position: "relative",
@@ -424,14 +421,14 @@ export const StepAccepted = () => (
         marginBottom: 28,
       }}
     >
-      {/* outer soft glow */}
+      {/* outer soft glow — marigold */}
       <span
         aria-hidden
         style={{
           position: "absolute",
           inset: -20,
           background:
-            "radial-gradient(circle, rgba(58,123,255,0.55) 0%, rgba(58,123,255,0.18) 35%, rgba(0,0,0,0) 70%)",
+            "radial-gradient(circle, rgba(253, 232, 219,0.55) 0%, rgba(253, 232, 219,0.18) 35%, rgba(0,0,0,0) 70%)",
           filter: "blur(2px)",
           zIndex: 0,
         }}
@@ -445,23 +442,21 @@ export const StepAccepted = () => (
           height: 96,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(58,123,255,0.5) 0%, rgba(58,123,255,0) 70%)",
+            "radial-gradient(circle, rgba(31, 95, 62,0.45) 0%, rgba(31, 95, 62,0) 70%)",
           zIndex: 0,
         }}
       />
-      {/* badge */}
+      {/* badge — rust gradient */}
       <div
         style={{
           position: "relative",
           width: 76,
           height: 76,
           borderRadius: "50%",
-          background:
-            "linear-gradient(180deg, #5e95ff 0%, #2f6fff 60%, #1f55da 100%)",
+          background: `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 60%, ${RUST_DEEP} 100%)`,
           display: "grid",
           placeItems: "center",
-          boxShadow:
-            "0 1px 0 rgba(255,255,255,0.45) inset, 0 -10px 20px rgba(0,0,0,0.25) inset, 0 0 0 1px rgba(255,255,255,0.18) inset, 0 0 0 6px rgba(58,123,255,0.12), 0 0 0 12px rgba(58,123,255,0.06), 0 12px 30px rgba(58,123,255,0.45), 0 2px 4px rgba(0,0,0,0.4)",
+          boxShadow: `0 1px 0 rgba(255,255,255,0.4) inset, 0 -10px 20px rgba(0,0,0,0.18) inset, 0 0 0 1px rgba(255,255,255,0.18) inset, 0 0 0 6px rgba(31, 95, 62,0.12), 0 0 0 12px rgba(31, 95, 62,0.06), 0 12px 30px ${RUST_GLOW}, 0 2px 4px rgba(21, 23, 26,0.18)`,
           zIndex: 1,
         }}
       >
@@ -474,7 +469,7 @@ export const StepAccepted = () => (
           strokeWidth={2.6}
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: "drop-shadow(0 1px 0 rgba(0,0,0,0.2))" }}
+          style={{ filter: "drop-shadow(0 1px 0 rgba(0,0,0,0.18))" }}
         >
           <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
           <path d="m9 12 2 2 4-4" />
@@ -489,7 +484,7 @@ export const StepAccepted = () => (
         fontWeight: 500,
         letterSpacing: "0.22em",
         textTransform: "uppercase",
-        color: "#94beff",
+        color: RUST,
         marginBottom: 10,
       }}
     >
@@ -498,7 +493,7 @@ export const StepAccepted = () => (
     <div
       style={{
         fontSize: 22,
-        fontWeight: 500,
+        fontWeight: 700,
         letterSpacing: "-0.012em",
         color: INK,
         marginBottom: 6,
@@ -620,16 +615,35 @@ const DeckCard = ({
       style={{
         position: "absolute",
         inset: 0,
-        background: GLASS_BG_DENSE,
-        border: `0.5px solid ${LINE_STRONG}`,
+        background: CARD_BG,
+        backdropFilter: "blur(24px) saturate(150%)",
+        WebkitBackdropFilter: "blur(24px) saturate(150%)",
+        border: "1px solid rgba(255, 255, 255, 0.6)",
         borderRadius: 18,
-        backdropFilter: "blur(28px) saturate(140%)",
-        WebkitBackdropFilter: "blur(28px) saturate(140%)",
         boxShadow: front
-          ? "0 1px 0 rgba(255,255,255,0.08) inset, 0 40px 80px rgba(0,0,0,0.65), 0 12px 28px rgba(0,0,0,0.5)"
+          ? [
+              "0 1px 2px rgba(21, 23, 26, 0.05)",
+              "0 6px 16px rgba(21, 23, 26, 0.08)",
+              "0 24px 56px -8px rgba(21, 23, 26, 0.16)",
+              "inset 0 1px 0 rgba(255, 255, 255, 0.9)",
+              "inset 0 -1px 0 rgba(199, 184, 158, 0.3)",
+              "inset 0 0 0 0.5px rgba(255, 255, 255, 0.55)",
+            ].join(", ")
           : back2
-            ? "0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px rgba(0,0,0,0.65), -10px 20px 40px rgba(0,0,0,0.5)"
-            : "0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px rgba(0,0,0,0.65), 10px 20px 40px rgba(0,0,0,0.5)",
+            ? [
+                "0 1px 2px rgba(21, 23, 26, 0.04)",
+                "0 4px 12px rgba(21, 23, 26, 0.06)",
+                "-8px 16px 32px -8px rgba(21, 23, 26, 0.10)",
+                "inset 0 1px 0 rgba(255, 255, 255, 0.7)",
+                "inset 0 0 0 0.5px rgba(255, 255, 255, 0.4)",
+              ].join(", ")
+            : [
+                "0 1px 2px rgba(21, 23, 26, 0.04)",
+                "0 4px 12px rgba(21, 23, 26, 0.06)",
+                "8px 16px 32px -8px rgba(21, 23, 26, 0.10)",
+                "inset 0 1px 0 rgba(255, 255, 255, 0.7)",
+                "inset 0 0 0 0.5px rgba(255, 255, 255, 0.4)",
+              ].join(", "),
         transform: back2
           ? "translate(-110px, 18px) scale(0.78)"
           : back1
@@ -637,9 +651,9 @@ const DeckCard = ({
             : undefined,
         transformOrigin: "center",
         filter: back2
-          ? "brightness(0.55) saturate(0.85)"
+          ? "brightness(0.92) saturate(0.85)"
           : back1
-            ? "brightness(0.7) saturate(0.9)"
+            ? "brightness(0.96) saturate(0.9)"
             : undefined,
         opacity: back2 ? 0.92 : back1 ? 0.95 : 1,
         zIndex: front ? 2 : 0,
@@ -650,18 +664,6 @@ const DeckCard = ({
         fontFamily: FONT,
       }}
     >
-      <span
-        aria-hidden
-        style={{
-          position: "absolute",
-          left: 18,
-          right: 18,
-          top: 0,
-          height: 1,
-          background:
-            "linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent)",
-        }}
-      />
       <div
         style={{
           position: "relative",
@@ -669,8 +671,7 @@ const DeckCard = ({
           aspectRatio: "1 / 1",
           borderRadius: 12,
           overflow: "hidden",
-          background: "#0e131e",
-          boxShadow: "0 1px 0 rgba(255,255,255,0.08) inset",
+          background: CARD_BG_TINT,
           flexShrink: 0,
         }}
       >
@@ -684,6 +685,7 @@ const DeckCard = ({
             height: "100%",
             objectFit: "cover",
             display: "block",
+            filter: photoFilter,
           }}
         />
         <div
@@ -691,7 +693,7 @@ const DeckCard = ({
             position: "absolute",
             inset: 0,
             background:
-              "linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%), linear-gradient(180deg, rgba(58,123,255,0.05) 0%, rgba(0,0,0,0) 30%)",
+              "linear-gradient(180deg, rgba(21, 23, 26,0) 55%, rgba(21, 23, 26,0.55) 100%)",
             pointerEvents: "none",
           }}
         />
@@ -704,8 +706,8 @@ const DeckCard = ({
             alignItems: "center",
             gap: 6,
             padding: "5px 9px 5px 8px",
-            background: "rgba(10,14,28,0.6)",
-            border: "0.5px solid rgba(255,255,255,0.2)",
+            background: "rgba(21, 23, 26,0.78)",
+            border: `1px solid rgba(244,237,217,0.3)`,
             borderRadius: 999,
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
@@ -714,7 +716,7 @@ const DeckCard = ({
             fontWeight: 500,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "#d8e2ff",
+            color: "#FFFFFF",
           }}
         >
           <span
@@ -722,8 +724,8 @@ const DeckCard = ({
               width: 5,
               height: 5,
               borderRadius: "50%",
-              background: BLUE,
-              boxShadow: `0 0 8px ${BLUE_GLOW}`,
+              background: MARIGOLD,
+              boxShadow: `0 0 8px rgba(253, 232, 219,0.55)`,
             }}
           />
           {match}
@@ -742,7 +744,7 @@ const DeckCard = ({
           style={{
             margin: 0,
             fontSize: 18,
-            fontWeight: 500,
+            fontWeight: 700,
             letterSpacing: "-0.012em",
             color: INK,
           }}
@@ -785,7 +787,7 @@ const DeckCard = ({
           <span>{location}</span>
           {availability && (
             <>
-              <span style={{ color: "rgba(255,255,255,0.18)", margin: "0 4px" }}>
+              <span style={{ color: "rgba(21, 23, 26,0.22)", margin: "0 4px" }}>
                 ·
               </span>
               <svg
@@ -825,8 +827,8 @@ const DeckCard = ({
                 textTransform: "uppercase",
                 padding: "3px 7px",
                 borderRadius: 4,
-                background: "rgba(255,255,255,0.05)",
-                border: `0.5px solid ${LINE}`,
+                background: FIELD_BG,
+                border: `1px solid ${LINE_STRONG}`,
                 color: INK_DIM,
               }}
             >
@@ -848,7 +850,7 @@ const ActionBtn = ({ variant }: { variant: "pass" | "connect" | "save" }) => {
       aria-label={variant}
       style={{
         appearance: "none",
-        border: isConnect ? 0 : `0.5px solid ${LINE_STRONG}`,
+        border: isConnect ? 0 : `1px solid ${LINE_STRONG}`,
         cursor: "default",
         width: size,
         height: size,
@@ -856,14 +858,12 @@ const ActionBtn = ({ variant }: { variant: "pass" | "connect" | "save" }) => {
         display: "grid",
         placeItems: "center",
         background: isConnect
-          ? "linear-gradient(180deg, rgb(74,134,255) 0%, rgb(47,111,255) 100%)"
-          : "rgba(255,255,255,0.04)",
+          ? `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`
+          : "#FFFFFF",
         color: isConnect ? "#fff" : INK_DIM,
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
         boxShadow: isConnect
-          ? "0 1px 0 rgba(255,255,255,0.3) inset, 0 -10px 16px rgba(0,0,0,0.2) inset, 0 8px 28px rgba(58,123,255,0.45), 0 2px 4px rgba(0,0,0,0.4)"
-          : undefined,
+          ? `0 1px 0 rgba(255,255,255,0.3) inset, 0 -8px 14px rgba(0,0,0,0.10) inset, 0 6px 18px ${RUST_GLOW}, 0 2px 4px rgba(21, 23, 26,0.18)`
+          : "0 1px 4px rgba(21, 23, 26,0.06)",
       }}
     >
       {variant === "pass" && (
@@ -917,8 +917,7 @@ const ActionBtn = ({ variant }: { variant: "pass" | "connect" | "save" }) => {
 export const StepChat = () => (
   <div
     style={{
-      ...baseGlass,
-      background: GLASS_BG_DENSE,
+      ...baseCard,
       width: 380,
       height: 460,
       display: "flex",
@@ -927,7 +926,6 @@ export const StepChat = () => (
       borderRadius: 16,
     }}
   >
-    <TopEdge inset={18} />
     {/* Header */}
     <div
       style={{
@@ -935,8 +933,9 @@ export const StepChat = () => (
         alignItems: "center",
         gap: 12,
         padding: "14px 16px",
-        borderBottom: `0.5px solid ${LINE}`,
+        borderBottom: `1px solid ${LINE_STRONG}`,
         flexShrink: 0,
+        background: CARD_BG_TINT,
       }}
     >
       <div
@@ -946,14 +945,12 @@ export const StepChat = () => (
           borderRadius: "50%",
           display: "grid",
           placeItems: "center",
-          background:
-            "linear-gradient(180deg, rgba(58,123,255,0.28), rgba(58,123,255,0.14))",
-          border: "0.5px solid rgba(58,123,255,0.45)",
-          boxShadow:
-            "0 0 0 3px rgba(58,123,255,0.08), 0 0 16px -2px rgba(58,123,255,0.42)",
-          color: "#cfdcff",
+          background: `linear-gradient(180deg, rgba(31, 95, 62,0.22), rgba(31, 95, 62,0.10))`,
+          border: `1px solid rgba(31, 95, 62,0.35)`,
+          boxShadow: `0 0 0 3px rgba(31, 95, 62,0.08)`,
+          color: RUST_DEEP,
           fontSize: 12,
-          fontWeight: 600,
+          fontWeight: 700,
           letterSpacing: "0.04em",
           fontFamily: FONT,
         }}
@@ -971,7 +968,7 @@ export const StepChat = () => (
         <div
           style={{
             fontSize: 14,
-            fontWeight: 500,
+            fontWeight: 600,
             color: INK,
             letterSpacing: "-0.005em",
             fontFamily: FONT,
@@ -998,7 +995,7 @@ export const StepChat = () => (
               height: 6,
               borderRadius: "50%",
               background: GREEN,
-              boxShadow: `0 0 0 2px rgba(47,191,113,0.18), 0 0 8px ${GREEN_GLOW}`,
+              boxShadow: `0 0 0 2px rgba(31, 95, 62,0.18), 0 0 8px ${GREEN_GLOW}`,
             }}
           />
           ONLINE
@@ -1017,6 +1014,7 @@ export const StepChat = () => (
         gap: 10,
         overflowY: "auto",
         fontFamily: FONT,
+        background: CARD_BG,
       }}
     >
       <div
@@ -1042,8 +1040,8 @@ export const StepChat = () => (
             fontSize: 13.5,
             lineHeight: 1.4,
             letterSpacing: "0.005em",
-            background: "rgba(255,255,255,0.06)",
-            border: `0.5px solid ${LINE}`,
+            background: FIELD_BG,
+            border: `1px solid ${LINE_STRONG}`,
             color: INK,
           }}
         >
@@ -1061,11 +1059,10 @@ export const StepChat = () => (
             fontSize: 13.5,
             lineHeight: 1.4,
             letterSpacing: "0.005em",
-            background:
-              "linear-gradient(180deg, rgba(58,123,255,0.32) 0%, rgba(58,123,255,0.22) 100%)",
-            border: "0.5px solid rgba(58,123,255,0.45)",
-            color: "#ecf2ff",
-            boxShadow: `0 4px 16px -6px ${BLUE_GLOW}`,
+            background: `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`,
+            border: `1px solid ${RUST_DEEP}`,
+            color: "#FFFFFF",
+            boxShadow: `0 4px 12px -4px ${RUST_GLOW}`,
           }}
         >
           Yeah sure, that sounds great. When are you free?
@@ -1080,8 +1077,8 @@ export const StepChat = () => (
         alignItems: "center",
         gap: 8,
         padding: "12px 12px 12px 16px",
-        borderTop: `0.5px solid ${LINE}`,
-        background: "rgba(8,10,16,0.4)",
+        borderTop: `1px solid ${LINE_STRONG}`,
+        background: CARD_BG_TINT,
         flexShrink: 0,
       }}
     >
@@ -1101,7 +1098,7 @@ export const StepChat = () => (
           fontSize: 13.5,
           height: 36,
           padding: 0,
-          caretColor: BLUE,
+          caretColor: RUST,
         }}
       />
       <button
@@ -1116,10 +1113,9 @@ export const StepChat = () => (
           borderRadius: "50%",
           display: "grid",
           placeItems: "center",
-          background: "linear-gradient(180deg, #4a86ff 0%, #2f6fff 100%)",
+          background: `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`,
           color: "#fff",
-          boxShadow:
-            "0 1px 0 rgba(255,255,255,0.25) inset, 0 -6px 12px rgba(0,0,0,0.18) inset, 0 4px 14px rgba(58,123,255,0.4), 0 1px 2px rgba(0,0,0,0.4)",
+          boxShadow: `0 1px 0 rgba(255,255,255,0.25) inset, 0 -6px 12px rgba(0,0,0,0.10) inset, 0 4px 12px ${RUST_GLOW}, 0 2px 4px rgba(21, 23, 26,0.18)`,
           flexShrink: 0,
         }}
       >

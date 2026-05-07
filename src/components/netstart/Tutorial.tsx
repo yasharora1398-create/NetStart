@@ -113,7 +113,7 @@ export const Tutorial = () => {
 
   return (
     <div className="fixed bottom-5 right-5 md:bottom-8 md:right-8 z-50 animate-fade-up">
-      <div className={cardClass.replace("border-gold/30", "border-blue-400/40")}>
+      <div className={cardClass.replace("border-gold/30", "border-primary/40")}>
         <button
           onClick={dismiss}
           className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -121,7 +121,7 @@ export const Tutorial = () => {
         >
           <X className="h-4 w-4" />
         </button>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-blue-400 mb-2">{step.label}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-primary mb-2">{step.label}</p>
         <h4 className="font-display text-xl mb-2 pr-6">{step.title}</h4>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">{step.body}</p>
         <div className="flex items-center gap-2">

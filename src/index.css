@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,65 +6,127 @@
 
 @layer base {
   :root {
-    /* NetStart - luxury obsidian + signal gold */
-    --background: 0 0% 4%;
-    --foreground: 210 20% 96%;
+    /* Vettd — single-accent forest green on warm off-white.
+       Token names are kept for compatibility — `--gold` now means
+       forest green, `--accent` means the soft green-tinted bg, etc. */
 
-    --card: 0 0% 6%;
-    --card-foreground: 210 20% 96%;
+    /* Page surfaces */
+    --background: 60 12% 97%;            /* #FAFAF7 warm off-white */
+    --foreground: 132 14% 7%;            /* #0F1410 text primary */
 
-    --popover: 0 0% 6%;
-    --popover-foreground: 210 20% 96%;
+    --card: 0 0% 100%;                   /* #FFFFFF */
+    --card-foreground: 132 14% 7%;
 
-    --primary: 215 37% 55%;
-    --primary-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 132 14% 7%;
 
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 210 20% 96%;
+    /* Accent — forest green */
+    --primary: 146 51% 25%;              /* #1F5F3E */
+    --primary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 9%;
-    --muted-foreground: 215 10% 60%;
+    --secondary: 48 13% 94%;             /* #F2F1ED alt section */
+    --secondary-foreground: 132 14% 7%;
 
-    --accent: 215 37% 45%;
-    --accent-foreground: 210 20% 98%;
+    --muted: 48 13% 94%;
+    --muted-foreground: 220 4% 44%;      /* #6B6E73 */
 
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 210 20% 96%;
+    --accent: 133 18% 92%;               /* #E8F0EA accent subtle bg */
+    --accent-foreground: 146 51% 25%;    /* forest green text */
 
-    --success: 145 50% 50%;
-    --success-foreground: 0 0% 4%;
+    --destructive: 4 51% 31%;            /* #7A2620 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 215 15% 14%;
-    --input: 0 0% 10%;
-    --ring: 215 37% 55%;
+    --success: 146 51% 25%;              /* same as accent */
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.25rem;
+    --border: 48 8% 87%;                 /* #E1E1DC */
+    --input: 48 6% 84%;                  /* #D9D9D6 stronger border */
+    --ring: 146 51% 25%;
 
-    /* Brand - steel blue (kept token names for compatibility) */
-    --gold: 215 37% 55%;
-    --gold-deep: 215 40% 35%;
-    --gold-glow: 215 50% 68%;
-    --obsidian: 0 0% 4%;
-    --carbon: 0 0% 8%;
+    --radius: 0.5rem;
 
-    --gradient-gold: linear-gradient(135deg, hsl(215 50% 68%), hsl(215 40% 35%));
-    --gradient-obsidian: linear-gradient(180deg, hsl(0 0% 6%) 0%, hsl(0 0% 3%) 100%);
-    --gradient-spotlight: radial-gradient(ellipse at top, hsl(215 40% 25% / 0.4), transparent 60%);
+    /* Brand legacy tokens — re-pointed at forest green */
+    --gold: 146 51% 25%;                 /* primary */
+    --gold-deep: 147 53% 19%;            /* #174A30 hover */
+    --gold-glow: 133 18% 92%;            /* #E8F0EA accent subtle */
+    --obsidian: 60 12% 97%;
+    --carbon: 48 13% 94%;
 
-    --shadow-elite: 0 30px 80px -20px hsl(215 37% 45% / 0.3);
-    --shadow-card: 0 20px 60px -10px hsl(0 0% 0% / 0.8);
-    --shadow-glow: 0 0 40px hsl(215 50% 68% / 0.35);
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(146 51% 25%), hsl(147 53% 19%));
+    --gradient-obsidian: linear-gradient(180deg, hsl(60 12% 97%) 0%, hsl(48 13% 94%) 100%);
+    --gradient-spotlight: radial-gradient(ellipse at top, hsl(146 51% 25% / 0.10), transparent 60%);
+
+    --shadow-elite: 0 4px 16px rgba(15, 20, 16, 0.14);
+    --shadow-card: 0 2px 8px rgba(15, 20, 16, 0.06);
+    --shadow-glow: 0 0 24px hsl(146 51% 25% / 0.35);
 
     --transition-precise: cubic-bezier(0.16, 1, 0.3, 1);
 
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 210 20% 96%;
-    --sidebar-primary: 215 37% 55%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 10%;
-    --sidebar-accent-foreground: 210 20% 96%;
-    --sidebar-border: 215 15% 14%;
-    --sidebar-ring: 215 37% 55%;
+    /* Sidebar */
+    --sidebar-background: 60 12% 97%;
+    --sidebar-foreground: 132 14% 7%;
+    --sidebar-primary: 146 51% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 48 13% 94%;
+    --sidebar-accent-foreground: 132 14% 7%;
+    --sidebar-border: 48 8% 87%;
+    --sidebar-ring: 146 51% 25%;
+  }
+
+  /* Vettd dark mode — deep forest base, sage accent. Matches the
+     mobile app's themeMode.tsx palette so brand is consistent. */
+  .dark {
+    --background: 162 19% 7%;            /* #0F1614 */
+    --foreground: 60 6% 95%;             /* near-white */
+
+    --card: 156 14% 12%;                 /* #19211D */
+    --card-foreground: 60 6% 95%;
+
+    --popover: 156 14% 12%;
+    --popover-foreground: 60 6% 95%;
+
+    --primary: 142 33% 48%;              /* #4FA572 sage */
+    --primary-foreground: 162 19% 7%;    /* dark text on sage button */
+
+    --secondary: 158 16% 9%;             /* #141C18 alt section */
+    --secondary-foreground: 60 6% 95%;
+
+    --muted: 158 16% 9%;
+    --muted-foreground: 60 4% 64%;       /* #A6A69E muted */
+
+    --accent: 142 22% 13%;               /* #1A2820 subtle bg */
+    --accent-foreground: 142 33% 58%;
+
+    --destructive: 6 60% 48%;
+    --destructive-foreground: 60 6% 95%;
+
+    --success: 142 33% 48%;
+    --success-foreground: 162 19% 7%;
+
+    --border: 156 12% 18%;               /* #28332C */
+    --input: 156 12% 18%;
+    --ring: 142 33% 48%;
+
+    --gold: 142 33% 48%;
+    --gold-deep: 144 33% 54%;            /* #5DB582 hover */
+    --gold-glow: 142 22% 13%;
+
+    --gradient-gold: linear-gradient(135deg, hsl(142 33% 48%), hsl(144 33% 54%));
+    --gradient-spotlight: radial-gradient(ellipse at top, hsl(142 33% 48% / 0.10), transparent 60%);
+
+    --shadow-elite: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 24px hsl(142 33% 48% / 0.4);
+
+    --sidebar-background: 162 19% 7%;
+    --sidebar-foreground: 60 6% 95%;
+    --sidebar-primary: 142 33% 48%;
+    --sidebar-primary-foreground: 162 19% 7%;
+    --sidebar-accent: 158 16% 9%;
+    --sidebar-accent-foreground: 60 6% 95%;
+    --sidebar-border: 156 12% 18%;
+    --sidebar-ring: 142 33% 48%;
   }
 }
 
@@ -81,11 +143,26 @@
     background-image: var(--gradient-spotlight);
     background-attachment: fixed;
   }
+  /* faint paper grain across the whole page */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.035;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  body > #root {
+    position: relative;
+    z-index: 1;
+  }
   .font-display {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Fraunces', 'ui-serif', Georgia, serif;
     font-weight: 700;
-    letter-spacing: -0.04em;
-    font-feature-settings: "ss01", "cv11";
+    letter-spacing: -0.02em;
+    font-feature-settings: "ss01";
   }
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
@@ -100,7 +177,7 @@
     background-clip: text;
   }
   .border-gold-soft {
-    border-color: hsl(var(--gold) / 0.25);
+    border-color: hsl(var(--gold) / 0.3);
   }
   .grain::before {
     content: '';
@@ -109,96 +186,101 @@
     pointer-events: none;
     opacity: 0.04;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
   }
 
-  /* Liquid-glass surface — almost invisible body, the work is in
-     the edges and inset shadows so it reads as physical glass. Use
-     `.glass` on any container. Don't set `position` here; it would
-     override Tailwind's `fixed` / `absolute` utilities.  */
+  /* Warm liquid glass — semi-transparent frosted surface that floats
+     ~1mm above the cream page. The body picks up whatever's behind it
+     via backdrop-filter. The bevel comes from inset highlights (bright
+     top edge, soft bottom shadow). The float comes from a layered drop
+     shadow that's tight near the surface and softer further out.
+
+     Don't set `position` here; would override Tailwind's fixed/abs. */
   .glass {
-    background: rgba(8, 10, 16, 0.4);
-    backdrop-filter: blur(36px) saturate(160%);
-    -webkit-backdrop-filter: blur(36px) saturate(160%);
-    border: 0.5px solid rgba(255, 255, 255, 0.05);
-    /* Inset shadows = the bevel: thin bright top edge, thin dark
-       bottom edge, faint inner outline. Plus a deep outer drop. */
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow:
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.16),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.5),
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.025),
-      0 30px 60px -20px rgba(0, 0, 0, 0.7);
+      /* The 1mm float — tight contact shadow, then a wider soft drop. */
+      0 1px 2px rgba(21, 23, 26, 0.04),
+      0 4px 12px rgba(21, 23, 26, 0.06),
+      0 16px 40px -8px rgba(21, 23, 26, 0.10),
+      /* Frosted bevel — bright top edge, faint dark bottom. */
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(199, 184, 158, 0.25),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
     overflow: hidden;
   }
-  /* LIQUID GLASS RIM — Apple iOS 26 style. Each edge carries a
-     wide multi-stop chromatic gradient (cyan -> white -> magenta ->
-     amber -> back) that's twice as wide as the element. We shift
-     its background-position with --scroll-progress so the rainbow
-     literally slides along the rim as the page scrolls. Only the
-     rim pixels show the color; the body is left alone.
+  .glass:hover {
+    box-shadow:
+      0 1px 2px rgba(21, 23, 26, 0.05),
+      0 6px 16px rgba(21, 23, 26, 0.08),
+      0 22px 48px -8px rgba(21, 23, 26, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(199, 184, 158, 0.3),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.55);
+  }
 
-     The trick: each gradient strip is positioned and sized to only
-     cover its own edge (16px tall on top, etc.), with no-repeat
-     and a wide background-size so we have headroom to pan.  */
+  /* LIQUID GLASS RIM — a single hairline strip on each edge that pans
+     with --scroll-progress, giving the rim the "liquid" feeling. The
+     warm palette uses cream highlights with marigold and sage chroma
+     instead of the original cyan/magenta. Each gradient is 250% wide
+     so it has headroom to slide as the page scrolls. */
   .glass::before {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
+    z-index: 0;
 
     background:
-      /* TOP edge — wide rainbow strip 18px tall, 250% wide */
+      /* TOP edge — bright cream-to-marigold rim, the floating highlight */
       linear-gradient(
         90deg,
-        rgba(80, 180, 255, 0.10),
-        rgba(200, 230, 255, 0.22),
-        rgba(220, 200, 255, 0.18),
-        rgba(255, 200, 220, 0.14),
-        rgba(255, 230, 180, 0.12),
-        rgba(180, 230, 255, 0.20),
-        rgba(80, 180, 255, 0.10)
+        rgba(255, 255, 255, 0.30),
+        rgba(255, 255, 255, 0.85),
+        rgba(244, 162, 97, 0.55),
+        rgba(255, 255, 255, 0.85),
+        rgba(168, 181, 158, 0.45),
+        rgba(255, 255, 255, 0.30)
       )
       0 0 / 250% 1px no-repeat,
 
-      /* BOTTOM edge — cooler palette, 14px tall, 250% wide */
+      /* BOTTOM edge — faint warm-brown rim */
       linear-gradient(
         90deg,
-        rgba(255, 200, 170, 0.06),
-        rgba(255, 180, 220, 0.12),
-        rgba(220, 180, 255, 0.14),
-        rgba(180, 220, 255, 0.10),
-        rgba(255, 200, 170, 0.06)
+        rgba(199, 184, 158, 0.20),
+        rgba(184, 92, 56, 0.18),
+        rgba(199, 184, 158, 0.30),
+        rgba(168, 181, 158, 0.20),
+        rgba(199, 184, 158, 0.20)
       )
       0 100% / 250% 1px no-repeat,
 
-      /* LEFT edge — vertical chromatic strip 250% tall so we can
-         pan it as scroll progresses */
+      /* LEFT edge — subtle vertical chromatic strip */
       linear-gradient(
         180deg,
-        rgba(80, 180, 255, 0.10),
-        rgba(200, 230, 255, 0.18),
-        rgba(220, 200, 255, 0.16),
-        rgba(255, 200, 220, 0.12),
-        rgba(180, 230, 255, 0.18),
-        rgba(80, 180, 255, 0.10)
+        rgba(255, 255, 255, 0.65),
+        rgba(244, 162, 97, 0.35),
+        rgba(255, 255, 255, 0.55),
+        rgba(168, 181, 158, 0.30),
+        rgba(255, 255, 255, 0.55)
       )
       0 0 / 1px 250% no-repeat,
 
-      /* RIGHT edge — same height, opposite color order so the two
-         sides drift toward each other */
+      /* RIGHT edge — opposite phase so the two sides drift toward each other */
       linear-gradient(
         180deg,
-        rgba(255, 200, 220, 0.10),
-        rgba(180, 230, 255, 0.18),
-        rgba(255, 230, 180, 0.14),
-        rgba(220, 200, 255, 0.16),
-        rgba(255, 200, 220, 0.10)
+        rgba(168, 181, 158, 0.30),
+        rgba(255, 255, 255, 0.55),
+        rgba(244, 162, 97, 0.35),
+        rgba(255, 255, 255, 0.55),
+        rgba(184, 92, 56, 0.20)
       )
       100% 0 / 1px 250% no-repeat;
 
-    /* All four edges pan with --scroll-progress: top slides left,
-       bottom slides right, left slides up, right slides down — so
-       the rim looks like it's flowing as you scroll.  */
     background-position:
       calc(var(--scroll-progress, 0) * -150%) 0,
       calc(50% + var(--scroll-progress, 0) * 150%) 100%,
@@ -208,20 +290,17 @@
     transition: background-position 100ms linear;
   }
 
-  /* Outlined / stroke text used for the giant numerals on the
-     landing. Modern technical feel.  */
+  /* Outlined / stroke text — now uses rust */
   .text-stroke {
-    -webkit-text-stroke: 1.5px rgba(96, 165, 250, 0.85);
+    -webkit-text-stroke: 1.5px hsl(var(--primary) / 0.85);
     color: transparent;
   }
   .text-stroke-soft {
-    -webkit-text-stroke: 1px rgba(96, 165, 250, 0.35);
+    -webkit-text-stroke: 1px hsl(var(--primary) / 0.35);
     color: transparent;
   }
 
-  /* Reveal-on-scroll utility — pair with .reveal-on for the visible
-     state. Sections add `data-reveal` and a small effect tracker
-     toggles `.reveal-on` once the section enters the viewport.  */
+  /* Reveal-on-scroll utility */
   .reveal {
     opacity: 0;
     transform: translateY(24px);
@@ -235,5 +314,323 @@
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
+  }
+
+  /* GLASS-SIDEBAR — exact spec from Sidebar.html design handoff.
+     Frosted-glass panel with a sub-pixel chromatic edge that hugs the
+     22px-rounded perimeter. Sits 12px in from top/left/bottom; 224px
+     wide. Body is a translucent white→sand gradient with strong blur
+     so the page beneath shows through. Bevel via inset highlights.
+     The rainbow ::before is masked to only show on the rim. */
+  .glass-sidebar {
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    width: 224px;
+    height: calc(100vh - 24px);
+    z-index: 40;
+    border-radius: 22px;
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.42) 0%,
+        rgba(245, 240, 228, 0.22) 100%);
+    -webkit-backdrop-filter: blur(32px) saturate(190%);
+    backdrop-filter: blur(32px) saturate(190%);
+    padding: 16px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow:
+      0 0 0 0.5px rgba(0, 0, 0, 0.08),
+      0 18px 40px -16px rgba(60, 50, 30, 0.18),
+      0 2px 6px -2px rgba(60, 50, 30, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  }
+  .glass-sidebar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 0.75px;
+    background: conic-gradient(
+      from 220deg at 50% 50%,
+      rgba(255, 110, 110, 0.55),
+      rgba(255, 170, 140, 0.35),
+      rgba(255, 220, 180, 0.25),
+      rgba(200, 200, 220, 0.20),
+      rgba(180, 160, 230, 0.30),
+      rgba(255, 140, 180, 0.45),
+      rgba(255, 110, 110, 0.55)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .glass-sidebar .gs-brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 10px;
+    z-index: 1;
+  }
+  .glass-sidebar .gs-brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: #1a1a1a;
+    color: #FFFFFF;
+    display: grid;
+    place-items: center;
+    font-family: "Times New Roman", serif;
+    font-size: 16px;
+    font-weight: 600;
+    flex: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .glass-sidebar .gs-brand-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: #1a1a1a;
+    line-height: 1.15;
+  }
+  .glass-sidebar .gs-brand-sub {
+    font-size: 10.5px;
+    color: #9a9a9a;
+    letter-spacing: 0.02em;
+    margin-top: 1px;
+  }
+  .glass-sidebar .gs-section {
+    position: relative;
+    z-index: 1;
+    padding: 6px 0 4px;
+  }
+  .glass-sidebar .gs-section + .gs-section {
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .glass-sidebar .gs-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9a9a9a;
+    padding: 4px 10px 8px;
+  }
+  .glass-sidebar .gs-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: #1a1a1a;
+    text-align: left;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: background 140ms ease;
+  }
+  .glass-sidebar .gs-item:hover {
+    background: rgba(255, 255, 255, 0.55);
+  }
+  .glass-sidebar .gs-item.gs-active {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+      0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .glass-sidebar .gs-ico {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: #6b6b6b;
+    display: grid;
+    place-items: center;
+  }
+  .glass-sidebar .gs-item.gs-active .gs-ico {
+    color: #1a1a1a;
+  }
+  .glass-sidebar .gs-ico svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+  .glass-sidebar .gs-spacer {
+    flex: 1;
+  }
+  .glass-sidebar .gs-theme {
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+    padding: 10px 4px 4px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .glass-sidebar .gs-theme-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9a9a9a;
+    padding: 0 6px 8px;
+  }
+  .glass-sidebar .gs-seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    padding: 3px;
+    background: rgba(0, 0, 0, 0.045);
+    border-radius: 11px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .glass-sidebar .gs-seg button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    color: #6b6b6b;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .glass-sidebar .gs-seg button svg {
+    width: 13px;
+    height: 13px;
+  }
+  .glass-sidebar .gs-seg button[aria-pressed="true"] {
+    background: #ffffff;
+    color: #1a1a1a;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* Dark mode overrides — keeps the same frosted geometry but flips
+     the surface, text, and rim colors to the Vettd dark palette. */
+  .dark .glass-sidebar {
+    background:
+      linear-gradient(180deg,
+        rgba(25, 33, 29, 0.65) 0%,
+        rgba(15, 22, 20, 0.55) 100%);
+    box-shadow:
+      0 0 0 0.5px rgba(255, 255, 255, 0.06),
+      0 18px 40px -16px rgba(0, 0, 0, 0.5),
+      0 2px 6px -2px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  }
+  .dark .glass-sidebar::before {
+    background: conic-gradient(
+      from 220deg at 50% 50%,
+      rgba(79, 165, 114, 0.45),
+      rgba(120, 200, 150, 0.30),
+      rgba(160, 220, 180, 0.18),
+      rgba(80, 90, 80, 0.20),
+      rgba(120, 200, 150, 0.30),
+      rgba(79, 165, 114, 0.45)
+    );
+    opacity: 0.7;
+  }
+  .dark .glass-sidebar .gs-brand {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+  .dark .glass-sidebar .gs-brand-mark {
+    background: hsl(142 33% 48%);  /* sage primary */
+    color: hsl(162 19% 7%);         /* dark text on sage */
+  }
+  .dark .glass-sidebar .gs-brand-name {
+    color: hsl(60 6% 95%);
+  }
+  .dark .glass-sidebar .gs-brand-sub {
+    color: hsl(60 4% 64%);
+  }
+  .dark .glass-sidebar .gs-section + .gs-section {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .dark .glass-sidebar .gs-section-label,
+  .dark .glass-sidebar .gs-theme-label {
+    color: hsl(60 4% 64%);
+  }
+  .dark .glass-sidebar .gs-item {
+    color: hsl(60 6% 95%);
+  }
+  .dark .glass-sidebar .gs-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .dark .glass-sidebar .gs-item.gs-active {
+    background: rgba(79, 165, 114, 0.15);
+    box-shadow:
+      inset 0 0 0 1px rgba(79, 165, 114, 0.35),
+      0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  .dark .glass-sidebar .gs-ico {
+    color: hsl(60 4% 64%);
+  }
+  .dark .glass-sidebar .gs-item.gs-active .gs-ico {
+    color: hsl(142 33% 58%);
+  }
+  .dark .glass-sidebar .gs-theme {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .dark .glass-sidebar .gs-seg {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+  .dark .glass-sidebar .gs-seg button {
+    color: hsl(60 4% 64%);
+  }
+  .dark .glass-sidebar .gs-seg button[aria-pressed="true"] {
+    background: hsl(142 33% 48%);
+    color: hsl(162 19% 7%);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  /* Hawk-moth mascot animations — used wherever the moth is shown. */
+  .moth-hover {
+    animation: moth-hover 4.6s ease-in-out infinite;
+    transform-origin: center 70%;
+  }
+  @keyframes moth-hover {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25%      { transform: translateY(-3px) rotate(-1.2deg); }
+    50%      { transform: translateY(0) rotate(0deg); }
+    75%      { transform: translateY(-3px) rotate(1.2deg); }
+  }
+  .wing-flap-l {
+    animation: wing-flap-l 0.18s ease-in-out infinite alternate;
+    transform-origin: 100% 50%;
+  }
+  .wing-flap-r {
+    animation: wing-flap-r 0.18s ease-in-out infinite alternate;
+    transform-origin: 0% 50%;
+  }
+  @keyframes wing-flap-l {
+    from { transform: skewY(-2deg) scaleY(0.96); }
+    to   { transform: skewY(2deg)  scaleY(1.02); }
+  }
+  @keyframes wing-flap-r {
+    from { transform: skewY(2deg)  scaleY(0.96); }
+    to   { transform: skewY(-2deg) scaleY(1.02); }
   }
 }

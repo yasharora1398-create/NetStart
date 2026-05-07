@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="theme-color" content="#FAF6EC" />
     <title>NetStart - Find cofounders who can actually build</title>
     <meta name="description" content="A two-sided network for founders and operators. AI-ranked matches, verified credentials, decisive applications. Move from idea to launch faster." />
     <meta name="author" content="NetStart" />
@@ -29,6 +29,18 @@
   </head>
 
   <body>
+    <!-- Apply the saved theme before React mounts so dark-mode users
+         don't see a flash of the light palette during boot. Mirrors
+         the logic in src/hooks/useTheme.ts. -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("vettd_web_theme");
+          var mode = saved === "light" || saved === "dark" ? saved : "dark";
+          if (mode === "dark") document.documentElement.classList.add("dark");
+        } catch (e) { /* localStorage blocked — ignore */ }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

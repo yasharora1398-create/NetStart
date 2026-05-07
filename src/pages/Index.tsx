@@ -37,17 +37,14 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-6 md:px-10">
           {/* HERO */}
           <section className="pt-6 md:pt-12 pb-12 md:pb-16 max-w-3xl">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
-              netstart / for builders
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] mb-5 text-primary">
+              vettd / for builders
             </p>
-            <h1
-              className="text-4xl md:text-6xl lg:text-[6rem] leading-[0.92] tracking-[-0.04em] mb-5"
-              style={{ fontWeight: 600 }}
-            >
+            <h1 className="font-display text-4xl md:text-6xl lg:text-[6rem] leading-[0.92] tracking-[-0.03em] mb-5 text-foreground font-bold">
               The mobile app for people who actually
-              <span className="text-blue-400"> build.</span>
+              <span className="italic text-primary"> build.</span>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-md mb-8 leading-relaxed">
+            <p className="text-base md:text-lg max-w-md mb-8 leading-relaxed text-muted-foreground">
               Vetted founders and operators. AI-ranked matches. Connect, pass,
               or save — no maybes.
             </p>
@@ -61,7 +58,10 @@ const Index = () => {
                   <Link to="/signup">
                     <PrimaryButton>Sign up free</PrimaryButton>
                   </Link>
-                  <Link to="/signin" className={MUTE_LINK}>
+                  <Link
+                    to="/signin"
+                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
                     Sign in
                   </Link>
                 </>
@@ -69,40 +69,27 @@ const Index = () => {
             </div>
           </section>
 
-          {/* WHY — three reasons in glass cards */}
+          {/* WHY — three reasons in warm cards */}
           <section className="py-10 md:py-14">
-            <div className="grid md:grid-cols-3 gap-3">
+            <div className="grid md:grid-cols-3 gap-4">
               {WHY.map((w) => {
                 const Icon = w.icon;
                 return (
-                  <div
+                  <article
                     key={w.title}
-                    className="glass rounded-2xl p-6"
-                    style={{
-                      fontFamily:
-                        "'Geist', ui-sans-serif, system-ui, sans-serif",
-                    }}
+                    className="glass relative p-6"
+                    style={{ borderRadius: 16 }}
                   >
-                    <div
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl mb-4"
-                      style={{
-                        background: "rgba(58,123,255,0.10)",
-                        border: "0.5px solid rgba(58,123,255,0.35)",
-                        color: "#5b95ff",
-                      }}
-                    >
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg mb-4 bg-primary/10 border border-primary/40 text-primary">
                       <Icon className="h-4 w-4" />
                     </div>
-                    <h3
-                      className="text-xl mb-2 tracking-[-0.02em]"
-                      style={{ fontWeight: 600 }}
-                    >
+                    <h3 className="font-display text-xl mb-2 tracking-[-0.015em] text-foreground font-bold">
                       {w.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-sm leading-relaxed text-muted-foreground">
                       {w.body}
                     </p>
-                  </div>
+                  </article>
                 );
               })}
             </div>
@@ -110,72 +97,60 @@ const Index = () => {
 
           {/* HOW — single line flow */}
           <section className="py-10 md:py-14">
-            <div className="grid md:grid-cols-[140px_1fr] gap-6 md:gap-12 items-baseline">
+            <div className="grid md:grid-cols-[160px_1fr] gap-6 md:gap-12 items-baseline">
               <Link
                 to="/how"
-                className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 hover:text-blue-300 transition-colors"
+                className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-primary transition-colors hover:opacity-80"
               >
                 How it works
                 <ArrowRight className="h-3 w-3 mt-0.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <p
-                className="text-2xl md:text-4xl tracking-[-0.03em] leading-[1.15] max-w-3xl"
-                style={{ fontWeight: 600 }}
-              >
+              <p className="font-display text-2xl md:text-4xl tracking-[-0.02em] leading-[1.15] max-w-3xl text-foreground font-bold">
                 Sign up. Verify. Match.{" "}
-                <span className="text-blue-400">Build.</span>
+                <span className="italic text-primary">Build.</span>
               </p>
             </div>
           </section>
 
-          {/* CLOSING CTA — frosted glass card */}
+          {/* CLOSING CTA — alt-section panel */}
           <section className="py-12 md:py-16">
-            <div
-              className="glass rounded-2xl p-8 md:p-12"
-              style={{
-                fontFamily: "'Geist', ui-sans-serif, system-ui, sans-serif",
-              }}
-            >
+            <div className="p-8 md:p-12 bg-secondary border border-border rounded-2xl">
               <div className="grid md:grid-cols-[1fr_auto] gap-8 md:gap-16 items-end">
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-4 inline-flex items-center gap-2">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] mb-4 inline-flex items-center gap-2 text-primary">
                     <span
-                      className="inline-block h-1.5 w-1.5 rounded-full"
-                      style={{
-                        background: "#3a7bff",
-                        boxShadow: "0 0 8px rgba(58,123,255,0.55)",
-                      }}
+                      className="inline-block h-1.5 w-1.5 rounded-full bg-primary"
+                      style={{ boxShadow: "0 0 8px hsl(var(--primary) / 0.55)" }}
                     />
                     Apply to join
                   </p>
-                  <h2
-                    className="text-3xl md:text-5xl tracking-[-0.04em] leading-[1] mb-3"
-                    style={{ fontWeight: 600 }}
-                  >
+                  <h2 className="font-display text-3xl md:text-5xl tracking-[-0.025em] leading-[1] mb-3 text-foreground font-bold">
                     Operators,
                     <br />
-                    <span className="text-muted-foreground">not talkers.</span>
+                    <span className="italic text-muted-foreground">
+                      not talkers.
+                    </span>
                   </h2>
-                  <p className="text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
+                  <p className="text-sm md:text-base max-w-md leading-relaxed text-muted-foreground">
                     Free to apply. Quick manual review.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2.5 min-w-[220px]">
                   {user ? (
                     <Link to="/mynet">
-                      <DownloadButton primary label="Open MyNet" sub="Continue" />
+                      <CtaButton primary label="Open MyNet" sub="Continue" />
                     </Link>
                   ) : (
                     <>
                       <Link to="/signup">
-                        <DownloadButton
+                        <CtaButton
                           primary
                           label="Sign up free"
                           sub="Free to apply"
                         />
                       </Link>
                       <Link to="/download">
-                        <DownloadButton label="Get the app" sub="iOS & Android" />
+                        <CtaButton label="Get the app" sub="iOS & Android" />
                       </Link>
                     </>
                   )}
@@ -184,21 +159,21 @@ const Index = () => {
             </div>
           </section>
 
-          <footer className="border-t border-white/10 mt-4 mb-6 pt-5 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-            <p>© netstart</p>
+          <footer className="mt-4 mb-6 pt-5 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-[0.25em] border-t border-border text-muted-foreground">
+            <p>© Vettd</p>
             <div className="flex gap-6">
-              <Link to="/how" className="hover:text-foreground transition-colors">
+              <Link to="/how" className="transition-colors hover:text-foreground">
                 How it works
               </Link>
               <Link
                 to="/standards"
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-foreground"
               >
                 Standards
               </Link>
               <Link
                 to="/download"
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-foreground"
               >
                 Download
               </Link>
@@ -210,27 +185,18 @@ const Index = () => {
   );
 };
 
-const MUTE_LINK =
-  "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
-
 const PrimaryButton = ({ children }: { children: React.ReactNode }) => (
   <button
     type="button"
-    className="group inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition-all"
-    style={{
-      background: "linear-gradient(180deg, #4a86ff 0%, #2f6fff 100%)",
-      color: "#fff",
-      boxShadow:
-        "0 1px 0 rgba(255,255,255,0.25) inset, 0 -8px 16px rgba(0,0,0,0.18) inset, 0 6px 20px rgba(58,123,255,0.35), 0 1px 2px rgba(0,0,0,0.4)",
-      fontFamily: "'Geist', ui-sans-serif, system-ui, sans-serif",
-    }}
+    className="group inline-flex items-center gap-2 text-sm font-medium px-6 py-3 rounded-lg bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+    style={{ boxShadow: "0 2px 8px hsl(var(--primary) / 0.3)" }}
   >
     {children}
     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
   </button>
 );
 
-const DownloadButton = ({
+const CtaButton = ({
   label,
   sub,
   primary = false,
@@ -240,35 +206,20 @@ const DownloadButton = ({
   primary?: boolean;
 }) => (
   <span
-    className="group flex items-center gap-3 rounded-xl px-5 py-3 transition-all min-w-[220px] cursor-pointer"
+    className={`group flex items-center gap-3 transition-all min-w-[220px] cursor-pointer rounded-lg ${
+      primary
+        ? "bg-primary text-primary-foreground px-5 py-3"
+        : "bg-card text-foreground border-[1.5px] border-primary px-5 py-[10.5px]"
+    }`}
     style={
       primary
-        ? {
-            background: "linear-gradient(180deg, #4a86ff 0%, #2f6fff 100%)",
-            color: "#fff",
-            boxShadow:
-              "0 1px 0 rgba(255,255,255,0.25) inset, 0 -8px 16px rgba(0,0,0,0.18) inset, 0 6px 20px rgba(58,123,255,0.35), 0 1px 2px rgba(0,0,0,0.4)",
-          }
-        : {
-            background: "rgba(255,255,255,0.04)",
-            color: "#eef1f6",
-            border: "0.5px solid rgba(255,255,255,0.14)",
-            boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset",
-          }
+        ? { boxShadow: "0 2px 8px hsl(var(--primary) / 0.3)" }
+        : undefined
     }
   >
-    <span
-      className="text-sm font-medium block flex-1"
-      style={{ fontFamily: "'Geist', ui-sans-serif, system-ui, sans-serif" }}
-    >
+    <span className="text-sm font-medium block flex-1">
       <span className="block leading-tight">{label}</span>
-      <span
-        className="block text-[10px] font-mono uppercase tracking-[0.18em] opacity-60 mt-0.5"
-        style={{
-          fontFamily:
-            "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
-        }}
-      >
+      <span className="block text-[10px] font-mono uppercase tracking-[0.18em] mt-0.5 opacity-65">
         {sub}
       </span>
     </span>

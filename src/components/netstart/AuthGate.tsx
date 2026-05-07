@@ -16,17 +16,28 @@ export const AuthGate = ({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center px-4"
+      // Sits to the RIGHT of the sidebar so users can still click
+      // sidebar items (Match, How it works, etc.) while the gate is
+      // open. The inline `left` reads the same `--sidebar-width` var
+      // the rest of the app uses so it stays in sync if the sidebar
+      // ever collapses.
+      className="fixed top-0 right-0 bottom-0 z-30 flex items-center justify-center px-4"
+      style={{ left: "var(--sidebar-width, 248px)" }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-gate-title"
     >
+      {/* Blurred backdrop — only blurs the content area, never the
+          sidebar. Sits behind the modal card. */}
       <div
         className="absolute inset-0 bg-background/70 backdrop-blur-md"
         aria-hidden
       />
 
-      <div className="relative w-full max-w-md rounded-sm border border-gold-soft bg-card shadow-card overflow-hidden">
+      {/* The card itself is fully opaque (bg-card) and sits above the
+          backdrop in z-order, so it always renders sharp regardless of
+          what's behind it. */}
+      <div className="relative z-10 w-full max-w-md rounded-sm border border-gold-soft bg-card shadow-card overflow-hidden">
         <div className="absolute inset-0 bg-gradient-spotlight opacity-60 pointer-events-none" />
         <div className="relative p-8 md:p-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">

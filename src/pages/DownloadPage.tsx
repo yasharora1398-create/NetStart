@@ -48,12 +48,12 @@ const DownloadPage = () => (
     >
       <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
             Download
           </p>
           <h1 className="font-display text-5xl md:text-7xl lg:text-[6rem] tracking-[-0.04em] leading-[0.92] mb-8 max-w-3xl">
             Operators,<br />
-            <span className="text-blue-400">not talkers.</span>
+            <span className="text-primary">not talkers.</span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-xl mb-12 leading-relaxed">
             Native apps for iOS and Android. The web works too — but the
@@ -65,7 +65,7 @@ const DownloadPage = () => (
           <div className="grid sm:grid-cols-2 gap-3 max-w-md mb-20">
             <a
               href="#"
-              className="group flex items-center gap-3 px-5 py-4 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 hover:bg-white/[0.07] hover:border-white/20 transition-all"
+              className="group flex items-center gap-3 px-5 py-4 rounded-2xl bg-card backdrop-blur-xl border border-border hover:bg-accent hover:border-primary/30 transition-all"
             >
               <Apple className="h-5 w-5 text-foreground" />
               <div className="flex-1 min-w-0">
@@ -78,7 +78,7 @@ const DownloadPage = () => (
             </a>
             <a
               href="#"
-              className="group flex items-center gap-3 px-5 py-4 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 hover:bg-white/[0.07] hover:border-white/20 transition-all"
+              className="group flex items-center gap-3 px-5 py-4 rounded-2xl bg-card backdrop-blur-xl border border-border hover:bg-accent hover:border-primary/30 transition-all"
             >
               <Smartphone className="h-5 w-5 text-foreground" />
               <div className="flex-1 min-w-0">
@@ -93,14 +93,14 @@ const DownloadPage = () => (
         </Reveal>
 
         <Reveal delay={140}>
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12 pt-10 border-t border-white/10">
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12 pt-10 border-t border-border">
             {[
               { label: "iOS", body: "iOS 16+. Native UIKit." },
               { label: "Android", body: "Android 12+. Material 3." },
               { label: "Web", body: "Chrome, Safari, Firefox latest." },
             ].map((s) => (
               <div key={s.label}>
-                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-blue-400 mb-2">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-2">
                   {s.label}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -112,10 +112,10 @@ const DownloadPage = () => (
         </Reveal>
 
         <Reveal>
-          <div className="mt-20 pt-10 border-t border-white/10">
+          <div className="mt-20 pt-10 border-t border-border">
             <Link
               to="/signup"
-              className="group inline-flex items-center gap-2 text-base font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              className="group inline-flex items-center gap-2 text-base font-medium text-primary transition-colors hover:opacity-80"
             >
               Or sign up on the web
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

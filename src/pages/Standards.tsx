@@ -78,7 +78,7 @@ const Standards = () => (
     >
       <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-blue-400 mb-5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
             Standards
           </p>
           <h1 className="font-display text-5xl md:text-7xl tracking-[-0.04em] leading-[0.95] mb-8">
@@ -94,7 +94,7 @@ const Standards = () => (
           {PRINCIPLES.map((p, i) => (
             <Reveal key={p.title} delay={i * 100}>
               <article className="grid md:grid-cols-[140px_1fr] gap-8 md:gap-14 items-start">
-                <span className="font-display text-stroke text-7xl md:text-[8rem] leading-none tracking-[-0.05em] select-none">
+                <span className="font-mono text-primary/35 text-6xl md:text-[7rem] leading-none tracking-[-0.04em] tabular-nums font-light select-none">
                   0{i + 1}
                 </span>
                 <div>
@@ -110,7 +110,7 @@ const Standards = () => (
                         key={d}
                         className="flex items-baseline gap-3 text-sm text-foreground/80"
                       >
-                        <span className="text-blue-400 font-mono text-xs">
+                        <span className="text-primary font-mono text-xs">
                           —
                         </span>
                         <span>{d}</span>
@@ -124,10 +124,10 @@ const Standards = () => (
         </div>
 
         <Reveal>
-          <div className="mt-32 pt-10 border-t border-white/10">
+          <div className="mt-32 pt-10 border-t border-border">
             <Link
               to="/signup"
-              className="group inline-flex items-center gap-2 text-base font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              className="group inline-flex items-center gap-2 text-base font-medium text-primary transition-colors hover:opacity-80"
             >
               Apply to join
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
