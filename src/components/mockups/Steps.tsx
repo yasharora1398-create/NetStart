@@ -527,64 +527,74 @@ export const StepAccepted = () => (
 
 // ============= 4. MATCH ==============================================
 
-export const StepMatch = () => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 22,
-      paddingTop: 18,
-      paddingBottom: 18,
-    }}
-  >
-    {/* Deck — 3 cards, the back two offset */}
+// Optional portrait override — when no array is passed, the default
+// builder-1/2/3 imports are used (the How it works step). The waitlist
+// hero passes business-style stock URLs instead.
+type StepMatchProps = {
+  portraits?: [string, string, string];
+};
+
+export const StepMatch = ({ portraits }: StepMatchProps = {}) => {
+  const [front, back1, back2] = portraits ?? [builder1, builder2, builder3];
+  return (
     <div
       style={{
-        position: "relative",
-        width: 240,
-        height: 380,
-        margin: "0 110px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 22,
+        paddingTop: 18,
+        paddingBottom: 18,
       }}
     >
-      <DeckCard
-        position="back-2"
-        portrait={builder3}
-        match="87% MATCH"
-        name="Devon Ortiz"
-        sub="Design lead · ex-Figma"
-        location="Austin, TX"
-        tags={["DESIGN SYSTEMS", "B2B"]}
-      />
-      <DeckCard
-        position="back-1"
-        portrait={builder2}
-        match="91% MATCH"
-        name="Aisha Bello"
-        sub="Founding PM · ex-Notion"
-        location="New York, NY"
-        tags={["PRODUCT", "FINTECH"]}
-      />
-      <DeckCard
-        position="front"
-        portrait={builder1}
-        match="94% MATCH"
-        name="Riley Pham"
-        sub="Senior eng · ex-Stripe"
-        location="San Francisco, CA"
-        availability="Open to chat"
-        tags={["PAYMENTS", "DISTRIBUTED", "RUST"]}
-      />
-    </div>
+      {/* Deck — 3 cards, the back two offset */}
+      <div
+        style={{
+          position: "relative",
+          width: 240,
+          height: 380,
+          margin: "0 110px",
+        }}
+      >
+        <DeckCard
+          position="back-2"
+          portrait={back2}
+          match="87% MATCH"
+          name="Devon Ortiz"
+          sub="Design lead · ex-Figma"
+          location="Austin, TX"
+          tags={["DESIGN SYSTEMS", "B2B"]}
+        />
+        <DeckCard
+          position="back-1"
+          portrait={back1}
+          match="91% MATCH"
+          name="Aisha Bello"
+          sub="Founding PM · ex-Notion"
+          location="New York, NY"
+          tags={["PRODUCT", "FINTECH"]}
+        />
+        <DeckCard
+          position="front"
+          portrait={front}
+          match="94% MATCH"
+          name="Riley Pham"
+          sub="Senior eng · ex-Stripe"
+          location="San Francisco, CA"
+          availability="Open to chat"
+          tags={["PAYMENTS", "DISTRIBUTED", "RUST"]}
+        />
+      </div>
 
-    {/* Action row */}
-    <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-      <ActionBtn variant="pass" />
-      <ActionBtn variant="connect" />
-      <ActionBtn variant="save" />
+      {/* Action row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <ActionBtn variant="pass" />
+        <ActionBtn variant="connect" />
+        <ActionBtn variant="save" />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const DeckCard = ({
   position,

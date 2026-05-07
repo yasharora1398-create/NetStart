@@ -15,6 +15,16 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { StepMatch } from "@/components/mockups/Steps";
+
+// Business-portrait stock photos (Unsplash, hot-linked). These swap
+// the casual builder-1/2/3 portraits used on the How it works page
+// for something more polished / suit-looking on the marketing hero.
+const HERO_PORTRAITS: [string, string, string] = [
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=600&q=80",
+];
 
 const Waitlist = () => {
   const { mode, toggle } = useTheme();
@@ -30,8 +40,14 @@ const Waitlist = () => {
         <div className="mx-auto max-w-6xl px-5 md:px-8 h-14 md:h-16 flex items-center justify-between">
           <Link
             to="/"
-            className="font-display text-xl md:text-[22px] tracking-[-0.02em] text-foreground"
+            className="flex items-center gap-2 font-display text-xl md:text-[22px] tracking-[-0.02em] text-foreground"
           >
+            <img
+              src="/polln8-logo.png"
+              alt=""
+              className="h-7 w-7 md:h-8 md:w-8 object-contain"
+              draggable={false}
+            />
             Polln8
           </Link>
           <div className="flex items-center gap-3">
@@ -49,32 +65,41 @@ const Waitlist = () => {
 
       <main className="relative z-10">
         {/* HERO ----------------------------------------------------- */}
-        <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-32 pb-24 md:pb-40">
-          <div className="max-w-3xl">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-6">
-              Coming soon · Free
-            </p>
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[6.5rem] leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
-              Stop building
-              <br />
-              alone.
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
-              Solo founders quit. Teams ship. Polln8 is where founders find
-              partners and builders find startups to bet on.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to="/signup"
-                className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
-                style={{ boxShadow: "var(--shadow-glow)" }}
-              >
-                Get started
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <p className="text-xs md:text-sm font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                Free · Launching 2026
+        <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28 pb-24 md:pb-40">
+          <div className="grid lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-6">
+                Coming soon · Free
               </p>
+              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
+                Stop building
+                <br />
+                alone.
+              </h1>
+              <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
+                Solo founders quit. Teams ship. Polln8 is where founders find
+                partners and builders find startups to bet on.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <Link
+                  to="/signup"
+                  className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
+                  style={{ boxShadow: "var(--shadow-glow)" }}
+                >
+                  Get started
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <p className="text-xs md:text-sm font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  Free · Launching 2026
+                </p>
+              </div>
+            </div>
+
+            {/* Right side — the Match step mockup with business portraits.
+                Hidden below large-tablet so the hero text breathes on
+                phones; visible on lg screens up. */}
+            <div className="hidden lg:flex justify-center items-center scale-90 origin-center">
+              <StepMatch portraits={HERO_PORTRAITS} />
             </div>
           </div>
         </section>
