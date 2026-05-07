@@ -1,4 +1,4 @@
-// Wordmark + moth logo. The image is served from /polln8-logo.png in
+// Wordmark + moth logo. The image is served from /polln8-logo.svg in
 // the public/ folder so it can be swapped without rebuilding (same
 // file the favicon and the waitlist nav point at).
 export const Logo = ({ className = "" }: { className?: string }) => (
@@ -7,7 +7,7 @@ export const Logo = ({ className = "" }: { className?: string }) => (
     aria-label="Polln8"
   >
     <img
-      src="/polln8-logo.png"
+      src="/polln8-logo.svg"
       alt=""
       className="h-8 w-8 object-contain"
       draggable={false}

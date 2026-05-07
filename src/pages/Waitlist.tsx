@@ -36,7 +36,7 @@ const Waitlist = () => {
             className="flex items-center gap-2 font-display text-xl md:text-[22px] tracking-[-0.02em] text-foreground"
           >
             <img
-              src="/polln8-logo.png"
+              src="/polln8-logo.svg"
               alt=""
               className="h-7 w-7 md:h-8 md:w-8 object-contain"
               draggable={false}
