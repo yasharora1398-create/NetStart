@@ -739,25 +739,33 @@ const MyNet = () => {
 
       {showPending && (
         <div className="fixed inset-0 z-40 flex items-center justify-center px-6 pt-28 pb-12 pointer-events-none">
-          <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-10 text-center pointer-events-auto">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-5">
-              <Hourglass className="h-5 w-5 text-gold" />
+          {/* Dimmed + blurred backdrop so the page behind is visible
+              but obviously locked. The card itself sits above the
+              backdrop and stays sharp. */}
+          <div
+            className="absolute inset-0 bg-background/70 backdrop-blur-md"
+            aria-hidden
+          />
+          <div className="relative max-w-md w-full rounded-2xl border border-gold-soft bg-card shadow-2xl p-10 text-center pointer-events-auto">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 bg-gold/10 mb-5">
+              <Sparkles className="h-5 w-5 text-gold" />
             </div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-              Review pending
+              All caught up
             </p>
-            <h3 className="font-display text-3xl mb-3">Hold tight.</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Your submission is in the queue. We&apos;ll review your resume or
-              LinkedIn shortly.
+            <h3 className="font-display text-3xl mb-3">You&apos;re set.</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-7">
+              When we launch, you&apos;ll be able to find cofounders that
+              match your project immediately.
             </p>
-            <button
-              onClick={() => setEditingPending(true)}
-              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border hover:border-gold/40 bg-background/60 rounded-sm px-4 py-2.5 transition-colors"
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Edit my submission
-            </button>
+              <ArrowLeft className="h-4 w-4" />
+              Back to homepage
+            </Link>
           </div>
         </div>
       )}
