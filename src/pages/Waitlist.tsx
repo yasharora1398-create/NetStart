@@ -15,10 +15,12 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/context/AuthContext";
 import { StepMatch } from "@/components/mockups/Steps";
 
 const Waitlist = () => {
   const { mode, toggle } = useTheme();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
@@ -42,12 +44,26 @@ const Waitlist = () => {
             Polln8
           </Link>
           <div className="flex items-center gap-3 md:gap-5">
-            <Link
-              to="/signin"
-              className="hidden sm:inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Sign in
-            </Link>
+            {/* If the user is already authenticated, the SignUp/SignIn
+                pages auto-redirect them back here, which feels like
+                the auth pages are broken. Show a "Sign out" link
+                instead so they can drop the session and re-test. */}
+            {user ? (
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="hidden sm:inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Sign out
+              </button>
+            ) : (
+              <Link
+                to="/signin"
+                className="hidden sm:inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Sign in
+              </Link>
+            )}
             <ThemeToggle mode={mode} onToggle={toggle} />
             <Link
               to="/signup"
