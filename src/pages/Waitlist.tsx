@@ -41,7 +41,13 @@ const Waitlist = () => {
             />
             Polln8
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 md:gap-5">
+            <Link
+              to="/signin"
+              className="hidden sm:inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Sign in
+            </Link>
             <ThemeToggle mode={mode} onToggle={toggle} />
             <Link
               to="/signup"
