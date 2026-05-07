@@ -758,14 +758,22 @@ const MyNet = () => {
               When we launch, you&apos;ll be able to find cofounders that
               match your project immediately.
             </p>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-              style={{ boxShadow: "var(--shadow-glow)" }}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to homepage
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                style={{ boxShadow: "var(--shadow-glow)" }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to homepage
+              </Link>
+              <button
+                onClick={() => setEditingPending(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent"
+              >
+                Edit MyNet
+              </button>
+            </div>
           </div>
         </div>
       )}
