@@ -10,6 +10,7 @@ import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import Index from "./pages/Index.tsx";
 import Waitlist from "./pages/Waitlist.tsx";
 import Authenticated from "./pages/Authenticated.tsx";
+import CheckEmail from "./pages/CheckEmail.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import SignUp from "./pages/SignUp.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/" element={<HomePage />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/check-email" element={<CheckEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/terms" element={<Terms />} />

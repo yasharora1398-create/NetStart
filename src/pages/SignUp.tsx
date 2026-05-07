@@ -67,8 +67,12 @@ const SignUp = () => {
       return;
     }
 
-    toast.success("Check your email to confirm your account.");
-    navigate("/signin", { replace: true, state: { from: redirectTo } });
+    // Replace the old toast + bounce-to-signin with a dedicated
+    // "check your email" page that has its own resend button.
+    navigate("/check-email", {
+      replace: true,
+      state: { email: values.email },
+    });
   };
 
   return (
