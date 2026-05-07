@@ -4,14 +4,32 @@
  * confirmation link is clicked). Not linked from the waitlist or any
  * other surface.
  *
+ * Supabase auto-creates a session when its /verify endpoint succeeds,
+ * which would silently log the user in. We want the opposite: the
+ * user should land here, see the confirmation, and then go sign in
+ * themselves with the credentials they just made. So we drop any
+ * session that's been set as soon as the page mounts.
+ *
  * Same near-black background as the rest of the marketing site, with
  * two green glow orbs floating behind a centered card. The card
  * confirms the email is verified and points the user at /signin.
  */
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
-const Authenticated = () => (
+const Authenticated = () => {
+  const { signOut } = useAuth();
+  useEffect(() => {
+    // Drop the session Supabase auto-created at verify-time. We don't
+    // wait on the promise — by the time the user reads the card and
+    // clicks "Sign in," the sign-out has resolved and /signin won't
+    // bounce them via its already-authed redirect.
+    void signOut();
+  }, [signOut]);
+
+  return (
   <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
     {/* Blurred green orbs — mirror of the waitlist backdrop. */}
     <div
@@ -69,6 +87,7 @@ const Authenticated = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default Authenticated;

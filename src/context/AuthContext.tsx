@@ -75,10 +75,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp: AuthContextValue["signUp"] = async (email, password, name) => {
     if (!isSupabaseConfigured) return notConfigured();
+    // After the user clicks the verification link in the email, send
+    // them to /authenticated. The page itself signs them back out on
+    // mount so they have to log in manually with the credentials they
+    // just created — Supabase otherwise auto-creates a session at
+    // verify-time.
+    const emailRedirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/authenticated`
+        : undefined;
     const { error } = await getSupabase().auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: { data: { name }, emailRedirectTo },
     });
     return { error };
   };
