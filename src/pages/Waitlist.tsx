@@ -30,7 +30,7 @@ const Waitlist = () => {
 
       {/* Sticky top nav */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border/50">
-        <div className="mx-auto max-w-6xl px-5 md:px-8 h-14 md:h-16 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
           <Link
             to="/"
             className="flex items-center gap-2 font-display text-xl md:text-[22px] tracking-[-0.02em] text-foreground"
@@ -38,7 +38,7 @@ const Waitlist = () => {
             <img
               src="/polln8-logo.png"
               alt=""
-              className="h-7 w-7 md:h-8 md:w-8 object-contain"
+              className="h-11 w-11 md:h-14 md:w-14 object-contain"
               draggable={false}
             />
             Polln8

@@ -9,10 +9,10 @@ export const Logo = ({ className = "" }: { className?: string }) => (
     <img
       src="/polln8-logo.png"
       alt=""
-      className="h-8 w-8 object-contain"
+      className="h-12 w-12 object-contain"
       draggable={false}
     />
-    <span className="font-display text-xl tracking-[-0.02em] text-foreground">
+    <span className="font-display text-2xl tracking-[-0.02em] text-foreground">
       Polln8
     </span>
   </div>
