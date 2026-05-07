@@ -6,7 +6,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "1. The deal",
     body:
-      "NetStart is a platform that connects founders with operators willing to join their projects. By creating an account you agree to use NetStart honestly: real identity, real work history, real intent. Misrepresentation is grounds for removal.",
+      "Polln8 is a platform that connects founders with operators willing to join their projects. By creating an account you agree to use Polln8 honestly: real identity, real work history, real intent. Misrepresentation is grounds for removal.",
   },
   {
     title: "2. Eligibility",
@@ -21,7 +21,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "4. Content you submit",
     body:
-      "Your LinkedIn, resume, project details, candidate profile, and applications are stored in our backend (Supabase). You retain ownership. By submitting them you grant NetStart a non-exclusive license to display them to other authenticated users in line with the visibility settings you choose (open to work, project published, etc.).",
+      "Your LinkedIn, resume, project details, candidate profile, and applications are stored in our backend (Supabase). You retain ownership. By submitting them you grant Polln8 a non-exclusive license to display them to other authenticated users in line with the visibility settings you choose (open to work, project published, etc.).",
   },
   {
     title: "5. Conduct",
@@ -36,7 +36,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "7. Termination",
     body:
-      "You can stop using NetStart at any time. We can suspend or terminate accounts that violate these terms. We'll typically email you first unless the violation is severe.",
+      "You can stop using Polln8 at any time. We can suspend or terminate accounts that violate these terms. We'll typically email you first unless the violation is severe.",
   },
   {
     title: "8. No guarantees",
@@ -51,7 +51,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "10. Contact",
     body:
-      "Questions, concerns, takedown requests: NetStartapp@outlook.com.",
+      "Questions, concerns, takedown requests: Polln8app@outlook.com.",
   },
 ];
 

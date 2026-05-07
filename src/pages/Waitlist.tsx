@@ -1,5 +1,5 @@
 /**
- * Vettd marketing waitlist landing — served at "/" in production
+ * Polln8 marketing waitlist landing — served at "/" in production
  * (Vercel) only. On localhost the original Index page renders instead
  * so the live product keeps iterating untouched. The routing switch
  * lives in App.tsx (`import.meta.env.PROD`).
@@ -32,7 +32,7 @@ const Waitlist = () => {
             to="/"
             className="font-display text-xl md:text-[22px] tracking-[-0.02em] text-foreground"
           >
-            Vettd
+            Polln8
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle mode={mode} onToggle={toggle} />
@@ -60,7 +60,7 @@ const Waitlist = () => {
               alone.
             </h1>
             <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
-              Solo founders quit. Teams ship. Vettd is where founders find
+              Solo founders quit. Teams ship. Polln8 is where founders find
               partners and builders find startups to bet on.
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -105,7 +105,7 @@ const Waitlist = () => {
         {/* HOW IT WORKS --------------------------------------------- */}
         <Section eyebrow="The mechanism">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-[-0.025em] leading-[1.05] text-foreground mb-12 md:mb-16">
-            How Vettd works.
+            How Polln8 works.
           </h2>
           <div className="grid md:grid-cols-3 gap-10 md:gap-14">
             <Pillar
@@ -169,7 +169,7 @@ const Waitlist = () => {
                 Find your person.
               </h2>
               <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-10">
-                Vettd launches 2026. Get on the list before then.
+                Polln8 launches 2026. Get on the list before then.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
@@ -192,18 +192,18 @@ const Waitlist = () => {
         <footer className="mx-auto max-w-6xl px-5 md:px-8 pb-10 pt-6 border-t border-border/60">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <span className="font-display text-sm tracking-[-0.01em] text-foreground">
-              Vettd
+              Polln8
             </span>
             <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-              © 2026 Vettd
+              © 2026 Polln8
             </p>
             <a
-              href="https://x.com/vettd"
+              href="https://x.com/polln8"
               target="_blank"
               rel="noreferrer"
               className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              @vettd
+              @polln8
             </a>
           </div>
         </footer>

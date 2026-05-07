@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 
-// Vettd theme — toggles the `.dark` class on <html> and persists the
-// pick to localStorage. Default is "dark" to match the mobile app.
+// Polln8 theme — toggles the `.dark` class on <html> and persists
+// the pick to localStorage. Default is "dark" to match the mobile app.
 //
 // CSS variables in src/index.css drive the actual colors; this hook
 // just flips the class so Tailwind / shadcn pick up the dark token set.
 
 export type ThemeMode = "light" | "dark";
 
-const STORAGE_KEY = "vettd_web_theme";
+const STORAGE_KEY = "polln8_web_theme";
 
 const readInitial = (): ThemeMode => {
   if (typeof window === "undefined") return "dark";

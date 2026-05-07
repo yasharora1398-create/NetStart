@@ -30,9 +30,9 @@ export const Sidebar = () => {
     <aside className="glass-sidebar" aria-label="Sidebar">
       {/* Brand */}
       <div className="gs-brand">
-        <div className="gs-brand-mark">V</div>
+        <div className="gs-brand-mark">P8</div>
         <div>
-          <div className="gs-brand-name">Vettd</div>
+          <div className="gs-brand-name">Polln8</div>
           <div className="gs-brand-sub">Build with intent</div>
         </div>
       </div>

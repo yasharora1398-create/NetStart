@@ -136,7 +136,7 @@ export const Nav = () => {
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-gold-soft">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" aria-label="NetStart home">
+        <Link to="/" aria-label="Polln8 home">
           <Logo />
         </Link>
 

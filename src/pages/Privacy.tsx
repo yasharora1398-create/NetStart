@@ -41,7 +41,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "8. Children",
     body:
-      "NetStart is not intended for users under 18. If we discover an underage account, we will delete it.",
+      "Polln8 is not intended for users under 18. If we discover an underage account, we will delete it.",
   },
   {
     title: "9. Changes",
@@ -51,7 +51,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "10. Contact",
     body:
-      "Privacy questions, takedown requests, or data exports: NetStartapp@outlook.com.",
+      "Privacy questions, takedown requests, or data exports: Polln8app@outlook.com.",
   },
 ];
 

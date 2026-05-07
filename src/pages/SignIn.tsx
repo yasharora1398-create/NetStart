@@ -76,7 +76,7 @@ const SignIn = () => {
         />
         <div className="absolute inset-0 -z-10 bg-gradient-spotlight opacity-60" />
 
-        <Link to="/" aria-label="NetStart home" className="relative z-10">
+        <Link to="/" aria-label="Polln8 home" className="relative z-10">
           <Logo />
         </Link>
 
@@ -108,7 +108,7 @@ const SignIn = () => {
         </div>
 
         <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-          © NetStart · A network for builders
+          © Polln8 · A network for builders
         </p>
       </aside>
 

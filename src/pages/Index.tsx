@@ -12,7 +12,7 @@ const WHY = [
   {
     icon: Sparkles,
     title: "AI-ranked matches.",
-    body: "The deck is ordered against your skills, project, and intent — not the algorithm's.",
+    body: "The deck is ordered against your skills, project, and intent. Not the algorithm's.",
   },
   {
     icon: Zap,
@@ -38,7 +38,7 @@ const Index = () => {
           {/* HERO */}
           <section className="pt-6 md:pt-12 pb-12 md:pb-16 max-w-3xl">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] mb-5 text-primary">
-              vettd / for builders
+              polln8 / for builders
             </p>
             <h1 className="font-display text-4xl md:text-6xl lg:text-[6rem] leading-[0.92] tracking-[-0.03em] mb-5 text-foreground font-bold">
               The mobile app for people who actually
@@ -46,7 +46,7 @@ const Index = () => {
             </h1>
             <p className="text-base md:text-lg max-w-md mb-8 leading-relaxed text-muted-foreground">
               Vetted founders and operators. AI-ranked matches. Connect, pass,
-              or save — no maybes.
+              or save. No maybes.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               {user ? (
@@ -160,7 +160,7 @@ const Index = () => {
           </section>
 
           <footer className="mt-4 mb-6 pt-5 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-[0.25em] border-t border-border text-muted-foreground">
-            <p>© Vettd</p>
+            <p>© Polln8</p>
             <div className="flex gap-6">
               <Link to="/how" className="transition-colors hover:text-foreground">
                 How it works

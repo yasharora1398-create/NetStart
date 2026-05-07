@@ -267,7 +267,7 @@ const Chats = () => {
                   <MessageCircle className="h-6 w-6 text-gold mx-auto mb-3" />
                 }
                 title="No contacts yet."
-                body="Accept a chat request and they'll show up here. In-app messaging is coming soon — for now, reach out via LinkedIn."
+                body="Accept a chat request and they'll show up here. In-app messaging is coming soon. For now, reach out via LinkedIn."
               />
             ) : (
               <ul className="space-y-3">

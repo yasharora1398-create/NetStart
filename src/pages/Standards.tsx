@@ -24,7 +24,7 @@ const PRINCIPLES = [
   },
   {
     title: "Decisive by design.",
-    body: "Connect, pass, save. No likes, no maybes. Every interaction is a deliberate choice — your time is the asset we protect most.",
+    body: "Connect, pass, save. No likes, no maybes. Every interaction is a deliberate choice. Your time is the asset we protect most.",
     detail: [
       "Three actions per profile and that's it.",
       "Apply once with a real pitch, not a template.",
@@ -111,7 +111,7 @@ const Standards = () => (
                         className="flex items-baseline gap-3 text-sm text-foreground/80"
                       >
                         <span className="text-primary font-mono text-xs">
-                          —
+                          ·
                         </span>
                         <span>{d}</span>
                       </li>

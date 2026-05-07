@@ -37,7 +37,7 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="px-6 py-6">
-        <Link to="/" aria-label="NetStart home">
+        <Link to="/" aria-label="Polln8 home">
           <Logo />
         </Link>
       </header>

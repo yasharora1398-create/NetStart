@@ -56,7 +56,7 @@ const DownloadPage = () => (
             <span className="text-primary">not talkers.</span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-xl mb-12 leading-relaxed">
-            Native apps for iOS and Android. The web works too — but the
+            Native apps for iOS and Android. The web works too. The
             phone is where the swiping lives.
           </p>
         </Reveal>
