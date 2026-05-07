@@ -17,19 +17,6 @@ import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { StepMatch } from "@/components/mockups/Steps";
 
-// Business-portrait stock photos (Unsplash, hot-linked). All three
-// are men in business attire — replaces the casual builder-1/2/3
-// photos used on the How it works step. If any look off, swap the
-// URL with another Unsplash men's-business portrait.
-const HERO_PORTRAITS: [string, string, string] = [
-  // Front card — Joel Mott portrait, black male in suit + glasses
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
-  // Back-1 card — male in suit, smiling
-  "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80",
-  // Back-2 card — male in business attire
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80",
-];
-
 const Waitlist = () => {
   const { mode, toggle } = useTheme();
 
@@ -99,11 +86,13 @@ const Waitlist = () => {
               </div>
             </div>
 
-            {/* Right side — the Match step mockup with business portraits.
-                Hidden below large-tablet so the hero text breathes on
-                phones; visible on lg screens up. */}
+            {/* Right side — the Match step deck rendered with anonymous
+                silhouettes (no specific people). The card info still
+                shows so the visual reads as "this is the product."
+                Hidden below lg so the headline owns the screen on
+                phones/tablets. */}
             <div className="hidden lg:flex justify-center items-center scale-90 origin-center">
-              <StepMatch portraits={HERO_PORTRAITS} />
+              <StepMatch anonymous />
             </div>
           </div>
         </section>

@@ -527,15 +527,27 @@ export const StepAccepted = () => (
 
 // ============= 4. MATCH ==============================================
 
-// Optional portrait override — when no array is passed, the default
-// builder-1/2/3 imports are used (the How it works step). The waitlist
-// hero passes business-style stock URLs instead.
+// Two optional knobs:
+//   • `portraits` — override the defaults (builder-1/2/3) with a
+//     specific trio of image URLs. Used when you want different
+//     people on the marketing surface.
+//   • `anonymous` — render the deck with silhouette fallbacks instead
+//     of portraits. Used on the waitlist hero so the marketing page
+//     doesn't promise specific real people.
 type StepMatchProps = {
   portraits?: [string, string, string];
+  anonymous?: boolean;
 };
 
-export const StepMatch = ({ portraits }: StepMatchProps = {}) => {
-  const [front, back1, back2] = portraits ?? [builder1, builder2, builder3];
+export const StepMatch = ({
+  portraits,
+  anonymous,
+}: StepMatchProps = {}) => {
+  const photos: [string | undefined, string | undefined, string | undefined] =
+    anonymous
+      ? [undefined, undefined, undefined]
+      : (portraits ?? [builder1, builder2, builder3]);
+  const [front, back1, back2] = photos;
   return (
     <div
       style={{
@@ -607,7 +619,10 @@ const DeckCard = ({
   tags,
 }: {
   position: "front" | "back-1" | "back-2";
-  portrait: string;
+  // Optional — when omitted, the card renders an anonymous silhouette
+  // instead of a real portrait. Used by the waitlist hero so the
+  // marketing page doesn't promise specific people.
+  portrait?: string;
   match: string;
   name: string;
   sub: string;
@@ -685,19 +700,51 @@ const DeckCard = ({
           flexShrink: 0,
         }}
       >
-        <img
-          src={portrait}
-          alt={name}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-            filter: photoFilter,
-          }}
-        />
+        {portrait ? (
+          <img
+            src={portrait}
+            alt={name}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              filter: photoFilter,
+            }}
+          />
+        ) : (
+          // Anonymous silhouette fallback — neutral grey field with a
+          // generic avatar shape. Same dimensions as the photo, so the
+          // gradient overlay + name pill below keep working unchanged.
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: `linear-gradient(180deg, ${LINE_STRONG} 0%, rgba(199, 184, 158, 0.25) 100%)`,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <svg
+              width="64%"
+              height="64%"
+              viewBox="0 0 64 64"
+              fill="none"
+              aria-hidden
+              style={{ opacity: 0.32 }}
+            >
+              {/* Head */}
+              <circle cx="32" cy="22" r="11" fill={INK} />
+              {/* Shoulders */}
+              <path
+                d="M8 60 C 8 44 18 36 32 36 C 46 36 56 44 56 60 Z"
+                fill={INK}
+              />
+            </svg>
+          </div>
+        )}
         <div
           style={{
             position: "absolute",

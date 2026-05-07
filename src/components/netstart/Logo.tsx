@@ -1,16 +1,19 @@
-import logoSrc from "@/assets/netstart-logo.png";
-
+// Wordmark + moth logo. The image is served from /polln8-logo.png in
+// the public/ folder so it can be swapped without rebuilding (same
+// file the favicon and the waitlist nav point at).
 export const Logo = ({ className = "" }: { className?: string }) => (
   <div
-    className={`relative h-10 w-40 overflow-hidden ${className}`}
+    className={`flex items-center gap-2 ${className}`}
     aria-label="Polln8"
   >
     <img
-      src={logoSrc}
-      alt="Polln8"
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-none"
-      style={{ width: "200px", height: "200px" }}
+      src="/polln8-logo.png"
+      alt=""
+      className="h-8 w-8 object-contain"
       draggable={false}
     />
+    <span className="font-display text-xl tracking-[-0.02em] text-foreground">
+      Polln8
+    </span>
   </div>
 );
