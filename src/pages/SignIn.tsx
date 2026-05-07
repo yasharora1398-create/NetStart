@@ -91,20 +91,6 @@ const SignIn = () => {
             Work with operators,<br />
             <em className="text-gradient-gold not-italic">not talkers.</em>
           </h2>
-          <div className="flex gap-12 mt-12">
-            <div>
-              <p className="font-display text-3xl text-gold">2,840</p>
-              <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
-                verified builders
-              </p>
-            </div>
-            <div>
-              <p className="font-display text-3xl text-gold">312</p>
-              <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
-                companies started
-              </p>
-            </div>
-          </div>
         </div>
 
         <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
