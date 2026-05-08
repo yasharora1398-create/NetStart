@@ -91,23 +91,33 @@ const STEPS: {
   },
 ];
 
-const HowItWorks = () => (
-  <div
-    className="min-h-screen bg-background text-foreground"
-    style={{ overflowX: "clip" }}
-  >
-    <div className="max-w-5xl mx-auto px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
+const HowItWorks = () => {
+  // Land at the top of the page when the user navigates here from
+  // the homepage's "See full flow" link. React Router preserves
+  // scroll otherwise, which would dump them at the bottom.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div
+      className="min-h-screen bg-background text-foreground"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="max-w-5xl mx-auto px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
-            How it works
-          </p>
-          <h1 className="font-display text-4xl md:text-6xl tracking-[-0.04em] leading-[0.95] mb-6">
-            Five steps.<br />Signup to shipping.
-          </h1>
-          <p className="text-base text-muted-foreground max-w-xl mb-20 leading-relaxed">
-            From making an account to landing your first match, the
-            whole experience is built to be fast and decisive.
-          </p>
+          <div className="text-center md:text-left">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
+              How it works
+            </p>
+            <h1 className="font-display text-4xl md:text-6xl tracking-[-0.04em] leading-[0.95] mb-6">
+              Five steps.<br />Signup to shipping.
+            </h1>
+            <p className="text-base text-muted-foreground max-w-xl mx-auto md:mx-0 mb-20 leading-relaxed">
+              From making an account to landing your first match, the
+              whole experience is built to be fast and decisive.
+            </p>
+          </div>
         </Reveal>
 
         <div className="space-y-28 md:space-y-36">
@@ -116,17 +126,21 @@ const HowItWorks = () => (
             return (
               <Reveal key={s.n} delay={i * 60}>
                 <article className="grid md:grid-cols-2 gap-10 md:gap-12 items-center">
-                  <div className={reverse ? "md:order-2" : ""}>
+                  <div
+                    className={`text-center md:text-left ${
+                      reverse ? "md:order-2" : ""
+                    }`}
+                  >
                     <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-3">
                       Step {s.n}
                     </p>
                     <h2 className="font-display text-3xl md:text-5xl tracking-[-0.03em] mb-4">
                       {s.title}
                     </h2>
-                    <p className="text-base md:text-lg text-foreground/90 leading-relaxed mb-3 max-w-md">
+                    <p className="text-base md:text-lg text-foreground/90 leading-relaxed mb-3 max-w-md mx-auto md:mx-0">
                       {s.body}
                     </p>
-                    <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto md:mx-0">
                       {s.detail}
                     </p>
                   </div>
@@ -142,7 +156,7 @@ const HowItWorks = () => (
         </div>
 
         <Reveal>
-          <div className="mt-32 pt-10 border-t border-border flex items-center justify-between gap-6 flex-wrap">
+          <div className="mt-32 pt-10 border-t border-border flex flex-col md:flex-row items-center md:justify-between gap-6 text-center md:text-left">
             <p className="text-base md:text-lg text-muted-foreground max-w-md">
               That's it. The rest is up to you.
             </p>
@@ -168,7 +182,8 @@ const HowItWorks = () => (
           </Link>
         </div>
       </div>
-  </div>
-);
+    </div>
+  );
+};
 
 export default HowItWorks;

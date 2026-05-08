@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+import { useInView } from "@/hooks/useInView";
 import { useAuth } from "@/context/AuthContext";
 
 const Waitlist = () => {
@@ -394,36 +395,53 @@ const Pillar = ({
   title: string;
   body: string;
   details: string[];
-}) => (
-  // `group` lets the children react to the card's hover state via
-  // group-hover:* utilities. The details list collapses to zero
-  // height when not hovered (grid-rows trick) so the closed-state
-  // pillar takes only the room its visible text needs. On hover it
-  // expands and the surrounding flow shifts down naturally.
-  <article className="relative group cursor-default">
-    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-      {accent}
-    </div>
-    <div className="h-px w-12 bg-primary/40 mb-5 transition-[width] duration-200 group-hover:w-20" />
-    <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
-      {title}
-    </h3>
-    <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
-      {body}
-    </p>
-    <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-out">
-      <div className="overflow-hidden">
-        <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
-          {details.map((d) => (
-            <li key={d} className="text-sm leading-relaxed text-muted-foreground">
-              {d}
-            </li>
-          ))}
-        </ul>
+}) => {
+  // Reveal the details list automatically as the pillar scrolls into
+  // view (no hover required). The closed-state pillar still takes
+  // only the room its visible text needs, then expands once revealed.
+  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.4 });
+  return (
+    <article ref={ref} className="relative cursor-default">
+      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+        {accent}
       </div>
-    </div>
-  </article>
-);
+      <div
+        className={`h-px bg-primary/40 mb-5 transition-[width] duration-500 ${
+          inView ? "w-20" : "w-12"
+        }`}
+      />
+      <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
+        {title}
+      </h3>
+      <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
+        {body}
+      </p>
+      <div
+        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+          inView ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <ul
+            className={`space-y-2 border-l border-primary/30 pl-4 mt-5 transition-opacity duration-500 ${
+              inView ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ transitionDelay: inView ? "180ms" : "0ms" }}
+          >
+            {details.map((d) => (
+              <li
+                key={d}
+                className="text-sm leading-relaxed text-muted-foreground"
+              >
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </article>
+  );
+};
 
 const RoleCard = ({
   kind,
@@ -435,43 +453,60 @@ const RoleCard = ({
   tagline: string;
   signals: string[];
   example: { headline: string; detail: string };
-}) => (
-  <article className="group self-start rounded-2xl border border-border hover:border-primary/40 bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors">
-    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-      {kind}
-    </p>
-    <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
-      {tagline}
-    </p>
-    <ul className="space-y-3">
-      {signals.map((s) => (
-        <li key={s} className="flex items-start gap-3 text-sm text-muted-foreground">
-          <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
-          <span>{s}</span>
-        </li>
-      ))}
-    </ul>
+}) => {
+  // Auto-reveal the example block as the card enters the viewport.
+  // The card grows to fit; the page below shifts down naturally.
+  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.4 });
+  return (
+    <article
+        ref={ref}
+        className="self-start rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors"
+      >
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+          {kind}
+        </p>
+        <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
+          {tagline}
+        </p>
+        <ul className="space-y-3">
+          {signals.map((s) => (
+            <li
+              key={s}
+              className="flex items-start gap-3 text-sm text-muted-foreground"
+            >
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+              <span>{s}</span>
+            </li>
+          ))}
+        </ul>
 
-    {/* Example — collapsed to zero height when not hovered so the
-        card sizes to its visible content; grows on hover and pushes
-        the page below down. */}
-    <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-out">
-      <div className="overflow-hidden">
-        <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
-            Example
-          </p>
-          <p className="text-foreground font-semibold leading-snug">
-            {example.headline}
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            {example.detail}
-          </p>
+        <div
+          className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+            inView ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div
+              className={`mt-6 pt-5 border-t border-primary/30 transition-opacity duration-500 ${
+                inView ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ transitionDelay: inView ? "200ms" : "0ms" }}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
+                Example
+              </p>
+              <p className="text-foreground font-semibold leading-snug">
+                {example.headline}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                {example.detail}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </article>
-);
+    </article>
+  );
+};
 
 // ─── Decorative blurred backdrop ─────────────────────────────────
 const BlurredBackdrop = () => (
