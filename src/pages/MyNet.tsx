@@ -368,6 +368,7 @@ const MyNet = () => {
             onProfileRefresh={refreshAll}
             onSubmitComplete={() => setEditingPending(false)}
           />
+          <BackToHome />
         </main>
         <Footer />
       </div>
@@ -734,6 +735,8 @@ const MyNet = () => {
 
       {!loading && !user && <AuthGate />}
 
+      {isAuthed && <BackToHome />}
+
       <Footer />
 
       {isAuthed && dialogState.mode !== "closed" && (
@@ -820,6 +823,18 @@ const CriteriaSummary = ({ project }: { project: Project }) => {
     </div>
   );
 };
+
+const BackToHome = () => (
+  <div className="container mt-16 flex justify-center">
+    <Link
+      to="/"
+      className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40 hover:bg-accent"
+    >
+      <ArrowLeft className="h-4 w-4" />
+      Back to home
+    </Link>
+  </div>
+);
 
 const Field = ({ label, value }: { label: string; value: string }) => (
   <div>
