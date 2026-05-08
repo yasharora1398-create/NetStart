@@ -363,6 +363,7 @@ const MyNet = () => {
   if (showWizard && uid) {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <BackToHomeTop />
         <main className="pt-12 pb-24">
           <MyNetWizard
             uid={uid}
@@ -380,6 +381,7 @@ const MyNet = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <BackToHomeTop />
       <div>
       <main
         className={`pt-12 pb-24 ${
@@ -737,7 +739,7 @@ const MyNet = () => {
 
       {!loading && !user && <AuthGate />}
 
-      {isAuthed && <BackToHome />}
+      <BackToHome />
 
       <Footer />
 
@@ -826,16 +828,32 @@ const CriteriaSummary = ({ project }: { project: Project }) => {
   );
 };
 
+// Visible against the near-black dark theme — gold border + faint
+// gold tint instead of the previous bg-background/60 which dissolved
+// into the page on dark mode.
 const BackToHome = () => (
   <div className="container mt-16 flex justify-center">
     <Link
       to="/"
-      className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40 hover:bg-accent"
+      className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/5 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold hover:bg-gold/10"
     >
-      <ArrowLeft className="h-4 w-4" />
+      <ArrowLeft className="h-4 w-4 text-gold" />
       Back to home
     </Link>
   </div>
+);
+
+// Small fixed top-left pill so users never have to scroll to find
+// their way out. Always rendered; doesn't depend on auth state.
+const BackToHomeTop = () => (
+  <Link
+    to="/"
+    className="fixed top-4 left-4 z-30 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-card/90 backdrop-blur-sm px-3.5 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-gold transition-colors"
+    aria-label="Back to home"
+  >
+    <ArrowLeft className="h-3 w-3 text-gold" />
+    Home
+  </Link>
 );
 
 const Field = ({ label, value }: { label: string; value: string }) => (
