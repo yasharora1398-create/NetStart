@@ -162,6 +162,17 @@ const Waitlist = () => {
               body="Stated up front. No surprises later."
             />
           </div>
+
+          {/* Deeper dive — links to the full /how page. */}
+          <div className="mt-12 md:mt-16">
+            <Link
+              to="/how"
+              className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent"
+            >
+              See the full flow
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
         </Section>
 
         {/* WHO IT'S FOR --------------------------------------------- */}

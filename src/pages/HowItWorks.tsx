@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { Sidebar } from "@/components/netstart/Sidebar";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
   StepSignup,
   StepCredentials,
@@ -97,12 +96,7 @@ const HowItWorks = () => (
     className="min-h-screen bg-background text-foreground"
     style={{ overflowX: "clip" }}
   >
-    <Sidebar />
-    <div
-      className="transition-[padding] duration-300"
-      style={{ paddingLeft: "var(--sidebar-width, 248px)" }}
-    >
-      <div className="max-w-5xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
+    <div className="max-w-5xl mx-auto px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
         <Reveal>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
             How it works
@@ -161,8 +155,19 @@ const HowItWorks = () => (
             </Link>
           </div>
         </Reveal>
+
+        {/* Back to homepage — primary pill, centered. */}
+        <div className="mt-16 flex justify-center">
+          <Link
+            to="/"
+            className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Back to homepage
+          </Link>
+        </div>
       </div>
-    </div>
   </div>
 );
 

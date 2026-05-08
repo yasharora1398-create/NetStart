@@ -69,6 +69,10 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
 
+            {/* Public marketing detail page — linked from the waitlist
+                "How Polln8 works" section. Renders without sidebar. */}
+            <Route path="/how" element={<HowItWorks />} />
+
             {/* Hidden post-verification landing — reachable only by
                 URL or by Supabase's confirmation redirect. Not linked
                 from any nav. Public so unauthenticated users coming
@@ -87,7 +91,6 @@ const App = () => (
             <Route path="/match" element={<Internal><Match /></Internal>} />
             <Route path="/chats" element={<Internal><Chats /></Internal>} />
             <Route path="/standards" element={<Internal><Standards /></Internal>} />
-            <Route path="/how" element={<Internal><HowItWorks /></Internal>} />
             <Route path="/download" element={<Internal><DownloadPage /></Internal>} />
             <Route path="/settings" element={<Internal><Settings /></Internal>} />
             <Route path="/u/:id" element={<Internal><FounderProfile /></Internal>} />
