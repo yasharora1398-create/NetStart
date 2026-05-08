@@ -891,6 +891,47 @@
     50%      { transform: translateY(4px); opacity: 1; }
   }
 
+  /* Polln8 Request Card mockup — auto-loops through:
+       0 rest      : Apply CTA pulses
+       1 composer  : sheet slides up, pitch types in
+       2 sent      : sheet drops, status pill + soft glow on card
+       3 accepted  : pill flips green, ring solid, Open chat reveals
+     The .rq-phase-<n> class on the device root drives every visual
+     change below. Namespaced .rq-* to avoid clashing with .rc-* /
+     .mc-* keyframes from the other two card mockups. */
+  .rq-pulse-cta {
+    animation: rq-btnpulse 2.4s ease-in-out infinite;
+  }
+  @keyframes rq-btnpulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+    50%      { box-shadow: 0 0 0 5px hsl(var(--primary) / 0.18); }
+  }
+  .rq-glow {
+    animation: rq-glowpulse 600ms ease;
+  }
+  @keyframes rq-glowpulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.005); }
+    100% { transform: scale(1); }
+  }
+  .rq-composer {
+    transform: translateY(100%);
+    transition: transform 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .rq-phase-1 .rq-composer { transform: translateY(0); }
+  .rq-caret {
+    display: inline-block;
+    width: 1.5px;
+    height: 13px;
+    vertical-align: text-bottom;
+    margin-left: 1px;
+    background: currentColor;
+    animation: rq-caret 0.9s steps(2) infinite;
+  }
+  @keyframes rq-caret {
+    50% { opacity: 0; }
+  }
+
   /* Hawk-moth mascot animations — used wherever the moth is shown. */
   .moth-hover {
     animation: moth-hover 4.6s ease-in-out infinite;

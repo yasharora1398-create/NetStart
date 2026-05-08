@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/netstart/Sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useInView } from "@/hooks/useInView";
 
-type MockupKind = "review" | "matches" | "placeholder";
+type MockupKind = "review" | "matches" | "request" | "placeholder";
 
 const WHY: {
   icon: typeof BadgeCheck;
@@ -45,7 +45,7 @@ const WHY: {
       "One pitch per application — no copy-paste spam.",
       "Accepted requests turn into mutual contacts immediately.",
     ],
-    mockup: "placeholder",
+    mockup: "request",
   },
 ];
 
@@ -264,6 +264,7 @@ const WhyRow = ({ entry }: { entry: (typeof WHY)[number] }) => {
       <div className="flex justify-center md:justify-end">
         {entry.mockup === "review" && <ReviewCardMockup />}
         {entry.mockup === "matches" && <MatchesCardMockup />}
+        {entry.mockup === "request" && <RequestCardMockup />}
         {entry.mockup === "placeholder" && <MockupPlaceholder />}
       </div>
     </article>
@@ -689,10 +690,10 @@ type ProfileEntry = {
 const MAYA: ProfileEntry = {
   id: "maya",
   name: "Maya C.",
-  pills: ["Full-time", "Remote", "Builder"],
+  pills: ["Full-time", "Remote", "Founder"],
   skills: ["Frontend", "Design", "Product"],
   headline:
-    "Building tools for indie hackers. Looking for a technical cofounder who ships fast and cares about craft.",
+    "Two-time founder, last exit Series A. Hiring a technical cofounder for a creator-economy tool — pre-seed, prototype live.",
 };
 const RAVI: ProfileEntry = {
   id: "ravi",
@@ -700,7 +701,7 @@ const RAVI: ProfileEntry = {
   pills: ["20 hrs/week", "NYC", "Founder"],
   skills: ["Backend", "AI/ML", "Sales"],
   headline:
-    "Building an AI scheduling tool for healthcare. MVP shipped, looking for a designer who can own the product surface.",
+    "Solo founder. AI scheduling for outpatient clinics, $8K MRR after 4 months. Looking for a design partner to own the product surface.",
 };
 
 const MatchesCardMockup = () => {
@@ -828,19 +829,20 @@ const MatchesCardMockup = () => {
           <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6">
             {/* Skeleton back-of-deck */}
             <div
-              className="mc-pcard mc-pcard--behind2 absolute rounded-2xl"
+              className="mc-pcard mc-pcard--behind2 absolute"
               style={{
-                width: 260,
-                minHeight: 340,
+                width: 296,
+                minHeight: 240,
+                borderRadius: 14,
                 border: "1.5px dashed hsl(var(--border))",
                 background: "transparent",
               }}
               aria-hidden
             >
               <div
-                className="rounded-xl mt-8 mx-4 mb-4"
+                className="rounded-xl mt-6 mx-3 mb-3"
                 style={{
-                  height: "calc(100% - 64px)",
+                  height: "calc(100% - 48px)",
                   backgroundImage:
                     "repeating-linear-gradient(0deg, transparent 0 8px, hsl(var(--foreground) / 0.05) 8px 9px)",
                 }}
@@ -1063,12 +1065,12 @@ const ProfileCardMockup = ({
   frontness: Frontness;
 }) => (
   <div
-    className={`mc-pcard mc-pcard--${frontness} absolute flex flex-col gap-2.5`}
+    className={`mc-pcard mc-pcard--${frontness} absolute flex flex-col gap-1.5`}
     style={{
-      width: 260,
-      minHeight: 340,
-      borderRadius: 16,
-      padding: "16px 16px 14px",
+      width: 296,
+      minHeight: 240,
+      borderRadius: 14,
+      padding: "12px 14px 12px",
       background: "hsl(var(--card))",
       border: "1px solid hsl(var(--border))",
       color: "hsl(var(--foreground))",
@@ -1122,11 +1124,11 @@ const ProfileCardMockup = ({
       {profile.name}
     </div>
 
-    {/* Square photo placeholder w/ hatch + silhouette */}
+    {/* Photo banner placeholder w/ hatch + silhouette */}
     <div
-      className="relative w-full overflow-hidden rounded-[10px] flex items-center justify-center"
+      className="relative w-full overflow-hidden rounded-lg flex items-center justify-center"
       style={{
-        aspectRatio: "4 / 3",
+        aspectRatio: "16 / 7",
         margin: "2px 0",
         background: "hsl(var(--primary) / 0.10)",
         color: "hsl(var(--primary))",
@@ -1194,7 +1196,7 @@ const ProfileCardMockup = ({
     </div>
 
     <div
-      className="leading-snug"
+      className="leading-snug line-clamp-2"
       style={{
         fontSize: 13.5,
         marginTop: 4,
@@ -1217,7 +1219,7 @@ const ProfileCardMockup = ({
         color: "hsl(var(--primary-foreground))",
       }}
     >
-      Request chat
+      Apply
       <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
         <path
           d="M3 7 L11 7 M7 3 L11 7 L7 11"
@@ -1317,6 +1319,461 @@ const LinkRow = ({
     </span>
   </div>
 );
+
+// ─── Polln8 Request Card mockup ─────────────────────────────────
+// Direct port of the Polln8 Request Card.html design from the
+// Anthropic design handoff. 4-phase auto-loop:
+//   0 rest      — profile card with Apply CTA pulsing
+//   1 composer  — sheet slides up, pitch types in character-by-char
+//   2 sent      — sheet drops, status pill "Request sent" + glow
+//   3 accepted  — pill flips green "Accepted", solid ring on
+//                 avatar, Open chat reveals
+const REQUEST_PROFILE = {
+  monogram: "JK",
+  name: "Jamie K.",
+  pills: ["Full-time", "SF", "Founder"],
+  skills: ["Product", "Sales", "Fundraising"],
+  headline:
+    "Building a B2B platform for restaurant operators. $40K MRR, looking for a technical cofounder to lead engineering.",
+};
+const REQUEST_PITCH =
+  "I've shipped two B2B products in restaurant tech. Saw your MRR growth — I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";
+
+const RequestCardMockup = () => {
+  const [phase, setPhase] = useState(0);
+  const [typed, setTyped] = useState("");
+  const timers = useRef<number[]>([]);
+
+  // Phase durations proportional to total ~6.4s, then loops.
+  // 0 rest 18%, 1 typing 36%, 2 sent 22%, 3 accepted 24%.
+  useEffect(() => {
+    const D = 6400;
+    const lens = [D * 0.18, D * 0.36, D * 0.22, D * 0.24];
+    let alive = true;
+    let p = 0;
+
+    const run = () => {
+      if (!alive) return;
+      setPhase(p);
+
+      // Typing animation during phase 1.
+      if (p === 1) {
+        setTyped("");
+        const step = Math.max(18, lens[1] / Math.max(1, REQUEST_PITCH.length + 6));
+        let i = 0;
+        const typer = () => {
+          if (!alive) return;
+          i += 1;
+          setTyped(REQUEST_PITCH.slice(0, i));
+          if (i < REQUEST_PITCH.length) {
+            const t = window.setTimeout(typer, step);
+            timers.current.push(t);
+          }
+        };
+        const t0 = window.setTimeout(typer, 280);
+        timers.current.push(t0);
+      }
+
+      const t = window.setTimeout(() => {
+        p = (p + 1) % 4;
+        run();
+      }, lens[p]);
+      timers.current.push(t);
+    };
+    run();
+    return () => {
+      alive = false;
+      timers.current.forEach((id) => window.clearTimeout(id));
+      timers.current = [];
+    };
+  }, []);
+
+  const sentTap = phase === 1 && typed.length === REQUEST_PITCH.length;
+
+  return (
+    <div
+      className={`rq-phase-${phase} relative w-full max-w-[640px]`}
+      style={{ aspectRatio: "16 / 12" }}
+    >
+      {/* Bezel */}
+      <div
+        className="relative w-full h-full rounded-[28px] p-2 bg-card"
+        style={{
+          boxShadow:
+            "inset 0 0 0 1px hsl(var(--foreground) / 0.06), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
+        }}
+      >
+        {/* Screen */}
+        <div
+          className="relative w-full h-full rounded-[22px] overflow-hidden flex flex-col"
+          style={{
+            background: "hsl(var(--background))",
+            color: "hsl(var(--foreground))",
+          }}
+        >
+          {/* App bar */}
+          <div
+            className="grid items-center text-[12px] font-medium"
+            style={{
+              gridTemplateColumns: "1fr auto 1fr",
+              padding: "14px 16px 12px",
+              borderBottom: "1px solid hsl(var(--border))",
+            }}
+          >
+            <span className="font-bold tracking-tight" style={{ fontSize: 13 }}>
+              Polln8
+            </span>
+            <span className="inline-flex gap-1 justify-self-center">
+              <span
+                className="px-2.5 py-1 rounded-full"
+                style={{
+                  fontSize: 11,
+                  background: "hsl(var(--secondary))",
+                  border: "1px solid hsl(var(--border))",
+                }}
+              >
+                Matches
+              </span>
+              <span
+                className="px-2.5 py-1 rounded-full opacity-55"
+                style={{ fontSize: 11 }}
+              >
+                Saved
+              </span>
+            </span>
+            <span className="justify-self-end">
+              <span
+                className="font-mono px-2 py-0.5 rounded-md"
+                style={{
+                  fontSize: 10.5,
+                  background: "hsl(var(--primary) / 0.12)",
+                  color: "hsl(var(--primary))",
+                }}
+              >
+                12 / 24
+              </span>
+            </span>
+          </div>
+
+          {/* Card area */}
+          <div className="relative flex-1 p-4 overflow-hidden">
+            <div
+              className={`relative flex flex-col gap-2 rounded-xl p-3.5 ${
+                phase === 2 ? "rq-glow" : ""
+              }`}
+              style={{
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                boxShadow:
+                  phase === 2
+                    ? "0 0 0 1px hsl(var(--primary)), 0 0 60px hsl(var(--primary) / 0.30)"
+                    : "none",
+                transition: "box-shadow 500ms ease",
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="relative flex items-center justify-center font-semibold"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: "hsl(var(--primary) / 0.12)",
+                    color: "hsl(var(--primary))",
+                    fontSize: 12,
+                    boxShadow:
+                      phase === 3
+                        ? "0 0 0 2px hsl(var(--primary))"
+                        : phase === 2
+                          ? "0 0 0 2px hsl(var(--primary) / 0.45)"
+                          : "none",
+                    transition: "box-shadow 280ms ease",
+                  }}
+                >
+                  {REQUEST_PROFILE.monogram}
+                </div>
+                <div
+                  className="font-semibold tracking-tight"
+                  style={{ fontSize: 16 }}
+                >
+                  {REQUEST_PROFILE.name}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {REQUEST_PROFILE.pills.map((p) => (
+                  <span
+                    key={p}
+                    className="font-medium leading-[1.5]"
+                    style={{
+                      fontSize: 11,
+                      padding: "3px 8px",
+                      borderRadius: 999,
+                      background: "hsl(var(--primary) / 0.12)",
+                      color: "hsl(var(--primary))",
+                      border: "1px solid hsl(var(--primary) / 0.30)",
+                    }}
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-1.5 -mt-1">
+                {REQUEST_PROFILE.skills.map((s) => (
+                  <span
+                    key={s}
+                    className="font-medium leading-[1.5]"
+                    style={{
+                      fontSize: 11,
+                      padding: "3px 8px",
+                      borderRadius: 999,
+                      background: "hsl(var(--card))",
+                      color: "hsl(var(--muted-foreground))",
+                      border: "1px solid hsl(var(--border))",
+                    }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+
+              <div
+                className="leading-snug"
+                style={{
+                  fontSize: 12,
+                  color: "hsl(var(--muted-foreground))",
+                  marginTop: 2,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {REQUEST_PROFILE.headline}
+              </div>
+
+              {/* CTA / Status — same physical slot, content swaps per phase */}
+              <div
+                className="flex items-stretch mt-1"
+                style={{ minHeight: 38 }}
+              >
+                {phase === 0 && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="rq-pulse-cta w-full rounded-lg font-semibold flex items-center justify-center gap-1.5"
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: 13,
+                      background: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                    }}
+                  >
+                    Apply
+                  </button>
+                )}
+                {phase === 1 && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="w-full rounded-lg font-semibold flex items-center justify-center gap-1.5"
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: 13,
+                      background: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                      transform: "scale(0.97)",
+                      transition: "transform 120ms ease",
+                    }}
+                  >
+                    Apply
+                  </button>
+                )}
+                {phase === 2 && (
+                  <div
+                    className="w-full rounded-lg font-semibold flex items-center justify-center gap-1.5"
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: 13,
+                      background: "hsl(var(--primary) / 0.12)",
+                      color: "hsl(var(--primary))",
+                    }}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <circle
+                        cx="6"
+                        cy="6"
+                        r="4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M6 3.5 L6 6 L7.8 7"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    Request sent
+                  </div>
+                )}
+                {phase === 3 && (
+                  <div
+                    className="w-full rounded-lg font-semibold flex items-center justify-center gap-1.5"
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: 13,
+                      background: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                    }}
+                  >
+                    <Check className="h-3 w-3" strokeWidth={2.4} />
+                    Accepted
+                  </div>
+                )}
+              </div>
+
+              {phase === 2 && (
+                <div
+                  className="text-center"
+                  style={{
+                    fontSize: 11,
+                    color: "hsl(var(--muted-foreground))",
+                    marginTop: 2,
+                  }}
+                >
+                  You&apos;ll get notified when Jamie responds.
+                </div>
+              )}
+              {phase === 3 && (
+                <div className="flex flex-col gap-2 mt-1">
+                  <div
+                    className="text-center font-medium"
+                    style={{ fontSize: 12 }}
+                  >
+                    Mutual contact. Message Jamie now.
+                  </div>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="w-full rounded-lg font-semibold flex items-center justify-center gap-1.5"
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: 13,
+                      background: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                    }}
+                  >
+                    Open chat
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M2 6 L10 6 M6 2 L10 6 L6 10"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Composer sheet — slides up during phase 1 with typing
+                pitch. Drops away in phases 2/3 (transform handled by
+                the .rq-phase-1 selector in index.css). */}
+            <div
+              className={`rq-composer absolute left-0 right-0 bottom-0 flex flex-col gap-2 z-[4] ${
+                sentTap ? "translate-y-[2px]" : ""
+              }`}
+              style={{
+                padding: "12px 16px 18px",
+                borderTopLeftRadius: 18,
+                borderTopRightRadius: 18,
+                background: "hsl(var(--card))",
+                borderTop: "1px solid hsl(var(--border))",
+                boxShadow: "0 -16px 32px -16px rgba(0,0,0,0.45)",
+                transition: "transform 400ms cubic-bezier(0.22,0.61,0.36,1)",
+              }}
+            >
+              <div
+                className="self-center rounded-full"
+                style={{
+                  width: 36,
+                  height: 4,
+                  background: "hsl(var(--foreground) / 0.18)",
+                  margin: "-4px 0 4px",
+                }}
+              />
+              <div
+                className="font-semibold"
+                style={{
+                  fontSize: 11,
+                  letterSpacing: "0.02em",
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
+                One pitch. One shot.
+              </div>
+              <div
+                className="flex flex-col gap-1.5"
+                style={{
+                  border: `1px solid ${
+                    phase === 1
+                      ? "hsl(var(--primary))"
+                      : "hsl(var(--border))"
+                  }`,
+                  borderRadius: 10,
+                  padding: "10px 11px 8px",
+                  background: "hsl(var(--background))",
+                  transition: "border-color 240ms ease",
+                }}
+              >
+                <div
+                  className="leading-[1.5] whitespace-pre-wrap"
+                  style={{ fontSize: 12.5, minHeight: 64 }}
+                >
+                  {typed || (
+                    <span className="opacity-50">
+                      Tell Jamie why you&apos;d be the right person to build this with…
+                    </span>
+                  )}
+                  {phase === 1 && typed.length < REQUEST_PITCH.length && (
+                    <span className="rq-caret" />
+                  )}
+                </div>
+                <div
+                  className="font-mono text-right"
+                  style={{
+                    fontSize: 10,
+                    color: "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  {typed.length} / 500
+                </div>
+              </div>
+              <button
+                type="button"
+                tabIndex={-1}
+                className="w-full rounded-lg font-semibold flex items-center justify-center gap-1.5"
+                style={{
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  background: "hsl(var(--primary))",
+                  color: "hsl(var(--primary-foreground))",
+                  transform: sentTap ? "scale(0.97)" : "none",
+                  transition: "transform 120ms ease",
+                }}
+              >
+                Send request
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const PrimaryButton = ({ children }: { children: React.ReactNode }) => (
   <button
