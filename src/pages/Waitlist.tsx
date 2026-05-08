@@ -11,9 +11,9 @@
  * Light/dark is class-based on <html>. The circular sun/moon button
  * in the top-right of the sticky nav drives `useTheme()`.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Moon, Sun } from "lucide-react";
+import { ArrowRight, ChevronDown, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 
@@ -150,16 +150,34 @@ const Waitlist = () => {
               accent="01"
               title="Founders post real ventures."
               body="Stage, what's built, equity offered. No vague ideas."
+              details={[
+                "Stage of the company: idea, prototype, MVP, or revenue.",
+                "What's already shipped: product links, repos, traction.",
+                "What you're looking for in a partner.",
+                "Equity offered, stated up front.",
+              ]}
             />
             <Pillar
               accent="02"
               title="Builders show real work."
               body="Shipping history, skills, what they're looking for."
+              details={[
+                "Verified resume or LinkedIn at signup.",
+                "Shipping history with real product links, not buzzwords.",
+                "Skills weighted by what you've actually used.",
+                "Commitment level: full-time, evenings, weekends.",
+              ]}
             />
             <Pillar
               accent="03"
               title="Equity is the contract."
               body="Stated up front. No surprises later."
+              details={[
+                "Founders set equity ranges before any conversation.",
+                "Vesting and cliff are surfaced on the project card.",
+                "No bait-and-switch on terms after weeks of meetings.",
+                "What you see on the card is what you sign.",
+              ]}
             />
           </div>
 
@@ -189,6 +207,12 @@ const Waitlist = () => {
                 "Ready to give meaningful equity",
                 "Committed to shipping",
               ]}
+              example={{
+                headline:
+                  "Climate fintech, pre-seed, looking for a senior backend engineer.",
+                detail:
+                  "Funded by an angel from Stripe. Need someone to lead the verification rails for carbon credits. Offering 8 to 15% equity.",
+              }}
             />
             <RoleCard
               kind="Builders"
@@ -198,6 +222,12 @@ const Waitlist = () => {
                 "Wants equity, not just salary",
                 "Looking for a venture worth betting on",
               ]}
+              example={{
+                headline:
+                  "Senior eng, ex-Stripe payments, four years on distributed systems.",
+                detail:
+                  "Strong in Rust and devtools. Wants to bet on a payments or infra startup with real customers. Open to full-time for the right equity.",
+              }}
             />
           </div>
         </Section>
@@ -330,51 +360,119 @@ const Pillar = ({
   accent,
   title,
   body,
+  details,
 }: {
   accent: string;
   title: string;
   body: string;
-}) => (
-  <article className="relative">
-    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-      {accent}
-    </div>
-    <div className="h-px w-12 bg-primary/40 mb-5" />
-    <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
-      {title}
-    </h3>
-    <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
-      {body}
-    </p>
-  </article>
-);
+  details: string[];
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <article className="relative group">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="text-left w-full"
+      >
+        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+          {accent}
+        </div>
+        <div className="h-px w-12 bg-primary/40 mb-5 transition-[width] duration-200 group-hover:w-20" />
+        <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
+          {title}
+        </h3>
+        <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-3">
+          {body}
+        </p>
+        <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.2em] text-primary/80 transition-colors group-hover:text-primary">
+          {open ? "Less" : "More"}
+          <ChevronDown
+            className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </span>
+      </button>
+      {open && (
+        <ul className="mt-5 space-y-2 border-l border-primary/30 pl-4">
+          {details.map((d) => (
+            <li
+              key={d}
+              className="text-sm leading-relaxed text-muted-foreground"
+            >
+              {d}
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
+  );
+};
 
 const RoleCard = ({
   kind,
   tagline,
   signals,
+  example,
 }: {
   kind: string;
   tagline: string;
   signals: string[];
-}) => (
-  <article className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-7 md:p-9">
-    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-      {kind}
-    </p>
-    <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
-      {tagline}
-    </p>
-    <ul className="space-y-3">
-      {signals.map((s) => (
-        <li key={s} className="flex items-start gap-3 text-sm text-muted-foreground">
-          <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
-          <span>{s}</span>
-        </li>
-      ))}
-    </ul>
-  </article>
-);
+  example: { headline: string; detail: string };
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <article
+      className={`rounded-2xl border bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-all cursor-pointer ${
+        open ? "border-primary/50" : "border-border hover:border-primary/30"
+      }`}
+      onClick={() => setOpen((v) => !v)}
+      role="button"
+      tabIndex={0}
+      aria-expanded={open}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setOpen((v) => !v);
+        }
+      }}
+    >
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+        {kind}
+      </p>
+      <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
+        {tagline}
+      </p>
+      <ul className="space-y-3">
+        {signals.map((s) => (
+          <li key={s} className="flex items-start gap-3 text-sm text-muted-foreground">
+            <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+            <span>{s}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* Hint that the card is interactive — fades when open. */}
+      <p className="mt-6 text-[11px] font-mono uppercase tracking-[0.2em] text-primary/70">
+        {open ? "Tap to collapse" : "Tap for an example"}
+      </p>
+
+      {open && (
+        <div className="mt-5 pt-5 border-t border-primary/30">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
+            Example
+          </p>
+          <p className="text-foreground font-semibold leading-snug">
+            {example.headline}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            {example.detail}
+          </p>
+        </div>
+      )}
+    </article>
+  );
+};
 
 // ─── Decorative blurred backdrop ─────────────────────────────────
 const BlurredBackdrop = () => (
