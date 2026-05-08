@@ -707,12 +707,13 @@ const RAVI: ProfileEntry = {
 const MatchesCardMockup = () => {
   const [phase, setPhase] = useState(0);
   const timers = useRef<number[]>([]);
-  // Phase durations — sum ≈ 5.5s, then loops.
-  const seg = 1100;
-  const phaseDur = useMemo(
-    () => [seg, seg * 0.85, seg * 1.4, seg * 0.6, seg * 0.85],
-    [seg],
-  );
+  // 4 phases:
+  //   0 maya rest          (Maya top, Ravi peeks behind)
+  //   1 maya swiping right (Save edge glow)
+  //   2 ravi rest          (Maya gone, Ravi top)
+  //   3 ravi swiping left  (Pass edge glow)
+  // Then loop back to 0. No profile-detail sheet — matches the PDF.
+  const phaseDur = useMemo(() => [1400, 1000, 1400, 1000], []);
 
   useEffect(() => {
     let alive = true;
@@ -721,7 +722,7 @@ const MatchesCardMockup = () => {
       if (!alive) return;
       setPhase(p);
       const t = window.setTimeout(() => {
-        p = (p + 1) % 5;
+        p = (p + 1) % 4;
         tick();
       }, phaseDur[p]);
       timers.current.push(t);
@@ -735,25 +736,16 @@ const MatchesCardMockup = () => {
   }, [phaseDur]);
 
   const mayaFront: Frontness = (
-    ["top", "swiping-right", "gone-right", "gone-right", "behind1"] as const
+    ["top", "swiping-right", "gone-right", "behind1"] as const
   )[phase];
   const raviFront: Frontness = (
-    ["behind1", "behind1", "behind1-grow", "top", "swiping-left"] as const
+    ["behind1", "behind1", "top", "swiping-left"] as const
   )[phase];
 
   const showSaveGlow = phase === 1;
-  const showPassGlow = phase === 4;
+  const showPassGlow = phase === 3;
 
-  const hint =
-    phase === 1
-      ? "Saving — opening profile"
-      : phase === 2
-        ? "Maya C. · profile open"
-        : phase === 3
-          ? "Closing — next match queued"
-          : phase === 4
-            ? "Passed — won't show again"
-            : "Swipe right to save · left to pass";
+  const hint = "Swipe right to save · left to pass";
 
   return (
     <div
@@ -825,143 +817,11 @@ const MatchesCardMockup = () => {
             </span>
           </div>
 
-          {/* Deck area */}
+          {/* Deck area — just the two cards, no skeleton plate or
+              profile-detail sheet (the PDF only shows the rest card). */}
           <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6">
-            {/* Skeleton back-of-deck */}
-            <div
-              className="mc-pcard mc-pcard--behind2 absolute"
-              style={{
-                width: 296,
-                minHeight: 240,
-                borderRadius: 14,
-                border: "1.5px dashed hsl(var(--border))",
-                background: "transparent",
-              }}
-              aria-hidden
-            >
-              <div
-                className="rounded-xl mt-6 mx-3 mb-3"
-                style={{
-                  height: "calc(100% - 48px)",
-                  backgroundImage:
-                    "repeating-linear-gradient(0deg, transparent 0 8px, hsl(var(--foreground) / 0.05) 8px 9px)",
-                }}
-              />
-            </div>
-
             <ProfileCardMockup profile={RAVI} frontness={raviFront} />
             <ProfileCardMockup profile={MAYA} frontness={mayaFront} />
-
-            {/* Profile detail sheet — slides up on phase 2/3 */}
-            <div
-              className="mc-profile-tab absolute left-0 right-0 bottom-0 flex flex-col gap-3.5 z-[5]"
-              style={{
-                top: 28,
-                padding: "10px 22px 18px",
-                borderRadius: "18px 18px 16px 16px",
-                background: "hsl(var(--background))",
-                border: "1px solid hsl(var(--border))",
-                borderBottom: "none",
-                boxShadow: "0 -20px 40px -20px rgba(0,0,0,0.35)",
-              }}
-              aria-hidden={phase !== 2 && phase !== 3}
-            >
-              <div
-                className="self-center rounded-full"
-                style={{
-                  width: 44,
-                  height: 5,
-                  background: "hsl(var(--foreground) / 0.18)",
-                  margin: "4px 0 6px",
-                }}
-              />
-              <div
-                className="mc-tab-hint absolute left-1/2 -translate-x-1/2 top-3.5 flex flex-col items-center gap-0.5 pointer-events-none"
-                style={{ color: "hsl(var(--muted-foreground))" }}
-              >
-                <svg
-                  className="mc-tab-hint-arrow"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                >
-                  <path
-                    d="M7 2 L7 11 M3 7 L7 11 L11 7"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="font-mono text-[8.5px] tracking-[0.12em] uppercase">
-                  swipe down
-                </span>
-              </div>
-
-              <div
-                className="flex items-center justify-between font-mono uppercase"
-                style={{
-                  fontSize: "9.5px",
-                  letterSpacing: "0.1em",
-                  color: "hsl(var(--muted-foreground))",
-                }}
-              >
-                <span>Profile</span>
-                <span>Saved</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div>
-                  <div
-                    className="font-semibold tracking-tight"
-                    style={{ fontSize: 17 }}
-                  >
-                    Maya C.
-                  </div>
-                  <div
-                    className="opacity-70 mt-0.5"
-                    style={{ fontSize: 11 }}
-                  >
-                    Builder · Remote · Full-time
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div
-                  className="font-mono uppercase mb-1.5 opacity-55"
-                  style={{ fontSize: 9, letterSpacing: "0.12em" }}
-                >
-                  Currently building
-                </div>
-                <div className="flex flex-col gap-2">
-                  <ProjectRow
-                    name="Pollenboard"
-                    tag="Shipped"
-                    desc="Design system for indie tooling — v2 live, used by 40+ small teams."
-                  />
-                  <ProjectRow
-                    name="Toolspace"
-                    tag="Beta"
-                    desc="Async pairing app for solo founders. MVP shipped in March."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div
-                  className="font-mono uppercase mb-1.5 opacity-55"
-                  style={{ fontSize: 9, letterSpacing: "0.12em" }}
-                >
-                  Links
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <LinkRow icon="in" label="LinkedIn" url="/in/mayac" />
-                  <LinkRow icon="PDF" label="Résumé" url="maya-c.pdf" />
-                </div>
-              </div>
-            </div>
 
             {/* Edge glows */}
             <div
