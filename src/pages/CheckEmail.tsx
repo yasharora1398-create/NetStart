@@ -3,7 +3,8 @@
  * Replaces the old toast with a dedicated page that:
  *   • tells them the email was sent
  *   • shows the address it went to so they don't second-guess it
- *   • offers a "Resend email" button (uses supabase.auth.resend)
+ *   • offers a "Resend email" button with a 60s cooldown so the
+ *     button can't be spammed against Supabase's rate limits
  *   • has a quiet escape route back to the homepage
  *
  * The email address is passed via location.state from SignUp. If the
@@ -11,11 +12,13 @@
  * "your email" message and the resend button is hidden (we have
  * nothing to resend to).
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Loader2, MailCheck, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const CheckEmail = () => {
   const location = useLocation();
@@ -23,20 +26,43 @@ const CheckEmail = () => {
   const { resendVerification } = useAuth();
   const email = (location.state as { email?: string } | null)?.email ?? "";
   const [resending, setResending] = useState(false);
-  const [resentAt, setResentAt] = useState<number | null>(null);
+  // Seconds remaining before the user can click Resend again. Starts
+  // at 0 (button is enabled). After a successful resend we set it to
+  // RESEND_COOLDOWN_SECONDS and tick down once a second.
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setInterval(() => {
+      setCooldown((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [cooldown]);
 
   const handleResend = async () => {
-    if (!email) return;
+    if (!email || cooldown > 0 || resending) return;
     setResending(true);
     const { error } = await resendVerification(email);
     setResending(false);
     if (error) {
-      toast.error(error.message || "Couldn't resend. Try again in a minute.");
+      const msg = error.message.toLowerCase();
+      if (msg.includes("rate") || msg.includes("for security")) {
+        toast.error("Too many requests. Wait a minute and try again.");
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+      } else {
+        toast.error(error.message || "Couldn't resend. Try again later.");
+      }
       return;
     }
-    setResentAt(Date.now());
+    setCooldown(RESEND_COOLDOWN_SECONDS);
     toast.success("Sent. Check your inbox.");
   };
+
+  const buttonLabel = resending
+    ? "Sending..."
+    : cooldown > 0
+      ? `Resend in ${cooldown}s`
+      : "Resend email";
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
@@ -97,8 +123,8 @@ const CheckEmail = () => {
               <button
                 type="button"
                 onClick={handleResend}
-                disabled={resending}
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                disabled={resending || cooldown > 0}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ boxShadow: "var(--shadow-glow)" }}
               >
                 {resending ? (
@@ -106,13 +132,8 @@ const CheckEmail = () => {
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                {resending ? "Sending…" : "Resend email"}
+                {buttonLabel}
               </button>
-            )}
-            {resentAt && !resending && (
-              <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-primary">
-                Sent again. Check your inbox.
-              </p>
             )}
 
             <button

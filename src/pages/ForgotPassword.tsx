@@ -1,37 +1,68 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, ArrowRight, Loader2, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { Logo } from "@/components/netstart/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
+
+const schema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+});
+type ForgotValues = z.infer<typeof schema>;
+
+const friendlyError = (msg: string): string => {
+  const lower = msg.toLowerCase();
+  if (lower.includes("rate") || lower.includes("for security"))
+    return "Too many requests. Wait a minute and try again.";
+  if (lower.includes("network") || lower.includes("fetch"))
+    return "Network error. Check your connection and try again.";
+  if (lower.includes("smtp") || lower.includes("sending"))
+    return "Couldn't send the reset email. Try again in a moment.";
+  return msg;
+};
 
 const ForgotPassword = () => {
   const { requestPasswordReset } = useAuth();
-  const [email, setEmail] = useState("");
+  const location = useLocation();
+  // Pre-fill from SignIn's "Forgot?" link state if present.
+  const initialEmail =
+    (location.state as { email?: string } | null)?.email ?? "";
   const [submitting, setSubmitting] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Enter your email.");
+  const form = useForm<ForgotValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: initialEmail },
+    mode: "onBlur",
+  });
+
+  const onSubmit = async (values: ForgotValues) => {
+    setSubmitting(true);
+    const { error } = await requestPasswordReset(values.email);
+    setSubmitting(false);
+    if (error) {
+      toast.error(friendlyError(error.message));
       return;
     }
-    setSubmitting(true);
-    try {
-      const { error } = await requestPasswordReset(email.trim());
-      if (error) {
-        toast.error(error.message);
-      } else {
-        setSent(true);
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    // Supabase always succeeds for security (no enumeration). We
+    // confirm visually regardless of whether the email actually
+    // exists. Real users get the email; attackers get the same
+    // success page and learn nothing.
+    setSentTo(values.email.trim().toLowerCase());
   };
 
   return (
@@ -52,7 +83,7 @@ const ForgotPassword = () => {
             Back to sign in
           </Link>
 
-          {sent ? (
+          {sentTo ? (
             <div className="rounded-sm border border-gold-soft bg-card p-8 text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
                 <MailCheck className="h-5 w-5 text-gold" />
@@ -61,10 +92,13 @@ const ForgotPassword = () => {
                 Sent
               </p>
               <h1 className="font-display text-3xl mb-3">Check your inbox.</h1>
-              <p className="text-sm text-muted-foreground">
-                We sent a reset link to{" "}
-                <span className="text-foreground">{email}</span>. The link
-                expires in an hour.
+              <p className="text-sm text-muted-foreground mb-2">
+                If an account exists for{" "}
+                <span className="text-foreground">{sentTo}</span>, we sent a
+                password reset link. The link expires in an hour.
+              </p>
+              <p className="text-xs text-muted-foreground/80 mt-4">
+                Don&apos;t see it? Check your spam folder.
               </p>
             </div>
           ) : (
@@ -76,43 +110,61 @@ const ForgotPassword = () => {
                 Forgot your password?
               </h1>
               <p className="text-sm text-muted-foreground mb-8">
-                We'll email you a link to set a new one.
+                We&apos;ll email you a link to set a new one.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <Label
-                    htmlFor="email"
-                    className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
-                  >
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    autoFocus
-                    className="mt-2 h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  variant="gold"
-                  size="lg"
-                  className="w-full"
-                  disabled={submitting}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-5"
+                  noValidate
                 >
-                  {submitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ArrowRight className="h-4 w-4" />
-                  )}
-                  Send reset link
-                </Button>
-              </form>
+                  <fieldset disabled={submitting} className="space-y-5">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                            Email
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              autoComplete="email"
+                              inputMode="email"
+                              autoFocus={!initialEmail}
+                              placeholder="you@example.com"
+                              className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </fieldset>
+                  <Button
+                    type="submit"
+                    variant="gold"
+                    size="lg"
+                    className="w-full h-12 group"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send reset link
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
             </>
           )}
         </div>
