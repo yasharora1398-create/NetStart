@@ -368,8 +368,10 @@ const Pillar = ({
   details: string[];
 }) => (
   // `group` lets the children react to the card's hover state via
-  // group-hover:* utilities. Hovering the article reveals the
-  // details list and grows the accent rule.
+  // group-hover:* utilities. The details list collapses to zero
+  // height when not hovered (grid-rows trick) so the closed-state
+  // pillar takes only the room its visible text needs. On hover it
+  // expands and the surrounding flow shifts down naturally.
   <article className="relative group cursor-default">
     <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
       {accent}
@@ -378,17 +380,20 @@ const Pillar = ({
     <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
       {title}
     </h3>
-    <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-3">
+    <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
       {body}
     </p>
-    {/* Details — hidden by default, fade in when hovering the card. */}
-    <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
-      {details.map((d) => (
-        <li key={d} className="text-sm leading-relaxed text-muted-foreground">
-          {d}
-        </li>
-      ))}
-    </ul>
+    <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-out">
+      <div className="overflow-hidden">
+        <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
+          {details.map((d) => (
+            <li key={d} className="text-sm leading-relaxed text-muted-foreground">
+              {d}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   </article>
 );
 
@@ -403,7 +408,7 @@ const RoleCard = ({
   signals: string[];
   example: { headline: string; detail: string };
 }) => (
-  <article className="group rounded-2xl border border-border hover:border-primary/40 bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors">
+  <article className="group self-start rounded-2xl border border-border hover:border-primary/40 bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors">
     <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
       {kind}
     </p>
@@ -419,18 +424,23 @@ const RoleCard = ({
       ))}
     </ul>
 
-    {/* Example — invisible until the card is hovered. Slides into
-        view via opacity, no layout shift required. */}
-    <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
-        Example
-      </p>
-      <p className="text-foreground font-semibold leading-snug">
-        {example.headline}
-      </p>
-      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-        {example.detail}
-      </p>
+    {/* Example — collapsed to zero height when not hovered so the
+        card sizes to its visible content; grows on hover and pushes
+        the page below down. */}
+    <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-out">
+      <div className="overflow-hidden">
+        <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
+            Example
+          </p>
+          <p className="text-foreground font-semibold leading-snug">
+            {example.headline}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            {example.detail}
+          </p>
+        </div>
+      </div>
     </div>
   </article>
 );
