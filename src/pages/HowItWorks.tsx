@@ -8,6 +8,11 @@ import {
   StepMatch,
   StepChat,
 } from "@/components/mockups/Steps";
+import { Sidebar } from "@/components/netstart/Sidebar";
+
+// Sidebar in dev only; production /how is the public marketing
+// page linked from the waitlist and stays sidebar-less.
+const SHOW_SIDEBAR = !import.meta.env.PROD;
 
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
@@ -104,6 +109,8 @@ const HowItWorks = () => {
       className="min-h-screen bg-background text-foreground"
       style={{ overflowX: "clip" }}
     >
+      {SHOW_SIDEBAR && <Sidebar />}
+      <div style={{ paddingLeft: "var(--sidebar-width, 0px)" }}>
       <div className="max-w-5xl mx-auto px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
         <Reveal>
           <div className="text-center md:text-left">
@@ -181,6 +188,7 @@ const HowItWorks = () => {
             Back to homepage
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );

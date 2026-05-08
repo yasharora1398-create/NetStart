@@ -17,8 +17,15 @@ import { toast } from "sonner";
 
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { Sidebar } from "@/components/netstart/Sidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+
+// Sidebar shows on /mynet in dev so the rest of the localhost
+// product is reachable. In prod the route is public (so post-signup
+// users can land on the wizard) but we strip the sidebar — same
+// pattern the Waitlist uses.
+const SHOW_SIDEBAR = !import.meta.env.PROD;
 
 import { ProfileCard } from "@/components/mynet/ProfileCard";
 import { CandidateCard } from "@/components/mynet/CandidateCard";
@@ -363,17 +370,20 @@ const MyNet = () => {
   if (showWizard && uid) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <BackToHomeTop />
-        <main className="pt-12 pb-24">
-          <MyNetWizard
-            uid={uid}
-            profile={profile}
-            onProfileRefresh={refreshAll}
-            onSubmitComplete={() => setEditingPending(false)}
-          />
-          <BackToHome />
-        </main>
-        <Footer />
+        {SHOW_SIDEBAR && <Sidebar />}
+        {!SHOW_SIDEBAR && <BackToHomeTop />}
+        <div style={{ paddingLeft: "var(--sidebar-width, 0px)" }}>
+          <main className="pt-12 pb-24">
+            <MyNetWizard
+              uid={uid}
+              profile={profile}
+              onProfileRefresh={refreshAll}
+              onSubmitComplete={() => setEditingPending(false)}
+            />
+            <BackToHome />
+          </main>
+          <Footer />
+        </div>
       </div>
     );
   }
@@ -381,8 +391,9 @@ const MyNet = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <BackToHomeTop />
-      <div>
+      {SHOW_SIDEBAR && <Sidebar />}
+      {!SHOW_SIDEBAR && <BackToHomeTop />}
+      <div style={{ paddingLeft: "var(--sidebar-width, 0px)" }}>
       <main
         className={`pt-12 pb-24 ${
           !isAuthed ? "pointer-events-none select-none blur-sm" : ""

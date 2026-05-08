@@ -2,7 +2,14 @@
  * Sidebar — frosted-glass nav panel. App + About sections of NavLink
  * items, each with a 16x16 stroke icon. Light/Dark segmented toggle
  * at the bottom drives the global theme via `useTheme()`.
+ *
+ * Owns the global --sidebar-width CSS variable: writes 248px on
+ * mount, removes it on unmount. Pages that pad past the sidebar use
+ * `var(--sidebar-width, 0px)` so they correctly collapse to zero
+ * padding on routes where the sidebar isn't rendered (production
+ * waitlist, prod /mynet, etc.).
  */
+import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -25,6 +32,13 @@ const ABOUT_ITEMS: Item[] = [
 
 export const Sidebar = () => {
   const { mode, setMode } = useTheme();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--sidebar-width", "248px");
+    return () => {
+      document.documentElement.style.removeProperty("--sidebar-width");
+    };
+  }, []);
 
   return (
     <aside className="glass-sidebar" aria-label="Sidebar">

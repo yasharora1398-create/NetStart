@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 
 type SidebarContextValue = {
   collapsed: boolean;
@@ -8,37 +8,22 @@ type SidebarContextValue = {
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
 
-// Floating sidebar: width includes the 12px left/right margins so the
-// content column sits just past the sidebar's right edge.
-const COLLAPSED_W = 80;
-const EXPANDED_W = 248;
-const LS_KEY = "netstart_sidebar_collapsed";
+// Sidebar is fixed at 224px + 12px left margin + 12px gap = 248px of
+// horizontal space pages should pad past. There's no collapse anymore;
+// `collapsed` and `setCollapsed` remain on the context as no-ops so any
+// older callers compile, but the value is constant.
+//
+// The actual --sidebar-width CSS variable is written by the Sidebar
+// component on mount (and removed on unmount), so pages that pad past
+// the sidebar via `var(--sidebar-width, 0px)` collapse to zero padding
+// when no sidebar is rendered (e.g. production /mynet).
+const SIDEBAR_WIDTH = 248;
 
 export const SidebarProvider = ({ children }: { children: ReactNode }) => {
-  const [collapsed, setCollapsedState] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(LS_KEY) === "1";
-  });
-
-  const setCollapsed = (v: boolean) => {
-    setCollapsedState(v);
-    try {
-      window.localStorage.setItem(LS_KEY, v ? "1" : "0");
-    } catch {
-      // ignore
-    }
-  };
-
-  useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--sidebar-width",
-      `${collapsed ? COLLAPSED_W : EXPANDED_W}px`,
-    );
-  }, [collapsed]);
-
-  // Drive a global --scroll-progress (0..1) that .glass::before
-  // reads to modulate edge reflections — the only thing that should
-  // visibly react to page scroll on liquid-glass surfaces.
+  // Drive a global --scroll-progress (0..1) that .glass::before reads
+  // to modulate edge reflections on liquid-glass surfaces elsewhere on
+  // the page (mockup cards, etc.). The fixed sidebar has its own static
+  // chromatic edge and doesn't depend on this.
   useEffect(() => {
     let raf = 0;
     const apply = () => {
@@ -70,9 +55,11 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SidebarContext.Provider
       value={{
-        collapsed,
-        setCollapsed,
-        width: collapsed ? COLLAPSED_W : EXPANDED_W,
+        collapsed: false,
+        setCollapsed: () => {
+          // noop — collapse no longer supported
+        },
+        width: SIDEBAR_WIDTH,
       }}
     >
       {children}
@@ -88,7 +75,7 @@ export const useSidebar = (): SidebarContextValue => {
       setCollapsed: () => {
         // noop fallback
       },
-      width: EXPANDED_W,
+      width: SIDEBAR_WIDTH,
     };
   }
   return ctx;
