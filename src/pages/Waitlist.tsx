@@ -478,22 +478,23 @@ const BlurredBackdrop = () => (
   <div
     aria-hidden
     className="pointer-events-none fixed inset-0 z-0"
-    style={{ filter: "blur(60px)" }}
+    style={{ filter: "blur(80px)" }}
   >
-    {/* Top-right primary orb */}
+    {/* Top-right primary orb — dimmed so the homepage reads as black
+        first, green-accented second. */}
     <div
-      className="absolute -top-32 -right-32 h-[480px] w-[480px] rounded-full opacity-30"
+      className="absolute -top-32 -right-32 h-[480px] w-[480px] rounded-full opacity-[0.10] dark:opacity-[0.10]"
       style={{
         background:
-          "radial-gradient(circle, hsl(var(--primary) / 0.85) 0%, transparent 70%)",
+          "radial-gradient(circle, hsl(var(--primary) / 0.5) 0%, transparent 70%)",
       }}
     />
     {/* Bottom-left soft accent orb */}
     <div
-      className="absolute -bottom-40 -left-32 h-[520px] w-[520px] rounded-full opacity-25"
+      className="absolute -bottom-40 -left-32 h-[520px] w-[520px] rounded-full opacity-[0.08] dark:opacity-[0.08]"
       style={{
         background:
-          "radial-gradient(circle, hsl(var(--primary) / 0.7) 0%, transparent 70%)",
+          "radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, transparent 70%)",
       }}
     />
   </div>

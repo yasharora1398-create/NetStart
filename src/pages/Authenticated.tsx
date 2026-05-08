@@ -22,17 +22,17 @@ const Authenticated = () => {
       style={{ filter: "blur(60px)" }}
     >
       <div
-        className="absolute -top-32 -right-32 h-[480px] w-[480px] rounded-full opacity-30"
+        className="absolute -top-32 -right-32 h-[480px] w-[480px] rounded-full opacity-[0.10]"
         style={{
           background:
-            "radial-gradient(circle, hsl(var(--primary) / 0.85) 0%, transparent 70%)",
+            "radial-gradient(circle, hsl(var(--primary) / 0.5) 0%, transparent 70%)",
         }}
       />
       <div
-        className="absolute -bottom-40 -left-32 h-[520px] w-[520px] rounded-full opacity-25"
+        className="absolute -bottom-40 -left-32 h-[520px] w-[520px] rounded-full opacity-[0.08]"
         style={{
           background:
-            "radial-gradient(circle, hsl(var(--primary) / 0.7) 0%, transparent 70%)",
+            "radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, transparent 70%)",
         }}
       />
     </div>
