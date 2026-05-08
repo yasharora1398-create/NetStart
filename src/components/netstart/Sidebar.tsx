@@ -10,12 +10,18 @@
  * waitlist, prod /mynet, etc.).
  */
 import { useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/context/AuthContext";
 
 type IconType = React.ComponentType;
 
 type Item = { to: string; label: string; icon: IconType };
+
+const HOME_ITEMS: Item[] = [
+  { to: "/", label: "Home", icon: HomeIcon },
+];
 
 const APP_ITEMS: Item[] = [
   { to: "/mynet", label: "MyNet", icon: MyNetIcon },
@@ -32,6 +38,7 @@ const ABOUT_ITEMS: Item[] = [
 
 export const Sidebar = () => {
   const { mode, setMode } = useTheme();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     document.documentElement.style.setProperty("--sidebar-width", "248px");
@@ -40,23 +47,49 @@ export const Sidebar = () => {
     };
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out.");
+  };
+
   return (
     <aside className="glass-sidebar" aria-label="Sidebar">
-      {/* Brand */}
-      <div className="gs-brand">
-        <div className="gs-brand-mark">P8</div>
+      {/* Brand — logo image replaces the P8 square; the whole row is
+          a Link to "/" so the brand mark works as a home affordance. */}
+      <Link to="/" className="gs-brand gs-brand-link" aria-label="Polln8 home">
+        <img
+          src="/polln8-logo.png"
+          alt=""
+          className="gs-brand-logo"
+          draggable={false}
+        />
         <div>
           <div className="gs-brand-name">Polln8</div>
           <div className="gs-brand-sub">Build with intent</div>
         </div>
+      </Link>
+
+      {/* Home — its own subsection so the home jump is a first-class
+          item rather than relying on the brand mark alone. */}
+      <div className="gs-section">
+        <div className="gs-section-label">Home</div>
+        {HOME_ITEMS.map((item) => (
+          <SideLink key={item.to} item={item} end />
+        ))}
       </div>
 
-      {/* App */}
+      {/* App — MyNet gets a name pill so the user sees whose net it
+          is at a glance. Falls back to the email local-part when no
+          name was set at signup. */}
       <div className="gs-section">
         <div className="gs-section-label">App</div>
-        {APP_ITEMS.map((item) => (
-          <SideLink key={item.to} item={item} />
-        ))}
+        {APP_ITEMS.map((item) => {
+          const pill =
+            item.to === "/mynet" && user
+              ? userDisplayName(user)
+              : undefined;
+          return <SideLink key={item.to} item={item} pill={pill} />;
+        })}
       </div>
 
       {/* About */}
@@ -65,6 +98,32 @@ export const Sidebar = () => {
         {ABOUT_ITEMS.map((item) => (
           <SideLink key={item.to} item={item} />
         ))}
+      </div>
+
+      {/* Account — Sign in/Sign up when logged out, Sign out when in. */}
+      <div className="gs-section">
+        <div className="gs-section-label">Account</div>
+        {user ? (
+          <button
+            type="button"
+            onClick={() => void handleSignOut()}
+            className="gs-item"
+          >
+            <span className="gs-ico" aria-hidden="true">
+              <SignOutIcon />
+            </span>
+            <span>Sign out</span>
+          </button>
+        ) : (
+          <>
+            <SideLink
+              item={{ to: "/signin", label: "Sign in", icon: SignInIcon }}
+            />
+            <SideLink
+              item={{ to: "/signup", label: "Sign up", icon: SignUpIcon }}
+            />
+          </>
+        )}
       </div>
 
       <div className="gs-spacer" />
@@ -96,11 +155,25 @@ export const Sidebar = () => {
   );
 };
 
-const SideLink = ({ item }: { item: Item }) => {
+// `end` prevents the Home NavLink from staying active on every nested
+// route (without it, "/" matches everything because every path starts
+// with /). Other items don't need it since they're top-level.
+// `pill` renders a small label on the right of the item — used to
+// show the signed-in user's name next to MyNet.
+const SideLink = ({
+  item,
+  end = false,
+  pill,
+}: {
+  item: Item;
+  end?: boolean;
+  pill?: string;
+}) => {
   const Icon = item.icon;
   return (
     <NavLink
       to={item.to}
+      end={end}
       className={({ isActive }) =>
         `gs-item${isActive ? " gs-active" : ""}`
       }
@@ -109,8 +182,20 @@ const SideLink = ({ item }: { item: Item }) => {
         <Icon />
       </span>
       <span>{item.label}</span>
+      {pill && <span className="gs-pill">{pill}</span>}
     </NavLink>
   );
+};
+
+// Pull a short, friendly display name from the user. Prefers the
+// signup `name` metadata, falls back to the email local-part, then
+// "you" as last resort. Keeps it compact (first word + first
+// initial-ish) so it fits the sidebar pill.
+const userDisplayName = (user: { email?: string | null; user_metadata?: Record<string, unknown> }): string => {
+  const meta = user.user_metadata as { name?: string } | undefined;
+  const raw = meta?.name?.trim() ?? user.email?.split("@")[0] ?? "you";
+  const first = raw.split(/\s+/)[0] ?? raw;
+  return first.length > 12 ? `${first.slice(0, 11)}…` : first;
 };
 
 // ============== ICONS — verbatim paths from Sidebar.html ==============
@@ -257,6 +342,74 @@ function MoonIcon() {
       strokeLinejoin="round"
     >
       <path d="M13 9.5 A5.5 5.5 0 1 1 6.5 3 A4.4 4.4 0 0 0 13 9.5 Z" />
+    </svg>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 7.5 L8 2.5 L13.5 7.5 V13 a0.8 0.8 0 0 1 -0.8 0.8 H3.3 a0.8 0.8 0 0 1 -0.8 -0.8 Z" />
+      <path d="M6.5 13.8 V9.5 H9.5 V13.8" />
+    </svg>
+  );
+}
+
+function SignInIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 2.5 H12.5 a1 1 0 0 1 1 1 V12.5 a1 1 0 0 1 -1 1 H9" />
+      <path d="M2.5 8 H10" />
+      <path d="M7.5 5.5 L10 8 L7.5 10.5" />
+    </svg>
+  );
+}
+
+function SignUpIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="6" cy="6" r="2.5" />
+      <path d="M2 13 c0 -2.2 1.8 -4 4 -4 s4 1.8 4 4" />
+      <path d="M12.5 5 V9" />
+      <path d="M10.5 7 H14.5" />
+    </svg>
+  );
+}
+
+function SignOutIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 2.5 H3.5 a1 1 0 0 0 -1 1 V12.5 a1 1 0 0 0 1 1 H7" />
+      <path d="M13.5 8 H6" />
+      <path d="M11 5.5 L13.5 8 L11 10.5" />
     </svg>
   );
 }

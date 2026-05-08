@@ -450,6 +450,19 @@
     margin-bottom: 10px;
     z-index: 1;
   }
+  /* Brand row is a Link now, so suppress underline + inherit the
+     specific text colors from gs-brand-name / gs-brand-sub. */
+  .glass-sidebar .gs-brand-link {
+    text-decoration: none;
+  }
+  .glass-sidebar .gs-brand-logo {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
   .glass-sidebar .gs-brand-mark {
     width: 30px;
     height: 30px;
@@ -541,6 +554,29 @@
   }
   .glass-sidebar .gs-spacer {
     flex: 1;
+  }
+  /* Right-aligned pill inside a sidebar item (used for the user's
+     name next to MyNet). Squashes long names with ellipsis so it
+     never breaks the sidebar layout. */
+  .glass-sidebar .gs-pill {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.06);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #6b6b6b;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .glass-sidebar .gs-item.gs-active .gs-pill {
+    background: rgba(0, 0, 0, 0.08);
+    color: #1a1a1a;
   }
   .glass-sidebar .gs-theme {
     position: relative;
@@ -656,6 +692,14 @@
   }
   .dark .glass-sidebar .gs-item.gs-active .gs-ico {
     color: hsl(142 33% 58%);
+  }
+  .dark .glass-sidebar .gs-pill {
+    background: rgba(255, 255, 255, 0.08);
+    color: hsl(60 4% 64%);
+  }
+  .dark .glass-sidebar .gs-item.gs-active .gs-pill {
+    background: rgba(79, 165, 114, 0.20);
+    color: hsl(142 33% 70%);
   }
   .dark .glass-sidebar .gs-theme {
     border-top-color: rgba(255, 255, 255, 0.08);
