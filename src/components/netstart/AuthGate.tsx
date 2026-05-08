@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,15 +15,24 @@ export const AuthGate = ({
   const location = useLocation();
   const from = location.pathname + location.search;
 
+  // Some pages (like /mynet in production) don't render a sidebar, so
+  // hard-coding `left: var(--sidebar-width, 248px)` would float the
+  // modal with a 248-px empty bar on the left. Detect at runtime
+  // whether the var is actually set by reading the computed style on
+  // <html>; if the document never set the variable we fall back to a
+  // full-width centered modal.
+  const [hasSidebar, setHasSidebar] = useState(false);
+  useEffect(() => {
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue("--sidebar-width")
+      .trim();
+    setHasSidebar(value.length > 0 && value !== "0px");
+  }, []);
+
   return (
     <div
-      // Sits to the RIGHT of the sidebar so users can still click
-      // sidebar items (Match, How it works, etc.) while the gate is
-      // open. The inline `left` reads the same `--sidebar-width` var
-      // the rest of the app uses so it stays in sync if the sidebar
-      // ever collapses.
       className="fixed top-0 right-0 bottom-0 z-30 flex items-center justify-center px-4"
-      style={{ left: "var(--sidebar-width, 248px)" }}
+      style={hasSidebar ? { left: "var(--sidebar-width)" } : { left: 0 }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-gate-title"

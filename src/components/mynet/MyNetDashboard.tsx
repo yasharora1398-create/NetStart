@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import {
-  ArrowRight,
   Briefcase,
   CheckCircle2,
   ExternalLink,
   Eye,
   FileText,
   Hammer,
+  Hourglass,
   Linkedin,
   MapPin,
   Pencil,
@@ -83,6 +82,7 @@ export const MyNetDashboard = ({
   const [editing, setEditing] = useState(false);
 
   const hasProjects = projects.length > 0;
+  const isPending = profile.reviewStatus === "pending";
 
   return (
     <>
@@ -91,19 +91,30 @@ export const MyNetDashboard = ({
           scrolling to the bottom to find the button. */}
       <header className="mb-10 flex flex-wrap items-start justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500/40 bg-emerald-500/10 mb-6">
-            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-400">
-              Accepted
-            </span>
-          </div>
+          {isPending ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold/40 bg-gold/10 mb-6">
+              <Hourglass className="h-3 w-3 text-gold" />
+              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+                Review pending
+              </span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500/40 bg-emerald-500/10 mb-6">
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-400">
+                Accepted
+              </span>
+            </div>
+          )}
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] mb-3">
             Your <em className="text-gradient-gold not-italic">profile.</em>
           </h1>
           <p className="text-muted-foreground max-w-xl">
             {editing
               ? "Editing. Make your changes and click Done."
-              : "Everything you've set up, at a glance."}
+              : isPending
+                ? "Submitted. We'll review your credentials shortly — feel free to keep building below."
+                : "Everything you've set up, at a glance."}
           </p>
         </div>
         <div className="shrink-0">
@@ -159,25 +170,22 @@ export const MyNetDashboard = ({
         )}
 
         {!editing && profile.candidate.isOpenToWork && (
-          <Link
-            to="/talent"
-            className="mt-6 block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
-          >
+          <div className="mt-6 block rounded-sm border border-gold-soft/60 bg-gradient-to-r from-gold/5 to-transparent p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
-                  Find projects
+                  Find projects · Coming soon
                 </p>
                 <h3 className="font-display text-2xl mb-1">
                   Browse open projects
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Ranked against your profile.
+                  We&apos;re lining up the founder side. You&apos;ll be able to
+                  browse projects ranked against your profile at launch.
                 </p>
               </div>
-              <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />
             </div>
-          </Link>
+          </div>
         )}
       </Section>
 

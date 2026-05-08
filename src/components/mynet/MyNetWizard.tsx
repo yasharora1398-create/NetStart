@@ -56,7 +56,7 @@ import {
 
 const MAX_RESUME_BYTES = 4 * 1024 * 1024;
 
-const STEP_LABELS = ["Credentials", "Mode", "Details", "Review"] as const;
+const STEP_LABELS = ["Credentials", "Mode", "Details"] as const;
 
 type Stage = "intro" | "credentials" | "mode" | "looking" | "building";
 
@@ -319,7 +319,7 @@ export const MyNetWizard = ({
 
       {stage === "credentials" && (
         <StepShell
-          eyebrow="Step 01 of 04"
+          eyebrow="Step 01 of 03"
           title="Drop your credentials."
           subtitle="LinkedIn or a resume helps us verify you. We strongly recommend both, but either one will do."
         >
@@ -391,7 +391,7 @@ export const MyNetWizard = ({
 
       {stage === "mode" && (
         <StepShell
-          eyebrow="Step 02 of 04"
+          eyebrow="Step 02 of 03"
           title="What brings you here?"
           subtitle="Pick the path that fits today. You can always do both later."
           onBack={() => setStage("credentials")}
@@ -417,7 +417,7 @@ export const MyNetWizard = ({
 
       {stage === "looking" && (
         <StepShell
-          eyebrow="Step 03 of 04"
+          eyebrow="Step 03 of 03"
           title="Tell us about you."
           subtitle="A short pitch and a few specifics so founders can match with you."
           onBack={() => setStage("mode")}
@@ -529,7 +529,7 @@ export const MyNetWizard = ({
 
       {stage === "building" && (
         <StepShell
-          eyebrow="Step 03 of 04"
+          eyebrow="Step 03 of 03"
           title="Tell us what you're building."
           subtitle="Give the project a name and what kind of operator you want next to you."
           onBack={() => setStage("mode")}
@@ -679,7 +679,7 @@ const Intro = ({
       </h1>
 
       <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-12">
-        Four short steps. We&apos;ll get you in front of the right people, and
+        Three short steps. We&apos;ll get you in front of the right people, and
         keep the network high signal.
       </p>
 

@@ -42,7 +42,7 @@ const Waitlist = () => {
             />
             Polln8
           </Link>
-          <div className="flex items-center gap-3 md:gap-5">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
             {/* If the user is already authenticated, the SignUp/SignIn
                 pages auto-redirect them back here, which feels like
                 the auth pages are broken. Show a "Sign out" link
@@ -51,14 +51,14 @@ const Waitlist = () => {
               <button
                 type="button"
                 onClick={() => void signOut()}
-                className="hidden sm:inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 Sign out
               </button>
             ) : (
               <Link
                 to="/signin"
-                className="hidden sm:inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 Sign in
               </Link>
@@ -67,7 +67,7 @@ const Waitlist = () => {
             {user ? (
               <Link
                 to="/mynet"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 Edit MyNet
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -75,7 +75,7 @@ const Waitlist = () => {
             ) : (
               <Link
                 to="/signup"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 Get started
                 <ArrowRight className="h-3.5 w-3.5" />

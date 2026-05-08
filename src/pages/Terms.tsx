@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Nav } from "@/components/netstart/Nav";
+import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/netstart/Footer";
 
 const SECTIONS: Array<{ title: string; body: string }> = [
@@ -57,8 +57,30 @@ const SECTIONS: Array<{ title: string; body: string }> = [
 
 const Terms = () => (
   <div className="min-h-screen bg-background text-foreground">
-    <Nav />
-    <main className="pt-28 pb-24">
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border/50">
+      <div className="mx-auto max-w-3xl px-5 md:px-8 h-16 flex items-center justify-between">
+        <Link
+          to="/"
+          className="flex items-center gap-2 font-display text-xl tracking-[-0.02em] text-foreground"
+        >
+          <img
+            src="/polln8-logo.png"
+            alt=""
+            className="h-9 w-9 object-contain"
+            draggable={false}
+          />
+          Polln8
+        </Link>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back home
+        </Link>
+      </div>
+    </header>
+    <main className="pt-12 pb-24">
       <div className="container max-w-3xl">
         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
           Legal
