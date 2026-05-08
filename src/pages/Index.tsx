@@ -2,22 +2,43 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BadgeCheck, Sparkles, Zap } from "lucide-react";
 import { Sidebar } from "@/components/netstart/Sidebar";
 import { useAuth } from "@/context/AuthContext";
+import { useInView } from "@/hooks/useInView";
 
-const WHY = [
+const WHY: {
+  icon: typeof BadgeCheck;
+  title: string;
+  body: string;
+  details: string[];
+}[] = [
   {
     icon: BadgeCheck,
     title: "Vetted, not viral.",
     body: "Every member reviewed for shipped work. No accounts farmed for engagement.",
+    details: [
+      "Manual review of every signup, not auto-approval.",
+      "LinkedIn + resume cross-checked against public work.",
+      "Rejected applicants get a reviewer note and a resubmit path.",
+    ],
   },
   {
     icon: Sparkles,
     title: "Matches ranked by AI.",
     body: "The deck is ordered against your skills, project, and intent. Not the algorithm's.",
+    details: [
+      "Embeddings of your profile + project intent drive ranking.",
+      "Skills weighted by what you've actually shipped, not claimed.",
+      "Re-ranks daily as profiles and projects update.",
+    ],
   },
   {
     icon: Zap,
     title: "Decisive by design.",
     body: "Connect, save, or pass. No likes, no maybes. Apply with one real pitch.",
+    details: [
+      "Three actions per card. No fourth option to defer.",
+      "One pitch per application — no copy-paste spam.",
+      "Accepted requests turn into mutual contacts immediately.",
+    ],
   },
 ];
 
@@ -36,6 +57,7 @@ const Index = () => {
       >
         <div className="max-w-6xl mx-auto px-6 md:px-10">
           {/* HERO */}
+          <Reveal>
           <section className="pt-6 md:pt-12 pb-12 md:pb-16 max-w-3xl">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] mb-5 text-primary">
               polln8 / for builders
@@ -68,34 +90,23 @@ const Index = () => {
               )}
             </div>
           </section>
+          </Reveal>
 
-          {/* WHY — three reasons in warm cards */}
+          {/* WHY — three reasons in warm cards. Each card auto-reveals
+              its extra details as it enters the viewport (same pattern
+              as the Waitlist pillars). */}
+          <Reveal>
           <section className="py-10 md:py-14">
-            <div className="grid md:grid-cols-3 gap-4">
-              {WHY.map((w) => {
-                const Icon = w.icon;
-                return (
-                  <article
-                    key={w.title}
-                    className="glass relative p-6"
-                    style={{ borderRadius: 16 }}
-                  >
-                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg mb-4 bg-primary/10 border border-primary/40 text-primary">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <h3 className="font-display text-xl mb-2 tracking-[-0.015em] text-foreground font-bold">
-                      {w.title}
-                    </h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {w.body}
-                    </p>
-                  </article>
-                );
-              })}
+            <div className="grid md:grid-cols-3 gap-4 items-start">
+              {WHY.map((w, i) => (
+                <WhyCard key={w.title} entry={w} delay={i * 80} />
+              ))}
             </div>
           </section>
+          </Reveal>
 
           {/* HOW — single line flow */}
+          <Reveal delay={120}>
           <section className="py-10 md:py-14">
             <div className="grid md:grid-cols-[160px_1fr] gap-6 md:gap-12 items-baseline">
               <Link
@@ -111,8 +122,10 @@ const Index = () => {
               </p>
             </div>
           </section>
+          </Reveal>
 
           {/* CLOSING CTA — alt-section panel */}
+          <Reveal>
           <section className="py-12 md:py-16">
             <div className="p-8 md:p-12 bg-secondary border border-border rounded-2xl">
               <div className="grid md:grid-cols-[1fr_auto] gap-8 md:gap-16 items-end">
@@ -158,6 +171,7 @@ const Index = () => {
               </div>
             </div>
           </section>
+          </Reveal>
 
           <footer className="mt-4 mb-6 pt-5 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-[0.25em] border-t border-border text-muted-foreground">
             <p>© Polln8</p>
@@ -182,6 +196,83 @@ const Index = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Fade-up + un-blur as the wrapped block enters the viewport. Uses
+// the shared .reveal / .reveal-on classes from index.css so all
+// reveals across the site share one motion language.
+const Reveal = ({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) => {
+  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.15 });
+  return (
+    <div
+      ref={ref}
+      className={`reveal${inView ? " reveal-on" : ""}`}
+      style={{ transitionDelay: inView ? `${delay}ms` : "0ms" }}
+    >
+      {children}
+    </div>
+  );
+};
+
+// Why-card — auto-expands its details list when the card scrolls
+// into view. Same grid-template-rows trick the Waitlist pillars
+// use so the closed-state card sizes only to its visible content.
+const WhyCard = ({
+  entry,
+  delay,
+}: {
+  entry: (typeof WHY)[number];
+  delay: number;
+}) => {
+  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.4 });
+  const Icon = entry.icon;
+  return (
+    <article
+      ref={ref}
+      className="glass relative p-6 self-start"
+      style={{ borderRadius: 16 }}
+    >
+      <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg mb-4 bg-primary/10 border border-primary/40 text-primary">
+        <Icon className="h-4 w-4" />
+      </div>
+      <h3 className="font-display text-xl mb-2 tracking-[-0.015em] text-foreground font-bold">
+        {entry.title}
+      </h3>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        {entry.body}
+      </p>
+      <div
+        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+          inView ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+        style={{ transitionDelay: inView ? `${delay}ms` : "0ms" }}
+      >
+        <div className="overflow-hidden">
+          <ul
+            className={`space-y-2 border-l border-primary/30 pl-4 mt-5 transition-opacity duration-500 ${
+              inView ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ transitionDelay: inView ? `${delay + 180}ms` : "0ms" }}
+          >
+            {entry.details.map((d) => (
+              <li
+                key={d}
+                className="text-sm leading-relaxed text-muted-foreground"
+              >
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </article>
   );
 };
 
