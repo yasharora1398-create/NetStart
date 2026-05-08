@@ -807,6 +807,90 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
+  /* Polln8 Review Card mockup animations — used by the
+     ReviewCardMockup on the localhost homepage Why-section. The
+     mockup auto-loops through rest -> reviewing -> approved so the
+     visitor can see the manual-review flow without interaction. */
+  .rc-ring {
+    animation: rc-ringspin 18s linear infinite;
+  }
+  .rc-state-reviewing .rc-ring {
+    animation-duration: 6s;
+  }
+  .rc-state-approved .rc-ring {
+    animation-play-state: paused;
+  }
+  @keyframes rc-ringspin {
+    to { transform: rotate(360deg); }
+  }
+  .rc-pulse {
+    animation: rc-pulsering 1.6s ease-out infinite;
+  }
+  .rc-state-reviewing .rc-pulse {
+    animation-duration: 1s;
+  }
+  @keyframes rc-pulsering {
+    0%   { transform: scale(0.7); opacity: 0.9; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .rc-confetti.is-on .rc-confetti__p {
+    animation: rc-drift 1500ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--delay) forwards;
+  }
+  @keyframes rc-drift {
+    0%   { opacity: 0;   transform: translateY(0)               scale(0.6); }
+    20%  { opacity: 0.9; }
+    100% { opacity: 0;   transform: translateY(var(--drift))    scale(1); }
+  }
+
+  /* Polln8 Matches Card mockup — auto-looping deck demo. Cards
+     translate via .mc-pcard--<frontness> classes; the profile-detail
+     sheet slides up via .mc-phase-<n> on the device root. */
+  .mc-pcard {
+    transition:
+      transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      opacity 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform, opacity;
+  }
+  .mc-pcard--top { transform: translateY(0) scale(1); z-index: 5; opacity: 1; }
+  .mc-pcard--behind1 { transform: translateY(14px) scale(0.95); z-index: 4; opacity: 1; }
+  .mc-pcard--behind1-grow { transform: translateY(7px) scale(0.975); z-index: 4; opacity: 1; }
+  .mc-pcard--behind2 { transform: translateY(28px) scale(0.90); z-index: 3; opacity: 0.65; }
+  .mc-pcard--swiping-right { transform: translateX(330px) translateY(-10px) rotate(8deg); z-index: 5; opacity: 1; }
+  .mc-pcard--swiping-left  { transform: translateX(-330px) translateY(-10px) rotate(-8deg); z-index: 5; opacity: 1; }
+  .mc-pcard--gone-right { transform: translateX(330px) rotate(8deg); z-index: 5; opacity: 0; }
+  .mc-pcard--gone-left  { transform: translateX(-330px) rotate(-8deg); z-index: 5; opacity: 0; }
+  .mc-edge-label {
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+  .mc-pcard--swiping-right .mc-edge-label--save { opacity: 1; }
+  .mc-pcard--swiping-left  .mc-edge-label--pass { opacity: 1; }
+  .mc-edge-glow {
+    opacity: 0;
+    transition: opacity 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .mc-edge-glow.is-on { opacity: 1; }
+  .mc-profile-tab {
+    transform: translateY(100%);
+    transition: transform 560ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .mc-phase-2 .mc-profile-tab,
+  .mc-phase-3 .mc-profile-tab {
+    transform: translateY(0);
+  }
+  .mc-tab-hint {
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+  .mc-phase-3 .mc-tab-hint { opacity: 0.55; }
+  .mc-tab-hint-arrow {
+    animation: mc-hintdown 1.4s ease-in-out infinite;
+  }
+  @keyframes mc-hintdown {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50%      { transform: translateY(4px); opacity: 1; }
+  }
+
   /* Hawk-moth mascot animations — used wherever the moth is shown. */
   .moth-hover {
     animation: moth-hover 4.6s ease-in-out infinite;

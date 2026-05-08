@@ -1,29 +1,18 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Briefcase,
-  Check,
-  Heart,
-  Hourglass,
-  MapPin,
-  MessageSquare,
-  Send,
-  Sparkles,
-  UserRound,
-  X,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, Sparkles, Zap } from "lucide-react";
 import { Sidebar } from "@/components/netstart/Sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useInView } from "@/hooks/useInView";
+
+type MockupKind = "review" | "matches" | "placeholder";
 
 const WHY: {
   icon: typeof BadgeCheck;
   title: string;
   body: string;
   details: string[];
-  mockup: "waiting" | "swipe" | "connect";
+  mockup: MockupKind;
 }[] = [
   {
     icon: BadgeCheck,
@@ -34,7 +23,7 @@ const WHY: {
       "LinkedIn + resume cross-checked against public work.",
       "Rejected applicants get a reviewer note and a resubmit path.",
     ],
-    mockup: "waiting",
+    mockup: "review",
   },
   {
     icon: Sparkles,
@@ -45,7 +34,7 @@ const WHY: {
       "Skills weighted by what you've actually shipped, not claimed.",
       "Re-ranks daily as profiles and projects update.",
     ],
-    mockup: "swipe",
+    mockup: "matches",
   },
   {
     icon: Zap,
@@ -56,7 +45,7 @@ const WHY: {
       "One pitch per application — no copy-paste spam.",
       "Accepted requests turn into mutual contacts immediately.",
     ],
-    mockup: "connect",
+    mockup: "placeholder",
   },
 ];
 
@@ -238,373 +227,1094 @@ const Reveal = ({
   );
 };
 
-// Each WHY row: text block on the left, animated mockup on the right.
-// The whole row is a `group` so the mockup's hover-driven animations
-// fire as soon as the cursor enters the row, not just the mockup.
+// Each WHY row: text block on the left, mockup on the right. The
+// text block is its own hover group — hovering it reveals the
+// expanded details list using the grid-rows-[0fr]->[1fr] trick (same
+// pattern the Waitlist pillars used originally before being switched
+// to scroll-reveal).
 const WhyRow = ({ entry }: { entry: (typeof WHY)[number] }) => {
   const Icon = entry.icon;
   return (
-    <article className="group grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-      <div>
+    <article className="grid md:grid-cols-[38fr_62fr] gap-10 md:gap-16 items-center">
+      <div className="group cursor-default">
         <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg mb-5 bg-primary/10 border border-primary/40 text-primary">
           <Icon className="h-4 w-4" />
         </div>
         <h3 className="font-display text-2xl md:text-3xl mb-3 tracking-[-0.02em] text-foreground font-bold">
           {entry.title}
         </h3>
-        <p className="text-base leading-relaxed text-muted-foreground mb-5 max-w-md">
+        <p className="text-base leading-relaxed text-muted-foreground max-w-md">
           {entry.body}
         </p>
-        <ul className="space-y-2 border-l border-primary/30 pl-4 max-w-md">
-          {entry.details.map((d) => (
-            <li
-              key={d}
-              className="text-sm leading-relaxed text-muted-foreground"
-            >
-              {d}
-            </li>
-          ))}
-        </ul>
+        <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out">
+          <div className="overflow-hidden">
+            <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 max-w-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+              {entry.details.map((d) => (
+                <li
+                  key={d}
+                  className="text-sm leading-relaxed text-muted-foreground"
+                >
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
       <div className="flex justify-center md:justify-end">
-        {entry.mockup === "waiting" && <WaitingMockup />}
-        {entry.mockup === "swipe" && <SwipeMockup />}
-        {entry.mockup === "connect" && <ConnectMockup />}
+        {entry.mockup === "review" && <ReviewCardMockup />}
+        {entry.mockup === "matches" && <MatchesCardMockup />}
+        {entry.mockup === "placeholder" && <MockupPlaceholder />}
       </div>
     </article>
   );
 };
 
-// ─── Animated mockups ────────────────────────────────────────────
-// Each one is a self-contained desktop card-like artifact. None of
-// them load external video; the motion is pure CSS keyframes that
-// activate on row hover via the parent `.group` class. They reset
-// when the cursor leaves so the next hover replays the sequence.
-
-// 1. Waiting mockup — review-pending state. On hover, the three
-// review checks tick in sequence and the hourglass spins.
-const WaitingMockup = () => (
-  <div className="w-full max-w-[360px] rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
-    {/* Browser-like top bar to make it read as a real screen. */}
-    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-secondary border-b border-border">
-      <span className="h-2 w-2 rounded-full bg-foreground/15" />
-      <span className="h-2 w-2 rounded-full bg-foreground/15" />
-      <span className="h-2 w-2 rounded-full bg-foreground/15" />
-      <span className="ml-2 text-[10px] font-mono text-muted-foreground">
-        polln8.com / mynet
-      </span>
-    </div>
-    <div className="p-6">
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-primary/40 bg-primary/10 mb-5">
-        <Hourglass className="h-3 w-3 text-primary group-hover:animate-spin" />
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary">
-          Review pending
-        </span>
-      </div>
-      <h4 className="font-display text-2xl mb-1 text-foreground">Submitted.</h4>
-      <p className="text-xs text-muted-foreground mb-5">
-        We'll review your credentials shortly.
+// Slot for a video the user is going to drop in later. Visually
+// quiet so it doesn't compete with the live mockup above; just a
+// dashed-border 16:12 panel with a small "Video coming" label.
+const MockupPlaceholder = () => (
+  <div
+    className="relative w-full max-w-[440px] rounded-2xl border border-dashed border-border bg-card/40 flex items-center justify-center"
+    style={{ aspectRatio: "16 / 12" }}
+    aria-hidden
+  >
+    <div className="text-center px-6">
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-2">
+        Demo · Video coming
       </p>
-      <ul className="space-y-2.5">
-        <CheckRow label="Profile uploaded" delay={0} />
-        <CheckRow label="LinkedIn verified" delay={300} />
-        <CheckRow label="Awaiting reviewer" delay={650} pending />
-      </ul>
+      <p className="text-sm text-muted-foreground/80">
+        We'll drop a real product clip in here.
+      </p>
     </div>
   </div>
 );
 
-const CheckRow = ({
-  label,
-  delay,
-  pending = false,
-}: {
-  label: string;
-  delay: number;
-  pending?: boolean;
-}) => (
-  <li className="flex items-center gap-3 text-xs">
-    <span
-      className={`h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-        pending
-          ? "bg-primary/10 border border-primary/40 text-primary group-hover:animate-pulse"
-          : "bg-foreground/[0.04] border border-border text-transparent group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground"
-      }`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {pending ? (
-        <Hourglass className="h-2.5 w-2.5" />
-      ) : (
-        <Check className="h-3 w-3" strokeWidth={3} />
-      )}
-    </span>
-    <span
-      className={`transition-colors duration-300 ${
-        pending
-          ? "text-foreground"
-          : "text-muted-foreground group-hover:text-foreground"
-      }`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {label}
-    </span>
-  </li>
-);
+// ─── Polln8 Review Card mockup ───────────────────────────────────
+// Direct port of the Polln8 Review Card.html design from the
+// Anthropic design handoff. 16:12 landscape phone frame with a
+// two-column layout: avatar + title on the left, status thread on
+// the right. Auto-loops through three states: rest -> reviewing
+// -> approved, with a 1500ms breath at approved before resetting.
+type ReviewState = "rest" | "reviewing" | "approved";
 
-// 2. Swipe mockup — phone with anonymous match cards. On hover the
-// front card swipes off-screen revealing the next one. No avatars;
-// just an anonymous monogram + role + signal-rich body.
-const SwipeMockup = () => (
-  <div
-    className="relative w-[260px] h-[440px] rounded-[36px] border-[8px] border-foreground/85 bg-background shadow-2xl overflow-hidden"
-    style={{ transform: "rotate(-2deg)" }}
-  >
-    {/* Notch */}
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 h-5 w-20 bg-foreground/85 rounded-b-2xl z-30" />
-    {/* Status row */}
-    <div className="absolute top-1.5 left-0 right-0 px-5 flex items-center justify-between text-[9px] font-mono text-foreground/70 tracking-widest z-20">
-      <span>9:41</span>
-      <span>polln8</span>
-    </div>
-    {/* Header */}
-    <div className="absolute top-7 left-0 right-0 px-4 z-10">
-      <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
-        Ranked deck · live
-      </p>
-    </div>
+const ReviewCardMockup = () => {
+  const [state, setState] = useState<ReviewState>("rest");
+  const timers = useRef<number[]>([]);
 
-    {/* Card stack — front card swipes off on row hover. */}
-    <div className="absolute inset-0 top-14 bottom-20 px-3">
-      {/* Back card (peeks through after the front leaves). */}
-      <AnonCard
-        offsetClass="translate-y-[6px] translate-x-[3px] scale-[0.96] opacity-80"
-        title="Senior infra engineer"
-        signals={["Distributed systems", "Rust", "Postgres"]}
-        commitment="Full-time"
-        location="Remote · NA"
-        match="92%"
-        zIndex={10}
-      />
-      {/* Front card — translates off and rotates on hover. */}
+  useEffect(() => {
+    let alive = true;
+    const cycle = () => {
+      if (!alive) return;
+      setState("rest");
+      const a = window.setTimeout(() => alive && setState("reviewing"), 600);
+      const b = window.setTimeout(() => alive && setState("approved"), 600 + 1400);
+      const c = window.setTimeout(() => alive && cycle(), 600 + 2800 + 1500);
+      timers.current.push(a, b, c);
+    };
+    cycle();
+    return () => {
+      alive = false;
+      timers.current.forEach((id) => window.clearTimeout(id));
+      timers.current = [];
+    };
+  }, []);
+
+  const isApproved = state === "approved";
+  const isReviewing = state === "reviewing";
+  const title = isApproved
+    ? "Approved — welcome to Polln8"
+    : isReviewing
+      ? "Application under review"
+      : "Application submitted";
+  const sub = isApproved
+    ? "All checks passed"
+    : isReviewing
+      ? "We're cross-checking your work"
+      : "Thanks, Jordan. We'll be in touch.";
+  const bottom = isApproved
+    ? "Member #1,284 · joined just now"
+    : "Average review time: 24 hours";
+
+  return (
+    <div
+      className={`rc-state-${state} relative w-full max-w-[640px]`}
+      style={
+        {
+          aspectRatio: "16 / 12",
+          // Local CSS vars matching the design's palette. Accent
+          // pulls from the live theme token; rest is the warm
+          // pollen-amber from the design spec used for the
+          // "under review" pulse so green stays = approved.
+          "--rc-accent": "hsl(var(--primary))",
+          "--rc-rest": "hsl(45 50% 70%)",
+        } as React.CSSProperties
+      }
+    >
+      {/* Bezel */}
       <div
-        className="absolute inset-3 transition-all duration-700 ease-out group-hover:translate-x-[140%] group-hover:rotate-[14deg] group-hover:opacity-0"
-        style={{ zIndex: 20 }}
+        className="relative w-full h-full rounded-[28px] p-2 bg-card"
+        style={{
+          boxShadow:
+            "inset 0 0 0 1px hsl(var(--foreground) / 0.08), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
+        }}
       >
-        <AnonCardInner
-          title="Senior backend engineer"
-          signals={["Payments", "Postgres", "TypeScript"]}
-          commitment="Full-time"
-          location="London"
-          match="96%"
-        />
+        {/* Screen */}
+        <div
+          className="relative w-full h-full rounded-[22px] overflow-hidden flex flex-col"
+          style={{
+            background: "hsl(var(--background))",
+            color: "hsl(var(--foreground))",
+            padding: "clamp(16px, 3.2%, 28px) clamp(20px, 4%, 36px) clamp(14px, 3%, 24px)",
+          }}
+        >
+          {/* App header */}
+          <div
+            className="flex items-center gap-2.5 pb-3.5 mb-2"
+            style={{ borderBottom: "1px solid hsl(var(--foreground) / 0.08)" }}
+          >
+            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+              application · step 3 of 3
+            </span>
+            <span
+              className="ml-auto font-mono text-[11px] tracking-[0.04em] text-muted-foreground px-2 py-0.5 rounded"
+              style={{ border: "1px solid hsl(var(--foreground) / 0.16)" }}
+            >
+              #1284
+            </span>
+          </div>
+
+          {/* Two-column layout */}
+          <div
+            className="grid flex-1 items-stretch py-2"
+            style={{ gridTemplateColumns: "1fr 1.15fr", gap: "clamp(20px, 4%, 36px)" }}
+          >
+            {/* Left: avatar + title + subtitle */}
+            <div
+              className="flex flex-col items-center justify-center text-center px-2 py-3"
+              style={{ borderRight: "1px solid hsl(var(--foreground) / 0.08)", paddingRight: "clamp(20px, 4%, 36px)" }}
+            >
+              <div className="relative mb-4 h-[88px] flex justify-center">
+                <div
+                  className="relative w-[84px] h-[84px] rounded-full flex items-center justify-center text-[30px] font-medium tracking-tight"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 30% 28%, #2c2a25, #14130f)",
+                    color: "#F4F1EA",
+                    transition: "transform 420ms cubic-bezier(0.22,0.61,0.36,1)",
+                  }}
+                >
+                  <span className="relative z-[2]">JK</span>
+                  {/* Dashed orbit ring */}
+                  <span
+                    className="rc-ring absolute rounded-full"
+                    style={{
+                      inset: -7,
+                      border: `1.5px ${
+                        isApproved ? "solid" : "dashed"
+                      } ${
+                        isApproved
+                          ? "var(--rc-accent)"
+                          : isReviewing
+                            ? "var(--rc-rest)"
+                            : "hsl(var(--foreground) / 0.45)"
+                      }`,
+                      opacity: isApproved ? 1 : isReviewing ? 0.75 : 0.45,
+                      transition: "opacity 420ms ease, border-color 420ms ease",
+                    }}
+                  />
+                  {/* Approved badge — pops in via scale + bounce */}
+                  <span
+                    className="absolute flex items-center justify-center rounded-full z-[3]"
+                    style={{
+                      right: -2,
+                      bottom: -2,
+                      width: 28,
+                      height: 28,
+                      background: "var(--rc-accent)",
+                      color: "#fff",
+                      border: "3px solid hsl(var(--background))",
+                      transform: isApproved ? "scale(1)" : "scale(0)",
+                      opacity: isApproved ? 1 : 0,
+                      transition:
+                        "transform 380ms cubic-bezier(0.34,1.56,0.64,1), opacity 220ms ease",
+                    }}
+                  >
+                    <Check className="h-3 w-3" strokeWidth={2.6} />
+                  </span>
+                </div>
+                <ConfettiField active={isApproved} />
+              </div>
+              <div
+                className="font-display text-[20px] md:text-[22px] font-medium tracking-tight leading-snug min-h-[28px]"
+                style={{ transition: "color 220ms ease" }}
+              >
+                {title}
+              </div>
+              <div className="font-mono text-[12.5px] tracking-[0.04em] text-muted-foreground mt-2 min-h-[16px]">
+                {sub}
+              </div>
+            </div>
+
+            {/* Right: thread */}
+            <div className="flex flex-col justify-center">
+              <div className="py-1">
+                <ThreadRow
+                  kind="done"
+                  title="Submitted"
+                  meta="Today · 9:38 AM"
+                />
+                <ThreadRow
+                  kind={isApproved ? "done" : "active"}
+                  title="Under review"
+                  meta={
+                    isApproved
+                      ? "Cleared in 21h"
+                      : isReviewing
+                        ? "Checking LinkedIn · GitHub · shipped work"
+                        : "Pending — typical wait 24h"
+                  }
+                  pulseTone={isReviewing ? "accent" : "rest"}
+                />
+                <ThreadRow
+                  kind={isApproved ? "done" : "pending"}
+                  title="Approved"
+                  meta={
+                    isApproved
+                      ? "Just now · welcome aboard"
+                      : "Notification on file"
+                  }
+                  isLast
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div
+            className="mt-3.5 pt-3.5 flex items-center gap-2.5 font-mono text-[11.5px] tracking-[0.04em] text-muted-foreground"
+            style={{ borderTop: "1px dashed hsl(var(--foreground) / 0.08)" }}
+          >
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full"
+              style={{
+                background: isApproved
+                  ? "var(--rc-accent)"
+                  : "hsl(var(--muted-foreground))",
+                transition: "background 420ms ease",
+              }}
+            />
+            <span>{bottom}</span>
+          </div>
+        </div>
       </div>
     </div>
+  );
+};
 
-    {/* Action row — three signature actions. The Connect button
-        gets a soft pulse on hover to draw the eye. */}
-    <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 z-30">
-      <ActionDot icon={<X className="h-3.5 w-3.5" />} tone="muted" />
-      <ActionDot icon={<Heart className="h-3.5 w-3.5" />} tone="muted" />
-      <ActionDot
-        icon={<ArrowRight className="h-3.5 w-3.5" />}
-        tone="primary"
-        pulse
-      />
-    </div>
-  </div>
-);
-
-const AnonCard = ({
-  offsetClass,
+const ThreadRow = ({
+  kind,
   title,
-  signals,
-  commitment,
-  location,
-  match,
-  zIndex,
+  meta,
+  pulseTone = "accent",
+  isLast = false,
 }: {
-  offsetClass: string;
+  kind: "done" | "active" | "pending";
   title: string;
-  signals: string[];
-  commitment: string;
-  location: string;
-  match: string;
-  zIndex: number;
-}) => (
-  <div
-    className={`absolute inset-3 ${offsetClass} transition-transform duration-500`}
-    style={{ zIndex }}
-  >
-    <AnonCardInner
-      title={title}
-      signals={signals}
-      commitment={commitment}
-      location={location}
-      match={match}
-    />
-  </div>
-);
-
-const AnonCardInner = ({
-  title,
-  signals,
-  commitment,
-  location,
-  match,
-}: {
-  title: string;
-  signals: string[];
-  commitment: string;
-  location: string;
-  match: string;
-}) => (
-  <div
-    className="h-full flex flex-col p-4 rounded-2xl bg-card border border-border"
-    style={{ boxShadow: "0 10px 24px -10px rgba(0,0,0,0.3)" }}
-  >
-    {/* Anonymous monogram — no profile image, deliberately
-        abstract so the visual emphasis is on the signal data. */}
-    <div className="flex items-center gap-3 mb-3">
-      <div className="h-10 w-10 rounded-full border border-dashed border-primary/50 bg-primary/5 flex items-center justify-center text-primary">
-        <UserRound className="h-4 w-4" />
+  meta: string;
+  pulseTone?: "accent" | "rest";
+  isLast?: boolean;
+}) => {
+  const dotBg =
+    kind === "done"
+      ? "var(--rc-accent)"
+      : kind === "active"
+        ? pulseTone === "accent"
+          ? "var(--rc-accent)"
+          : "var(--rc-rest)"
+        : "transparent";
+  const dotBorder =
+    kind === "pending"
+      ? "hsl(var(--foreground) / 0.16)"
+      : kind === "active"
+        ? pulseTone === "accent"
+          ? "var(--rc-accent)"
+          : "var(--rc-rest)"
+        : "var(--rc-accent)";
+  return (
+    <div
+      className="grid relative pb-4"
+      style={{ gridTemplateColumns: "28px 1fr", gap: 14 }}
+    >
+      <div className="relative flex flex-col items-center">
+        <div
+          className="relative z-[1] flex items-center justify-center rounded-full mt-0.5"
+          style={{
+            width: 16,
+            height: 16,
+            background: dotBg,
+            border: `1.5px solid ${dotBorder}`,
+            transition: "background 420ms ease, border-color 420ms ease",
+            color: "#fff",
+          }}
+        >
+          {kind === "done" && <Check className="h-2.5 w-2.5" strokeWidth={2.4} />}
+          {kind === "active" && (
+            <span
+              className="rc-pulse absolute rounded-full"
+              style={{
+                inset: -5,
+                border: `1.5px solid ${
+                  pulseTone === "accent" ? "var(--rc-accent)" : "var(--rc-rest)"
+                }`,
+                opacity: 0.85,
+              }}
+            />
+          )}
+        </div>
+        {!isLast && (
+          <div
+            className="flex-1 mt-0.5 -mb-4"
+            style={{
+              width: 1.5,
+              background:
+                kind === "done"
+                  ? "var(--rc-accent)"
+                  : "hsl(var(--foreground) / 0.16)",
+              transition: "background 420ms ease",
+            }}
+          />
+        )}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-display text-[13px] text-foreground truncate">
+      <div>
+        <div
+          className="text-[14.5px] font-medium tracking-tight leading-tight"
+          style={{
+            color:
+              kind === "pending"
+                ? "hsl(var(--muted-foreground))"
+                : "hsl(var(--foreground))",
+          }}
+        >
           {title}
-        </p>
-        <p className="text-[10px] text-muted-foreground">Anonymous · pre-match</p>
+        </div>
+        <div className="font-mono text-[11.5px] tracking-[0.02em] text-muted-foreground mt-0.5 leading-snug">
+          {meta}
+        </div>
       </div>
     </div>
-    <div className="space-y-1.5 mb-2">
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-        <Briefcase className="h-3 w-3 text-primary" />
-        {commitment}
-      </div>
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-        <MapPin className="h-3 w-3 text-primary" />
-        {location}
+  );
+};
+
+const ConfettiField = ({ active }: { active: boolean }) => {
+  // 9 hairline particles drifting upward, fading. Restrained per the
+  // design's "vetted not viral" tone — no rotation, no gold shower.
+  const particles = useMemo(() => {
+    const seeded = (i: number) => {
+      const s = Math.sin(i * 928.3) * 10000;
+      return s - Math.floor(s);
+    };
+    return Array.from({ length: 9 }, (_, i) => ({
+      x: 8 + seeded(i) * 84,
+      d: 28 + seeded(i + 11) * 38,
+      delay: seeded(i + 23) * 220,
+      size: 2 + seeded(i + 31) * 2,
+      hueShift: i % 3,
+    }));
+  }, []);
+  return (
+    <div
+      className={`rc-confetti absolute inset-0 pointer-events-none overflow-visible ${
+        active ? "is-on" : ""
+      }`}
+      aria-hidden
+    >
+      {particles.map((p, i) => (
+        <span
+          key={i}
+          className="rc-confetti__p absolute bottom-2 rounded-[1px]"
+          style={
+            {
+              left: `${p.x}%`,
+              width: p.size,
+              height: p.size,
+              opacity: 0,
+              transform: "translateY(0)",
+              "--drift": `-${p.d}px`,
+              "--delay": `${p.delay}ms`,
+              background:
+                p.hueShift === 0
+                  ? "var(--rc-accent)"
+                  : p.hueShift === 1
+                    ? "hsl(var(--foreground) / 0.5)"
+                    : "hsl(var(--foreground) / 0.2)",
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+};
+
+// ─── Polln8 Matches Card mockup ─────────────────────────────────
+// Direct port of the Polln8 Matches Card.html design from the
+// Anthropic design handoff (latest revision: square photo
+// placeholder w/ silhouette, profile detail tab slides up from
+// the bottom on right-swipe, with a swipe-down handle to dismiss).
+//
+// 5-phase auto-loop:
+//   0 rest             — Maya on top, Ravi behind
+//   1 maya-swiping     — Maya swipes right (Save)
+//   2 detail-tab-open  — Maya's profile sheet slides up
+//   3 detail+next      — sheet still open, Ravi grows behind
+//   4 ravi-swiping     — sheet retracts, Ravi swipes left (Pass)
+type Frontness =
+  | "top"
+  | "behind1"
+  | "behind1-grow"
+  | "behind2"
+  | "swiping-right"
+  | "swiping-left"
+  | "gone-right"
+  | "gone-left";
+
+type ProfileEntry = {
+  id: string;
+  name: string;
+  pills: string[];
+  skills: string[];
+  headline: string;
+};
+
+const MAYA: ProfileEntry = {
+  id: "maya",
+  name: "Maya C.",
+  pills: ["Full-time", "Remote", "Builder"],
+  skills: ["Frontend", "Design", "Product"],
+  headline:
+    "Building tools for indie hackers. Looking for a technical cofounder who ships fast and cares about craft.",
+};
+const RAVI: ProfileEntry = {
+  id: "ravi",
+  name: "Ravi T.",
+  pills: ["20 hrs/week", "NYC", "Founder"],
+  skills: ["Backend", "AI/ML", "Sales"],
+  headline:
+    "Building an AI scheduling tool for healthcare. MVP shipped, looking for a designer who can own the product surface.",
+};
+
+const MatchesCardMockup = () => {
+  const [phase, setPhase] = useState(0);
+  const timers = useRef<number[]>([]);
+  // Phase durations — sum ≈ 5.5s, then loops.
+  const seg = 1100;
+  const phaseDur = useMemo(
+    () => [seg, seg * 0.85, seg * 1.4, seg * 0.6, seg * 0.85],
+    [seg],
+  );
+
+  useEffect(() => {
+    let alive = true;
+    let p = 0;
+    const tick = () => {
+      if (!alive) return;
+      setPhase(p);
+      const t = window.setTimeout(() => {
+        p = (p + 1) % 5;
+        tick();
+      }, phaseDur[p]);
+      timers.current.push(t);
+    };
+    tick();
+    return () => {
+      alive = false;
+      timers.current.forEach((id) => window.clearTimeout(id));
+      timers.current = [];
+    };
+  }, [phaseDur]);
+
+  const mayaFront: Frontness = (
+    ["top", "swiping-right", "gone-right", "gone-right", "behind1"] as const
+  )[phase];
+  const raviFront: Frontness = (
+    ["behind1", "behind1", "behind1-grow", "top", "swiping-left"] as const
+  )[phase];
+
+  const showSaveGlow = phase === 1;
+  const showPassGlow = phase === 4;
+
+  const hint =
+    phase === 1
+      ? "Saving — opening profile"
+      : phase === 2
+        ? "Maya C. · profile open"
+        : phase === 3
+          ? "Closing — next match queued"
+          : phase === 4
+            ? "Passed — won't show again"
+            : "Swipe right to save · left to pass";
+
+  return (
+    <div
+      className={`mc-phase-${phase} relative w-full max-w-[640px]`}
+      style={{ aspectRatio: "16 / 12" }}
+    >
+      {/* Bezel */}
+      <div
+        className="relative w-full h-full rounded-[28px] p-2 bg-card"
+        style={{
+          boxShadow:
+            "inset 0 0 0 1px hsl(var(--foreground) / 0.06), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
+        }}
+      >
+        {/* Screen */}
+        <div
+          className="relative w-full h-full rounded-[22px] overflow-hidden flex flex-col"
+          style={{
+            background: "hsl(var(--background))",
+            color: "hsl(var(--foreground))",
+          }}
+        >
+          {/* App bar */}
+          <div
+            className="grid items-center gap-4 text-[13px] font-medium tracking-tight"
+            style={{
+              gridTemplateColumns: "1fr auto 1fr",
+              padding: "16px 22px 14px",
+              borderBottom: "1px solid hsl(var(--border))",
+            }}
+          >
+            <span className="inline-flex items-center gap-2 font-semibold">
+              <span
+                className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[16px] leading-none"
+                style={{
+                  background: "hsl(var(--secondary))",
+                  color: "hsl(var(--muted-foreground))",
+                  border: "1px solid hsl(var(--border))",
+                }}
+              >
+                ‹
+              </span>
+              Matches
+            </span>
+            <span className="inline-flex gap-1 justify-self-center">
+              <span
+                className="text-[12px] px-3 py-1 rounded-full"
+                style={{
+                  background: "hsl(var(--secondary))",
+                  border: "1px solid hsl(var(--border))",
+                }}
+              >
+                For you
+              </span>
+              <span className="text-[12px] px-3 py-1 rounded-full opacity-55">
+                Saved
+              </span>
+            </span>
+            <span className="justify-self-end">
+              <span
+                className="font-mono text-[11px] tracking-[0.04em] px-2 py-1 rounded-md"
+                style={{
+                  background: "hsl(var(--primary) / 0.12)",
+                  color: "hsl(var(--primary))",
+                }}
+              >
+                12 / 24
+              </span>
+            </span>
+          </div>
+
+          {/* Deck area */}
+          <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6">
+            {/* Skeleton back-of-deck */}
+            <div
+              className="mc-pcard mc-pcard--behind2 absolute rounded-2xl"
+              style={{
+                width: 260,
+                minHeight: 340,
+                border: "1.5px dashed hsl(var(--border))",
+                background: "transparent",
+              }}
+              aria-hidden
+            >
+              <div
+                className="rounded-xl mt-8 mx-4 mb-4"
+                style={{
+                  height: "calc(100% - 64px)",
+                  backgroundImage:
+                    "repeating-linear-gradient(0deg, transparent 0 8px, hsl(var(--foreground) / 0.05) 8px 9px)",
+                }}
+              />
+            </div>
+
+            <ProfileCardMockup profile={RAVI} frontness={raviFront} />
+            <ProfileCardMockup profile={MAYA} frontness={mayaFront} />
+
+            {/* Profile detail sheet — slides up on phase 2/3 */}
+            <div
+              className="mc-profile-tab absolute left-0 right-0 bottom-0 flex flex-col gap-3.5 z-[5]"
+              style={{
+                top: 28,
+                padding: "10px 22px 18px",
+                borderRadius: "18px 18px 16px 16px",
+                background: "hsl(var(--background))",
+                border: "1px solid hsl(var(--border))",
+                borderBottom: "none",
+                boxShadow: "0 -20px 40px -20px rgba(0,0,0,0.35)",
+              }}
+              aria-hidden={phase !== 2 && phase !== 3}
+            >
+              <div
+                className="self-center rounded-full"
+                style={{
+                  width: 44,
+                  height: 5,
+                  background: "hsl(var(--foreground) / 0.18)",
+                  margin: "4px 0 6px",
+                }}
+              />
+              <div
+                className="mc-tab-hint absolute left-1/2 -translate-x-1/2 top-3.5 flex flex-col items-center gap-0.5 pointer-events-none"
+                style={{ color: "hsl(var(--muted-foreground))" }}
+              >
+                <svg
+                  className="mc-tab-hint-arrow"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                >
+                  <path
+                    d="M7 2 L7 11 M3 7 L7 11 L11 7"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="font-mono text-[8.5px] tracking-[0.12em] uppercase">
+                  swipe down
+                </span>
+              </div>
+
+              <div
+                className="flex items-center justify-between font-mono uppercase"
+                style={{
+                  fontSize: "9.5px",
+                  letterSpacing: "0.1em",
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
+                <span>Profile</span>
+                <span>Saved</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div>
+                  <div
+                    className="font-semibold tracking-tight"
+                    style={{ fontSize: 17 }}
+                  >
+                    Maya C.
+                  </div>
+                  <div
+                    className="opacity-70 mt-0.5"
+                    style={{ fontSize: 11 }}
+                  >
+                    Builder · Remote · Full-time
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div
+                  className="font-mono uppercase mb-1.5 opacity-55"
+                  style={{ fontSize: 9, letterSpacing: "0.12em" }}
+                >
+                  Currently building
+                </div>
+                <div className="flex flex-col gap-2">
+                  <ProjectRow
+                    name="Pollenboard"
+                    tag="Shipped"
+                    desc="Design system for indie tooling — v2 live, used by 40+ small teams."
+                  />
+                  <ProjectRow
+                    name="Toolspace"
+                    tag="Beta"
+                    desc="Async pairing app for solo founders. MVP shipped in March."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div
+                  className="font-mono uppercase mb-1.5 opacity-55"
+                  style={{ fontSize: 9, letterSpacing: "0.12em" }}
+                >
+                  Links
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <LinkRow icon="in" label="LinkedIn" url="/in/mayac" />
+                  <LinkRow icon="PDF" label="Résumé" url="maya-c.pdf" />
+                </div>
+              </div>
+            </div>
+
+            {/* Edge glows */}
+            <div
+              className={`mc-edge-glow absolute pointer-events-none z-[6] ${
+                showSaveGlow ? "is-on" : ""
+              }`}
+              style={{
+                top: 24,
+                bottom: 80,
+                width: 110,
+                right: 0,
+                background:
+                  "linear-gradient(270deg, hsl(var(--primary) / 0.40), transparent)",
+              }}
+              aria-hidden
+            />
+            <div
+              className={`mc-edge-glow absolute pointer-events-none z-[6] ${
+                showPassGlow ? "is-on" : ""
+              }`}
+              style={{
+                top: 24,
+                bottom: 80,
+                width: 110,
+                left: 0,
+                background:
+                  "linear-gradient(90deg, hsl(var(--muted-foreground) / 0.30), transparent)",
+              }}
+              aria-hidden
+            />
+          </div>
+
+          {/* Action bar */}
+          <div
+            className="grid items-center gap-3"
+            style={{
+              gridTemplateColumns: "auto 1fr auto",
+              padding: "12px 22px 16px",
+              borderTop: "1px solid hsl(var(--border))",
+            }}
+          >
+            <button
+              type="button"
+              tabIndex={-1}
+              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full text-[13px] font-medium"
+              style={{
+                color: "hsl(var(--muted-foreground))",
+                border: "1px solid hsl(var(--border))",
+                background: "transparent",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M3 3 L9 9 M9 3 L3 9"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              Pass
+            </button>
+            <span
+              className="inline-flex items-center justify-center gap-2 font-mono uppercase"
+              style={{
+                fontSize: "10.5px",
+                letterSpacing: "0.06em",
+                color: "hsl(var(--muted-foreground))",
+              }}
+            >
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full"
+                style={{ background: "hsl(var(--primary))" }}
+              />
+              {hint}
+            </span>
+            <button
+              type="button"
+              tabIndex={-1}
+              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full text-[13px] font-medium"
+              style={{
+                color: "hsl(var(--primary))",
+                border: "1px solid hsl(var(--primary) / 0.4)",
+                background: "hsl(var(--primary) / 0.10)",
+              }}
+            >
+              <Check className="h-3.5 w-3.5" strokeWidth={2.2} />
+              Save
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-    <div className="flex flex-wrap gap-1 mb-2">
-      {signals.map((s) => (
+  );
+};
+
+const ProfileCardMockup = ({
+  profile,
+  frontness,
+}: {
+  profile: ProfileEntry;
+  frontness: Frontness;
+}) => (
+  <div
+    className={`mc-pcard mc-pcard--${frontness} absolute flex flex-col gap-2.5`}
+    style={{
+      width: 260,
+      minHeight: 340,
+      borderRadius: 16,
+      padding: "16px 16px 14px",
+      background: "hsl(var(--card))",
+      border: "1px solid hsl(var(--border))",
+      color: "hsl(var(--foreground))",
+      boxShadow: "0 18px 36px -18px rgba(0,0,0,0.4)",
+    }}
+    data-id={profile.id}
+  >
+    {/* Edge labels — appear during swipe */}
+    <div
+      className="mc-edge-label mc-edge-label--save absolute top-4 right-4 inline-flex items-center gap-1 font-bold uppercase"
+      style={{
+        fontSize: 11,
+        letterSpacing: "0.08em",
+        padding: "4px 8px",
+        borderRadius: 4,
+        border: "1.5px solid hsl(var(--primary))",
+        color: "hsl(var(--primary))",
+        transform: "rotate(8deg)",
+      }}
+    >
+      <Check className="h-3 w-3" strokeWidth={2.5} />
+      Save
+    </div>
+    <div
+      className="mc-edge-label mc-edge-label--pass absolute top-4 left-4 inline-flex items-center gap-1 font-bold uppercase"
+      style={{
+        fontSize: 11,
+        letterSpacing: "0.08em",
+        padding: "4px 8px",
+        borderRadius: 4,
+        border: "1.5px solid hsl(var(--muted-foreground))",
+        color: "hsl(var(--muted-foreground))",
+        transform: "rotate(-8deg)",
+      }}
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path
+          d="M3 3 L9 9 M9 3 L3 9"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      </svg>
+      Pass
+    </div>
+
+    <div
+      className="font-semibold tracking-tight"
+      style={{ fontSize: 18, marginTop: 2 }}
+    >
+      {profile.name}
+    </div>
+
+    {/* Square photo placeholder w/ hatch + silhouette */}
+    <div
+      className="relative w-full overflow-hidden rounded-[10px] flex items-center justify-center"
+      style={{
+        aspectRatio: "4 / 3",
+        margin: "2px 0",
+        background: "hsl(var(--primary) / 0.10)",
+        color: "hsl(var(--primary))",
+      }}
+      aria-hidden
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg, transparent 0 8px, currentColor 8px 9px)",
+          opacity: 0.18,
+        }}
+      />
+      <svg
+        className="relative z-[1]"
+        viewBox="0 0 64 64"
+        fill="none"
+        style={{ width: "46%", opacity: 0.55 }}
+      >
+        <circle cx="32" cy="22" r="11" fill="currentColor" />
+        <path
+          d="M8 60 C 10 44, 22 38, 32 38 C 42 38, 54 44, 56 60 Z"
+          fill="currentColor"
+        />
+      </svg>
+    </div>
+
+    <div className="flex flex-wrap gap-1.5">
+      {profile.pills.map((p) => (
+        <span
+          key={p}
+          className="inline-flex items-center font-medium"
+          style={{
+            fontSize: 12,
+            padding: "5px 10px",
+            borderRadius: 999,
+            background: "hsl(var(--primary) / 0.12)",
+            color: "hsl(var(--primary))",
+            border: "1px solid hsl(var(--primary) / 0.3)",
+          }}
+        >
+          {p}
+        </span>
+      ))}
+    </div>
+
+    <div className="flex flex-wrap gap-1.5">
+      {profile.skills.map((s) => (
         <span
           key={s}
-          className="px-1.5 py-0.5 text-[9px] rounded-sm border border-primary/30 bg-primary/5 text-foreground"
+          className="inline-flex items-center font-medium"
+          style={{
+            fontSize: 12,
+            padding: "5px 10px",
+            borderRadius: 999,
+            background: "hsl(var(--card))",
+            color: "hsl(var(--muted-foreground))",
+            border: "1px solid hsl(var(--border))",
+          }}
         >
           {s}
         </span>
       ))}
     </div>
-    <div className="mt-auto pt-2.5 border-t border-border flex items-center justify-between">
-      <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
-        Match
-      </span>
-      <span className="text-[11px] font-medium text-primary">{match}</span>
+
+    <div
+      className="leading-snug"
+      style={{
+        fontSize: 13.5,
+        marginTop: 4,
+        color: "hsl(var(--muted-foreground))",
+      }}
+    >
+      {profile.headline}
     </div>
+
+    <button
+      type="button"
+      tabIndex={-1}
+      className="mt-auto inline-flex items-center justify-center gap-2 font-semibold cursor-pointer"
+      style={{
+        height: 38,
+        border: "none",
+        borderRadius: 10,
+        fontSize: 14,
+        background: "hsl(var(--primary))",
+        color: "hsl(var(--primary-foreground))",
+      }}
+    >
+      Request chat
+      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+        <path
+          d="M3 7 L11 7 M7 3 L11 7 L7 11"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
   </div>
 );
 
-const ActionDot = ({
-  icon,
-  tone,
-  pulse = false,
+const ProjectRow = ({
+  name,
+  tag,
+  desc,
 }: {
-  icon: React.ReactNode;
-  tone: "muted" | "primary";
-  pulse?: boolean;
+  name: string;
+  tag: string;
+  desc: string;
 }) => (
   <div
-    className={`h-9 w-9 rounded-full flex items-center justify-center border transition-transform ${
-      tone === "primary"
-        ? "bg-primary text-primary-foreground border-primary"
-        : "bg-card text-muted-foreground border-border"
-    } ${pulse ? "group-hover:scale-110 group-hover:animate-pulse" : ""}`}
+    className="grid items-baseline gap-2 px-2.5 py-2 rounded-lg"
+    style={{
+      gridTemplateColumns: "1fr auto",
+      background: "hsl(var(--foreground) / 0.035)",
+    }}
   >
-    {icon}
+    <span
+      className="font-semibold tracking-tight"
+      style={{ fontSize: 12 }}
+    >
+      {name}
+    </span>
+    <span
+      className="font-mono uppercase"
+      style={{
+        fontSize: 8.5,
+        letterSpacing: "0.08em",
+        padding: "3px 6px",
+        borderRadius: 4,
+        background: "hsl(var(--primary) / 0.12)",
+        color: "hsl(var(--primary))",
+      }}
+    >
+      {tag}
+    </span>
+    <span
+      className="opacity-70 leading-snug col-span-full"
+      style={{ fontSize: 10.5, marginTop: 2 }}
+    >
+      {desc}
+    </span>
   </div>
 );
 
-// 3. Connect mockup — the apply / chat moment. On hover, "Apply"
-// presses, a "Pitch sent" toast slides in, and a chat preview
-// panel slides up showing DMs unlocked.
-const ConnectMockup = () => (
-  <div className="w-full max-w-[380px] rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
-    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-secondary border-b border-border">
-      <span className="h-2 w-2 rounded-full bg-foreground/15" />
-      <span className="h-2 w-2 rounded-full bg-foreground/15" />
-      <span className="h-2 w-2 rounded-full bg-foreground/15" />
-      <span className="ml-2 text-[10px] font-mono text-muted-foreground">
-        polln8.com / project
+const LinkRow = ({
+  icon,
+  label,
+  url,
+}: {
+  icon: string;
+  label: string;
+  url: string;
+}) => (
+  <div
+    className="flex items-center justify-between px-2.5 py-2 rounded-lg"
+    style={{
+      background: "hsl(var(--foreground) / 0.04)",
+      fontSize: 11.5,
+      fontWeight: 500,
+    }}
+  >
+    <span className="inline-flex items-center gap-2">
+      <span
+        className="inline-flex items-center justify-center font-mono font-bold"
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          fontSize: 9,
+          letterSpacing: "0.04em",
+          background: "hsl(var(--primary) / 0.12)",
+          color: "hsl(var(--primary))",
+        }}
+      >
+        {icon}
       </span>
-    </div>
-    <div className="p-5 relative">
-      {/* Project preview */}
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-1.5">
-        Pre-seed · YC W26
-      </p>
-      <h4 className="font-display text-lg mb-2 text-foreground leading-tight">
-        Climate fintech, looking for a backend lead.
-      </h4>
-      <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-        Verification rails for carbon credits. Funded by an angel from Stripe.
-        Offering 8 to 15% equity.
-      </p>
-
-      {/* Three actions */}
-      <div className="flex items-center gap-2 mb-4">
-        <button
-          type="button"
-          className="px-3 py-2 text-xs rounded-md border border-border bg-background flex items-center gap-1.5 transition-colors"
-          tabIndex={-1}
-        >
-          <X className="h-3 w-3" />
-          Pass
-        </button>
-        <button
-          type="button"
-          className="px-3 py-2 text-xs rounded-md border border-border bg-background flex items-center gap-1.5 transition-colors"
-          tabIndex={-1}
-        >
-          <Heart className="h-3 w-3" />
-          Save
-        </button>
-        <button
-          type="button"
-          className="px-3 py-2 text-xs rounded-md bg-primary text-primary-foreground flex items-center gap-1.5 ml-auto transition-transform group-hover:scale-95"
-          style={{ boxShadow: "var(--shadow-glow)" }}
-          tabIndex={-1}
-        >
-          <Send className="h-3 w-3" />
-          Apply with pitch
-        </button>
-      </div>
-
-      {/* "Pitch sent" toast — slides in on hover */}
-      <div className="rounded-md border border-primary/40 bg-primary/10 p-2.5 flex items-center gap-2 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-200">
-        <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-        <span className="text-[11px] text-foreground">
-          Pitch sent. Founder will review your profile.
-        </span>
-      </div>
-
-      {/* DM preview — slides up after the toast */}
-      <div className="mt-3 rounded-lg border border-border bg-background p-3 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-[600ms]">
-        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-          <MessageSquare className="h-3.5 w-3.5 text-primary" />
-          <span className="text-[11px] font-medium text-foreground">
-            DM unlocked
-          </span>
-          <span className="ml-auto text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
-            Mutual contact
-          </span>
-        </div>
-        <div className="space-y-1.5">
-          <div className="rounded-md bg-secondary p-2 text-[11px] text-foreground inline-block">
-            Hey — saw your shipping history. Want to do a 20-min call this week?
-          </div>
-        </div>
-      </div>
-    </div>
+      <span>{label}</span>
+    </span>
+    <span
+      className="font-mono opacity-60"
+      style={{ fontSize: 10 }}
+    >
+      {url}
+    </span>
   </div>
 );
 
