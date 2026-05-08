@@ -52,9 +52,9 @@ const STEPS: {
   {
     n: "01",
     title: "Sign up",
-    body: "Create your account in under a minute. Pick your path: builder or visionary.",
+    body: "Create your account in under a minute. Pick your path: founder or builder.",
     detail:
-      "Builders publish projects and look for operators. Visionaries fill out a candidate profile and get matched into projects. The two flows diverge from here.",
+      "Founders post projects and look for the operators they need next to them. Builders fill out a candidate profile and get matched into projects. The two flows diverge from here.",
     visual: <StepSignup />,
   },
   {

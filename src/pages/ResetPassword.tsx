@@ -72,7 +72,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (done) {
-      const t = setTimeout(() => navigate("/mynet", { replace: true }), 1800);
+      const t = setTimeout(() => navigate("/", { replace: true }), 1800);
       return () => clearTimeout(t);
     }
   }, [done, navigate]);
@@ -114,7 +114,7 @@ const ResetPassword = () => {
               </p>
               <h1 className="font-display text-3xl mb-3">Password set.</h1>
               <p className="text-sm text-muted-foreground">
-                Sending you to MyNet...
+                Sending you home...
               </p>
             </div>
           ) : loading ? (

@@ -49,7 +49,11 @@ type ProjectDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initial?: Project;
-  onSubmit: (data: { title: string; description: string; criteria: ProjectCriteria }) => void;
+  onSubmit: (data: {
+    title: string;
+    description: string;
+    criteria: ProjectCriteria;
+  }) => void | Promise<void>;
 };
 
 const toFormValues = (p?: Project): FormValues => ({
@@ -78,7 +82,7 @@ export const ProjectDialog = ({
     if (open) form.reset(toFormValues(initial));
   }, [open, initial, form]);
 
-  const handle = (values: FormValues) => {
+  const handle = async (values: FormValues) => {
     setSubmitting(true);
     const criteria: ProjectCriteria = {
       skills: values.skills,
@@ -86,13 +90,19 @@ export const ProjectDialog = ({
       location: values.location,
       keywords: values.keywords,
     };
-    onSubmit({
-      title: values.title,
-      description: values.description ?? "",
-      criteria,
-    });
-    setSubmitting(false);
-    onOpenChange(false);
+    try {
+      await onSubmit({
+        title: values.title,
+        description: values.description ?? "",
+        criteria,
+      });
+      onOpenChange(false);
+    } catch {
+      // Parent shows the toast; keep the dialog open so the user can
+      // fix the issue and retry without losing what they typed.
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const editing = Boolean(initial);

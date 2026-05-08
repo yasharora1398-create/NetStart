@@ -97,9 +97,14 @@ const ForgotPassword = () => {
                 <span className="text-foreground">{sentTo}</span>, we sent a
                 password reset link. The link expires in an hour.
               </p>
-              <p className="text-xs text-muted-foreground/80 mt-4">
+              <p className="text-xs text-muted-foreground/80 mt-4 mb-6">
                 Don&apos;t see it? Check your spam folder.
               </p>
+              <Link to="/signin">
+                <Button variant="gold" size="lg" className="w-full h-12">
+                  Back to sign in
+                </Button>
+              </Link>
             </div>
           ) : (
             <>

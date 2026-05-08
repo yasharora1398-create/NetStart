@@ -14,12 +14,18 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Moon, Sun } from "lucide-react";
+import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 
 const Waitlist = () => {
   const { mode, toggle } = useTheme();
   const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out.");
+  };
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
@@ -50,7 +56,7 @@ const Waitlist = () => {
             {user ? (
               <button
                 type="button"
-                onClick={() => void signOut()}
+                onClick={() => void handleSignOut()}
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 Sign out
@@ -273,17 +279,39 @@ const Waitlist = () => {
             <span className="font-display text-sm tracking-[-0.01em] text-foreground">
               Polln8
             </span>
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-              © 2026 Polln8
-            </p>
-            <a
-              href="https://x.com/polln8"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              @polln8
-            </a>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+              <Link
+                to="/terms"
+                className="transition-colors hover:text-foreground"
+              >
+                Terms
+              </Link>
+              <Link
+                to="/privacy"
+                className="transition-colors hover:text-foreground"
+              >
+                Privacy
+              </Link>
+              <a
+                href="mailto:Polln8app@outlook.com"
+                className="transition-colors hover:text-foreground normal-case tracking-normal"
+              >
+                Polln8app@outlook.com
+              </a>
+            </div>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://x.com/polln8"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                @polln8
+              </a>
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+                © {new Date().getFullYear()} Polln8
+              </p>
+            </div>
           </div>
         </footer>
       </main>

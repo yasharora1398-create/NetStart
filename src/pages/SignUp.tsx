@@ -56,7 +56,7 @@ const PERKS = [
 ];
 
 const SignUp = () => {
-  const { signUp, user, loading } = useAuth();
+  const { signUp, user, loading, emailVerified } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
@@ -75,15 +75,24 @@ const SignUp = () => {
     mode: "onBlur",
   });
 
-  // Default landing after signup is /mynet, where the MyNetWizard
-  // auto-renders for draft profiles. If they were bounced here from
-  // a gated page, return them there instead via location.state.from.
-  const redirectTo =
-    (location.state as { from?: string } | null)?.from ?? "/mynet";
+  // If an already-authed user lands on /signup, route them away.
+  // - Unverified users go to /check-email so they finish verification
+  //   before they can fill out the wizard with an unconfirmed address.
+  // - Verified users go to "/" (the homepage) — same policy as sign-in,
+  //   from there they can hit Edit MyNet whenever they're ready.
+  const fromState = (location.state as { from?: string } | null)?.from ?? "/";
 
   useEffect(() => {
-    if (!loading && user) navigate(redirectTo, { replace: true });
-  }, [loading, user, navigate, redirectTo]);
+    if (loading || !user) return;
+    if (!emailVerified) {
+      navigate("/check-email", {
+        replace: true,
+        state: { email: user.email ?? "" },
+      });
+      return;
+    }
+    navigate(fromState, { replace: true });
+  }, [loading, user, emailVerified, navigate, fromState]);
 
   // Don't flash the form for an already-authed user. The redirect
   // above runs in an effect, so without this guard the form mounts

@@ -125,7 +125,7 @@ export const StepSignup = () => (
       }}
     >
       <Choice selected={false} name="Builder" sub="Ship every day" />
-      <Choice selected={true} name="Visionary" sub="Set the direction" />
+      <Choice selected={true} name="Founder" sub="Set the direction" />
     </div>
 
     <CTA label="Continue" />

@@ -55,26 +55,30 @@ const Authenticated = () => {
         <h1 className="font-display text-3xl md:text-4xl tracking-[-0.025em] text-foreground mb-4">
           You&apos;re in.
         </h1>
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-3">
-          Your account is verified and you&apos;re signed in. We&apos;ll
-          have a spot waiting the day Polln8 launches.
-        </p>
         <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-8">
-          One thing left:{" "}
+          Your account is verified and you&apos;re signed in. One thing
+          left:{" "}
           <span className="text-foreground font-semibold">
-            edit your MyNet
+            set up your MyNet
           </span>{" "}
-          so we know who you are and what you&apos;re building. You can
-          do that from the homepage anytime.
+          so we know who you are and what you&apos;re building.
         </p>
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-          style={{ boxShadow: "var(--shadow-glow)" }}
-        >
-          Back to homepage
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            to="/mynet"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            Set up MyNet
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            to="/"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Back home
+          </Link>
+        </div>
       </div>
     </div>
   </div>

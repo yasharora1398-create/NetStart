@@ -190,13 +190,23 @@ export const MyNetDashboard = ({
       </Section>
 
       {/* BUILDING — always shown. Empty state surfaces a "New project"
-          card so the user knows the section is even here. */}
+          card so the user knows the section is even here. Pending users
+          can preview the surface but the action buttons are gated until
+          their submission is approved. */}
       <Section
         title="What you're building"
         eyebrow="03"
         icon={<Hammer className="h-3.5 w-3.5 text-gold" />}
         action={
-          <Button variant="gold" size="lg" onClick={onNewProject}>
+          <Button
+            variant="gold"
+            size="lg"
+            onClick={onNewProject}
+            disabled={isPending}
+            title={
+              isPending ? "Available once your review is approved." : undefined
+            }
+          >
             <Plus className="h-4 w-4" />
             New project
           </Button>
@@ -206,22 +216,28 @@ export const MyNetDashboard = ({
           <button
             type="button"
             onClick={onNewProject}
-            className="w-full rounded-sm border border-dashed border-border hover:border-gold/60 bg-card/40 hover:bg-card transition-colors p-8 text-left group"
+            disabled={isPending}
+            className="w-full rounded-sm border border-dashed border-border hover:border-gold/60 disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-70 bg-card/40 hover:bg-card disabled:hover:bg-card/40 transition-colors p-8 text-left group"
           >
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-              Empty
+              {isPending ? "Locked · Review pending" : "Empty"}
             </p>
             <h3 className="font-display text-2xl mb-2">
-              You haven&apos;t posted a project yet.
+              {isPending
+                ? "You can post a project once you're approved."
+                : "You haven't posted a project yet."}
             </h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              Add what you&apos;re building so operators can find and apply
-              to your venture.
+              {isPending
+                ? "We're reviewing your credentials. The moment you're in, this section unlocks."
+                : "Add what you're building so operators can find and apply to your venture."}
             </p>
-            <span className="inline-flex items-center gap-2 text-sm text-gold group-hover:gap-3 transition-all">
-              <Plus className="h-4 w-4" />
-              Start a project
-            </span>
+            {!isPending && (
+              <span className="inline-flex items-center gap-2 text-sm text-gold group-hover:gap-3 transition-all">
+                <Plus className="h-4 w-4" />
+                Start a project
+              </span>
+            )}
           </button>
         ) : editing ? (
           <div className="grid md:grid-cols-2 gap-4">
@@ -242,6 +258,7 @@ export const MyNetDashboard = ({
             projects={projects}
             onOpen={onOpenProject}
             onFindPeople={onFindPeople}
+            disableFindPeople={isPending}
           />
         )}
       </Section>
@@ -445,10 +462,12 @@ const ProjectsDisplay = ({
   projects,
   onOpen,
   onFindPeople,
+  disableFindPeople = false,
 }: {
   projects: Project[];
   onOpen: (id: string) => void;
   onFindPeople: (id: string) => void;
+  disableFindPeople?: boolean;
 }) => (
   <div className="grid md:grid-cols-2 gap-4">
     {projects.map((p) => (
@@ -496,6 +515,12 @@ const ProjectsDisplay = ({
               variant="outlineGold"
               size="sm"
               onClick={() => onFindPeople(p.id)}
+              disabled={disableFindPeople}
+              title={
+                disableFindPeople
+                  ? "Available once your review is approved."
+                  : undefined
+              }
             >
               <Search className="h-4 w-4" />
               Find people

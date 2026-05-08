@@ -341,7 +341,7 @@ export const ApplicationsPanel = ({
               <EmptyState
                 icon={Send}
                 title="You haven't applied yet."
-                body="Browse projects on the Talent page and send a pitch."
+                body="Project browsing is opening soon. You'll be able to send a pitch from here once it's live."
               />
             ) : (
               <ul className="divide-y divide-border border border-border rounded-sm bg-background/40">

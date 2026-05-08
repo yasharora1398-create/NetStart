@@ -61,14 +61,14 @@ import {
 const SAMPLE_PROJECTS: Project[] = [
   {
     id: "sample",
-    title: "Your first project",
+    title: "AI infra for logistics",
     description:
-      "Sign in, then click + New project to define what you're building and the kind of operator you want next to you.",
+      "Pre-seed venture matching with a senior backend engineer. Sign in to define what you're building and who you want next to you.",
     criteria: {
-      skills: ["Sample skill"],
+      skills: ["Distributed systems", "Rust", "B2B GTM"],
       commitment: "Full-time",
-      location: "",
-      keywords: "",
+      location: "Remote · NA / EU",
+      keywords: "infra, logistics, ex-faang",
     },
     savedPersonIds: [],
     passedPersonIds: [],
@@ -223,6 +223,7 @@ const MyNet = () => {
       toast.success("Project created.");
     } catch (err) {
       toast.error(errorMessage(err));
+      throw err;
     }
   };
 
@@ -247,6 +248,7 @@ const MyNet = () => {
         toast.success("Project updated.");
       } catch (err) {
         toast.error(errorMessage(err));
+        throw err;
       }
     };
 
