@@ -9,11 +9,16 @@
  * padding on routes where the sidebar isn't rendered (production
  * waitlist, prod /mynet, etc.).
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
+
+const COLLAPSED_KEY = "polln8.sidebar.collapsed";
+const EXPANDED_WIDTH = "248px";
+const COLLAPSED_WIDTH = "64px";
 
 type IconType = React.ComponentType;
 
@@ -40,12 +45,26 @@ export const Sidebar = () => {
   const { mode, setMode } = useTheme();
   const { user, signOut } = useAuth();
 
+  // Persist collapse state across sessions; default to expanded so a
+  // first-time visitor sees the full nav.
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(COLLAPSED_KEY) === "1";
+  });
+
+  // Drives the global --sidebar-width CSS variable that pages pad
+  // past via `var(--sidebar-width, 0px)`. Animating the variable
+  // makes the page content slide in/out alongside the sidebar.
   useEffect(() => {
-    document.documentElement.style.setProperty("--sidebar-width", "248px");
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
+    );
+    window.localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
     return () => {
       document.documentElement.style.removeProperty("--sidebar-width");
     };
-  }, []);
+  }, [collapsed]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -53,7 +72,26 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="glass-sidebar" aria-label="Sidebar">
+    <aside
+      className={`glass-sidebar${collapsed ? " is-collapsed" : ""}`}
+      aria-label="Sidebar"
+    >
+      {/* Collapse toggle — small chevron at the top-right of the
+          sidebar. Aria label flips with state. */}
+      <button
+        type="button"
+        onClick={() => setCollapsed((c) => !c)}
+        className="gs-toggle"
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        aria-expanded={!collapsed}
+      >
+        {collapsed ? (
+          <ChevronRight className="h-3.5 w-3.5" />
+        ) : (
+          <ChevronLeft className="h-3.5 w-3.5" />
+        )}
+      </button>
+
       {/* Brand — logo image replaces the P8 square; the whole row is
           a Link to "/" so the brand mark works as a home affordance. */}
       <Link to="/" className="gs-brand gs-brand-link" aria-label="Polln8 home">
@@ -63,7 +101,7 @@ export const Sidebar = () => {
           className="gs-brand-logo"
           draggable={false}
         />
-        <div>
+        <div className="gs-brand-text">
           <div className="gs-brand-name">Polln8</div>
           <div className="gs-brand-sub">Build with intent</div>
         </div>

@@ -372,7 +372,10 @@ const MyNet = () => {
       <div className="min-h-screen bg-background text-foreground">
         {SHOW_SIDEBAR && <Sidebar />}
         {!SHOW_SIDEBAR && <BackToHomeTop />}
-        <div style={{ paddingLeft: "var(--sidebar-width, 0px)" }}>
+        <div
+          className="transition-[padding] duration-[220ms] ease-out"
+          style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
+        >
           <main className="pt-12 pb-24">
             <MyNetWizard
               uid={uid}

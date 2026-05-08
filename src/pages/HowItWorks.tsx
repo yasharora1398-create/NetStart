@@ -110,7 +110,10 @@ const HowItWorks = () => {
       style={{ overflowX: "clip" }}
     >
       {SHOW_SIDEBAR && <Sidebar />}
-      <div style={{ paddingLeft: "var(--sidebar-width, 0px)" }}>
+      <div
+        className="transition-[padding] duration-[220ms] ease-out"
+        style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
+      >
       <div className="max-w-5xl mx-auto px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
         <Reveal>
           <div className="text-center md:text-left">

@@ -415,6 +415,86 @@
       0 2px 6px -2px rgba(60, 50, 30, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.75),
       inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+    /* Animate width changes so collapse/expand glides instead of
+       snapping. Pages padding past the sidebar via the CSS variable
+       inherit the same transition for a synchronized motion. */
+    transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Collapsed state — icon-only rail. The chevron toggle button on
+     the brand row flips the .is-collapsed class which drives every
+     visual change below (label hiding, icon centering, etc.). */
+  .glass-sidebar.is-collapsed {
+    width: 52px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .glass-sidebar.is-collapsed .gs-section-label,
+  .glass-sidebar.is-collapsed .gs-brand-text,
+  .glass-sidebar.is-collapsed .gs-pill,
+  .glass-sidebar.is-collapsed .gs-theme-label,
+  .glass-sidebar.is-collapsed .gs-seg button > span:not(.gs-ico):not(:first-child) {
+    display: none;
+  }
+  /* Items: icons-only and centered. The label text span lives at
+     position 2 inside .gs-item; hiding it via attribute selector
+     keeps the icon visible and lets us center the whole row. */
+  .glass-sidebar.is-collapsed .gs-item {
+    justify-content: center;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .glass-sidebar.is-collapsed .gs-item > span:not(.gs-ico):not(.gs-pill) {
+    display: none;
+  }
+  .glass-sidebar.is-collapsed .gs-brand,
+  .glass-sidebar.is-collapsed .gs-brand-link {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    gap: 0;
+  }
+  /* Theme toggle collapses to two stacked icon buttons. */
+  .glass-sidebar.is-collapsed .gs-seg {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .glass-sidebar.is-collapsed .gs-seg button {
+    padding: 6px;
+  }
+  /* Section dividers don't need their inner padding when collapsed. */
+  .glass-sidebar.is-collapsed .gs-section + .gs-section {
+    padding-top: 6px;
+  }
+  .glass-sidebar.is-collapsed .gs-theme {
+    padding: 8px 0 0;
+  }
+
+  /* Toggle button — small chevron pinned to the top-right of the
+     sidebar. In collapsed mode it stays in the same corner, just
+     against the narrower edge. */
+  .glass-sidebar .gs-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 0;
+    background: rgba(0, 0, 0, 0.05);
+    color: #6b6b6b;
+    cursor: pointer;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    transition: background 140ms ease, color 140ms ease;
+  }
+  .glass-sidebar .gs-toggle:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+  }
+  .glass-sidebar.is-collapsed .gs-toggle {
+    top: 8px;
+    right: 8px;
   }
   .glass-sidebar::before {
     content: "";
@@ -700,6 +780,14 @@
   .dark .glass-sidebar .gs-item.gs-active .gs-pill {
     background: rgba(79, 165, 114, 0.20);
     color: hsl(142 33% 70%);
+  }
+  .dark .glass-sidebar .gs-toggle {
+    background: rgba(255, 255, 255, 0.06);
+    color: hsl(60 4% 64%);
+  }
+  .dark .glass-sidebar .gs-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: hsl(60 6% 95%);
   }
   .dark .glass-sidebar .gs-theme {
     border-top-color: rgba(255, 255, 255, 0.08);
