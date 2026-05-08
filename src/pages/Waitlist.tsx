@@ -11,9 +11,9 @@
  * Light/dark is class-based on <html>. The circular sun/moon button
  * in the top-right of the sticky nav drives `useTheme()`.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronDown, Moon, Sun } from "lucide-react";
+import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 
@@ -366,48 +366,31 @@ const Pillar = ({
   title: string;
   body: string;
   details: string[];
-}) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <article className="relative group">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="text-left w-full"
-      >
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-          {accent}
-        </div>
-        <div className="h-px w-12 bg-primary/40 mb-5 transition-[width] duration-200 group-hover:w-20" />
-        <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
-          {title}
-        </h3>
-        <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-3">
-          {body}
-        </p>
-        <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.2em] text-primary/80 transition-colors group-hover:text-primary">
-          {open ? "Less" : "More"}
-          <ChevronDown
-            className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </span>
-      </button>
-      {open && (
-        <ul className="mt-5 space-y-2 border-l border-primary/30 pl-4">
-          {details.map((d) => (
-            <li
-              key={d}
-              className="text-sm leading-relaxed text-muted-foreground"
-            >
-              {d}
-            </li>
-          ))}
-        </ul>
-      )}
-    </article>
-  );
-};
+}) => (
+  // `group` lets the children react to the card's hover state via
+  // group-hover:* utilities. Hovering the article reveals the
+  // details list and grows the accent rule.
+  <article className="relative group cursor-default">
+    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+      {accent}
+    </div>
+    <div className="h-px w-12 bg-primary/40 mb-5 transition-[width] duration-200 group-hover:w-20" />
+    <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
+      {title}
+    </h3>
+    <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-3">
+      {body}
+    </p>
+    {/* Details — hidden by default, fade in when hovering the card. */}
+    <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+      {details.map((d) => (
+        <li key={d} className="text-sm leading-relaxed text-muted-foreground">
+          {d}
+        </li>
+      ))}
+    </ul>
+  </article>
+);
 
 const RoleCard = ({
   kind,
@@ -419,60 +402,38 @@ const RoleCard = ({
   tagline: string;
   signals: string[];
   example: { headline: string; detail: string };
-}) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <article
-      className={`rounded-2xl border bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-all cursor-pointer ${
-        open ? "border-primary/50" : "border-border hover:border-primary/30"
-      }`}
-      onClick={() => setOpen((v) => !v)}
-      role="button"
-      tabIndex={0}
-      aria-expanded={open}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          setOpen((v) => !v);
-        }
-      }}
-    >
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-        {kind}
-      </p>
-      <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
-        {tagline}
-      </p>
-      <ul className="space-y-3">
-        {signals.map((s) => (
-          <li key={s} className="flex items-start gap-3 text-sm text-muted-foreground">
-            <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
-            <span>{s}</span>
-          </li>
-        ))}
-      </ul>
+}) => (
+  <article className="group rounded-2xl border border-border hover:border-primary/40 bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors">
+    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+      {kind}
+    </p>
+    <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
+      {tagline}
+    </p>
+    <ul className="space-y-3">
+      {signals.map((s) => (
+        <li key={s} className="flex items-start gap-3 text-sm text-muted-foreground">
+          <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+          <span>{s}</span>
+        </li>
+      ))}
+    </ul>
 
-      {/* Hint that the card is interactive — fades when open. */}
-      <p className="mt-6 text-[11px] font-mono uppercase tracking-[0.2em] text-primary/70">
-        {open ? "Tap to collapse" : "Tap for an example"}
+    {/* Example — invisible until the card is hovered. Slides into
+        view via opacity, no layout shift required. */}
+    <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
+        Example
       </p>
-
-      {open && (
-        <div className="mt-5 pt-5 border-t border-primary/30">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
-            Example
-          </p>
-          <p className="text-foreground font-semibold leading-snug">
-            {example.headline}
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            {example.detail}
-          </p>
-        </div>
-      )}
-    </article>
-  );
-};
+      <p className="text-foreground font-semibold leading-snug">
+        {example.headline}
+      </p>
+      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+        {example.detail}
+      </p>
+    </div>
+  </article>
+);
 
 // ─── Decorative blurred backdrop ─────────────────────────────────
 const BlurredBackdrop = () => (
