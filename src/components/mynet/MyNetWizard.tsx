@@ -399,16 +399,16 @@ export const MyNetWizard = ({
           <div className="grid md:grid-cols-2 gap-5 md:gap-6">
             <ModeCard
               icon={<Hammer className="h-6 w-6" />}
-              tag="I'm building"
+              tag="I'm a founder"
               title="I have a project."
-              body="You're working on something and you need a builder, operator, or co-founder next to you."
+              body="You're building a venture and you need a builder, operator, or co-founder next to you. We'll set up the project."
               onClick={() => setStage("building")}
             />
             <ModeCard
               icon={<Telescope className="h-6 w-6" />}
-              tag="I'm looking"
+              tag="I'm a builder"
               title="I want to join one."
-              body="You're open to joining a project that fits your skills, your time, and the kind of work you want to do."
+              body="You're open to joining a project that fits your skills, your time, and the kind of work you want to do. We'll set up your candidate profile."
               onClick={() => setStage("looking")}
             />
           </div>
@@ -531,7 +531,7 @@ export const MyNetWizard = ({
         <StepShell
           eyebrow="Step 03 of 03"
           title="Tell us what you're building."
-          subtitle="Give the project a name and what kind of operator you want next to you."
+          subtitle="Set up your project so the right operators can find it."
           onBack={() => setStage("mode")}
         >
           <div className="space-y-6 mb-10">
@@ -563,58 +563,69 @@ export const MyNetWizard = ({
               />
             </Field>
 
-            <Field
-              label="Skills you need"
-              required
-              hint="At least one"
-            >
-              <TagInput
-                value={projectSkills}
-                onChange={setProjectSkills}
-                placeholder="e.g. Rust, Marketplaces, B2B GTM"
-              />
-            </Field>
+            <div className="border-t border-border pt-6">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-gold mb-1">
+                Criteria
+              </p>
+              <p className="text-xs text-muted-foreground mb-5">
+                Used by Find People to surface matches.
+              </p>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <Field label="Commitment" required>
-                <Select
-                  value={projectCommitment}
-                  onValueChange={setProjectCommitment}
-                >
-                  <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60">
-                    <SelectValue placeholder="What you need from them" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-border">
-                    {COMMITMENT_OPTIONS.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
               <Field
-                label="Location"
+                label="Skills"
                 required
-                icon={<MapPin className="h-3.5 w-3.5 text-gold" />}
+                hint="At least one"
               >
-                <Autocomplete
-                  value={projectLocation}
-                  onChange={setProjectLocation}
-                  options={LOCATION_OPTIONS}
-                  placeholder="Type a city or pick remote..."
+                <TagInput
+                  value={projectSkills}
+                  onChange={setProjectSkills}
+                  placeholder="e.g. Rust, Marketplaces, B2B GTM (Enter to add)"
                 />
               </Field>
-            </div>
 
-            <Field label="Keywords" hint="Optional. Helps matching.">
-              <Input
-                value={projectKeywords}
-                onChange={(e) => setProjectKeywords(e.target.value)}
-                placeholder="e.g. payments, fintech, ex-Stripe"
-                className="h-11 bg-background border-border focus-visible:border-gold/60"
-              />
-            </Field>
+              <div className="grid md:grid-cols-2 gap-6 mt-5">
+                <Field label="Commitment" required>
+                  <Select
+                    value={projectCommitment}
+                    onValueChange={setProjectCommitment}
+                  >
+                    <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60">
+                      <SelectValue placeholder="What you need from them" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      {COMMITMENT_OPTIONS.map((opt) => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field
+                  label="Location"
+                  required
+                  icon={<MapPin className="h-3.5 w-3.5 text-gold" />}
+                >
+                  <Autocomplete
+                    value={projectLocation}
+                    onChange={setProjectLocation}
+                    options={LOCATION_OPTIONS}
+                    placeholder="Type a city or pick remote..."
+                  />
+                </Field>
+              </div>
+
+              <div className="mt-5">
+                <Field label="Keywords" hint="Optional. Helps matching.">
+                  <Input
+                    value={projectKeywords}
+                    onChange={(e) => setProjectKeywords(e.target.value)}
+                    placeholder="e.g. payments, fintech, ex-Stripe"
+                    className="h-11 bg-background border-border focus-visible:border-gold/60"
+                  />
+                </Field>
+              </div>
+            </div>
           </div>
 
           <Footer
@@ -651,17 +662,12 @@ const Intro = ({
     {
       num: "02",
       title: "Mode",
-      body: "Tell us if you're building something or looking to join.",
+      body: "Founder or builder — tell us which side of the network you're on.",
     },
     {
       num: "03",
       title: "Details",
-      body: "Fill in the specifics for the path you picked.",
-    },
-    {
-      num: "04",
-      title: "Review",
-      body: "Submit and we'll take a look. Usually fast.",
+      body: "Founders set up a project. Builders fill out a candidate profile.",
     },
   ];
 
