@@ -707,13 +707,15 @@ const RAVI: ProfileEntry = {
 const MatchesCardMockup = () => {
   const [phase, setPhase] = useState(0);
   const timers = useRef<number[]>([]);
-  // 4 phases:
-  //   0 maya rest          (Maya top, Ravi peeks behind)
-  //   1 maya swiping right (Save edge glow)
-  //   2 ravi rest          (Maya gone, Ravi top)
-  //   3 ravi swiping left  (Pass edge glow)
-  // Then loop back to 0. No profile-detail sheet — matches the PDF.
-  const phaseDur = useMemo(() => [1400, 1000, 1400, 1000], []);
+  // 5 phases:
+  //   0 maya rest          (Maya top, Ravi behind)
+  //   1 maya swipes right  (slides off — info page about to appear)
+  //   2 info page open     (Maya's profile sheet visible)
+  //   3 ravi rest          (sheet retracted, Ravi on top)
+  //   4 ravi swipes left   (translates + fades out)
+  // No edge glows; left swipe is a clean fade, right swipe opens
+  // the info page.
+  const phaseDur = useMemo(() => [1300, 800, 1800, 1100, 900], []);
 
   useEffect(() => {
     let alive = true;
@@ -722,7 +724,7 @@ const MatchesCardMockup = () => {
       if (!alive) return;
       setPhase(p);
       const t = window.setTimeout(() => {
-        p = (p + 1) % 4;
+        p = (p + 1) % 5;
         tick();
       }, phaseDur[p]);
       timers.current.push(t);
@@ -735,17 +737,24 @@ const MatchesCardMockup = () => {
     };
   }, [phaseDur]);
 
+  // mayaFront stays "gone-right" through phases 1 and 2 so she's
+  // out of frame while the sheet is up. Ravi sits behind the whole
+  // time, then takes over at phase 3 and exits left at phase 4.
   const mayaFront: Frontness = (
-    ["top", "swiping-right", "gone-right", "behind1"] as const
+    ["top", "swiping-right", "gone-right", "behind1", "behind1"] as const
   )[phase];
   const raviFront: Frontness = (
-    ["behind1", "behind1", "top", "swiping-left"] as const
+    ["behind1", "behind1", "behind1", "top", "swiping-left"] as const
   )[phase];
 
-  const showSaveGlow = phase === 1;
-  const showPassGlow = phase === 3;
-
-  const hint = "Swipe right to save · left to pass";
+  const hint =
+    phase === 1
+      ? "Saving — opening profile"
+      : phase === 2
+        ? "Maya C. · profile open"
+        : phase === 4
+          ? "Passed — won't show again"
+          : "Swipe right to save · left to pass";
 
   return (
     <div
@@ -817,41 +826,97 @@ const MatchesCardMockup = () => {
             </span>
           </div>
 
-          {/* Deck area — just the two cards, no skeleton plate or
-              profile-detail sheet (the PDF only shows the rest card). */}
+          {/* Deck area — two cards plus the profile-detail sheet that
+              slides up when Maya is right-swiped. No edge glows; left
+              swipes just fade out and right swipes hand off to the
+              sheet. */}
           <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6">
             <ProfileCardMockup profile={RAVI} frontness={raviFront} />
             <ProfileCardMockup profile={MAYA} frontness={mayaFront} />
 
-            {/* Edge glows */}
+            {/* Info sheet — slides up from the bottom on phase 2 and
+                stays through the rest of Maya's stay. Hidden during
+                Ravi's frames (phases 3, 4). */}
             <div
-              className={`mc-edge-glow absolute pointer-events-none z-[6] ${
-                showSaveGlow ? "is-on" : ""
-              }`}
+              className="mc-profile-tab absolute left-0 right-0 bottom-0 flex flex-col gap-3.5 z-[5]"
               style={{
-                top: 24,
-                bottom: 80,
-                width: 110,
-                right: 0,
-                background:
-                  "linear-gradient(270deg, hsl(var(--primary) / 0.40), transparent)",
+                top: 28,
+                padding: "10px 22px 18px",
+                borderRadius: "18px 18px 16px 16px",
+                background: "hsl(var(--background))",
+                border: "1px solid hsl(var(--border))",
+                borderBottom: "none",
+                boxShadow: "0 -20px 40px -20px rgba(0,0,0,0.35)",
               }}
-              aria-hidden
-            />
-            <div
-              className={`mc-edge-glow absolute pointer-events-none z-[6] ${
-                showPassGlow ? "is-on" : ""
-              }`}
-              style={{
-                top: 24,
-                bottom: 80,
-                width: 110,
-                left: 0,
-                background:
-                  "linear-gradient(90deg, hsl(var(--muted-foreground) / 0.30), transparent)",
-              }}
-              aria-hidden
-            />
+              aria-hidden={phase !== 2}
+            >
+              <div
+                className="self-center rounded-full"
+                style={{
+                  width: 44,
+                  height: 5,
+                  background: "hsl(var(--foreground) / 0.18)",
+                  margin: "4px 0 6px",
+                }}
+              />
+              <div
+                className="flex items-center justify-between font-mono uppercase"
+                style={{
+                  fontSize: "9.5px",
+                  letterSpacing: "0.1em",
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
+                <span>Profile</span>
+                <span>Saved</span>
+              </div>
+
+              <div>
+                <div
+                  className="font-semibold tracking-tight"
+                  style={{ fontSize: 17 }}
+                >
+                  Maya C.
+                </div>
+                <div className="opacity-70 mt-0.5" style={{ fontSize: 11 }}>
+                  Founder · Remote · Full-time
+                </div>
+              </div>
+
+              <div>
+                <div
+                  className="font-mono uppercase mb-1.5 opacity-55"
+                  style={{ fontSize: 9, letterSpacing: "0.12em" }}
+                >
+                  Currently building
+                </div>
+                <div className="flex flex-col gap-2">
+                  <ProjectRow
+                    name="Pollenboard"
+                    tag="Shipped"
+                    desc="Design system for indie tooling — v2 live, used by 40+ small teams."
+                  />
+                  <ProjectRow
+                    name="Toolspace"
+                    tag="Beta"
+                    desc="Async pairing app for solo founders. MVP shipped in March."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div
+                  className="font-mono uppercase mb-1.5 opacity-55"
+                  style={{ fontSize: 9, letterSpacing: "0.12em" }}
+                >
+                  Links
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <LinkRow icon="in" label="LinkedIn" url="/in/mayac" />
+                  <LinkRow icon="PDF" label="Résumé" url="maya-c.pdf" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Action bar */}
