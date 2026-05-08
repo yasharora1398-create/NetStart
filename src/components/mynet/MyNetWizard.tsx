@@ -382,6 +382,7 @@ export const MyNetWizard = ({
           <Footer
             valid={credentialsValid}
             onNext={goCredentials}
+            onBack={() => setStage("intro")}
             working={working}
             label="Continue"
           />
@@ -518,6 +519,7 @@ export const MyNetWizard = ({
           <Footer
             valid={lookingValid}
             onNext={submitLooking}
+            onBack={() => setStage("mode")}
             working={working}
             label="Submit for review"
             icon={<Send className="h-4 w-4" />}
@@ -618,6 +620,7 @@ export const MyNetWizard = ({
           <Footer
             valid={buildingValid}
             onNext={submitBuilding}
+            onBack={() => setStage("mode")}
             working={working}
             label="Submit for review"
             icon={<Send className="h-4 w-4" />}
@@ -968,12 +971,17 @@ const Footer = ({
   valid,
   working,
   onNext,
+  onBack,
   label,
   icon,
 }: {
   valid: boolean;
   working: boolean;
   onNext: () => void;
+  // Back is optional so the very first step can omit it. Every step
+  // after credentials should pass it so the user can walk backwards
+  // through the flow without losing context.
+  onBack?: () => void;
   label: string;
   icon?: React.ReactNode;
 }) => (
@@ -981,21 +989,35 @@ const Footer = ({
     <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
       {valid ? "Ready when you are" : "Fields marked with * are required"}
     </p>
-    <button
-      onClick={onNext}
-      disabled={working}
-      className={`inline-flex items-center gap-2 px-6 py-3 rounded-sm font-medium text-sm transition-all ${
-        valid
-          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-500 hover:to-blue-400 hover:shadow-[0_0_22px_rgba(59,130,246,0.55)]"
-          : "bg-neutral-800/80 text-muted-foreground border border-border cursor-pointer"
-      } ${working ? "opacity-60 cursor-wait" : ""}`}
-    >
-      {working ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        icon ?? <ArrowRight className="h-4 w-4" />
+    <div className="flex items-center gap-3">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={working}
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-sm font-medium text-sm border border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
       )}
-      {label}
-    </button>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={working}
+        className={`inline-flex items-center gap-2 px-6 py-3 rounded-sm font-medium text-sm transition-all ${
+          valid
+            ? "bg-primary text-primary-foreground hover:opacity-90 hover:shadow-[0_0_22px_hsl(var(--primary)/0.45)]"
+            : "bg-neutral-800/80 text-muted-foreground border border-border cursor-pointer"
+        } ${working ? "opacity-60 cursor-wait" : ""}`}
+      >
+        {working ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          icon ?? <ArrowRight className="h-4 w-4" />
+        )}
+        {label}
+      </button>
+    </div>
   </div>
 );

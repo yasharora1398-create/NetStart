@@ -82,33 +82,54 @@ export const MyNetDashboard = ({
 }: Props) => {
   const [editing, setEditing] = useState(false);
 
-  const hasCandidate =
-    profile.candidate.headline.trim() !== "" ||
-    profile.candidate.bio.trim() !== "" ||
-    profile.candidate.skills.length > 0;
   const hasProjects = projects.length > 0;
 
   return (
     <>
-      {/* Header */}
-      <header className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500/40 bg-emerald-500/10 mb-6">
-          <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-400">
-            Accepted
-          </span>
+      {/* Header — Edit toggle now lives up top so the user can flip
+          into edit mode the moment they land on the page, instead of
+          scrolling to the bottom to find the button. */}
+      <header className="mb-10 flex flex-wrap items-start justify-between gap-6">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500/40 bg-emerald-500/10 mb-6">
+            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-400">
+              Accepted
+            </span>
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] mb-3">
+            Your <em className="text-gradient-gold not-italic">profile.</em>
+          </h1>
+          <p className="text-muted-foreground max-w-xl">
+            {editing
+              ? "Editing. Make your changes and click Done."
+              : "Everything you've set up, at a glance."}
+          </p>
         </div>
-        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] mb-3">
-          Your <em className="text-gradient-gold not-italic">profile.</em>
-        </h1>
-        <p className="text-muted-foreground max-w-xl">
-          {editing
-            ? "Editing. Make your changes and click Done."
-            : "Everything you've set up, at a glance."}
-        </p>
+        <div className="shrink-0">
+          {editing ? (
+            <Button
+              variant="gold"
+              size="xl"
+              onClick={() => setEditing(false)}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Done editing
+            </Button>
+          ) : (
+            <Button
+              variant="outlineGold"
+              size="xl"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil className="h-4 w-4" />
+              Edit profile
+            </Button>
+          )}
+        </div>
       </header>
 
-      {/* CREDENTIALS */}
+      {/* CREDENTIALS — always shown */}
       <Section title="Credentials" eyebrow="01">
         {editing ? (
           <ProfileCard profile={profile} onSubmit={onSubmitProfile} />
@@ -117,131 +138,123 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
-      {/* LOOKING — only if they signed up as a looker */}
-      {hasCandidate && (
-        <Section
-          title="How operators find you"
-          eyebrow="02"
-          icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
-        >
-          {editing ? (
-            <CandidateCard
-              profile={profile}
-              onSave={onSaveCandidate}
-              onToggleOpenToWork={onToggleOpenToWork}
-              onUploadAvatar={onUploadAvatar}
-              onRemoveAvatar={onRemoveAvatar}
-            />
-          ) : (
-            <CandidateDisplay profile={profile} />
-          )}
-
-          {!editing && profile.candidate.isOpenToWork && (
-            <Link
-              to="/talent"
-              className="mt-6 block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
-                    Find projects
-                  </p>
-                  <h3 className="font-display text-2xl mb-1">
-                    Browse open projects
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Ranked against your profile.
-                  </p>
-                </div>
-                <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />
-              </div>
-            </Link>
-          )}
-        </Section>
-      )}
-
-      {/* BUILDING — only if they have projects */}
-      {hasProjects && (
-        <Section
-          title="What you're building"
-          eyebrow="03"
-          icon={<Hammer className="h-3.5 w-3.5 text-gold" />}
-          action={
-            editing ? (
-              <Button variant="gold" size="lg" onClick={onNewProject}>
-                <Plus className="h-4 w-4" />
-                New project
-              </Button>
-            ) : null
-          }
-        >
-          {editing ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {projects.map((p) => (
-                <ProjectCard
-                  key={p.id}
-                  project={p}
-                  onOpen={() => onOpenProject(p.id)}
-                  onEdit={() => onEditProject(p)}
-                  onDelete={() => onDeleteProject(p)}
-                  onFindPeople={() => onFindPeople(p.id)}
-                  onTogglePublish={() => onTogglePublish(p)}
-                />
-              ))}
-            </div>
-          ) : (
-            <ProjectsDisplay
-              projects={projects}
-              onOpen={onOpenProject}
-              onFindPeople={onFindPeople}
-            />
-          )}
-        </Section>
-      )}
-
-      {/* APPLICATIONS */}
-      {hasCandidate && (
-        <Section
-          title="My applications"
-          eyebrow="04"
-          icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
-        >
-          <ApplicationsPanel ownedProjects={projects} mode="sent" />
-        </Section>
-      )}
-
-      {hasProjects && (
-        <Section
-          title="Applications received"
-          eyebrow={hasCandidate ? "05" : "04"}
-          icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
-        >
-          <ApplicationsPanel ownedProjects={projects} mode="received" />
-        </Section>
-      )}
-
-      {/* EDIT / DONE TOGGLE */}
-      <div className="flex justify-end pt-8 mt-8 border-t border-border">
+      {/* LOOKING — always shown. Empty candidate gets the editor by
+          default while editing, or a "tell us about you" prompt
+          when read-only. */}
+      <Section
+        title="How operators find you"
+        eyebrow="02"
+        icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
+      >
         {editing ? (
-          <Button
-            variant="gold"
-            size="xl"
-            onClick={() => setEditing(false)}
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            Done editing
-          </Button>
+          <CandidateCard
+            profile={profile}
+            onSave={onSaveCandidate}
+            onToggleOpenToWork={onToggleOpenToWork}
+            onUploadAvatar={onUploadAvatar}
+            onRemoveAvatar={onRemoveAvatar}
+          />
         ) : (
-          <Button
-            variant="outlineGold"
-            size="xl"
-            onClick={() => setEditing(true)}
-          >
-            <Pencil className="h-4 w-4" />
-            Edit profile
-          </Button>
+          <CandidateDisplay profile={profile} />
         )}
-      </div>
+
+        {!editing && profile.candidate.isOpenToWork && (
+          <Link
+            to="/talent"
+            className="mt-6 block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
+                  Find projects
+                </p>
+                <h3 className="font-display text-2xl mb-1">
+                  Browse open projects
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Ranked against your profile.
+                </p>
+              </div>
+              <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            </div>
+          </Link>
+        )}
+      </Section>
+
+      {/* BUILDING — always shown. Empty state surfaces a "New project"
+          card so the user knows the section is even here. */}
+      <Section
+        title="What you're building"
+        eyebrow="03"
+        icon={<Hammer className="h-3.5 w-3.5 text-gold" />}
+        action={
+          <Button variant="gold" size="lg" onClick={onNewProject}>
+            <Plus className="h-4 w-4" />
+            New project
+          </Button>
+        }
+      >
+        {!hasProjects ? (
+          <button
+            type="button"
+            onClick={onNewProject}
+            className="w-full rounded-sm border border-dashed border-border hover:border-gold/60 bg-card/40 hover:bg-card transition-colors p-8 text-left group"
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+              Empty
+            </p>
+            <h3 className="font-display text-2xl mb-2">
+              You haven&apos;t posted a project yet.
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-md">
+              Add what you&apos;re building so operators can find and apply
+              to your venture.
+            </p>
+            <span className="inline-flex items-center gap-2 text-sm text-gold group-hover:gap-3 transition-all">
+              <Plus className="h-4 w-4" />
+              Start a project
+            </span>
+          </button>
+        ) : editing ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            {projects.map((p) => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                onOpen={() => onOpenProject(p.id)}
+                onEdit={() => onEditProject(p)}
+                onDelete={() => onDeleteProject(p)}
+                onFindPeople={() => onFindPeople(p.id)}
+                onTogglePublish={() => onTogglePublish(p)}
+              />
+            ))}
+          </div>
+        ) : (
+          <ProjectsDisplay
+            projects={projects}
+            onOpen={onOpenProject}
+            onFindPeople={onFindPeople}
+          />
+        )}
+      </Section>
+
+      {/* APPLICATIONS — both panels always shown. They render their
+          own empty states internally. */}
+      <Section
+        title="My applications"
+        eyebrow="04"
+        icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
+      >
+        <ApplicationsPanel ownedProjects={projects} mode="sent" />
+      </Section>
+
+      <Section
+        title="Applications received"
+        eyebrow="05"
+        icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
+      >
+        <ApplicationsPanel ownedProjects={projects} mode="received" />
+      </Section>
     </>
   );
 };
