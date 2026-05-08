@@ -842,39 +842,32 @@
     100% { opacity: 0;   transform: translateY(var(--drift))    scale(1); }
   }
 
-  /* Polln8 Matches Card mockup — auto-looping deck demo. Cards
-     translate via .mc-pcard--<frontness> classes; the profile-detail
-     sheet slides up via .mc-phase-<n> on the device root. */
+  /* Polln8 Matches Card mockup — auto-looping deck demo. The card's
+     transform/opacity is driven by inline style (set in React from a
+     frontness lookup), and this class supplies the transition + GPU
+     compositor hints so the inline-style change animates smoothly
+     instead of snapping. */
   .mc-pcard {
     transition:
       transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1),
       opacity 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
     will-change: transform, opacity;
+    backface-visibility: hidden;
   }
-  .mc-pcard--top { transform: translateY(0) scale(1); z-index: 5; opacity: 1; }
-  .mc-pcard--behind1 { transform: translateY(14px) scale(0.95); z-index: 4; opacity: 1; }
-  .mc-pcard--behind1-grow { transform: translateY(7px) scale(0.975); z-index: 4; opacity: 1; }
-  .mc-pcard--behind2 { transform: translateY(28px) scale(0.90); z-index: 3; opacity: 0.65; }
-  .mc-pcard--swiping-right { transform: translateX(330px) translateY(-10px) rotate(8deg); z-index: 5; opacity: 1; }
-  .mc-pcard--swiping-left  { transform: translateX(-330px) translateY(-10px) rotate(-8deg); z-index: 5; opacity: 1; }
-  .mc-pcard--gone-right { transform: translateX(330px) rotate(8deg); z-index: 5; opacity: 0; }
-  .mc-pcard--gone-left  { transform: translateX(-330px) rotate(-8deg); z-index: 5; opacity: 0; }
   .mc-edge-label {
     opacity: 0;
     transition: opacity 280ms ease;
   }
-  .mc-pcard--swiping-right .mc-edge-label--save { opacity: 1; }
-  .mc-pcard--swiping-left  .mc-edge-label--pass { opacity: 1; }
-  .mc-edge-glow {
-    opacity: 0;
-    transition: opacity 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
-  }
-  .mc-edge-glow.is-on { opacity: 1; }
+  .mc-pcard[data-front="swiping-right"] .mc-edge-label--save { opacity: 1; }
+  .mc-pcard[data-front="swiping-left"]  .mc-edge-label--pass { opacity: 1; }
   .mc-profile-tab {
     transform: translateY(100%);
     transition: transform 560ms cubic-bezier(0.22, 0.61, 0.36, 1);
   }
-  .mc-phase-2 .mc-profile-tab {
+  /* Sheet rises after Maya's right-swipe (phase 4 in the new flow:
+     Ravi rest -> Ravi swipes left -> Maya rest -> Maya swipes right
+     -> info up). Drops in every other phase. */
+  .mc-phase-4 .mc-profile-tab {
     transform: translateY(0);
   }
 

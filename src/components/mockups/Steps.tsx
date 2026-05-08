@@ -9,29 +9,29 @@ import builder1 from "@/assets/builder-1.jpg";
 import builder2 from "@/assets/builder-2.jpg";
 import builder3 from "@/assets/builder-3.jpg";
 
-// Shared design tokens — Vettd forest-green palette. Originally used
-// hardcoded rust hexes; retargeted at brand rename. The "RUST" /
-// "MARIGOLD" names are kept as a stable identifier for the accent
-// throughout this mockup, but they all point at the forest green.
+// Shared design tokens — now theme-aware. Each token maps to a global
+// CSS variable so the mockups swap colors automatically when the
+// user toggles light/dark via the sidebar. The constant names are
+// kept as a stable identifier for accent/ink/etc. across the file.
 const FONT = "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif";
 const FONT_MONO =
   "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
-const INK = "#0F1410";                          // text primary
-const INK_DIM = "#3A3D42";
-const INK_MUTED = "#6B6E73";
-const LINE = "rgba(15, 20, 16, 0.08)";
-const LINE_STRONG = "#E1E1DC";                  // border default
-const CARD_BG = "rgba(255, 255, 255, 0.55)";
-const CARD_BG_OPAQUE = "#FFFFFF";
-const CARD_BG_TINT = "rgba(232, 240, 234, 0.85)";   // gold-glow tint
-const FIELD_BG = "rgba(232, 240, 234, 0.6)";
-const RUST = "#1F5F3E";                         // primary forest green
-const RUST_GLOW = "rgba(31, 95, 62, 0.35)";
-const RUST_LIGHT = "#1F5F3E";
-const RUST_DEEP = "#174A30";                    // hover deep
-const MARIGOLD = "#1F5F3E";
-const GREEN = "#1F5F3E";                        // semantic green = primary
-const GREEN_GLOW = "rgba(31, 95, 62, 0.30)";
+const INK = "hsl(var(--foreground))";                       // text primary
+const INK_DIM = "hsl(var(--foreground) / 0.75)";
+const INK_MUTED = "hsl(var(--muted-foreground))";
+const LINE = "hsl(var(--foreground) / 0.08)";
+const LINE_STRONG = "hsl(var(--border))";                   // border default
+const CARD_BG = "hsl(var(--card) / 0.85)";
+const CARD_BG_OPAQUE = "hsl(var(--card))";
+const CARD_BG_TINT = "hsl(var(--accent))";                  // accent tint
+const FIELD_BG = "hsl(var(--secondary))";
+const RUST = "hsl(var(--primary))";                         // accent
+const RUST_GLOW = "hsl(var(--primary) / 0.35)";
+const RUST_LIGHT = "hsl(var(--primary))";
+const RUST_DEEP = "hsl(var(--primary))";
+const MARIGOLD = "hsl(var(--primary))";
+const GREEN = "hsl(var(--primary))";                        // semantic green
+const GREEN_GLOW = "hsl(var(--primary) / 0.30)";
 
 // Subtle photo tint — neutral now (sepia/orange tint removed when the
 // palette flipped from rust to forest green). Just a hair desaturated
@@ -39,24 +39,23 @@ const GREEN_GLOW = "rgba(31, 95, 62, 0.30)";
 const photoFilter = "saturate(0.95)";
 
 // Frosted-glass base — semi-transparent body picks up the page bg
-// through backdrop-filter. The float comes from a layered drop shadow
-// (tight contact + soft halo). The bevel comes from inset highlights:
-// bright top, soft sand bottom, faint white inner outline.
+// through backdrop-filter. Border + bevel use foreground-tinted
+// alphas so the surface reads frosted on light AND dark themes
+// instead of glowing bright-white in dark mode.
 const baseCard = {
   fontFamily: FONT,
   color: INK,
   background: CARD_BG,
   backdropFilter: "blur(24px) saturate(150%)",
   WebkitBackdropFilter: "blur(24px) saturate(150%)",
-  border: "1px solid rgba(255, 255, 255, 0.6)",
+  border: "1px solid hsl(var(--foreground) / 0.10)",
   borderRadius: 14,
   boxShadow: [
-    "0 1px 2px rgba(21, 23, 26, 0.04)",
-    "0 4px 12px rgba(21, 23, 26, 0.06)",
-    "0 16px 40px -8px rgba(21, 23, 26, 0.10)",
-    "inset 0 1px 0 rgba(255, 255, 255, 0.85)",
-    "inset 0 -1px 0 rgba(199, 184, 158, 0.25)",
-    "inset 0 0 0 0.5px rgba(255, 255, 255, 0.5)",
+    "0 1px 2px rgba(0, 0, 0, 0.10)",
+    "0 4px 12px rgba(0, 0, 0, 0.12)",
+    "0 16px 40px -8px rgba(0, 0, 0, 0.18)",
+    "inset 0 1px 0 hsl(var(--foreground) / 0.06)",
+    "inset 0 -1px 0 hsl(var(--foreground) / 0.04)",
   ].join(", "),
   position: "relative" as const,
 };
@@ -201,8 +200,8 @@ const Choice = ({
         width: 14,
         height: 14,
         borderRadius: "50%",
-        border: selected ? `1.5px solid ${RUST}` : `1px solid #9DA1A8`,
-        background: selected ? RUST : "#FFFFFF",
+        border: selected ? `1.5px solid ${RUST}` : `1px solid hsl(var(--border))`,
+        background: selected ? RUST : CARD_BG_OPAQUE,
         boxShadow: selected
           ? "0 0 0 3px rgba(31, 95, 62,0.18)"
           : undefined,
@@ -916,7 +915,7 @@ const ActionBtn = ({ variant }: { variant: "pass" | "connect" | "save" }) => {
         placeItems: "center",
         background: isConnect
           ? `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`
-          : "#FFFFFF",
+          : CARD_BG_OPAQUE,
         color: isConnect ? "#fff" : INK_DIM,
         boxShadow: isConnect
           ? `0 1px 0 rgba(255,255,255,0.3) inset, 0 -8px 14px rgba(0,0,0,0.10) inset, 0 6px 18px ${RUST_GLOW}, 0 2px 4px rgba(21, 23, 26,0.18)`

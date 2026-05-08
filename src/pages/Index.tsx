@@ -672,12 +672,41 @@ const ConfettiField = ({ active }: { active: boolean }) => {
 type Frontness =
   | "top"
   | "behind1"
-  | "behind1-grow"
-  | "behind2"
   | "swiping-right"
   | "swiping-left"
   | "gone-right"
   | "gone-left";
+
+// Inline-style lookup so React directly drives transform/opacity per
+// phase change — bypasses any cascade conflicts that were keeping
+// the cards visually static.
+const FRONTNESS_STYLE: Record<
+  Frontness,
+  { transform: string; opacity: number; zIndex: number }
+> = {
+  top: { transform: "translateY(0) scale(1)", opacity: 1, zIndex: 5 },
+  behind1: { transform: "translateY(14px) scale(0.95)", opacity: 1, zIndex: 4 },
+  "swiping-right": {
+    transform: "translateX(330px) translateY(-10px) rotate(8deg)",
+    opacity: 1,
+    zIndex: 5,
+  },
+  "swiping-left": {
+    transform: "translateX(-330px) translateY(-10px) rotate(-8deg)",
+    opacity: 1,
+    zIndex: 5,
+  },
+  "gone-right": {
+    transform: "translateX(330px) rotate(8deg)",
+    opacity: 0,
+    zIndex: 5,
+  },
+  "gone-left": {
+    transform: "translateX(-330px) rotate(-8deg)",
+    opacity: 0,
+    zIndex: 5,
+  },
+};
 
 type ProfileEntry = {
   id: string;
@@ -707,15 +736,13 @@ const RAVI: ProfileEntry = {
 const MatchesCardMockup = () => {
   const [phase, setPhase] = useState(0);
   const timers = useRef<number[]>([]);
-  // 5 phases:
-  //   0 maya rest          (Maya top, Ravi behind)
-  //   1 maya swipes right  (slides off — info page about to appear)
-  //   2 info page open     (Maya's profile sheet visible)
-  //   3 ravi rest          (sheet retracted, Ravi on top)
-  //   4 ravi swipes left   (translates + fades out)
-  // No edge glows; left swipe is a clean fade, right swipe opens
-  // the info page.
-  const phaseDur = useMemo(() => [1300, 800, 1800, 1100, 900], []);
+  // 5 phases — two-person flow per the user's spec:
+  //   0 ravi rest          (first person shown)
+  //   1 ravi swipes left   (skip — translates + fades)
+  //   2 maya rest          (second person, now on top)
+  //   3 maya swipes right  (save — slides off)
+  //   4 info sheet up      (Maya's projects, LinkedIn, résumé)
+  const phaseDur = useMemo(() => [1400, 900, 1400, 800, 2000], []);
 
   useEffect(() => {
     let alive = true;
@@ -737,23 +764,20 @@ const MatchesCardMockup = () => {
     };
   }, [phaseDur]);
 
-  // mayaFront stays "gone-right" through phases 1 and 2 so she's
-  // out of frame while the sheet is up. Ravi sits behind the whole
-  // time, then takes over at phase 3 and exits left at phase 4.
-  const mayaFront: Frontness = (
-    ["top", "swiping-right", "gone-right", "behind1", "behind1"] as const
-  )[phase];
   const raviFront: Frontness = (
-    ["behind1", "behind1", "behind1", "top", "swiping-left"] as const
+    ["top", "swiping-left", "gone-left", "gone-left", "gone-left"] as const
+  )[phase];
+  const mayaFront: Frontness = (
+    ["behind1", "behind1", "top", "swiping-right", "gone-right"] as const
   )[phase];
 
   const hint =
     phase === 1
-      ? "Saving — opening profile"
-      : phase === 2
-        ? "Maya C. · profile open"
+      ? "Passed — won't show again"
+      : phase === 3
+        ? "Saving — opening profile"
         : phase === 4
-          ? "Passed — won't show again"
+          ? "Maya C. · profile open"
           : "Swipe right to save · left to pass";
 
   return (
@@ -848,7 +872,7 @@ const MatchesCardMockup = () => {
                 borderBottom: "none",
                 boxShadow: "0 -20px 40px -20px rgba(0,0,0,0.35)",
               }}
-              aria-hidden={phase !== 2}
+              aria-hidden={phase !== 4}
             >
               <div
                 className="self-center rounded-full"
@@ -988,9 +1012,11 @@ const ProfileCardMockup = ({
 }: {
   profile: ProfileEntry;
   frontness: Frontness;
-}) => (
+}) => {
+  const pos = FRONTNESS_STYLE[frontness];
+  return (
   <div
-    className={`mc-pcard mc-pcard--${frontness} absolute flex flex-col gap-1.5`}
+    className="mc-pcard absolute flex flex-col gap-1.5"
     style={{
       width: 296,
       minHeight: 240,
@@ -1000,8 +1026,12 @@ const ProfileCardMockup = ({
       border: "1px solid hsl(var(--border))",
       color: "hsl(var(--foreground))",
       boxShadow: "0 18px 36px -18px rgba(0,0,0,0.4)",
+      transform: pos.transform,
+      opacity: pos.opacity,
+      zIndex: pos.zIndex,
     }}
     data-id={profile.id}
+    data-front={frontness}
   >
     {/* Edge labels — appear during swipe */}
     <div
@@ -1156,7 +1186,8 @@ const ProfileCardMockup = ({
       </svg>
     </button>
   </div>
-);
+  );
+};
 
 const ProjectRow = ({
   name,
