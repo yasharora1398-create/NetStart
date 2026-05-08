@@ -7,11 +7,11 @@ const WHY = [
   {
     icon: BadgeCheck,
     title: "Vetted, not viral.",
-    body: "Every member reviewed for shipped work. No engagement-farmed accounts.",
+    body: "Every member reviewed for shipped work. No accounts farmed for engagement.",
   },
   {
     icon: Sparkles,
-    title: "AI-ranked matches.",
+    title: "Matches ranked by AI.",
     body: "The deck is ordered against your skills, project, and intent. Not the algorithm's.",
   },
   {
@@ -45,7 +45,7 @@ const Index = () => {
               <span className="italic text-primary"> build.</span>
             </h1>
             <p className="text-base md:text-lg max-w-md mb-8 leading-relaxed text-muted-foreground">
-              Vetted founders and operators. AI-ranked matches. Connect, pass,
+              Vetted founders and operators. Matches ranked by AI. Connect, pass,
               or save. No maybes.
             </p>
             <div className="flex flex-wrap items-center gap-4">

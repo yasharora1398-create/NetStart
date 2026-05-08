@@ -111,7 +111,7 @@ const CheckEmail = () => {
             )}
             {resentAt && !resending && (
               <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-primary">
-                Sent again — check your inbox
+                Sent again. Check your inbox.
               </p>
             )}
 

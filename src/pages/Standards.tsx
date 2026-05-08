@@ -15,9 +15,9 @@ const PRINCIPLES = [
   },
   {
     title: "Skill, not surface.",
-    body: "Matching prioritizes complementary capability over background, school, or city. The right co-founder for a Rust infra startup is a senior systems engineer, not the loudest 'building in public' account.",
+    body: "Matching prioritizes complementary capability over background, school, or city. The right cofounder for a Rust infra startup is a senior systems engineer, not the loudest 'building in public' account.",
     detail: [
-      "AI-ranked recommendations based on your work, not your resume keywords.",
+      "ranked by AI recommendations based on your work, not your resume keywords.",
       "Filters for skill and commitment first; geography second.",
       "Profiles surface proof of work above credentials.",
     ],

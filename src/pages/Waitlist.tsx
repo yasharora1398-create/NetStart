@@ -125,9 +125,9 @@ const Waitlist = () => {
           <div className="grid md:grid-cols-3 gap-8 md:gap-10 max-w-5xl">
             <Paragraph>
               Most founders try to find someone on Reddit or YC's matcher.
-              They get idea-guys offering 5% equity for a full build.
-              Engineers who ghost after one call. Forty platforms, all
-              dumping grounds.
+              They get pitched loose concepts in exchange for full builds
+              and 5% equity. Engineers who ghost after one call. Forty
+              platforms, all dumping grounds.
             </Paragraph>
             <Paragraph>
               The people you'd actually want to build with aren't on those
