@@ -222,7 +222,7 @@ const SignUp = () => {
                   <p className="text-muted-foreground">
                     <Link
                       to="/signin"
-                      state={{ from: redirectTo }}
+                      state={{ from: fromState }}
                       className="text-gold hover:underline"
                     >
                       Sign in
@@ -375,7 +375,7 @@ const SignUp = () => {
               Already have an account?{" "}
               <Link
                 to="/signin"
-                state={{ from: redirectTo }}
+                state={{ from: fromState }}
                 className="text-gold hover:underline"
               >
                 Sign in
