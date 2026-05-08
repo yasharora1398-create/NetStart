@@ -70,11 +70,18 @@ const SignIn = () => {
     mode: "onBlur",
   });
 
-  const redirectTo = (location.state as { from?: string } | null)?.from ?? "/";
+  // Sign-in always lands on the homepage, regardless of where the
+  // user was bounced from. Returning users are intentionally dropped
+  // on "/" so they can re-orient (and so the signed-in nav surfaces
+  // the Edit MyNet pill there). The location.state.from value is
+  // preserved on the "Create an account" link below for users who
+  // pivot to signup.
+  const redirectTo = "/";
+  const fromState = (location.state as { from?: string } | null)?.from ?? "/";
 
   useEffect(() => {
     if (!loading && user) navigate(redirectTo, { replace: true });
-  }, [loading, user, navigate, redirectTo]);
+  }, [loading, user, navigate]);
 
   // Don't flash the form for an already-authed user.
   if (loading || user) return null;
@@ -316,7 +323,7 @@ const SignIn = () => {
               </div>
             </div>
 
-            <Link to="/signup" state={{ from: redirectTo }}>
+            <Link to="/signup" state={{ from: fromState }}>
               <Button variant="outlineGold" size="lg" className="w-full h-12">
                 Create an account
               </Button>

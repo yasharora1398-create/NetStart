@@ -344,18 +344,19 @@ const MyNet = () => {
   const displayProjects = isAuthed ? projects : SAMPLE_PROJECTS;
   const displayProfile = isAuthed ? profile : emptyProfile();
 
-  // Pre-acceptance flow: show the step-by-step wizard or the pending screen.
-  // Authed users with status draft/rejected go through the wizard.
-  // Authed users with status pending see the "hold tight" overlay.
-  // Authed users with status accepted (and unauthed users seeing the preview)
-  // fall through to the existing dashboard render below.
+  // Pre-acceptance flow: draft/rejected users go through the step-by-step wizard.
+  // Pending and accepted users both see the full dashboard (the dashboard
+  // surfaces a "review pending" pill for pending users so they understand state
+  // without being blocked from viewing all of their MyNet).
   const showWizard =
     isAuthed &&
     (profile.reviewStatus === "draft" ||
       profile.reviewStatus === "rejected" ||
       (profile.reviewStatus === "pending" && editingPending));
-  const showPending =
-    isAuthed && profile.reviewStatus === "pending" && !editingPending;
+  const showDashboard =
+    isAuthed &&
+    (profile.reviewStatus === "accepted" ||
+      profile.reviewStatus === "pending");
 
   if (showWizard && uid) {
     return (
@@ -379,11 +380,7 @@ const MyNet = () => {
       <div>
       <main
         className={`pt-12 pb-24 ${
-          !isAuthed
-            ? "pointer-events-none select-none blur-sm"
-            : showPending
-              ? "pointer-events-none select-none blur-md"
-              : ""
+          !isAuthed ? "pointer-events-none select-none blur-sm" : ""
         }`}
       >
         <div className="container">
@@ -454,7 +451,7 @@ const MyNet = () => {
                 />
               </div>
             </>
-          ) : isAuthed && profile.reviewStatus === "accepted" ? (
+          ) : showDashboard ? (
             <MyNetDashboard
               profile={profile}
               projects={projects}
@@ -736,47 +733,6 @@ const MyNet = () => {
       </div>
 
       {!loading && !user && <AuthGate />}
-
-      {showPending && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center px-6 pt-28 pb-12 pointer-events-none">
-          {/* Dimmed + blurred backdrop so the page behind is visible
-              but obviously locked. The card itself sits above the
-              backdrop and stays sharp. */}
-          <div
-            className="absolute inset-0 bg-background/70 backdrop-blur-md"
-            aria-hidden
-          />
-          <div className="relative max-w-md w-full rounded-2xl border border-gold-soft bg-card shadow-2xl p-10 text-center pointer-events-auto">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 bg-gold/10 mb-5">
-              <Sparkles className="h-5 w-5 text-gold" />
-            </div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-              All caught up
-            </p>
-            <h3 className="font-display text-3xl mb-3">You&apos;re set.</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-7">
-              When we launch, you&apos;ll be able to find cofounders that
-              match your project immediately.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to="/"
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-                style={{ boxShadow: "var(--shadow-glow)" }}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to homepage
-              </Link>
-              <button
-                onClick={() => setEditingPending(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-accent"
-              >
-                Edit MyNet
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <Footer />
 
