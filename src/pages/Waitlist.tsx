@@ -16,7 +16,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
-import { StepMatch } from "@/components/mockups/Steps";
 
 const Waitlist = () => {
   const { mode, toggle } = useTheme();
@@ -88,43 +87,32 @@ const Waitlist = () => {
 
       <main className="relative z-10">
         {/* HERO ----------------------------------------------------- */}
-        <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28 pb-24 md:pb-40">
-          <div className="grid lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-6">
-                Coming soon · Free
+        <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-32 pb-24 md:pb-40">
+          <div className="max-w-3xl">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-6">
+              Coming soon · Free
+            </p>
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[6.5rem] leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
+              Stop building
+              <br />
+              alone.
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
+              Solo founders quit. Teams ship. Polln8 is where founders find
+              partners and builders find startups to bet on.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                to="/signup"
+                className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
+                style={{ boxShadow: "var(--shadow-glow)" }}
+              >
+                Get started
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <p className="text-xs md:text-sm font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                Free · Launching August 2026
               </p>
-              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
-                Stop building
-                <br />
-                alone.
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
-                Solo founders quit. Teams ship. Polln8 is where founders find
-                partners and builders find startups to bet on.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link
-                  to="/signup"
-                  className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
-                  style={{ boxShadow: "var(--shadow-glow)" }}
-                >
-                  Get started
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <p className="text-xs md:text-sm font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                  Free · Launching 2026
-                </p>
-              </div>
-            </div>
-
-            {/* Right side — the Match step deck rendered with anonymous
-                silhouettes (no specific people). The card info still
-                shows so the visual reads as "this is the product."
-                Hidden below lg so the headline owns the screen on
-                phones/tablets. */}
-            <div className="hidden lg:flex justify-center items-center scale-90 origin-center">
-              <StepMatch anonymous />
             </div>
           </div>
         </section>
@@ -219,7 +207,7 @@ const Waitlist = () => {
                 Find your person.
               </h2>
               <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-10">
-                Polln8 launches 2026. Get on the list before then.
+                Polln8 launches August 2026. Get on the list before then.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
