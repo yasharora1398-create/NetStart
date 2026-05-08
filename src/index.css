@@ -229,6 +229,68 @@
       inset 0 0 0 0.5px rgba(255, 255, 255, 0.55);
   }
 
+  /* Dark-mode frosted glass — same geometry, swapped to a dark
+     translucent surface so the .glass cards on the localhost Index
+     page (Why-section) read as smoked-glass-on-black instead of
+     bright cream-on-black. */
+  .dark .glass {
+    background: rgba(20, 22, 21, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.45),
+      0 4px 12px rgba(0, 0, 0, 0.5),
+      0 16px 40px -8px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.04);
+  }
+  .dark .glass:hover {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.5),
+      0 6px 16px rgba(0, 0, 0, 0.6),
+      0 22px 48px -8px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  }
+  /* Rim hairlines — the cream/marigold gradient set in light mode
+     would read as warm tan smudges on a black background. Replace
+     with neutral white + a faint sage hint so the rim still shimmers
+     on scroll without breaking the dark palette. */
+  .dark .glass::before {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.04),
+        rgba(255, 255, 255, 0.16),
+        rgba(120, 200, 150, 0.20),
+        rgba(255, 255, 255, 0.16),
+        rgba(255, 255, 255, 0.04)
+      )
+      0 0 / 250% 1px no-repeat,
+      linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.4),
+        rgba(0, 0, 0, 0.6),
+        rgba(0, 0, 0, 0.4)
+      )
+      0 100% / 250% 1px no-repeat,
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.10),
+        rgba(120, 200, 150, 0.14),
+        rgba(255, 255, 255, 0.06)
+      )
+      0 0 / 1px 250% no-repeat,
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.06),
+        rgba(120, 200, 150, 0.14),
+        rgba(255, 255, 255, 0.10)
+      )
+      100% 0 / 1px 250% no-repeat;
+  }
+
   /* LIQUID GLASS RIM — a single hairline strip on each edge that pans
      with --scroll-progress, giving the rim the "liquid" feeling. The
      warm palette uses cream highlights with marigold and sage chroma
