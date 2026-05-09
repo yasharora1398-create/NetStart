@@ -152,7 +152,7 @@ const Waitlist = () => {
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
-                to="/signup"
+                to={user ? "/mynet" : "/signup"}
                 className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
                 style={{ boxShadow: "var(--shadow-glow)" }}
               >
@@ -303,11 +303,11 @@ const Waitlist = () => {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
-                  to="/signup"
+                  to={user ? "/mynet" : "/signup"}
                   className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
                   style={{ boxShadow: "var(--shadow-glow)" }}
                 >
-                  Get started
+                  {user ? "Edit MyNet" : "Get started"}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <p className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
