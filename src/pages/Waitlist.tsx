@@ -170,14 +170,14 @@ const Waitlist = () => {
                 <>
                   Find a startup
                   <br />
-                  <span className="text-primary italic">to bet on.</span>
+                  <span className="text-primary italic">to join.</span>
                 </>
               )}
             </h1>
             <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
               {persona === "founder"
                 ? "Post your venture, set the equity, and meet vetted operators ranked by AI against what you're building. No talkers, no maybes."
-                : "Show your shipping history, pick what you'd actually bet on, and meet founders with real ventures and real equity. No spam, no maybes."}
+                : "Show your shipping history, find a project worth joining, and meet founders with real ventures and real equity. No spam, no maybes."}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
@@ -300,17 +300,17 @@ const Waitlist = () => {
             />
             <RoleCard
               kind="Builders"
-              tagline="You have skill. You have a job. You're ready to bet on something real."
+              tagline="You have skill. You have a job. You're ready to join something real."
               signals={[
                 "Has shipping history",
                 "Wants equity, not just salary",
-                "Looking for a venture worth betting on",
+                "Looking for a venture worth joining",
               ]}
               example={{
                 headline:
                   "Senior eng, ex-Stripe payments, four years on distributed systems.",
                 detail:
-                  "Strong in Rust and devtools. Wants to bet on a payments or infra startup with real customers. Open to full-time for the right equity.",
+                  "Strong in Rust and devtools. Wants to join a payments or infra startup with real customers. Open to full-time for the right equity.",
               }}
             />
           </div>
