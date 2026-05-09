@@ -87,7 +87,10 @@ const App = () => (
                 already gates content behind auth via <AuthGate>. */}
             <Route path="/mynet" element={<MyNet />} />
             <Route path="/talent" element={<Internal><Talent /></Internal>} />
-            <Route path="/admin" element={<Internal><Admin /></Internal>} />
+            {/* /admin is public-routable so admin users can reach it
+                in production. The page itself gates on isAdmin and
+                redirects everyone else to "/". */}
+            <Route path="/admin" element={<Admin />} />
             <Route path="/match" element={<Internal><Match /></Internal>} />
             <Route path="/chats" element={<Internal><Chats /></Internal>} />
             <Route path="/standards" element={<Internal><Standards /></Internal>} />

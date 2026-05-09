@@ -1,36 +1,56 @@
+/**
+ * Admin dashboard — gated by useAuth().isAdmin.
+ *
+ * Two tabs:
+ *   • Overview   — visitor analytics (24h/7d/30d unique views) + line
+ *                  graph of last 30 days, plus a table of all
+ *                  signups with their MyNet completion status.
+ *   • Review queue — pending MyNet submissions as collapsible cards.
+ *                    Click a name to expand the full submitted info,
+ *                    then accept or decline.
+ *
+ * Visitor data comes from the page_views table (0015 migration).
+ * Each device gets one row per calendar day.
+ */
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
+  ArrowLeft,
   Check,
+  ChevronDown,
   ExternalLink,
   FileText,
   Linkedin,
   Loader2,
   ShieldCheck,
-  Users,
   X,
 } from "lucide-react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { toast } from "sonner";
 
-import { Nav } from "@/components/netstart/Nav";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import {
-  getResumeSignedUrl,
-  listAllProfiles,
-  reviewProfile,
-  type AdminProfile,
-} from "@/lib/mynet-storage";
-import type { ReviewStatus } from "@/lib/mynet-types";
+  getAnalytics,
+  listAllSignups,
+  listPendingSubmissions,
+  type DailyViewPoint,
+  type PendingSubmission,
+  type SignupRow,
+  type ViewCounts,
+} from "@/lib/admin-storage";
+import { getResumeSignedUrl, reviewProfile } from "@/lib/mynet-storage";
+
+// ────────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────────
 
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -50,45 +70,25 @@ const formatDate = (iso: string): string => {
   }
 };
 
+const formatDayShort = (day: string): string => {
+  const [y, m, d] = day.split("-");
+  return `${m}/${d}`;
+};
+
+// ────────────────────────────────────────────────────────────────
+// Page shell
+// ────────────────────────────────────────────────────────────────
+
+type Tab = "overview" | "review";
+
 const Admin = () => {
   const { user, loading, isAdmin } = useAuth();
-  const [rows, setRows] = useState<AdminProfile[]>([]);
-  const [loadingRows, setLoadingRows] = useState(false);
-  const [openingPath, setOpeningPath] = useState<string | null>(null);
-  const [workingId, setWorkingId] = useState<string | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<AdminProfile | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
-
-  useEffect(() => {
-    if (!user || !isAdmin) return;
-    let cancelled = false;
-    setLoadingRows(true);
-    listAllProfiles()
-      .then((data) => {
-        if (!cancelled) setRows(data);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          toast.error(err instanceof Error ? err.message : "Failed to load.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingRows(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [user, isAdmin]);
+  const [tab, setTab] = useState<Tab>("overview");
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Nav />
-        <main className="pt-28 pb-24 container">
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="h-5 w-5 text-gold animate-spin" />
-          </div>
-        </main>
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <Loader2 className="h-5 w-5 text-primary animate-spin" />
       </div>
     );
   }
@@ -96,6 +96,339 @@ const Admin = () => {
   if (!user || !isAdmin) {
     return <Navigate to="/" replace />;
   }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/70 border-b border-border/50">
+        <div className="mx-auto max-w-6xl px-5 md:px-8 h-16 flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1">
+            <ShieldCheck className="h-3 w-3 text-primary" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-primary">
+              Admin
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-5 md:px-8 pt-10 pb-24">
+        <h1 className="font-display text-4xl md:text-5xl tracking-[-0.03em] mb-8">
+          Admin
+        </h1>
+
+        <div className="flex items-center gap-2 border-b border-border mb-8">
+          <TabButton active={tab === "overview"} onClick={() => setTab("overview")}>
+            Overview
+          </TabButton>
+          <TabButton active={tab === "review"} onClick={() => setTab("review")}>
+            Review queue
+          </TabButton>
+        </div>
+
+        {tab === "overview" ? <OverviewTab /> : <ReviewTab />}
+      </main>
+    </div>
+  );
+};
+
+const TabButton = ({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`relative px-4 py-3 text-sm font-medium transition-colors ${
+      active
+        ? "text-foreground"
+        : "text-muted-foreground hover:text-foreground"
+    }`}
+  >
+    {children}
+    {active && (
+      <span className="absolute inset-x-0 -bottom-px h-0.5 bg-primary" />
+    )}
+  </button>
+);
+
+// ────────────────────────────────────────────────────────────────
+// Overview tab
+// ────────────────────────────────────────────────────────────────
+
+const OverviewTab = () => {
+  const [counts, setCounts] = useState<ViewCounts | null>(null);
+  const [daily, setDaily] = useState<DailyViewPoint[]>([]);
+  const [signups, setSignups] = useState<SignupRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([getAnalytics(), listAllSignups()])
+      .then(([a, s]) => {
+        if (cancelled) return;
+        setCounts(a.counts);
+        setDaily(a.daily);
+        setSignups(s);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          toast.error(err instanceof Error ? err.message : "Failed to load.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-5 w-5 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-12">
+      {/* Stat cards */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        <StatCard label="Last 24 hours" value={counts?.last24h ?? 0} />
+        <StatCard label="Last 7 days" value={counts?.last7d ?? 0} />
+        <StatCard label="Last 30 days" value={counts?.last30d ?? 0} />
+      </div>
+
+      {/* Line graph */}
+      <section>
+        <h2 className="font-display text-xl tracking-[-0.02em] mb-4">
+          Daily unique visitors
+        </h2>
+        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-4 md:p-6">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={daily}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                />
+                <XAxis
+                  dataKey="day"
+                  tickFormatter={formatDayShort}
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={11}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={11}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                  labelFormatter={(label: string) => formatDate(label)}
+                  formatter={(value: number) => [value, "Visitors"]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: "hsl(var(--primary))" }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+
+      {/* Signups table */}
+      <section>
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="font-display text-xl tracking-[-0.02em]">Signups</h2>
+          <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
+            {signups.length} total
+          </span>
+        </div>
+        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden">
+          {signups.length === 0 ? (
+            <p className="px-6 py-8 text-sm text-muted-foreground">
+              No signups yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                    <th className="px-5 py-3 font-normal">Name</th>
+                    <th className="px-5 py-3 font-normal">Email</th>
+                    <th className="px-5 py-3 font-normal">Signed up</th>
+                    <th className="px-5 py-3 font-normal">MyNet</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {signups.map((row) => (
+                    <tr
+                      key={row.userId}
+                      className="border-b border-border/60 last:border-b-0"
+                    >
+                      <td className="px-5 py-3 text-foreground">
+                        {row.fullName || "—"}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {row.email || "—"}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {formatDate(row.createdAt)}
+                      </td>
+                      <td className="px-5 py-3">
+                        <MyNetBadge row={row} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const StatCard = ({ label, value }: { label: string; value: number }) => (
+  <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-6">
+    <p className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-2">
+      {label}
+    </p>
+    <p className="font-display text-4xl tracking-[-0.02em] text-foreground">
+      {value}
+    </p>
+  </div>
+);
+
+const MyNetBadge = ({ row }: { row: SignupRow }) => {
+  if (!row.mynetSubmitted) {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-border text-[11px] text-muted-foreground">
+        Not started
+      </span>
+    );
+  }
+  if (row.reviewStatus === "accepted") {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary/40 bg-primary/10 text-[11px] text-primary">
+        Accepted
+      </span>
+    );
+  }
+  if (row.reviewStatus === "rejected") {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-destructive/40 bg-destructive/10 text-[11px] text-destructive">
+        Rejected
+      </span>
+    );
+  }
+  // pending
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-border bg-muted/40 text-[11px] text-foreground">
+      Pending review
+    </span>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────
+// Review queue tab
+// ────────────────────────────────────────────────────────────────
+
+const ReviewTab = () => {
+  const [submissions, setSubmissions] = useState<PendingSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+  const [openingPath, setOpeningPath] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<PendingSubmission | null>(
+    null,
+  );
+  const [rejectReason, setRejectReason] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    listPendingSubmissions()
+      .then((data) => {
+        if (!cancelled) setSubmissions(data);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          toast.error(err instanceof Error ? err.message : "Failed to load.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const removeFromList = (userId: string) => {
+    setSubmissions((prev) => prev.filter((s) => s.userId !== userId));
+    if (openId === userId) setOpenId(null);
+  };
+
+  const handleAccept = async (sub: PendingSubmission) => {
+    setWorkingId(sub.userId);
+    try {
+      await reviewProfile(sub.userId, "accepted", null);
+      toast.success(`Accepted ${sub.fullName || sub.email}.`);
+      removeFromList(sub.userId);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not accept.");
+    } finally {
+      setWorkingId(null);
+    }
+  };
+
+  const submitReject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (reason.length < 3) {
+      toast.error("Give a short reason (at least 3 characters).");
+      return;
+    }
+    setWorkingId(rejectTarget.userId);
+    try {
+      await reviewProfile(rejectTarget.userId, "rejected", reason);
+      toast.success(`Declined ${rejectTarget.fullName || rejectTarget.email}.`);
+      removeFromList(rejectTarget.userId);
+      setRejectTarget(null);
+      setRejectReason("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not decline.");
+    } finally {
+      setWorkingId(null);
+    }
+  };
 
   const openResume = async (path: string) => {
     setOpeningPath(path);
@@ -109,353 +442,274 @@ const Admin = () => {
     }
   };
 
-  const applyReview = async (
-    row: AdminProfile,
-    status: ReviewStatus,
-    reason: string | null,
-  ) => {
-    setWorkingId(row.userId);
-    try {
-      await reviewProfile(row.userId, status, reason);
-      setRows((prev) =>
-        prev.map((r) =>
-          r.userId === row.userId
-            ? {
-                ...r,
-                reviewStatus: status,
-                reviewReason: status === "rejected" ? reason : null,
-                reviewedAt: new Date().toISOString(),
-              }
-            : r,
-        ),
-      );
-      toast.success(
-        status === "accepted"
-          ? "Accepted."
-          : status === "rejected"
-            ? "Rejected."
-            : "Reset to pending.",
-      );
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not update.");
-    } finally {
-      setWorkingId(null);
-    }
-  };
-
-  const handleAccept = (row: AdminProfile) => applyReview(row, "accepted", null);
-
-  const handleReset = (row: AdminProfile) => applyReview(row, "pending", null);
-
-  const openReject = (row: AdminProfile) => {
-    setRejectTarget(row);
-    setRejectReason(row.reviewStatus === "rejected" ? row.reviewReason ?? "" : "");
-  };
-
-  const submitReject = async () => {
-    if (!rejectTarget) return;
-    const reason = rejectReason.trim();
-    if (reason.length < 3) {
-      toast.error("Give a short reason (at least 3 characters).");
-      return;
-    }
-    await applyReview(rejectTarget, "rejected", reason);
-    setRejectTarget(null);
-    setRejectReason("");
-  };
-
-  const totalResumes = rows.filter((r) => r.resume).length;
-  const totalLinkedIn = rows.filter((r) => r.linkedinUrl.trim() !== "").length;
-  const totalPending = rows.filter((r) => r.reviewStatus === "pending").length;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-5 w-5 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Nav />
+    <div>
+      <div className="flex items-baseline justify-between mb-4">
+        <h2 className="font-display text-xl tracking-[-0.02em]">
+          Pending submissions
+        </h2>
+        <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
+          {submissions.length} waiting
+        </span>
+      </div>
 
-      <main className="pt-28 pb-24">
-        <div className="container">
-          <header className="mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
-              <ShieldCheck className="h-3 w-3 text-gold" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-                Admin
-              </span>
-            </div>
-            <h1 className="font-display text-4xl md:text-6xl leading-[1] mb-4">
-              Submissions
-            </h1>
-            <p className="text-muted-foreground max-w-xl">
-              Review every applicant's resume and LinkedIn. Accept to unlock their
-              projects, or reject with a reason they'll see.
-            </p>
-          </header>
-
-          <div className="grid sm:grid-cols-4 gap-3 mb-10">
-            <StatCard label="Members" value={rows.length} icon={Users} />
-            <StatCard label="Pending" value={totalPending} icon={ShieldCheck} />
-            <StatCard label="Resumes" value={totalResumes} icon={FileText} />
-            <StatCard label="LinkedIn" value={totalLinkedIn} icon={Linkedin} />
-          </div>
-
-          {loadingRows ? (
-            <div className="rounded-sm border border-border bg-card/40 p-12 text-center">
-              <Loader2 className="h-5 w-5 text-gold animate-spin mx-auto mb-3" />
-              <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                Loading submissions...
-              </p>
-            </div>
-          ) : rows.length === 0 ? (
-            <div className="rounded-sm border border-dashed border-border bg-card/40 p-12 text-center">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-3">
-                Empty
-              </p>
-              <h3 className="font-display text-2xl">No submissions yet.</h3>
-            </div>
-          ) : (
-            <div className="rounded-sm border border-border bg-card overflow-hidden">
-              <div className="hidden md:grid grid-cols-[1.2fr_1.3fr_1.5fr_1.5fr] gap-4 px-6 py-3 border-b border-border bg-background/40">
-                <ColHeader label="Member" />
-                <ColHeader label="LinkedIn" />
-                <ColHeader label="Resume" />
-                <ColHeader label="Review" />
-              </div>
-              <ul className="divide-y divide-border">
-                {rows.map((row) => {
-                  const busy = workingId === row.userId;
-                  return (
-                    <li
-                      key={row.userId}
-                      className="grid md:grid-cols-[1.2fr_1.3fr_1.5fr_1.5fr] gap-4 px-6 py-5 items-start"
-                    >
-                      <div className="min-w-0 pt-1">
-                        <p className="text-sm truncate">
-                          {row.fullName || "Unnamed"}
-                        </p>
-                        <p className="text-[11px] font-mono text-muted-foreground truncate">
-                          {row.email || row.userId.slice(0, 8)}
-                        </p>
-                        <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
-                          Joined {formatDate(row.createdAt)}
-                        </p>
-                      </div>
-
-                      <div className="min-w-0 pt-1">
-                        {row.linkedinUrl ? (
-                          <a
-                            href={row.linkedinUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-gold hover:underline truncate max-w-full"
-                          >
-                            <Linkedin className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span className="truncate">{row.linkedinUrl}</span>
-                            <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
-                          </a>
-                        ) : (
-                          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                            None
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        {row.resume ? (
-                          <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-4 w-4 text-gold" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm truncate">
-                                {row.resume.name}
-                              </p>
-                              <p className="text-[11px] font-mono text-muted-foreground">
-                                {formatBytes(row.resume.size)} ·{" "}
-                                {formatDate(row.resume.uploadedAt)}
-                              </p>
-                            </div>
-                            <Button
-                              variant="outlineGold"
-                              size="sm"
-                              onClick={() => openResume(row.resume!.path)}
-                              disabled={openingPath === row.resume.path}
-                            >
-                              {openingPath === row.resume.path ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                "Open"
-                              )}
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                            None
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        <StatusBadge status={row.reviewStatus} />
-                        {row.reviewStatus === "rejected" && row.reviewReason && (
-                          <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-                            <span className="font-mono uppercase tracking-widest text-destructive/80">
-                              Reason:
-                            </span>{" "}
-                            {row.reviewReason}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {row.reviewStatus !== "accepted" && (
-                            <Button
-                              variant="gold"
-                              size="sm"
-                              onClick={() => handleAccept(row)}
-                              disabled={busy}
-                            >
-                              {busy ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Check className="h-4 w-4" />
-                              )}
-                              Accept
-                            </Button>
-                          )}
-                          {row.reviewStatus !== "rejected" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openReject(row)}
-                              disabled={busy}
-                            >
-                              <X className="h-4 w-4" />
-                              Reject
-                            </Button>
-                          )}
-                          {row.reviewStatus !== "pending" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleReset(row)}
-                              disabled={busy}
-                            >
-                              Reset
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+      {submissions.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm px-6 py-16 text-center">
+          <p className="text-muted-foreground">
+            No pending submissions. The queue is clear.
+          </p>
         </div>
-      </main>
+      ) : (
+        <ul className="space-y-3">
+          {submissions.map((sub) => {
+            const open = openId === sub.userId;
+            const busy = workingId === sub.userId;
+            return (
+              <li key={sub.userId}>
+                <article className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setOpenId(open ? null : sub.userId)}
+                    className="w-full px-5 py-4 flex items-center justify-between gap-4 text-left hover:bg-accent/30 transition-colors"
+                  >
+                    <span className="font-medium text-foreground truncate">
+                      {sub.fullName || sub.email || "Unnamed submission"}
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                        open ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
 
-      <Dialog
-        open={Boolean(rejectTarget)}
-        onOpenChange={(open) => {
-          if (!open) {
+                  {open && (
+                    <div className="px-5 pb-5 pt-1 border-t border-border/60 space-y-5">
+                      <DetailRow label="Email" value={sub.email || "—"} />
+                      <DetailRow
+                        label="Submitted"
+                        value={formatDate(sub.createdAt)}
+                      />
+
+                      {sub.linkedinUrl && (
+                        <DetailRow
+                          label="LinkedIn"
+                          value={
+                            <a
+                              href={sub.linkedinUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-primary hover:underline"
+                            >
+                              <Linkedin className="h-3.5 w-3.5" />
+                              {sub.linkedinUrl}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          }
+                        />
+                      )}
+
+                      {sub.resume && (
+                        <DetailRow
+                          label="Resume"
+                          value={
+                            <button
+                              type="button"
+                              onClick={() => openResume(sub.resume!.path)}
+                              disabled={openingPath === sub.resume.path}
+                              className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                              {sub.resume.name}
+                              <span className="text-muted-foreground">
+                                · {formatBytes(sub.resume.size)}
+                              </span>
+                              {openingPath === sub.resume.path ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <ExternalLink className="h-3 w-3" />
+                              )}
+                            </button>
+                          }
+                        />
+                      )}
+
+                      {sub.candidate.headline && (
+                        <DetailRow
+                          label="Headline"
+                          value={sub.candidate.headline}
+                        />
+                      )}
+                      {sub.candidate.bio && (
+                        <DetailRow
+                          label="Bio"
+                          value={
+                            <p className="whitespace-pre-wrap leading-relaxed text-foreground">
+                              {sub.candidate.bio}
+                            </p>
+                          }
+                        />
+                      )}
+                      {sub.candidate.skills.length > 0 && (
+                        <DetailRow
+                          label="Skills"
+                          value={
+                            <div className="flex flex-wrap gap-1.5">
+                              {sub.candidate.skills.map((s) => (
+                                <span
+                                  key={s}
+                                  className="px-2 py-0.5 rounded-md border border-border bg-muted/40 text-xs text-foreground"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          }
+                        />
+                      )}
+                      {sub.candidate.location && (
+                        <DetailRow
+                          label="Location"
+                          value={sub.candidate.location}
+                        />
+                      )}
+                      {sub.candidate.commitment && (
+                        <DetailRow
+                          label="Commitment"
+                          value={sub.candidate.commitment}
+                        />
+                      )}
+                      <DetailRow
+                        label="Open to work"
+                        value={sub.candidate.isOpenToWork ? "Yes" : "No"}
+                      />
+
+                      <div className="flex flex-wrap gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => handleAccept(sub)}
+                          disabled={busy}
+                          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                        >
+                          {busy ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
+                          Accept
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRejectTarget(sub);
+                            setRejectReason("");
+                          }}
+                          disabled={busy}
+                          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-50"
+                        >
+                          <X className="h-4 w-4" />
+                          Decline
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </article>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {rejectTarget && (
+        <RejectDialog
+          target={rejectTarget}
+          reason={rejectReason}
+          onReasonChange={setRejectReason}
+          onCancel={() => {
             setRejectTarget(null);
             setRejectReason("");
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject submission</DialogTitle>
-            <DialogDescription>
-              {rejectTarget?.fullName || rejectTarget?.email || "Member"} will see
-              this reason on their MyNet page.
-            </DialogDescription>
-          </DialogHeader>
-          <Textarea
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Be direct. What specifically is missing or insufficient?"
-            rows={5}
-            className="bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
-          />
-          <DialogFooter className="gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setRejectTarget(null);
-                setRejectReason("");
-              }}
-              disabled={workingId === rejectTarget?.userId}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="gold"
-              onClick={submitReject}
-              disabled={workingId === rejectTarget?.userId}
-            >
-              {workingId === rejectTarget?.userId ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : null}
-              Send rejection
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          }}
+          onSubmit={submitReject}
+          submitting={workingId === rejectTarget.userId}
+        />
+      )}
     </div>
   );
 };
 
-const StatusBadge = ({ status }: { status: ReviewStatus }) => {
-  const { label, className } = {
-    pending: {
-      label: "Pending",
-      className:
-        "border-gold/40 bg-gold/10 text-gold",
-    },
-    accepted: {
-      label: "Accepted",
-      className:
-        "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
-    },
-    rejected: {
-      label: "Rejected",
-      className:
-        "border-destructive/40 bg-destructive/10 text-destructive",
-    },
-  }[status];
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-sm border text-[11px] font-mono uppercase tracking-widest ${className}`}
-    >
-      {label}
-    </span>
-  );
-};
-
-const StatCard = ({
+const DetailRow = ({
   label,
   value,
-  icon: Icon,
 }: {
   label: string;
-  value: number;
-  icon: typeof Users;
+  value: React.ReactNode;
 }) => (
-  <div className="rounded-sm border border-border bg-card p-5 flex items-center gap-4">
-    <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-      <Icon className="h-4 w-4 text-gold" />
-    </div>
-    <div>
-      <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-        {label}
-      </p>
-      <p className="font-display text-2xl">{value}</p>
-    </div>
+  <div className="grid grid-cols-[120px_1fr] gap-4 text-sm">
+    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pt-0.5">
+      {label}
+    </span>
+    <div className="text-foreground min-w-0 break-words">{value}</div>
   </div>
 );
 
-const ColHeader = ({ label }: { label: string }) => (
-  <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-    {label}
-  </p>
+const RejectDialog = ({
+  target,
+  reason,
+  onReasonChange,
+  onCancel,
+  onSubmit,
+  submitting,
+}: {
+  target: PendingSubmission;
+  reason: string;
+  onReasonChange: (s: string) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+  submitting: boolean;
+}) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+    <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl">
+      <h3 className="font-display text-xl tracking-[-0.02em] mb-2">
+        Decline submission
+      </h3>
+      <p className="text-sm text-muted-foreground mb-5">
+        Give {target.fullName || target.email} a short reason. They'll see it
+        on their MyNet page.
+      </p>
+      <textarea
+        value={reason}
+        onChange={(e) => onReasonChange(e.target.value)}
+        rows={4}
+        placeholder="Why are you declining?"
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+      />
+      <div className="flex justify-end gap-3 mt-5">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={submitting}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          Decline
+        </button>
+      </div>
+    </div>
+  </div>
 );
 
 export default Admin;

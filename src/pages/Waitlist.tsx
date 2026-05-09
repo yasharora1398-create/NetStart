@@ -23,18 +23,25 @@ import {
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
+import { logPageView } from "@/lib/analytics";
 
 type Persona = "founder" | "builder";
 
 const Waitlist = () => {
   const { mode, toggle } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [persona, setPersona] = useState<Persona>("founder");
 
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out.");
   };
+
+  // Log one unique view per device per day. The migration's
+  // (device_id, day) primary key collapses repeat hits to a no-op.
+  useEffect(() => {
+    void logPageView();
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
@@ -58,6 +65,16 @@ const Waitlist = () => {
             Polln8
           </Link>
           <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
+            {/* Admin-only link to the dashboard. Hidden for everyone
+                else. The /admin page itself also gates on isAdmin. */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="text-sm font-medium text-primary transition-opacity hover:opacity-80"
+              >
+                Admin
+              </Link>
+            )}
             {/* If the user is already authenticated, the SignUp/SignIn
                 pages auto-redirect them back here, which feels like
                 the auth pages are broken. Show a "Sign out" link
