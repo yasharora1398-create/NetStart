@@ -176,8 +176,8 @@ const Waitlist = () => {
             </h1>
             <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
               {persona === "founder"
-                ? "Post your venture, set the equity, and meet vetted operators ranked by AI against what you're building. No talkers, no maybes."
-                : "Show your shipping history, find a project worth joining, and meet founders with real ventures and real equity. No spam, no maybes."}
+                ? "Post your venture, set the equity, and meet vetted operators ranked by AI against what you're building. Serious applicants only."
+                : "Show your shipping history, find a project worth joining, and meet founders with real ventures and real equity. Serious opportunities only."}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
@@ -204,10 +204,10 @@ const Waitlist = () => {
           </h2>
           <div className="grid md:grid-cols-3 gap-8 md:gap-10 max-w-5xl">
             <Paragraph>
-              Most founders try to find someone on Reddit or YC's matcher.
-              They get pitched loose concepts in exchange for full builds
-              and 5% equity. Engineers who ghost after one call. Forty
-              platforms, all dumping grounds.
+              Most founders search on Reddit or YC's matcher. They review
+              loose concepts in exchange for full builds and 5% equity, talk
+              to engineers who stop responding after one call, and rotate
+              through dozens of platforms with no signal.
             </Paragraph>
             <Paragraph>
               The people you'd actually want to build with aren't on those

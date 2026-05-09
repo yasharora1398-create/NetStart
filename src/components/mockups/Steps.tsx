@@ -13,9 +13,8 @@ import builder3 from "@/assets/builder-3.jpg";
 // CSS variable so the mockups swap colors automatically when the
 // user toggles light/dark via the sidebar. The constant names are
 // kept as a stable identifier for accent/ink/etc. across the file.
-const FONT = "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif";
-const FONT_MONO =
-  "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 const INK = "hsl(var(--foreground))";                       // text primary
 const INK_DIM = "hsl(var(--foreground) / 0.75)";
 const INK_MUTED = "hsl(var(--muted-foreground))";

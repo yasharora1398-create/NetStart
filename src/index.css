@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
+/* Helvetica everywhere. No Google Fonts dependency: every device
+   ships either Helvetica (macOS/iOS), an Arial clone (Windows/Android),
+   or one of the named substitutes below. Mono labels fall back to the
+   OS's system monospace so we keep the visual category without
+   pulling in a custom monospace face. */
 
 @tailwind base;
 @tailwind components;
@@ -147,7 +151,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-image: var(--gradient-spotlight);
     background-attachment: fixed;
     overflow-x: clip;
@@ -168,13 +172,12 @@
     z-index: 1;
   }
   .font-display {
-    font-family: 'Fraunces', 'ui-serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
-    font-feature-settings: "ss01";
   }
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
 }
 
@@ -553,7 +556,7 @@
     color: #FFFFFF;
     display: grid;
     place-items: center;
-    font-family: "Times New Roman", serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
     font-weight: 600;
     flex: none;

@@ -639,7 +639,7 @@ const LIAM: ProfileEntry = {
   pills: ["Full-time", "NYC", "Operator"],
   skills: ["Backend", "Distributed Sys", "Rust"],
   headline:
-    "Senior backend engineer, ex-Stripe payments. Want to bet on a venture with real customers and meaningful equity.",
+    "Senior backend engineer, ex-Stripe payments. Looking to join a venture with real customers and meaningful equity.",
 };
 const ZARA: ProfileEntry = {
   id: "zara",
