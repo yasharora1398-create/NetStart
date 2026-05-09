@@ -4,6 +4,7 @@ import { useInView } from "@/hooks/useInView";
 
 // ─── Types & data ────────────────────────────────────────────────
 type MockupKind = "review" | "matches" | "request" | "placeholder";
+export type Persona = "founder" | "builder";
 
 const WHY: {
   icon: typeof BadgeCheck;
@@ -75,12 +76,17 @@ const Reveal = ({
 // layout: row 1 text-left/mockup-right, row 2 text-right/mockup-left,
 // row 3 text-left/mockup-right. Mockup column hides on phones
 // (`hidden lg:flex`); text-only on small screens.
-const WhySection = () => {
+//
+// `persona` flips rows 2 and 3 to a founder POV: Matches deck shows
+// operators looking to join startups, Request mockup targets an
+// operator and the pitch reads as the founder writing to them.
+// Defaults to "builder" (the original deck content).
+const WhySection = ({ persona = "builder" }: { persona?: Persona }) => {
   return (
     <section className="mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28 space-y-20 md:space-y-28">
       {WHY.map((w, i) => (
         <Reveal key={w.title}>
-          <WhyRow entry={w} reverse={i % 2 === 1} />
+          <WhyRow entry={w} reverse={i % 2 === 1} persona={persona} />
         </Reveal>
       ))}
     </section>
@@ -97,9 +103,11 @@ export default WhySection;
 const WhyRow = ({
   entry,
   reverse,
+  persona,
 }: {
   entry: (typeof WHY)[number];
   reverse: boolean;
+  persona: Persona;
 }) => {
   const Icon = entry.icon;
   const textCol = (
@@ -141,8 +149,8 @@ const WhyRow = ({
       }`}
     >
       {entry.mockup === "review" && <ReviewCardMockup />}
-      {entry.mockup === "matches" && <MatchesCardMockup />}
-      {entry.mockup === "request" && <RequestCardMockup />}
+      {entry.mockup === "matches" && <MatchesCardMockup persona={persona} />}
+      {entry.mockup === "request" && <RequestCardMockup persona={persona} />}
       {entry.mockup === "placeholder" && <MockupPlaceholder />}
     </div>
   );
@@ -624,15 +632,94 @@ const RAVI: ProfileEntry = {
     "Solo founder. AI scheduling for outpatient clinics, $8K MRR after 4 months. Looking for a design partner to own the product surface.",
 };
 
-const MatchesCardMockup = () => {
+// Founder-side cards: people looking to JOIN startups (operators).
+const LIAM: ProfileEntry = {
+  id: "liam",
+  name: "Liam P.",
+  pills: ["Full-time", "NYC", "Operator"],
+  skills: ["Backend", "Distributed Sys", "Rust"],
+  headline:
+    "Senior backend engineer, ex-Stripe payments. Want to bet on a venture with real customers and meaningful equity.",
+};
+const ZARA: ProfileEntry = {
+  id: "zara",
+  name: "Zara R.",
+  pills: ["30 hrs/week", "Remote", "Operator"],
+  skills: ["Frontend", "Design", "Product"],
+  headline:
+    "Product designer with two YC launches. Looking to own the product surface for a small team that's already shipping.",
+};
+
+// Info-sheet content shown when the secondary card is right-swiped.
+// Builder POV: Maya (founder) shows her shipped projects.
+// Founder POV: Zara (operator) shows her recent shipped work.
+type DeckInfoSheet = {
+  name: string;
+  role: string;
+  sectionLabel: string;
+  rows: { name: string; tag: string; desc: string }[];
+  links: { icon: string; label: string; url: string }[];
+};
+const MAYA_INFO: DeckInfoSheet = {
+  name: "Maya C.",
+  role: "Founder · Remote · Full-time",
+  sectionLabel: "Currently building",
+  rows: [
+    {
+      name: "Pollenboard",
+      tag: "Shipped",
+      desc: "Design system for indie tooling — v2 live, used by 40+ small teams.",
+    },
+    {
+      name: "Toolspace",
+      tag: "Beta",
+      desc: "Async pairing app for solo founders. MVP shipped in March.",
+    },
+  ],
+  links: [
+    { icon: "in", label: "LinkedIn", url: "/in/mayac" },
+    { icon: "PDF", label: "Résumé", url: "maya-c.pdf" },
+  ],
+};
+const ZARA_INFO: DeckInfoSheet = {
+  name: "Zara R.",
+  role: "Operator · Remote · 30 hrs/week",
+  sectionLabel: "Recently shipped",
+  rows: [
+    {
+      name: "Linear Insights",
+      tag: "Shipped",
+      desc: "Lead designer on the analytics surface — used daily by 12K+ teams.",
+    },
+    {
+      name: "Glow",
+      tag: "Beta",
+      desc: "Solo project. Onboarding flow tooling for early-stage SaaS.",
+    },
+  ],
+  links: [
+    { icon: "in", label: "LinkedIn", url: "/in/zarar" },
+    { icon: "PDF", label: "Résumé", url: "zara-r.pdf" },
+  ],
+};
+
+const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
+  const isFounder = persona === "founder";
+  // Builder POV (original): cards are founders posting projects.
+  // Founder POV: cards are operators looking to join startups.
+  const primary = isFounder ? LIAM : RAVI;
+  const secondary = isFounder ? ZARA : MAYA;
+  const info = isFounder ? ZARA_INFO : MAYA_INFO;
+  const ctaLabel = isFounder ? "Request chat" : "Apply";
+
   const [phase, setPhase] = useState(0);
   const timers = useRef<number[]>([]);
   // 5 phases — two-person flow per the user's spec:
-  //   0 ravi rest          (first person shown)
-  //   1 ravi swipes left   (skip — translates + fades)
-  //   2 maya rest          (second person, now on top)
-  //   3 maya swipes right  (save — slides off)
-  //   4 info sheet up      (Maya's projects, LinkedIn, résumé)
+  //   0 primary rest          (first person shown)
+  //   1 primary swipes left   (skip — translates + fades)
+  //   2 secondary rest        (second person, now on top)
+  //   3 secondary swipes right (save — slides off)
+  //   4 info sheet up         (secondary's projects, LinkedIn, résumé)
   const phaseDur = useMemo(() => [1400, 900, 1400, 800, 2000], []);
 
   useEffect(() => {
@@ -655,10 +742,10 @@ const MatchesCardMockup = () => {
     };
   }, [phaseDur]);
 
-  const raviFront: Frontness = (
+  const primaryFront: Frontness = (
     ["top", "swiping-left", "gone-left", "gone-left", "gone-left"] as const
   )[phase];
-  const mayaFront: Frontness = (
+  const secondaryFront: Frontness = (
     ["behind1", "behind1", "top", "swiping-right", "gone-right"] as const
   )[phase];
 
@@ -668,7 +755,7 @@ const MatchesCardMockup = () => {
       : phase === 3
         ? "Saving — opening profile"
         : phase === 4
-          ? "Maya C. · profile open"
+          ? `${info.name} · profile open`
           : "Swipe right to save · left to pass";
 
   return (
@@ -746,8 +833,16 @@ const MatchesCardMockup = () => {
               swipes just fade out and right swipes hand off to the
               sheet. */}
           <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6">
-            <ProfileCardMockup profile={RAVI} frontness={raviFront} />
-            <ProfileCardMockup profile={MAYA} frontness={mayaFront} />
+            <ProfileCardMockup
+              profile={primary}
+              frontness={primaryFront}
+              ctaLabel={ctaLabel}
+            />
+            <ProfileCardMockup
+              profile={secondary}
+              frontness={secondaryFront}
+              ctaLabel={ctaLabel}
+            />
 
             {/* Info sheet — slides up from the bottom on phase 2 and
                 stays through the rest of Maya's stay. Hidden during
@@ -791,10 +886,10 @@ const MatchesCardMockup = () => {
                   className="font-semibold tracking-tight"
                   style={{ fontSize: 17 }}
                 >
-                  Maya C.
+                  {info.name}
                 </div>
                 <div className="opacity-70 mt-0.5" style={{ fontSize: 11 }}>
-                  Founder · Remote · Full-time
+                  {info.role}
                 </div>
               </div>
 
@@ -803,19 +898,17 @@ const MatchesCardMockup = () => {
                   className="font-mono uppercase mb-1.5 opacity-55"
                   style={{ fontSize: 9, letterSpacing: "0.12em" }}
                 >
-                  Currently building
+                  {info.sectionLabel}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <ProjectRow
-                    name="Pollenboard"
-                    tag="Shipped"
-                    desc="Design system for indie tooling — v2 live, used by 40+ small teams."
-                  />
-                  <ProjectRow
-                    name="Toolspace"
-                    tag="Beta"
-                    desc="Async pairing app for solo founders. MVP shipped in March."
-                  />
+                  {info.rows.map((r) => (
+                    <ProjectRow
+                      key={r.name}
+                      name={r.name}
+                      tag={r.tag}
+                      desc={r.desc}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -827,8 +920,14 @@ const MatchesCardMockup = () => {
                   Links
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <LinkRow icon="in" label="LinkedIn" url="/in/mayac" />
-                  <LinkRow icon="PDF" label="Résumé" url="maya-c.pdf" />
+                  {info.links.map((l) => (
+                    <LinkRow
+                      key={l.label}
+                      icon={l.icon}
+                      label={l.label}
+                      url={l.url}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -900,9 +999,11 @@ const MatchesCardMockup = () => {
 const ProfileCardMockup = ({
   profile,
   frontness,
+  ctaLabel,
 }: {
   profile: ProfileEntry;
   frontness: Frontness;
+  ctaLabel: string;
 }) => {
   const pos = FRONTNESS_STYLE[frontness];
   return (
@@ -1065,7 +1166,7 @@ const ProfileCardMockup = ({
         color: "hsl(var(--primary-foreground))",
       }}
     >
-      Apply
+      {ctaLabel}
       <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
         <path
           d="M3 7 L11 7 M7 3 L11 7 L7 11"
@@ -1175,18 +1276,46 @@ const LinkRow = ({
 //   2 sent      — sheet drops, status pill "Request sent" + glow
 //   3 accepted  — pill flips green "Accepted", solid ring on
 //                 avatar, Open chat reveals
-const REQUEST_PROFILE = {
+// Builder POV (original): pitch operator → founder asking to join.
+const REQUEST_PROFILE_BUILDER = {
   monogram: "JK",
   name: "Jamie K.",
+  firstName: "Jamie",
   pills: ["Full-time", "SF", "Founder"],
   skills: ["Product", "Sales", "Fundraising"],
   headline:
     "Building a B2B platform for restaurant operators. $40K MRR, looking for a technical cofounder to lead engineering.",
 };
-const REQUEST_PITCH =
+const REQUEST_PITCH_BUILDER =
   "I've shipped two B2B products in restaurant tech. Saw your MRR growth — I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";
 
-const RequestCardMockup = () => {
+// Founder POV: target is an operator. The "pitch" reads as the
+// founder writing to that operator — the first chat message rather
+// than a self-pitch.
+const REQUEST_PROFILE_FOUNDER = {
+  monogram: "TP",
+  name: "Taylor P.",
+  firstName: "Taylor",
+  pills: ["Full-time", "Remote", "Operator"],
+  skills: ["Backend", "Devtools", "Postgres"],
+  headline:
+    "Senior engineer, ex-Stripe payments and Linear. Looking for a venture with real users and meaningful equity.",
+};
+const REQUEST_PITCH_FOUNDER =
+  "I'm building a B2B clinic-ops platform — $8K MRR, real users, technical surface that needs an owner. Your devtools work looks like exactly what I need next to me. Free to chat this week?";
+
+const RequestCardMockup = ({ persona }: { persona: Persona }) => {
+  const isFounder = persona === "founder";
+  const profile = isFounder ? REQUEST_PROFILE_FOUNDER : REQUEST_PROFILE_BUILDER;
+  const pitch = isFounder ? REQUEST_PITCH_FOUNDER : REQUEST_PITCH_BUILDER;
+  const ctaLabel = isFounder ? "Request chat" : "Apply";
+  const placeholder = isFounder
+    ? `Tell ${profile.firstName} why they'd be a great fit for what you're building…`
+    : `Tell ${profile.firstName} why you'd be the right person to build this with…`;
+  const composerLead = isFounder
+    ? "First message. First impression."
+    : "One pitch. One shot.";
+
   const [phase, setPhase] = useState(0);
   const [typed, setTyped] = useState("");
   const timers = useRef<number[]>([]);
@@ -1206,13 +1335,13 @@ const RequestCardMockup = () => {
       // Typing animation during phase 1.
       if (p === 1) {
         setTyped("");
-        const step = Math.max(18, lens[1] / Math.max(1, REQUEST_PITCH.length + 6));
+        const step = Math.max(18, lens[1] / Math.max(1, pitch.length + 6));
         let i = 0;
         const typer = () => {
           if (!alive) return;
           i += 1;
-          setTyped(REQUEST_PITCH.slice(0, i));
-          if (i < REQUEST_PITCH.length) {
+          setTyped(pitch.slice(0, i));
+          if (i < pitch.length) {
             const t = window.setTimeout(typer, step);
             timers.current.push(t);
           }
@@ -1233,9 +1362,9 @@ const RequestCardMockup = () => {
       timers.current.forEach((id) => window.clearTimeout(id));
       timers.current = [];
     };
-  }, []);
+  }, [pitch]);
 
-  const sentTap = phase === 1 && typed.length === REQUEST_PITCH.length;
+  const sentTap = phase === 1 && typed.length === pitch.length;
 
   return (
     <div
@@ -1337,18 +1466,18 @@ const RequestCardMockup = () => {
                     transition: "box-shadow 280ms ease",
                   }}
                 >
-                  {REQUEST_PROFILE.monogram}
+                  {profile.monogram}
                 </div>
                 <div
                   className="font-semibold tracking-tight"
                   style={{ fontSize: 16 }}
                 >
-                  {REQUEST_PROFILE.name}
+                  {profile.name}
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-1.5">
-                {REQUEST_PROFILE.pills.map((p) => (
+                {profile.pills.map((p) => (
                   <span
                     key={p}
                     className="font-medium leading-[1.5]"
@@ -1366,7 +1495,7 @@ const RequestCardMockup = () => {
                 ))}
               </div>
               <div className="flex flex-wrap gap-1.5 -mt-1">
-                {REQUEST_PROFILE.skills.map((s) => (
+                {profile.skills.map((s) => (
                   <span
                     key={s}
                     className="font-medium leading-[1.5]"
@@ -1396,7 +1525,7 @@ const RequestCardMockup = () => {
                   overflow: "hidden",
                 }}
               >
-                {REQUEST_PROFILE.headline}
+                {profile.headline}
               </div>
 
               {/* CTA / Status — same physical slot, content swaps per phase */}
@@ -1416,7 +1545,7 @@ const RequestCardMockup = () => {
                       color: "hsl(var(--primary-foreground))",
                     }}
                   >
-                    Apply
+                    {ctaLabel}
                   </button>
                 )}
                 {phase === 1 && (
@@ -1433,7 +1562,7 @@ const RequestCardMockup = () => {
                       transition: "transform 120ms ease",
                     }}
                   >
-                    Apply
+                    {ctaLabel}
                   </button>
                 )}
                 {phase === 2 && (
@@ -1489,7 +1618,7 @@ const RequestCardMockup = () => {
                     marginTop: 2,
                   }}
                 >
-                  You&apos;ll get notified when Jamie responds.
+                  You&apos;ll get notified when {profile.firstName} responds.
                 </div>
               )}
               {phase === 3 && (
@@ -1498,7 +1627,7 @@ const RequestCardMockup = () => {
                     className="text-center font-medium"
                     style={{ fontSize: 12 }}
                   >
-                    Mutual contact. Message Jamie now.
+                    Mutual contact. Message {profile.firstName} now.
                   </div>
                   <button
                     type="button"
@@ -1560,7 +1689,7 @@ const RequestCardMockup = () => {
                   color: "hsl(var(--muted-foreground))",
                 }}
               >
-                One pitch. One shot.
+                {composerLead}
               </div>
               <div
                 className="flex flex-col gap-1.5"
@@ -1581,11 +1710,9 @@ const RequestCardMockup = () => {
                   style={{ fontSize: 12.5, minHeight: 64 }}
                 >
                   {typed || (
-                    <span className="opacity-50">
-                      Tell Jamie why you&apos;d be the right person to build this with…
-                    </span>
+                    <span className="opacity-50">{placeholder}</span>
                   )}
-                  {phase === 1 && typed.length < REQUEST_PITCH.length && (
+                  {phase === 1 && typed.length < pitch.length && (
                     <span className="rq-caret" />
                   )}
                 </div>

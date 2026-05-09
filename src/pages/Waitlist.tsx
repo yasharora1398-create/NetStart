@@ -275,7 +275,7 @@ const Waitlist = () => {
 
         {/* WHY — three reasons in a zig-zag layout. Animated mockups
             visible on lg+ only; phones see the text in a frosted card. */}
-        <WhySection />
+        <WhySection persona={persona} />
 
         {/* WHO IT'S FOR --------------------------------------------- */}
         <Section eyebrow="Who it's for">
