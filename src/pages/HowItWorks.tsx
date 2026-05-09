@@ -106,15 +106,14 @@ const HowItWorks = () => {
 
   return (
     <div
-      className="min-h-screen bg-background text-foreground"
-      style={{ overflowX: "clip" }}
+      className="min-h-screen w-full max-w-full overflow-x-hidden bg-background text-foreground"
     >
       {SHOW_SIDEBAR && <Sidebar />}
       <div
-        className="transition-[padding] duration-[220ms] ease-out"
-        style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
+        className={SHOW_SIDEBAR ? "transition-[padding] duration-[220ms] ease-out" : ""}
+        style={SHOW_SIDEBAR ? { paddingLeft: "var(--sidebar-width, 0px)" } : undefined}
       >
-      <div className="max-w-5xl mx-auto px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
+      <div className="mx-auto w-full max-w-5xl px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
         <Reveal>
           <div className="text-center lg:text-left">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
@@ -155,7 +154,7 @@ const HowItWorks = () => {
                     </p>
                   </div>
                   <div
-                    className={`relative w-full overflow-x-clip ${reverse ? "lg:order-1" : ""}`}
+                    className={`relative w-full max-w-full overflow-hidden ${reverse ? "lg:order-1" : ""}`}
                   >
                     <div className="relative left-1/2 w-fit -translate-x-1/2">
                       {s.visual}
