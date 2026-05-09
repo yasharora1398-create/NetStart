@@ -143,14 +143,14 @@
   }
   html {
     font-feature-settings: "ss01", "cv11";
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
     background-image: var(--gradient-spotlight);
     background-attachment: fixed;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   /* faint paper grain across the whole page */
   body::after {

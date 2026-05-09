@@ -44,23 +44,51 @@ const Waitlist = () => {
     void logPageView();
   }, []);
 
+  // Shrink the sticky nav once the user has scrolled past the hero
+  // so it becomes a thin glass strip instead of the full-height bar.
+  // Threshold is generous so a small bounce doesn't toggle it.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
       {/* Soft blurred backdrop — a single forest-green orb that the
           hero copy floats over. Pure decoration, behind everything. */}
       <BlurredBackdrop />
 
-      {/* Sticky top nav */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border/50">
-        <div className="mx-auto max-w-6xl px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
+      {/* Sticky top nav — follows the scroll, collapses to a thinner
+          strip once the user has moved past the hero. */}
+      <header
+        className={`sticky top-0 z-40 backdrop-blur-md border-b transition-[background-color,border-color,box-shadow] duration-200 ${
+          scrolled
+            ? "bg-background/85 border-border/70 shadow-sm"
+            : "bg-background/70 border-border/50"
+        }`}
+      >
+        <div
+          className={`mx-auto max-w-6xl px-5 md:px-8 flex items-center justify-between transition-[height] duration-200 ${
+            scrolled ? "h-12 md:h-14" : "h-16 md:h-20"
+          }`}
+        >
           <Link
             to="/"
-            className="flex items-center gap-2 font-display text-xl md:text-[22px] tracking-[-0.02em] text-foreground"
+            className={`flex items-center gap-2 font-display tracking-[-0.02em] text-foreground transition-[font-size] duration-200 ${
+              scrolled ? "text-base md:text-lg" : "text-xl md:text-[22px]"
+            }`}
           >
             <img
               src="/polln8-logo.png"
               alt=""
-              className="h-11 w-11 md:h-14 md:w-14 object-contain"
+              className={`object-contain transition-[width,height] duration-200 ${
+                scrolled
+                  ? "h-7 w-7 md:h-9 md:w-9"
+                  : "h-11 w-11 md:h-14 md:w-14"
+              }`}
               draggable={false}
             />
             Polln8
