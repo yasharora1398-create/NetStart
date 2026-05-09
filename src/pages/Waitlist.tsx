@@ -44,12 +44,24 @@ const Waitlist = () => {
     void logPageView();
   }, []);
 
-  // Shrink the sticky nav once the user has scrolled past the hero
-  // so it becomes a thin glass strip instead of the full-height bar.
-  // Threshold is generous so a small bounce doesn't toggle it.
+  // Shrink the sticky nav once the user has scrolled past the hero,
+  // expand it back when they're near the top. The two thresholds
+  // create a deadband (hysteresis) so the flicker loop can't trigger:
+  // when the nav collapses, content reflows up by ~16-24px and
+  // scrollY drops; with a single threshold that immediately re-
+  // expands the nav, which pushes content back, etc. The 60px gap
+  // between thresholds (140 collapse / 80 expand) means a single
+  // short scroll can't cross both directions in one frame.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => {
+      setScrolled((prev) => {
+        const y = window.scrollY;
+        if (!prev && y > 140) return true;
+        if (prev && y < 80) return false;
+        return prev;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
