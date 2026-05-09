@@ -148,7 +148,13 @@ const WhyRow = ({
   );
 
   return (
-    <article className="grid lg:grid-cols-[38fr_62fr] gap-10 lg:gap-16 items-center">
+    <article
+      className={`grid gap-10 lg:gap-16 items-center ${
+        reverse
+          ? "lg:grid-cols-[62fr_38fr]"
+          : "lg:grid-cols-[38fr_62fr]"
+      }`}
+    >
       {textCol}
       {mockupCol}
     </article>
