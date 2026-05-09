@@ -698,7 +698,7 @@ const Intro = ({
         </div>
       )}
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14 text-left">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14 max-w-4xl mx-auto text-left">
         {steps.map((s) => (
           <div
             key={s.num}
