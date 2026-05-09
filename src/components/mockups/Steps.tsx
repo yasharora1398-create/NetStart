@@ -1,5 +1,5 @@
 /**
- * Step mockups — implementations of the Claude Design HTML prototypes
+ * Step mockups - implementations of the Claude Design HTML prototypes
  * for the How it works page (Signup, Credentials, Accepted, Match,
  * Chat). Each component is self-contained: brings its own card
  * background, rust accent, and Inter typography matching the warm
@@ -9,7 +9,7 @@ import builder1 from "@/assets/builder-1.jpg";
 import builder2 from "@/assets/builder-2.jpg";
 import builder3 from "@/assets/builder-3.jpg";
 
-// Shared design tokens — now theme-aware. Each token maps to a global
+// Shared design tokens - now theme-aware. Each token maps to a global
 // CSS variable so the mockups swap colors automatically when the
 // user toggles light/dark via the sidebar. The constant names are
 // kept as a stable identifier for accent/ink/etc. across the file.
@@ -33,12 +33,12 @@ const MARIGOLD = "hsl(var(--primary))";
 const GREEN = "hsl(var(--primary))";                        // semantic green
 const GREEN_GLOW = "hsl(var(--primary) / 0.30)";
 
-// Subtle photo tint — neutral now (sepia/orange tint removed when the
+// Subtle photo tint - neutral now (sepia/orange tint removed when the
 // palette flipped from rust to forest green). Just a hair desaturated
 // so portraits sit against the page without screaming.
 const photoFilter = "saturate(0.95)";
 
-// Frosted-glass base — semi-transparent body picks up the page bg
+// Frosted-glass base - semi-transparent body picks up the page bg
 // through backdrop-filter. Border + bevel use foreground-tinted
 // alphas so the surface reads frosted on light AND dark themes
 // instead of glowing bright-white in dark mode.
@@ -420,7 +420,7 @@ export const StepAccepted = () => (
         marginBottom: 28,
       }}
     >
-      {/* outer soft glow — marigold */}
+      {/* outer soft glow - marigold */}
       <span
         aria-hidden
         style={{
@@ -445,7 +445,7 @@ export const StepAccepted = () => (
           zIndex: 0,
         }}
       />
-      {/* badge — rust gradient */}
+      {/* badge - rust gradient */}
       <div
         style={{
           position: "relative",
@@ -527,10 +527,10 @@ export const StepAccepted = () => (
 // ============= 4. MATCH ==============================================
 
 // Two optional knobs:
-//   • `portraits` — override the defaults (builder-1/2/3) with a
+//   • `portraits` - override the defaults (builder-1/2/3) with a
 //     specific trio of image URLs. Used when you want different
 //     people on the marketing surface.
-//   • `anonymous` — render the deck with silhouette fallbacks instead
+//   • `anonymous` - render the deck with silhouette fallbacks instead
 //     of portraits. Used on the waitlist hero so the marketing page
 //     doesn't promise specific real people.
 type StepMatchProps = {
@@ -558,7 +558,7 @@ export const StepMatch = ({
         paddingBottom: 18,
       }}
     >
-      {/* Deck — 3 cards, the back two offset */}
+      {/* Deck - 3 cards, the back two offset */}
       <div
         style={{
           position: "relative",
@@ -618,7 +618,7 @@ const DeckCard = ({
   tags,
 }: {
   position: "front" | "back-1" | "back-2";
-  // Optional — when omitted, the card renders an anonymous silhouette
+  // Optional - when omitted, the card renders an anonymous silhouette
   // instead of a real portrait. Used by the waitlist hero so the
   // marketing page doesn't promise specific people.
   portrait?: string;
@@ -714,7 +714,7 @@ const DeckCard = ({
             }}
           />
         ) : (
-          // Anonymous silhouette fallback — neutral grey field with a
+          // Anonymous silhouette fallback - neutral grey field with a
           // generic avatar shape. Same dimensions as the photo, so the
           // gradient overlay + name pill below keep working unchanged.
           <div

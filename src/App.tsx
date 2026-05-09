@@ -59,7 +59,7 @@ const App = () => (
           <SidebarProvider>
             <EmailVerifyBanner />
           <Routes>
-            {/* Public routes — accessible in both dev and prod. */}
+            {/* Public routes - accessible in both dev and prod. */}
             <Route path="/" element={<HomePage />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
@@ -69,17 +69,17 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
 
-            {/* Public marketing detail page — linked from the waitlist
+            {/* Public marketing detail page - linked from the waitlist
                 "How Polln8 works" section. Renders without sidebar. */}
             <Route path="/how" element={<HowItWorks />} />
 
-            {/* Hidden post-verification landing — reachable only by
+            {/* Hidden post-verification landing - reachable only by
                 URL or by Supabase's confirmation redirect. Not linked
                 from any nav. Public so unauthenticated users coming
                 back from the email link can see it. */}
             <Route path="/authenticated" element={<Authenticated />} />
 
-            {/* Internal product routes — wrapped with <Internal> so
+            {/* Internal product routes - wrapped with <Internal> so
                 they redirect to "/" in production. In dev they work
                 exactly as before.
                 Exception: /mynet is public so the post-signup flow

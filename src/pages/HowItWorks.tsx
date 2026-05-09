@@ -181,7 +181,7 @@ const HowItWorks = () => {
           </div>
         </Reveal>
 
-        {/* Back to homepage — primary pill, centered. */}
+        {/* Back to homepage - primary pill, centered. */}
         <div className="mt-16 flex justify-center">
           <Link
             to="/"

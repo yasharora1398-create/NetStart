@@ -86,7 +86,7 @@ export const MyNetDashboard = ({
 
   return (
     <>
-      {/* Header — Edit toggle now lives up top so the user can flip
+      {/* Header - Edit toggle now lives up top so the user can flip
           into edit mode the moment they land on the page, instead of
           scrolling to the bottom to find the button. */}
       <header className="mb-10 flex flex-wrap items-start justify-between gap-6">
@@ -113,7 +113,7 @@ export const MyNetDashboard = ({
             {editing
               ? "Editing. Make your changes and click Done."
               : isPending
-                ? "Submitted. We'll review your credentials shortly — feel free to keep building below."
+                ? "Submitted. We'll review your credentials shortly - feel free to keep building below."
                 : "Everything you've set up, at a glance."}
           </p>
         </div>
@@ -140,7 +140,7 @@ export const MyNetDashboard = ({
         </div>
       </header>
 
-      {/* CREDENTIALS — always shown */}
+      {/* CREDENTIALS - always shown */}
       <Section title="Credentials" eyebrow="01">
         {editing ? (
           <ProfileCard profile={profile} onSubmit={onSubmitProfile} />
@@ -149,7 +149,7 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
-      {/* LOOKING — always shown. Empty candidate gets the editor by
+      {/* LOOKING - always shown. Empty candidate gets the editor by
           default while editing, or a "tell us about you" prompt
           when read-only. */}
       <Section
@@ -189,7 +189,7 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
-      {/* BUILDING — always shown. Empty state surfaces a "New project"
+      {/* BUILDING - always shown. Empty state surfaces a "New project"
           card so the user knows the section is even here. Pending users
           can preview the surface but the action buttons are gated until
           their submission is approved. */}
@@ -263,7 +263,7 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
-      {/* APPLICATIONS — both panels always shown. They render their
+      {/* APPLICATIONS - both panels always shown. They render their
           own empty states internally. */}
       <Section
         title="My applications"

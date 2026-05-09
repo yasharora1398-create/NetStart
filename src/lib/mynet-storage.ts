@@ -976,7 +976,7 @@ export const listNotifications = async (
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) {
-      // Migration 0011 hasn't been applied yet — fall back to the
+      // Migration 0011 hasn't been applied yet - fall back to the
       // pre-migration schema so the page still loads.
       useFromUserId = false;
     } else {

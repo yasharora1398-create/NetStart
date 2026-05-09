@@ -1,11 +1,11 @@
 /**
- * Admin dashboard — gated by useAuth().isAdmin.
+ * Admin dashboard - gated by useAuth().isAdmin.
  *
  * Two tabs:
- *   • Overview   — visitor analytics (24h/7d/30d unique views) + line
+ *   • Overview   - visitor analytics (24h/7d/30d unique views) + line
  *                  graph of last 30 days, plus a table of all
  *                  signups with their MyNet completion status.
- *   • Review queue — pending MyNet submissions as collapsible cards.
+ *   • Review queue - pending MyNet submissions as collapsible cards.
  *                    Click a name to expand the full submitted info,
  *                    then accept or decline.
  *
@@ -292,10 +292,10 @@ const OverviewTab = () => {
                       className="border-b border-border/60 last:border-b-0"
                     >
                       <td className="px-5 py-3 text-foreground">
-                        {row.fullName || "—"}
+                        {row.fullName || "-"}
                       </td>
                       <td className="px-5 py-3 text-muted-foreground">
-                        {row.email || "—"}
+                        {row.email || "-"}
                       </td>
                       <td className="px-5 py-3 text-muted-foreground">
                         {formatDate(row.createdAt)}
@@ -492,7 +492,7 @@ const ReviewTab = () => {
 
                   {open && (
                     <div className="px-5 pb-5 pt-1 border-t border-border/60 space-y-5">
-                      <DetailRow label="Email" value={sub.email || "—"} />
+                      <DetailRow label="Email" value={sub.email || "-"} />
                       <DetailRow
                         label="Submitted"
                         value={formatDate(sub.createdAt)}

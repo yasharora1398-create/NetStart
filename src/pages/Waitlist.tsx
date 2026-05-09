@@ -1,5 +1,5 @@
 /**
- * Polln8 marketing waitlist landing — served at "/" in production
+ * Polln8 marketing waitlist landing - served at "/" in production
  * (Vercel) only. On localhost the original Index page renders instead
  * so the live product keeps iterating untouched. The routing switch
  * lives in App.tsx (`import.meta.env.PROD`).
@@ -57,11 +57,11 @@ const Waitlist = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
-      {/* Soft blurred backdrop — a single forest-green orb that the
+      {/* Soft blurred backdrop - a single forest-green orb that the
           hero copy floats over. Pure decoration, behind everything. */}
       <BlurredBackdrop />
 
-      {/* Sticky top nav — follows the scroll, collapses to a thinner
+      {/* Sticky top nav - follows the scroll, collapses to a thinner
           strip once the user has moved past the hero. */}
       <header
         className={`sticky top-0 z-40 backdrop-blur-md border-b transition-[background-color,border-color,box-shadow] duration-200 ${
@@ -150,7 +150,7 @@ const Waitlist = () => {
         {/* HERO ----------------------------------------------------- */}
         <section className="mx-auto max-w-6xl px-5 md:px-8 pt-16 md:pt-24 pb-20 md:pb-32">
           <div>
-            {/* Persona toggle — flips the hero copy for whichever
+            {/* Persona toggle - flips the hero copy for whichever
                 side of the network the visitor is on. */}
             <PersonaToggle persona={persona} onChange={setPersona} />
 
@@ -261,7 +261,7 @@ const Waitlist = () => {
             />
           </div>
 
-          {/* Deeper dive — links to the full /how page. */}
+          {/* Deeper dive - links to the full /how page. */}
           <div className="mt-12 md:mt-16">
             <Link
               to="/how"
@@ -273,7 +273,7 @@ const Waitlist = () => {
           </div>
         </Section>
 
-        {/* WHY — three reasons in a zig-zag layout. Animated mockups
+        {/* WHY - three reasons in a zig-zag layout. Animated mockups
             visible on lg+ only; phones see the text in a frosted card. */}
         <WhySection persona={persona} />
 
@@ -610,7 +610,7 @@ const BlurredBackdrop = () => (
     className="pointer-events-none fixed inset-0 z-0"
     style={{ filter: "blur(80px)" }}
   >
-    {/* Top-right primary orb — dimmed so the homepage reads as black
+    {/* Top-right primary orb - dimmed so the homepage reads as black
         first, green-accented second. */}
     <div
       className="absolute -top-32 -right-32 h-[480px] w-[480px] rounded-full opacity-[0.10] dark:opacity-[0.10]"

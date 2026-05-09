@@ -1,5 +1,5 @@
 /**
- * Post-signup landing — shown after a user submits the SignUp form.
+ * Post-signup landing - shown after a user submits the SignUp form.
  * Replaces the old toast with a dedicated page that:
  *   • tells them the email was sent
  *   • shows the address it went to so they don't second-guess it

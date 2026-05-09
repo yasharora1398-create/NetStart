@@ -6,8 +6,8 @@
 
 @layer base {
   :root {
-    /* Vettd — single-accent forest green on warm off-white.
-       Token names are kept for compatibility — `--gold` now means
+    /* Vettd - single-accent forest green on warm off-white.
+       Token names are kept for compatibility - `--gold` now means
        forest green, `--accent` means the soft green-tinted bg, etc. */
 
     /* Page surfaces */
@@ -20,7 +20,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 132 14% 7%;
 
-    /* Accent — forest green */
+    /* Accent - forest green */
     --primary: 146 51% 25%;              /* #1F5F3E */
     --primary-foreground: 0 0% 100%;
 
@@ -45,7 +45,7 @@
 
     --radius: 0.5rem;
 
-    /* Brand legacy tokens — re-pointed at forest green */
+    /* Brand legacy tokens - re-pointed at forest green */
     --gold: 146 51% 25%;                 /* primary */
     --gold-deep: 147 53% 19%;            /* #174A30 hover */
     --gold-glow: 133 18% 92%;            /* #E8F0EA accent subtle */
@@ -74,7 +74,7 @@
     --sidebar-ring: 146 51% 25%;
   }
 
-  /* Polln8 dark mode — near-pure-black base with a very faint forest
+  /* Polln8 dark mode - near-pure-black base with a very faint forest
      tint. Cards and dividers stay close to neutral so the green
      accent stays a punctuation, not the dominant chroma. The glow
      is intentionally restrained: the brand reads as composed and
@@ -116,13 +116,13 @@
     --gold-glow: 142 15% 8%;
 
     --gradient-gold: linear-gradient(135deg, hsl(142 28% 42%), hsl(144 30% 48%));
-    /* Spotlight on body background — much more restrained now (was
+    /* Spotlight on body background - much more restrained now (was
        0.12). Looks like a faint ambient lift, not a beacon. */
     --gradient-spotlight: radial-gradient(ellipse at top, hsl(142 28% 42% / 0.04), transparent 60%);
 
     --shadow-elite: 0 4px 16px rgba(0, 0, 0, 0.7);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
-    /* Button glow — tighter spread + lower alpha (was 32px / 0.5).
+    /* Button glow - tighter spread + lower alpha (was 32px / 0.5).
        Reads as a subtle lift rather than a green halo. */
     --shadow-glow: 0 0 14px hsl(142 28% 42% / 0.22);
 
@@ -198,7 +198,7 @@
     mix-blend-mode: multiply;
   }
 
-  /* Warm liquid glass — semi-transparent frosted surface that floats
+  /* Warm liquid glass - semi-transparent frosted surface that floats
      ~1mm above the cream page. The body picks up whatever's behind it
      via backdrop-filter. The bevel comes from inset highlights (bright
      top edge, soft bottom shadow). The float comes from a layered drop
@@ -211,11 +211,11 @@
     -webkit-backdrop-filter: blur(24px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow:
-      /* The 1mm float — tight contact shadow, then a wider soft drop. */
+      /* The 1mm float - tight contact shadow, then a wider soft drop. */
       0 1px 2px rgba(21, 23, 26, 0.04),
       0 4px 12px rgba(21, 23, 26, 0.06),
       0 16px 40px -8px rgba(21, 23, 26, 0.10),
-      /* Frosted bevel — bright top edge, faint dark bottom. */
+      /* Frosted bevel - bright top edge, faint dark bottom. */
       inset 0 1px 0 rgba(255, 255, 255, 0.85),
       inset 0 -1px 0 rgba(199, 184, 158, 0.25),
       inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
@@ -231,7 +231,7 @@
       inset 0 0 0 0.5px rgba(255, 255, 255, 0.55);
   }
 
-  /* Dark-mode frosted glass — same geometry, swapped to a dark
+  /* Dark-mode frosted glass - same geometry, swapped to a dark
      translucent surface so the .glass cards on the localhost Index
      page (Why-section) read as smoked-glass-on-black instead of
      bright cream-on-black. */
@@ -255,7 +255,7 @@
       inset 0 -1px 0 rgba(0, 0, 0, 0.4),
       inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
   }
-  /* Rim hairlines — the cream/marigold gradient set in light mode
+  /* Rim hairlines - the cream/marigold gradient set in light mode
      would read as warm tan smudges on a black background. Replace
      with neutral white + a faint sage hint so the rim still shimmers
      on scroll without breaking the dark palette. */
@@ -293,7 +293,7 @@
       100% 0 / 1px 250% no-repeat;
   }
 
-  /* LIQUID GLASS RIM — a single hairline strip on each edge that pans
+  /* LIQUID GLASS RIM - a single hairline strip on each edge that pans
      with --scroll-progress, giving the rim the "liquid" feeling. The
      warm palette uses cream highlights with marigold and sage chroma
      instead of the original cyan/magenta. Each gradient is 250% wide
@@ -307,7 +307,7 @@
     z-index: 0;
 
     background:
-      /* TOP edge — bright cream-to-marigold rim, the floating highlight */
+      /* TOP edge - bright cream-to-marigold rim, the floating highlight */
       linear-gradient(
         90deg,
         rgba(255, 255, 255, 0.30),
@@ -319,7 +319,7 @@
       )
       0 0 / 250% 1px no-repeat,
 
-      /* BOTTOM edge — faint warm-brown rim */
+      /* BOTTOM edge - faint warm-brown rim */
       linear-gradient(
         90deg,
         rgba(199, 184, 158, 0.20),
@@ -330,7 +330,7 @@
       )
       0 100% / 250% 1px no-repeat,
 
-      /* LEFT edge — subtle vertical chromatic strip */
+      /* LEFT edge - subtle vertical chromatic strip */
       linear-gradient(
         180deg,
         rgba(255, 255, 255, 0.65),
@@ -341,7 +341,7 @@
       )
       0 0 / 1px 250% no-repeat,
 
-      /* RIGHT edge — opposite phase so the two sides drift toward each other */
+      /* RIGHT edge - opposite phase so the two sides drift toward each other */
       linear-gradient(
         180deg,
         rgba(168, 181, 158, 0.30),
@@ -361,7 +361,7 @@
     transition: background-position 100ms linear;
   }
 
-  /* Outlined / stroke text — now uses rust */
+  /* Outlined / stroke text - now uses rust */
   .text-stroke {
     -webkit-text-stroke: 1.5px hsl(var(--primary) / 0.85);
     color: transparent;
@@ -387,7 +387,7 @@
     filter: blur(0);
   }
 
-  /* GLASS-SIDEBAR — exact spec from Sidebar.html design handoff.
+  /* GLASS-SIDEBAR - exact spec from Sidebar.html design handoff.
      Frosted-glass panel with a sub-pixel chromatic edge that hugs the
      22px-rounded perimeter. Sits 12px in from top/left/bottom; 224px
      wide. Body is a translucent white→sand gradient with strong blur
@@ -422,7 +422,7 @@
        inherit the same transition for a synchronized motion. */
     transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  /* Collapsed state — icon-only rail. The chevron toggle button on
+  /* Collapsed state - icon-only rail. The chevron toggle button on
      the brand row flips the .is-collapsed class which drives every
      visual change below (label hiding, icon centering, etc.). */
   .glass-sidebar.is-collapsed {
@@ -471,7 +471,7 @@
     padding: 8px 0 0;
   }
 
-  /* Toggle button — small chevron pinned to the top-right of the
+  /* Toggle button - small chevron pinned to the top-right of the
      sidebar. In collapsed mode it stays in the same corner, just
      against the narrower edge. */
   .glass-sidebar .gs-toggle {
@@ -711,7 +711,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
-  /* Dark mode overrides — keeps the same frosted geometry but flips
+  /* Dark mode overrides - keeps the same frosted geometry but flips
      the surface, text, and rim colors to the Vettd dark palette. */
   .dark .glass-sidebar {
     background:
@@ -809,7 +809,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
-  /* Polln8 Review Card mockup animations — used by the
+  /* Polln8 Review Card mockup animations - used by the
      ReviewCardMockup on the localhost homepage Why-section. The
      mockup auto-loops through rest -> reviewing -> approved so the
      visitor can see the manual-review flow without interaction. */
@@ -844,7 +844,7 @@
     100% { opacity: 0;   transform: translateY(var(--drift))    scale(1); }
   }
 
-  /* Polln8 Matches Card mockup — auto-looping deck demo. The card's
+  /* Polln8 Matches Card mockup - auto-looping deck demo. The card's
      transform/opacity is driven by inline style (set in React from a
      frontness lookup), and this class supplies the transition + GPU
      compositor hints so the inline-style change animates smoothly
@@ -873,7 +873,7 @@
     transform: translateY(0);
   }
 
-  /* Polln8 Request Card mockup — auto-loops through:
+  /* Polln8 Request Card mockup - auto-loops through:
        0 rest      : Apply CTA pulses
        1 composer  : sheet slides up, pitch types in
        2 sent      : sheet drops, status pill + soft glow on card
@@ -914,7 +914,7 @@
     50% { opacity: 0; }
   }
 
-  /* Hawk-moth mascot animations — used wherever the moth is shown. */
+  /* Hawk-moth mascot animations - used wherever the moth is shown. */
   .moth-hover {
     animation: moth-hover 4.6s ease-in-out infinite;
     transform-origin: center 70%;

@@ -41,7 +41,7 @@ const WHY: {
     body: "Connect, save, or pass. No likes, no maybes. Apply with one real pitch.",
     details: [
       "Three actions per card. No fourth option to defer.",
-      "One pitch per application — no copy-paste spam.",
+      "One pitch per application - no copy-paste spam.",
       "Accepted requests turn into mutual contacts immediately.",
     ],
     mockup: "request",
@@ -98,7 +98,7 @@ export default WhySection;
 // ─── WhyRow ──────────────────────────────────────────────────────
 // Each WHY row: text block on one side, mockup on the other (zig-zag).
 // Text sits inside a frosted-glass card. Mockup column is hidden on
-// phones — `hidden lg:flex` — so phones show only text. Text block
+// phones - `hidden lg:flex` - so phones show only text. Text block
 // keeps its hover-to-reveal-details interaction.
 const WhyRow = ({
   entry,
@@ -223,7 +223,7 @@ const ReviewCardMockup = () => {
   const isApproved = state === "approved";
   const isReviewing = state === "reviewing";
   const title = isApproved
-    ? "Approved — welcome to Polln8"
+    ? "Approved - welcome to Polln8"
     : isReviewing
       ? "Application under review"
       : "Application submitted";
@@ -323,7 +323,7 @@ const ReviewCardMockup = () => {
                       transition: "opacity 420ms ease, border-color 420ms ease",
                     }}
                   />
-                  {/* Approved badge — pops in via scale + bounce */}
+                  {/* Approved badge - pops in via scale + bounce */}
                   <span
                     className="absolute flex items-center justify-center rounded-full z-[3]"
                     style={{
@@ -372,7 +372,7 @@ const ReviewCardMockup = () => {
                       ? "Cleared in 21h"
                       : isReviewing
                         ? "Checking LinkedIn · GitHub · shipped work"
-                        : "Pending — typical wait 24h"
+                        : "Pending - typical wait 24h"
                   }
                   pulseTone={isReviewing ? "accent" : "rest"}
                 />
@@ -508,7 +508,7 @@ const ThreadRow = ({
 
 const ConfettiField = ({ active }: { active: boolean }) => {
   // 9 hairline particles drifting upward, fading. Restrained per the
-  // design's "vetted not viral" tone — no rotation, no gold shower.
+  // design's "vetted not viral" tone - no rotation, no gold shower.
   const particles = useMemo(() => {
     const seeded = (i: number) => {
       const s = Math.sin(i * 928.3) * 10000;
@@ -563,11 +563,11 @@ const ConfettiField = ({ active }: { active: boolean }) => {
 // the bottom on right-swipe, with a swipe-down handle to dismiss).
 //
 // 5-phase auto-loop:
-//   0 rest             — Maya on top, Ravi behind
-//   1 maya-swiping     — Maya swipes right (Save)
-//   2 detail-tab-open  — Maya's profile sheet slides up
-//   3 detail+next      — sheet still open, Ravi grows behind
-//   4 ravi-swiping     — sheet retracts, Ravi swipes left (Pass)
+//   0 rest             - Maya on top, Ravi behind
+//   1 maya-swiping     - Maya swipes right (Save)
+//   2 detail-tab-open  - Maya's profile sheet slides up
+//   3 detail+next      - sheet still open, Ravi grows behind
+//   4 ravi-swiping     - sheet retracts, Ravi swipes left (Pass)
 type Frontness =
   | "top"
   | "behind1"
@@ -577,7 +577,7 @@ type Frontness =
   | "gone-left";
 
 // Inline-style lookup so React directly drives transform/opacity per
-// phase change — bypasses any cascade conflicts that were keeping
+// phase change - bypasses any cascade conflicts that were keeping
 // the cards visually static.
 const FRONTNESS_STYLE: Record<
   Frontness,
@@ -621,7 +621,7 @@ const MAYA: ProfileEntry = {
   pills: ["Full-time", "Remote", "Founder"],
   skills: ["Frontend", "Design", "Product"],
   headline:
-    "Two-time founder, last exit Series A. Hiring a technical cofounder for a creator-economy tool — pre-seed, prototype live.",
+    "Two-time founder, last exit Series A. Hiring a technical cofounder for a creator-economy tool - pre-seed, prototype live.",
 };
 const RAVI: ProfileEntry = {
   id: "ravi",
@@ -668,7 +668,7 @@ const MAYA_INFO: DeckInfoSheet = {
     {
       name: "Pollenboard",
       tag: "Shipped",
-      desc: "Design system for indie tooling — v2 live, used by 40+ small teams.",
+      desc: "Design system for indie tooling - v2 live, used by 40+ small teams.",
     },
     {
       name: "Toolspace",
@@ -689,7 +689,7 @@ const ZARA_INFO: DeckInfoSheet = {
     {
       name: "Linear Insights",
       tag: "Shipped",
-      desc: "Lead designer on the analytics surface — used daily by 12K+ teams.",
+      desc: "Lead designer on the analytics surface - used daily by 12K+ teams.",
     },
     {
       name: "Glow",
@@ -714,11 +714,11 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
 
   const [phase, setPhase] = useState(0);
   const timers = useRef<number[]>([]);
-  // 5 phases — two-person flow per the user's spec:
+  // 5 phases - two-person flow per the user's spec:
   //   0 primary rest          (first person shown)
-  //   1 primary swipes left   (skip — translates + fades)
+  //   1 primary swipes left   (skip - translates + fades)
   //   2 secondary rest        (second person, now on top)
-  //   3 secondary swipes right (save — slides off)
+  //   3 secondary swipes right (save - slides off)
   //   4 info sheet up         (secondary's projects, LinkedIn, résumé)
   const phaseDur = useMemo(() => [1400, 900, 1400, 800, 2000], []);
 
@@ -751,9 +751,9 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
 
   const hint =
     phase === 1
-      ? "Passed — won't show again"
+      ? "Passed - won't show again"
       : phase === 3
-        ? "Saving — opening profile"
+        ? "Saving - opening profile"
         : phase === 4
           ? `${info.name} · profile open`
           : "Swipe right to save · left to pass";
@@ -828,7 +828,7 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
             </span>
           </div>
 
-          {/* Deck area — two cards plus the profile-detail sheet that
+          {/* Deck area - two cards plus the profile-detail sheet that
               slides up when Maya is right-swiped. No edge glows; left
               swipes just fade out and right swipes hand off to the
               sheet. */}
@@ -844,7 +844,7 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
               ctaLabel={ctaLabel}
             />
 
-            {/* Info sheet — slides up from the bottom on phase 2 and
+            {/* Info sheet - slides up from the bottom on phase 2 and
                 stays through the rest of Maya's stay. Hidden during
                 Ravi's frames (phases 3, 4). */}
             <div
@@ -1025,7 +1025,7 @@ const ProfileCardMockup = ({
     data-id={profile.id}
     data-front={frontness}
   >
-    {/* Edge labels — appear during swipe */}
+    {/* Edge labels - appear during swipe */}
     <div
       className="mc-edge-label mc-edge-label--save absolute top-4 right-4 inline-flex items-center gap-1 font-bold uppercase"
       style={{
@@ -1271,10 +1271,10 @@ const LinkRow = ({
 // ─── Polln8 Request Card mockup ─────────────────────────────────
 // Direct port of the Polln8 Request Card.html design from the
 // Anthropic design handoff. 4-phase auto-loop:
-//   0 rest      — profile card with Apply CTA pulsing
-//   1 composer  — sheet slides up, pitch types in character-by-char
-//   2 sent      — sheet drops, status pill "Request sent" + glow
-//   3 accepted  — pill flips green "Accepted", solid ring on
+//   0 rest      - profile card with Apply CTA pulsing
+//   1 composer  - sheet slides up, pitch types in character-by-char
+//   2 sent      - sheet drops, status pill "Request sent" + glow
+//   3 accepted  - pill flips green "Accepted", solid ring on
 //                 avatar, Open chat reveals
 // Builder POV (original): pitch operator → founder asking to join.
 const REQUEST_PROFILE_BUILDER = {
@@ -1287,10 +1287,10 @@ const REQUEST_PROFILE_BUILDER = {
     "Building a B2B platform for restaurant operators. $40K MRR, looking for a technical cofounder to lead engineering.",
 };
 const REQUEST_PITCH_BUILDER =
-  "I've shipped two B2B products in restaurant tech. Saw your MRR growth — I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";
+  "I've shipped two B2B products in restaurant tech. Saw your MRR growth - I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";
 
 // Founder POV: target is an operator. The "pitch" reads as the
-// founder writing to that operator — the first chat message rather
+// founder writing to that operator - the first chat message rather
 // than a self-pitch.
 const REQUEST_PROFILE_FOUNDER = {
   monogram: "TP",
@@ -1302,7 +1302,7 @@ const REQUEST_PROFILE_FOUNDER = {
     "Senior engineer, ex-Stripe payments and Linear. Looking for a venture with real users and meaningful equity.",
 };
 const REQUEST_PITCH_FOUNDER =
-  "I'm building a B2B clinic-ops platform — $8K MRR, real users, technical surface that needs an owner. Your devtools work looks like exactly what I need next to me. Free to chat this week?";
+  "I'm building a B2B clinic-ops platform - $8K MRR, real users, technical surface that needs an owner. Your devtools work looks like exactly what I need next to me. Free to chat this week?";
 
 const RequestCardMockup = ({ persona }: { persona: Persona }) => {
   const isFounder = persona === "founder";
@@ -1528,7 +1528,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                 {profile.headline}
               </div>
 
-              {/* CTA / Status — same physical slot, content swaps per phase */}
+              {/* CTA / Status - same physical slot, content swaps per phase */}
               <div
                 className="flex items-stretch mt-1"
                 style={{ minHeight: 38 }}
@@ -1655,7 +1655,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
               )}
             </div>
 
-            {/* Composer sheet — slides up during phase 1 with typing
+            {/* Composer sheet - slides up during phase 1 with typing
                 pitch. Drops away in phases 2/3 (transform handled by
                 the .rq-phase-1 selector in index.css). */}
             <div

@@ -58,7 +58,7 @@ const SignIn = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
-  // Inline banner for "email not confirmed" — gives the user a path
+  // Inline banner for "email not confirmed" - gives the user a path
   // back to the verification email instead of a transient toast.
   const [needsConfirmation, setNeedsConfirmation] = useState<string | null>(
     null,
@@ -172,7 +172,7 @@ const SignIn = () => {
               </p>
             </div>
 
-            {/* "Confirm your email" banner — appears when login is
+            {/* "Confirm your email" banner - appears when login is
                 rejected because the address is unconfirmed. */}
             {needsConfirmation && (
               <div className="mb-6 flex items-start gap-3 rounded-sm border border-gold/40 bg-gold/5 p-4">

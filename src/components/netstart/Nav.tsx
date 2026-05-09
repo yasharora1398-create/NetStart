@@ -36,7 +36,7 @@ export const Nav = () => {
           list.filter((n) => n.type === "chat_request" && !n.readAt).length,
         );
       } catch {
-        // silent — this is just a badge, don't toast
+        // silent - this is just a badge, don't toast
       }
     };
     refresh();

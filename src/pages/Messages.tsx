@@ -54,7 +54,7 @@ const saveChat = (id: string, msgs: Msg[]) => {
 const formatTime = (d: Date) =>
   d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-// Canned replies — picked based on context of the incoming message
+// Canned replies - picked based on context of the incoming message
 const replyPool = [
   "Solid. Tell me more 👀",
   "Love that. What's the biggest open question for you right now?",
@@ -180,7 +180,7 @@ const ChatView = ({ profile, onBack }: { profile: Profile; onBack: () => void })
     setMsgs((m) => [...m, mine]);
     setDraft("");
 
-    // Trigger a reply — typing indicator then canned response
+    // Trigger a reply - typing indicator then canned response
     if (replyTimeoutRef.current) window.clearTimeout(replyTimeoutRef.current);
     setTyping(true);
     replyTimeoutRef.current = window.setTimeout(() => {

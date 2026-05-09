@@ -96,18 +96,18 @@ export const MyNetWizard = ({
     profile.reviewStatus === "rejected" ? "credentials" : "intro",
   );
 
-  // Step 1 — credentials
+  // Step 1 - credentials
   const [linkedin, setLinkedin] = useState(profile.linkedinUrl);
   const [pendingResume, setPendingResume] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Step 3 — profile picture (required, both modes)
+  // Step 3 - profile picture (required, both modes)
   const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const existingAvatarUrl = getAvatarUrl(profile.avatarPath);
 
-  // Step 3 — looking
+  // Step 3 - looking
   const [fullName, setFullName] = useState(profile.fullName);
   const [headline, setHeadline] = useState(profile.candidate.headline);
   const [bio, setBio] = useState(profile.candidate.bio);
@@ -121,7 +121,7 @@ export const MyNetWizard = ({
     profile.candidate.commitment,
   );
 
-  // Step 3 — building
+  // Step 3 - building
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [projectSkills, setProjectSkills] = useState<string[]>([]);
@@ -662,7 +662,7 @@ const Intro = ({
     {
       num: "02",
       title: "Mode",
-      body: "Founder or builder — tell us which side of the network you're on.",
+      body: "Founder or builder - tell us which side of the network you're on.",
     },
     {
       num: "03",

@@ -78,7 +78,7 @@ const SignUp = () => {
   // If an already-authed user lands on /signup, route them away.
   // - Unverified users go to /check-email so they finish verification
   //   before they can fill out the wizard with an unconfirmed address.
-  // - Verified users go to "/" (the homepage) — same policy as sign-in,
+  // - Verified users go to "/" (the homepage) - same policy as sign-in,
   //   from there they can hit Edit MyNet whenever they're ready.
   const fromState = (location.state as { from?: string } | null)?.from ?? "/";
 
@@ -131,7 +131,7 @@ const SignUp = () => {
     });
   };
 
-  // Caps Lock detection on the password field — common UX nicety
+  // Caps Lock detection on the password field - common UX nicety
   // that catches typing-the-wrong-password-because-Caps-Lock-is-on.
   const onPasswordKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (typeof e.getModifierState === "function") {
@@ -210,7 +210,7 @@ const SignUp = () => {
               </p>
             </div>
 
-            {/* Duplicate-email banner — shown above the form so it's
+            {/* Duplicate-email banner - shown above the form so it's
                 impossible to miss after a phantom-success signup. */}
             {duplicateEmail && (
               <div className="mb-6 flex items-start gap-3 rounded-sm border border-gold/40 bg-gold/5 p-4">

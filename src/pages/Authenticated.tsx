@@ -1,5 +1,5 @@
 /**
- * Hidden post-verification landing — reached only by Supabase
+ * Hidden post-verification landing - reached only by Supabase
  * redirecting here after a confirmation link is clicked, or by
  * typing /authenticated directly. Not linked from any nav.
  *
@@ -15,7 +15,7 @@ import { ArrowRight, Check } from "lucide-react";
 const Authenticated = () => {
   return (
   <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
-    {/* Blurred green orbs — mirror of the waitlist backdrop. */}
+    {/* Blurred green orbs - mirror of the waitlist backdrop. */}
     <div
       aria-hidden
       className="pointer-events-none fixed inset-0 z-0"

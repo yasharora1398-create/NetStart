@@ -1,5 +1,5 @@
 /**
- * Sidebar — frosted-glass nav panel. App + About sections of NavLink
+ * Sidebar - frosted-glass nav panel. App + About sections of NavLink
  * items, each with a 16x16 stroke icon. Light/Dark segmented toggle
  * at the bottom drives the global theme via `useTheme()`.
  *
@@ -76,7 +76,7 @@ export const Sidebar = () => {
       className={`glass-sidebar${collapsed ? " is-collapsed" : ""}`}
       aria-label="Sidebar"
     >
-      {/* Collapse toggle — small chevron at the top-right of the
+      {/* Collapse toggle - small chevron at the top-right of the
           sidebar. Aria label flips with state. */}
       <button
         type="button"
@@ -92,7 +92,7 @@ export const Sidebar = () => {
         )}
       </button>
 
-      {/* Brand — logo image replaces the P8 square; the whole row is
+      {/* Brand - logo image replaces the P8 square; the whole row is
           a Link to "/" so the brand mark works as a home affordance. */}
       <Link to="/" className="gs-brand gs-brand-link" aria-label="Polln8 home">
         <img
@@ -107,7 +107,7 @@ export const Sidebar = () => {
         </div>
       </Link>
 
-      {/* Home — its own subsection so the home jump is a first-class
+      {/* Home - its own subsection so the home jump is a first-class
           item rather than relying on the brand mark alone. */}
       <div className="gs-section">
         <div className="gs-section-label">Home</div>
@@ -116,7 +116,7 @@ export const Sidebar = () => {
         ))}
       </div>
 
-      {/* App — MyNet gets a name pill so the user sees whose net it
+      {/* App - MyNet gets a name pill so the user sees whose net it
           is at a glance. Falls back to the email local-part when no
           name was set at signup. */}
       <div className="gs-section">
@@ -138,7 +138,7 @@ export const Sidebar = () => {
         ))}
       </div>
 
-      {/* Account — Sign in/Sign up when logged out, Sign out when in. */}
+      {/* Account - Sign in/Sign up when logged out, Sign out when in. */}
       <div className="gs-section">
         <div className="gs-section-label">Account</div>
         {user ? (
@@ -166,7 +166,7 @@ export const Sidebar = () => {
 
       <div className="gs-spacer" />
 
-      {/* Theme toggle — wired to global useTheme so it flips the
+      {/* Theme toggle - wired to global useTheme so it flips the
           .dark class on <html> and persists to localStorage. */}
       <div className="gs-theme">
         <div className="gs-theme-label">Theme</div>
@@ -196,7 +196,7 @@ export const Sidebar = () => {
 // `end` prevents the Home NavLink from staying active on every nested
 // route (without it, "/" matches everything because every path starts
 // with /). Other items don't need it since they're top-level.
-// `pill` renders a small label on the right of the item — used to
+// `pill` renders a small label on the right of the item - used to
 // show the signed-in user's name next to MyNet.
 const SideLink = ({
   item,
@@ -236,7 +236,7 @@ const userDisplayName = (user: { email?: string | null; user_metadata?: Record<s
   return first.length > 12 ? `${first.slice(0, 11)}…` : first;
 };
 
-// ============== ICONS — verbatim paths from Sidebar.html ==============
+// ============== ICONS - verbatim paths from Sidebar.html ==============
 
 function MyNetIcon() {
   return (

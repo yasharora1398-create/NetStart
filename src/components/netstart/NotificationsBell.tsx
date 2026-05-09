@@ -82,7 +82,7 @@ export const NotificationsBell = () => {
       const list = await listNotifications();
       setItems(list);
     } catch (err) {
-      // silent — notification fetch errors shouldn't toast on every render
+      // silent - notification fetch errors shouldn't toast on every render
       void err;
     } finally {
       setLoading(false);

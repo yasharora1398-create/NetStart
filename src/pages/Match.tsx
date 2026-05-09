@@ -84,7 +84,7 @@ const Match = () => {
         setHasProjects(prs.length > 0);
       })
       .catch(() => {
-        // ignore — page will fall through to a friendly state
+        // ignore - page will fall through to a friendly state
       })
       .finally(() => {
         if (!cancelled) setLoadingMode(false);

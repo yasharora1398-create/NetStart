@@ -57,7 +57,7 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
       value={{
         collapsed: false,
         setCollapsed: () => {
-          // noop — collapse no longer supported
+          // noop - collapse no longer supported
         },
         width: SIDEBAR_WIDTH,
       }}

@@ -156,7 +156,7 @@ const Discover = () => {
       }
     >
       <div className="flex h-full flex-col px-5 pb-2 pt-2">
-        {/* Card stack — swipe only. Left = pass, right = open profile, up = super. */}
+        {/* Card stack - swipe only. Left = pass, right = open profile, up = super. */}
         <div className="relative mx-auto w-full max-w-sm flex-1 min-h-0">
           {stack.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center rounded-[32px] border-2 border-foreground/20 bg-card text-center px-6">
@@ -209,7 +209,7 @@ const Discover = () => {
           )}
         </div>
 
-        {/* Swipe hint — replaces the action button bar */}
+        {/* Swipe hint - replaces the action button bar */}
         {stack.length > 0 && (
           <div className="mt-3 flex shrink-0 items-center justify-center gap-4 pb-2 text-[10px] font-black uppercase tracking-wider text-tertiary">
             <span className="animate-text-reveal" style={{ animationDelay: "1100ms" }}>← Pass</span>

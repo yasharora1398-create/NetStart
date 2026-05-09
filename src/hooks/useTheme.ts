@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-// Polln8 theme — toggles the `.dark` class on <html> and persists
+// Polln8 theme - toggles the `.dark` class on <html> and persists
 // the pick to localStorage. Default is "dark" to match the mobile app.
 //
 // CSS variables in src/index.css drive the actual colors; this hook

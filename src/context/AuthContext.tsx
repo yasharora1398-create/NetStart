@@ -8,7 +8,7 @@ type AuthResult = { error: AuthError | Error | null };
 // signUp also surfaces whether the email was already registered.
 // Supabase's "email enumeration protection" returns a non-error
 // response with an empty user.identities array when the address is
-// already on file — which our UI needs to render as "this email is
+// already on file - which our UI needs to render as "this email is
 // already registered" instead of silently sending the user to the
 // "check your inbox" page.
 type SignUpResult = AuthResult & { duplicate: boolean };
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!isSupabaseConfigured) return notConfiguredSignUp();
     // After the user clicks the verification link in the email, send
     // them to /authenticated. Supabase auto-creates a session at
-    // verify-time and the page reads that — keeps them signed in.
+    // verify-time and the page reads that - keeps them signed in.
     const emailRedirectTo =
       typeof window !== "undefined"
         ? `${window.location.origin}/authenticated`

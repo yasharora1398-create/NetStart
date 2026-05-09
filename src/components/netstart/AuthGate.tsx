@@ -37,7 +37,7 @@ export const AuthGate = ({
       aria-modal="true"
       aria-labelledby="auth-gate-title"
     >
-      {/* Blurred backdrop — only blurs the content area, never the
+      {/* Blurred backdrop - only blurs the content area, never the
           sidebar. Sits behind the modal card. */}
       <div
         className="absolute inset-0 bg-background/70 backdrop-blur-md"

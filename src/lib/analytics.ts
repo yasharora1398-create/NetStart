@@ -6,7 +6,7 @@ const generateDeviceId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
-  // Fallback for environments without crypto.randomUUID — pre-2022
+  // Fallback for environments without crypto.randomUUID - pre-2022
   // Safari, etc. Good-enough randomness for a device anchor.
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 };

@@ -23,7 +23,7 @@ import { useAuth } from "@/context/AuthContext";
 
 // Sidebar shows on /mynet in dev so the rest of the localhost
 // product is reachable. In prod the route is public (so post-signup
-// users can land on the wizard) but we strip the sidebar — same
+// users can land on the wizard) but we strip the sidebar - same
 // pattern the Waitlist uses.
 const SHOW_SIDEBAR = !import.meta.env.PROD;
 
@@ -842,7 +842,7 @@ const CriteriaSummary = ({ project }: { project: Project }) => {
   );
 };
 
-// Visible against the near-black dark theme — gold border + faint
+// Visible against the near-black dark theme - gold border + faint
 // gold tint instead of the previous bg-background/60 which dissolved
 // into the page on dark mode.
 const BackToHome = () => (
