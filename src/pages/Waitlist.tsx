@@ -15,20 +15,13 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  BadgeCheck,
-  Briefcase,
   Hammer,
-  Heart,
-  MapPin,
   Moon,
-  Sparkles,
   Sun,
   Telescope,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
-import { useInView } from "@/hooks/useInView";
 import { useAuth } from "@/context/AuthContext";
 
 type Persona = "founder" | "builder";
@@ -110,64 +103,51 @@ const Waitlist = () => {
       <main className="relative z-10">
         {/* HERO ----------------------------------------------------- */}
         <section className="mx-auto max-w-6xl px-5 md:px-8 pt-16 md:pt-24 pb-20 md:pb-32">
-          <div className="grid lg:grid-cols-[1fr_auto] gap-12 lg:gap-20 items-center">
-            <div>
-              {/* Persona toggle — flips the hero copy and the live
-                  mockup below for whichever side of the network the
-                  visitor is on. */}
-              <PersonaToggle persona={persona} onChange={setPersona} />
+          <div>
+            {/* Persona toggle — flips the hero copy for whichever
+                side of the network the visitor is on. */}
+            <PersonaToggle persona={persona} onChange={setPersona} />
 
-              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5 mt-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5 mt-8">
+              {persona === "founder"
+                ? "For founders · Free"
+                : "For builders · Free"}
+            </p>
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[6.25rem] leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
+              {persona === "founder" ? (
+                <>
+                  Find your
+                  <br />
+                  <span className="text-primary italic">co-founder.</span>
+                </>
+              ) : (
+                <>
+                  Find a startup
+                  <br />
+                  <span className="text-primary italic">to bet on.</span>
+                </>
+              )}
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
+              {persona === "founder"
+                ? "Post your venture, set the equity, and meet vetted operators ranked by AI against what you're building. No talkers, no maybes."
+                : "Show your shipping history, pick what you'd actually bet on, and meet founders with real ventures and real equity. No spam, no maybes."}
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                to="/signup"
+                className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
+                style={{ boxShadow: "var(--shadow-glow)" }}
+              >
                 {persona === "founder"
-                  ? "For founders · Free"
-                  : "For builders · Free"}
+                  ? "Post a project"
+                  : "Set up your profile"}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <p className="text-xs md:text-sm font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                Free · Launching August 2026
               </p>
-              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[6.25rem] leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
-                {persona === "founder" ? (
-                  <>
-                    Find your
-                    <br />
-                    <span className="text-primary italic">co-founder.</span>
-                  </>
-                ) : (
-                  <>
-                    Find a startup
-                    <br />
-                    <span className="text-primary italic">to bet on.</span>
-                  </>
-                )}
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
-                {persona === "founder"
-                  ? "Post your venture, set the equity, and meet vetted operators ranked by AI against what you're building. No talkers, no maybes."
-                  : "Show your shipping history, pick what you'd actually bet on, and meet founders with real ventures and real equity. No spam, no maybes."}
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link
-                  to="/signup"
-                  className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:opacity-90 hover:gap-3"
-                  style={{ boxShadow: "var(--shadow-glow)" }}
-                >
-                  {persona === "founder"
-                    ? "Post a project"
-                    : "Set up your profile"}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <p className="text-xs md:text-sm font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                  Free · Launching August 2026
-                </p>
-              </div>
             </div>
-
-            <div className="hidden lg:flex justify-center">
-              <HeroMockup persona={persona} />
-            </div>
-          </div>
-
-          {/* Mobile mockup — placed below the hero copy on small
-              screens so the visual still lands without crowding. */}
-          <div className="lg:hidden mt-16 flex justify-center">
-            <HeroMockup persona={persona} />
           </div>
         </section>
 
@@ -442,53 +422,34 @@ const Pillar = ({
   title: string;
   body: string;
   details: string[];
-}) => {
-  // Reveal the details list automatically as the pillar scrolls into
-  // view (no hover required). The closed-state pillar still takes
-  // only the room its visible text needs, then expands once revealed.
-  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.4 });
-  return (
-    <article ref={ref} className="relative cursor-default">
-      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-        {accent}
+}) => (
+  <article className="group relative cursor-default">
+    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+      {accent}
+    </div>
+    <div className="h-px w-12 bg-primary/40 mb-5 transition-[width] duration-500 group-hover:w-20" />
+    <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
+      {title}
+    </h3>
+    <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
+      {body}
+    </p>
+    <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-hover:grid-rows-[1fr]">
+      <div className="overflow-hidden">
+        <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:delay-[180ms]">
+          {details.map((d) => (
+            <li
+              key={d}
+              className="text-sm leading-relaxed text-muted-foreground"
+            >
+              {d}
+            </li>
+          ))}
+        </ul>
       </div>
-      <div
-        className={`h-px bg-primary/40 mb-5 transition-[width] duration-500 ${
-          inView ? "w-20" : "w-12"
-        }`}
-      />
-      <h3 className="font-display text-xl md:text-2xl tracking-[-0.02em] text-foreground mb-3">
-        {title}
-      </h3>
-      <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
-        {body}
-      </p>
-      <div
-        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
-          inView ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <ul
-            className={`space-y-2 border-l border-primary/30 pl-4 mt-5 transition-opacity duration-500 ${
-              inView ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ transitionDelay: inView ? "180ms" : "0ms" }}
-          >
-            {details.map((d) => (
-              <li
-                key={d}
-                className="text-sm leading-relaxed text-muted-foreground"
-              >
-                {d}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </article>
-  );
-};
+    </div>
+  </article>
+);
 
 const RoleCard = ({
   kind,
@@ -500,60 +461,43 @@ const RoleCard = ({
   tagline: string;
   signals: string[];
   example: { headline: string; detail: string };
-}) => {
-  // Auto-reveal the example block as the card enters the viewport.
-  // The card grows to fit; the page below shifts down naturally.
-  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.4 });
-  return (
-    <article
-        ref={ref}
-        className="self-start rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors"
-      >
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
-          {kind}
-        </p>
-        <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
-          {tagline}
-        </p>
-        <ul className="space-y-3">
-          {signals.map((s) => (
-            <li
-              key={s}
-              className="flex items-start gap-3 text-sm text-muted-foreground"
-            >
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
-              <span>{s}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div
-          className={`grid transition-[grid-template-rows] duration-500 ease-out ${
-            inView ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
+}) => (
+  <article className="group self-start rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-7 md:p-9 transition-colors">
+    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+      {kind}
+    </p>
+    <p className="text-base md:text-lg leading-relaxed text-foreground mb-7">
+      {tagline}
+    </p>
+    <ul className="space-y-3">
+      {signals.map((s) => (
+        <li
+          key={s}
+          className="flex items-start gap-3 text-sm text-muted-foreground"
         >
-          <div className="overflow-hidden">
-            <div
-              className={`mt-6 pt-5 border-t border-primary/30 transition-opacity duration-500 ${
-                inView ? "opacity-100" : "opacity-0"
-              }`}
-              style={{ transitionDelay: inView ? "200ms" : "0ms" }}
-            >
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
-                Example
-              </p>
-              <p className="text-foreground font-semibold leading-snug">
-                {example.headline}
-              </p>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {example.detail}
-              </p>
-            </div>
-          </div>
+          <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+          <span>{s}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-hover:grid-rows-[1fr]">
+      <div className="overflow-hidden">
+        <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:delay-[200ms]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
+            Example
+          </p>
+          <p className="text-foreground font-semibold leading-snug">
+            {example.headline}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            {example.detail}
+          </p>
         </div>
-    </article>
-  );
-};
+      </div>
+    </div>
+  </article>
+);
 
 // ─── Hero: persona toggle + product mockup ──────────────────────
 // Cal.com-style segmented switch. Two pills, the active one swaps
@@ -606,279 +550,6 @@ const PersonaToggle = ({
       <Telescope className="h-3.5 w-3.5" />
       I'm a builder
     </button>
-  </div>
-);
-
-// Linear-style hero artwork: a tilted phone-shaped frame with a
-// stack of match cards inside, plus the three-action row below.
-// Different deck per persona — founders see a stack of vetted
-// operators, builders see a stack of real ventures with equity.
-type CardData =
-  | {
-      kind: "operator";
-      name: string;
-      role: string;
-      skills: string[];
-      commitment: string;
-      location: string;
-    }
-  | {
-      kind: "project";
-      title: string;
-      stage: string;
-      desc: string;
-      equity: string;
-      skills: string[];
-    };
-
-const FOUNDER_DECK: CardData[] = [
-  {
-    kind: "operator",
-    name: "Maya Chen",
-    role: "Senior backend · ex-Stripe",
-    skills: ["Rust", "Distributed systems", "Payments"],
-    commitment: "Full-time",
-    location: "Remote · NA",
-  },
-  {
-    kind: "operator",
-    name: "Eitan Mor",
-    role: "ML eng · ex-Anthropic",
-    skills: ["LLMs", "Eval", "Infra"],
-    commitment: "Full-time",
-    location: "London",
-  },
-  {
-    kind: "operator",
-    name: "Priya Nayar",
-    role: "Product eng · ex-Linear",
-    skills: ["TypeScript", "Postgres", "DX"],
-    commitment: "Part-time",
-    location: "NYC",
-  },
-];
-
-const BUILDER_DECK: CardData[] = [
-  {
-    kind: "project",
-    title: "Climate fintech",
-    stage: "Pre-seed · YC W26",
-    desc: "Verification rails for carbon credits. Looking for a backend lead.",
-    equity: "8–15%",
-    skills: ["Rust", "Postgres", "Payments"],
-  },
-  {
-    kind: "project",
-    title: "Devtools observability",
-    stage: "Seed · $2M raised",
-    desc: "OSS tracing for serverless apps. Need a product engineer.",
-    equity: "5–10%",
-    skills: ["TypeScript", "OpenTelemetry"],
-  },
-  {
-    kind: "project",
-    title: "B2B AI workflows",
-    stage: "Pre-seed · Idea",
-    desc: "Agent system for sales operations. Looking for ML lead.",
-    equity: "10–18%",
-    skills: ["LLMs", "Eval", "Python"],
-  },
-];
-
-const HeroMockup = ({ persona }: { persona: Persona }) => {
-  const deck = persona === "founder" ? FOUNDER_DECK : BUILDER_DECK;
-  // Cycle the front card every ~3.6s so the deck appears alive.
-  const [front, setFront] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(
-      () => setFront((f) => (f + 1) % deck.length),
-      3600,
-    );
-    return () => window.clearInterval(id);
-  }, [deck.length]);
-
-  return (
-    <div
-      className="relative"
-      style={{ perspective: "1200px" }}
-      aria-hidden
-    >
-      {/* Phone frame */}
-      <div
-        className="relative w-[320px] h-[640px] rounded-[44px] border-[10px] border-foreground/85 bg-background shadow-2xl overflow-hidden"
-        style={{
-          transform: "rotateY(-8deg) rotateX(4deg)",
-          transformStyle: "preserve-3d",
-          boxShadow:
-            "0 30px 60px -20px rgba(0,0,0,0.45), 0 18px 30px -10px rgba(0,0,0,0.3)",
-        }}
-      >
-        {/* Notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-6 w-28 bg-foreground/85 rounded-b-2xl z-30" />
-
-        {/* Status row */}
-        <div className="absolute top-2 left-0 right-0 flex items-center justify-between px-7 z-20 text-[10px] font-mono text-foreground/70 tracking-widest">
-          <span>9:41</span>
-          <span>polln8</span>
-        </div>
-
-        {/* Header */}
-        <div className="absolute top-9 left-0 right-0 px-5 z-10">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-            {persona === "founder" ? "Operators · ranked" : "Projects · ranked"}
-          </p>
-        </div>
-
-        {/* Card stack */}
-        <div className="absolute inset-0 top-20 bottom-32 px-4">
-          {deck.map((card, i) => {
-            const offset = (i - front + deck.length) % deck.length;
-            const isFront = offset === 0;
-            return (
-              <div
-                key={i}
-                className="absolute inset-x-4 top-0 bottom-0 rounded-2xl border border-border bg-card transition-all duration-700 ease-out"
-                style={{
-                  transform: `translateY(${offset * 6}px) translateX(${
-                    offset * 4
-                  }px) scale(${1 - offset * 0.04})`,
-                  opacity: offset > 2 ? 0 : 1 - offset * 0.18,
-                  zIndex: deck.length - offset,
-                  boxShadow: isFront
-                    ? "0 12px 32px -10px rgba(0,0,0,0.35)"
-                    : "0 6px 18px -8px rgba(0,0,0,0.2)",
-                }}
-              >
-                <DeckCardBody card={card} />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Action row — the three-action signature of the deck. */}
-        <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4 z-20">
-          <ActionPill icon={<X className="h-4 w-4" />} tone="muted" />
-          <ActionPill icon={<Heart className="h-4 w-4" />} tone="muted" />
-          <ActionPill icon={<ArrowRight className="h-4 w-4" />} tone="primary" />
-        </div>
-      </div>
-
-      {/* Floating "ranked by AI" chip — small detail that signals
-          the differentiator without an extra section. */}
-      <div
-        className="absolute -left-6 top-16 rounded-full border border-border bg-card/95 backdrop-blur px-3 py-1.5 shadow-lg flex items-center gap-1.5"
-        style={{ transform: "rotate(-6deg)" }}
-      >
-        <Sparkles className="h-3 w-3 text-primary" />
-        <span className="font-mono text-[10px] uppercase tracking-widest text-foreground">
-          Ranked by AI
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const DeckCardBody = ({ card }: { card: CardData }) => {
-  if (card.kind === "operator") {
-    return (
-      <div className="h-full flex flex-col p-5">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="h-11 w-11 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center text-primary">
-            <BadgeCheck className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-display text-base text-foreground truncate">
-              {card.name}
-            </p>
-            <p className="text-[11px] text-muted-foreground truncate">
-              {card.role}
-            </p>
-          </div>
-        </div>
-        <div className="space-y-2.5 mt-1">
-          <Detail icon={<Briefcase className="h-3 w-3" />} label={card.commitment} />
-          <Detail icon={<MapPin className="h-3 w-3" />} label={card.location} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-1">
-          {card.skills.map((s) => (
-            <span
-              key={s}
-              className="px-2 py-0.5 text-[10px] rounded-sm border border-primary/30 bg-primary/5 text-foreground"
-            >
-              {s}
-            </span>
-          ))}
-        </div>
-        <div className="mt-auto pt-3 border-t border-border flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            96% match · ranked
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="h-full flex flex-col p-5">
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
-        {card.stage}
-      </p>
-      <p className="font-display text-base text-foreground mb-2 leading-tight">
-        {card.title}
-      </p>
-      <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">
-        {card.desc}
-      </p>
-      <div className="flex flex-wrap gap-1 mb-3">
-        {card.skills.map((s) => (
-          <span
-            key={s}
-            className="px-2 py-0.5 text-[10px] rounded-sm border border-primary/30 bg-primary/5 text-foreground"
-          >
-            {s}
-          </span>
-        ))}
-      </div>
-      <div className="mt-auto pt-3 border-t border-border flex items-center justify-between gap-2">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          Equity
-        </span>
-        <span className="text-[11px] font-medium text-foreground">
-          {card.equity}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const Detail = ({
-  icon,
-  label,
-}: {
-  icon: React.ReactNode;
-  label: string;
-}) => (
-  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-    <span className="text-primary">{icon}</span>
-    {label}
-  </div>
-);
-
-const ActionPill = ({
-  icon,
-  tone,
-}: {
-  icon: React.ReactNode;
-  tone: "muted" | "primary";
-}) => (
-  <div
-    className={`h-10 w-10 rounded-full flex items-center justify-center border ${
-      tone === "primary"
-        ? "bg-primary text-primary-foreground border-primary"
-        : "bg-card text-muted-foreground border-border"
-    }`}
-  >
-    {icon}
   </div>
 );
 
