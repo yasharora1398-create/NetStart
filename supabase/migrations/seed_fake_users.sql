@@ -252,34 +252,68 @@ begin
     resume_size = excluded.resume_size,
     resume_uploaded_at = excluded.resume_uploaded_at;
 
-  -- 2c. one published, active project per founder ----------------
+  -- 2c. two published, active projects per founder ---------------
+  -- Two each so the Match info panel's "Also building" section
+  -- actually renders for every founder. First row is the headline
+  -- project (matches the founder's profile bio); the second is a
+  -- side bet showing what else they're working on.
   insert into public.projects (
     owner_id, title, description, criteria,
     business_type, lifecycle_state, is_published
   ) values
+    -- Jamie
     (uid_f1,
      'Sales OS for forward-deployed engineers',
      'Pulling sales reps out of CRM tabs and into a single source-of-truth view of the deal. Three design partners paying.',
      '{"skills":["TypeScript","React","Postgres"],"commitment":"Full-time","location":"New York","keywords":"sales, B2B SaaS, CRM"}'::jsonb,
      'B2B SaaS', 'active', true),
+    (uid_f1,
+     'Forecast assistant for RevOps',
+     'A side bet inside the same codebase: a forecasting layer that hangs off the Sales OS deal graph. Closed beta with two partners.',
+     '{"skills":["TypeScript","Python","Forecasting"],"commitment":"Part-time","location":"New York","keywords":"revops, forecasting"}'::jsonb,
+     'B2B SaaS', 'active', true),
+    -- Sara
     (uid_f2,
      'Healthcare payer rules graph',
      'Indexing every public payer rule into a graph. Provider networks pay per query. Built the prototype, need an eng lead.',
      '{"skills":["Python","Postgres","Graph databases"],"commitment":"Full-time","location":"San Francisco","keywords":"healthcare, data, infra"}'::jsonb,
      'B2B SaaS', 'active', true),
+    (uid_f2,
+     'Claims denial classifier',
+     'ML pipeline that flags likely-to-be-denied claims before submission. Trained on a 2M-row dataset from one of our payer partners.',
+     '{"skills":["Python","ML","Healthcare"],"commitment":"Part-time","location":"San Francisco","keywords":"healthcare, ml, claims"}'::jsonb,
+     'B2B SaaS', 'active', true),
+    -- Theo
     (uid_f3,
      'Edge inference SDK for industrial sensors',
      'Low-power, on-device inference targeting sub-mW workloads. Customers: industrial OEMs running predictive maintenance.',
      '{"skills":["Rust","Embedded","Hardware"],"commitment":"Full-time","location":"Remote","keywords":"hardware, edge, ml"}'::jsonb,
      'Hardware + Software', 'active', true),
+    (uid_f3,
+     'Open-source RTOS scheduler',
+     'Spinoff of the work we did at the last company. MIT-licensed cooperative scheduler tuned for sub-100ms wakeups on Cortex-M.',
+     '{"skills":["Rust","Embedded","Open source"],"commitment":"Part-time","location":"Remote","keywords":"rtos, embedded, open source"}'::jsonb,
+     'Open source', 'active', true),
+    -- Noor
     (uid_f4,
      'Battery diagnostics for second-life EV cells',
      'We grade returned EV battery packs in minutes instead of days. Pilots with two recyclers. Need a CTO.',
      '{"skills":["Embedded","Python","Hardware"],"commitment":"Full-time","location":"Austin","keywords":"climate, energy, batteries"}'::jsonb,
      'Climate', 'active', true),
+    (uid_f4,
+     'Marketplace for second-life EV cells',
+     'The other half of the loop: a marketplace where graded battery packs find a buyer (storage installers, micromobility OEMs).',
+     '{"skills":["Marketplaces","Operations","B2B GTM"],"commitment":"Full-time","location":"Austin","keywords":"climate, energy, marketplace"}'::jsonb,
+     'Climate', 'active', true),
+    -- Kai
     (uid_f5,
      'Async voice for friend groups',
      'TestFlight quietly hit 50k DAU. Voice-first messaging for the people you actually talk to. Building the post-WhatsApp version.',
      '{"skills":["iOS","Swift","Audio"],"commitment":"Full-time","location":"Tokyo","keywords":"consumer, social, audio"}'::jsonb,
+     'Consumer App', 'active', true),
+    (uid_f5,
+     'Voice-first journaling app',
+     'Same audio stack, different product surface. A solo journaling app where you record short reflections and the app stitches them into a weekly review.',
+     '{"skills":["iOS","Swift","Audio"],"commitment":"Part-time","location":"Tokyo","keywords":"consumer, journaling, audio"}'::jsonb,
      'Consumer App', 'active', true);
 end $$;
