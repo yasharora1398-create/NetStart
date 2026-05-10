@@ -9,7 +9,8 @@ import {
   View,
 } from "react-native";
 import { Check, ChevronDown, X } from "lucide-react-native";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 type OptionPickerProps = {
   value: string;
@@ -26,6 +27,8 @@ export const OptionPicker = ({
   placeholder = "Pick one",
   searchable = true,
 }: OptionPickerProps) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -118,7 +121,7 @@ export const OptionPicker = ({
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   trigger: {
     flexDirection: "row",
     alignItems: "center",

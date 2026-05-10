@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import {
   Stack,
   useLocalSearchParams,
@@ -25,16 +25,24 @@ import {
   createProject,
   deleteProject,
   getProjectById,
+  setProjectPublished,
   updateProjectMeta,
 } from "@/lib/api";
 import type { ProjectCriteria } from "@/lib/types";
-import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
-import { fonts, theme } from "@/lib/theme";
+import {
+  BUSINESS_TYPE_OPTIONS,
+  COMMITMENT_OPTIONS,
+  LOCATION_OPTIONS,
+} from "@/lib/options";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 const TITLE_MAX = 80;
 const DESC_MAX = 280;
 
 export default function EditProjectScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -46,10 +54,16 @@ export default function EditProjectScreen() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [businessType, setBusinessType] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [commitment, setCommitment] = useState("");
   const [location, setLocation] = useState("");
   const [keywords, setKeywords] = useState("");
+  // Snapshot of the criteria when the form loaded, used to detect
+  // mid-flight criteria edits on a published project so we can warn
+  // about re-ranking.
+  const originalCriteriaRef = useRef<string>("");
+  const originalPublishedRef = useRef(false);
 
   useEffect(() => {
     if (!editing || !id) return;
@@ -60,10 +74,13 @@ export default function EditProjectScreen() {
         if (cancelled || !p) return;
         setTitle(p.title);
         setDescription(p.description);
+        setBusinessType(p.businessType);
         setSkills(p.criteria.skills);
         setCommitment(p.criteria.commitment);
         setLocation(p.criteria.location);
         setKeywords(p.criteria.keywords);
+        originalCriteriaRef.current = JSON.stringify(p.criteria);
+        originalPublishedRef.current = p.isPublished;
       })
       .catch(() => {})
       .finally(() => {
@@ -74,34 +91,86 @@ export default function EditProjectScreen() {
     };
   }, [editing, id]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!user) return;
     if (title.trim().length < 2) {
       Alert.alert("Name required", "Give your project a short name.");
       return;
     }
+    const criteria: ProjectCriteria = {
+      skills,
+      commitment: commitment.trim(),
+      location: location.trim(),
+      keywords: keywords.trim(),
+    };
+
+    // Edit-criteria warning: when the project is already published
+    // and the criteria string actually changed, warn the founder
+    // that builders' decks + match rankings shift accordingly.
+    const criteriaChanged =
+      editing &&
+      originalCriteriaRef.current !== "" &&
+      JSON.stringify(criteria) !== originalCriteriaRef.current;
+    if (criteriaChanged && originalPublishedRef.current) {
+      Alert.alert(
+        "Re-rank your matches?",
+        "You've changed the project's criteria. Saving will re-rank Match against the new skills, commitment, and location. Builders who already applied stay where they are.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Save", onPress: () => void performSave(criteria) },
+        ],
+      );
+      return;
+    }
+    void performSave(criteria);
+  };
+
+  const performSave = async (criteria: ProjectCriteria) => {
+    if (!user) return;
     setSaving(true);
     try {
-      const criteria: ProjectCriteria = {
-        skills,
-        commitment: commitment.trim(),
-        location: location.trim(),
-        keywords: keywords.trim(),
-      };
       if (editing && id) {
         await updateProjectMeta(id, {
           title: title.trim(),
           description: description.trim(),
           criteria,
+          businessType: businessType.trim(),
         });
+        router.back();
       } else {
-        await createProject(user.id, {
+        const created = await createProject(user.id, {
           title: title.trim(),
           description: description.trim(),
           criteria,
+          businessType: businessType.trim(),
         });
+        // First-time projects are draft by default. Nudge the founder
+        // to publish so builders can actually apply - otherwise they
+        // post a project, get no applications, and assume the app
+        // is broken.
+        Alert.alert(
+          "Project saved",
+          "Publish it so builders can find it and apply? You can unpublish anytime.",
+          [
+            {
+              text: "Later",
+              style: "cancel",
+              onPress: () => router.back(),
+            },
+            {
+              text: "Publish",
+              onPress: async () => {
+                try {
+                  await setProjectPublished(created.id, true);
+                } catch {
+                  // silent - user can publish from project detail later
+                }
+                router.back();
+              },
+            },
+          ],
+        );
       }
-      router.back();
     } catch (err) {
       Alert.alert(
         "Save failed",
@@ -200,12 +269,13 @@ export default function EditProjectScreen() {
 
           <Field
             label="What you're building"
+            hint="One or two sentences. Stage, market, what's already shipped."
             rightLabel={`${description.length}/${DESC_MAX}`}
           >
             <TextInput
               value={description}
               onChangeText={(t) => setDescription(t.slice(0, DESC_MAX))}
-              placeholder="Stage, market, what's already shipped."
+              placeholder="e.g. Pre-seed B2B platform for clinics. $8K MRR after 4 months."
               placeholderTextColor={theme.textDim}
               multiline
               numberOfLines={4}
@@ -213,25 +283,38 @@ export default function EditProjectScreen() {
             />
           </Field>
 
+          <Field
+            label="Business type"
+            hint="Pick the closest match. Builders filter by this in Search."
+          >
+            <OptionPicker
+              value={businessType}
+              onChange={setBusinessType}
+              options={BUSINESS_TYPE_OPTIONS}
+              placeholder="What kind of business?"
+              searchable
+            />
+          </Field>
+
           <Text style={styles.criteriaHeader}>Criteria</Text>
           <Text style={styles.criteriaHint}>
-            Used by Match and Find People to surface candidates that fit.
+            Used by Find People to surface matches.
           </Text>
 
           <Field label="Skills">
             <TagInput
               value={skills}
               onChange={setSkills}
-              placeholder="e.g. Rust, Marketplaces, B2B GTM"
+              placeholder="e.g. Rust, Marketplaces, B2B GTM (Enter to add)"
             />
           </Field>
 
-          <Field label="Commitment">
+          <Field label="Commitment" hint="What you need from them.">
             <OptionPicker
               value={commitment}
               onChange={setCommitment}
               options={COMMITMENT_OPTIONS}
-              placeholder="What you need from them"
+              placeholder="Full-time"
               searchable={false}
             />
           </Field>
@@ -241,16 +324,19 @@ export default function EditProjectScreen() {
               value={location}
               onChange={setLocation}
               options={LOCATION_OPTIONS}
-              placeholder="Pick a city or remote"
+              placeholder="Type a city or pick remote..."
               searchable
             />
           </Field>
 
-          <Field label="Keywords" hint="Free-text terms to nudge matching.">
+          <Field
+            label="Keywords"
+            hint="Free-text nudges to refine matching, if not already covered above."
+          >
             <TextInput
               value={keywords}
               onChangeText={setKeywords}
-              placeholder="payments, fintech, ex-Stripe"
+              placeholder="e.g. payments, fintech, ex-Stripe"
               placeholderTextColor={theme.textDim}
               style={styles.input}
               autoCapitalize="none"
@@ -283,7 +369,7 @@ export default function EditProjectScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   headerBar: {

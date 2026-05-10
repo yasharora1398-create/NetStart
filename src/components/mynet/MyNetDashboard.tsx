@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Briefcase,
   CheckCircle2,
@@ -12,6 +12,7 @@ import {
   Pencil,
   Plus,
   Search,
+  Star,
   Telescope,
 } from "lucide-react";
 
@@ -21,13 +22,17 @@ import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
 import { ApplicationsPanel } from "./ApplicationsPanel";
 import type { ProfileSubmission } from "./ProfileCard";
-import { getAvatarUrl } from "@/lib/mynet-storage";
+import { getAvatarUrl, listPublishedProjects } from "@/lib/mynet-storage";
 import type {
   CandidateProfile,
   Profile,
   Project,
   ProjectCriteria,
+  PublicProject,
 } from "@/lib/mynet-types";
+import { RoleSwitcher, type Role } from "@/components/netstart/RoleSwitcher";
+import { Link } from "react-router-dom";
+import { ArrowRight, MapPin as MapPinIcon, Briefcase as BriefcaseIcon } from "lucide-react";
 
 type Props = {
   profile: Profile;
@@ -46,6 +51,12 @@ type Props = {
   onDeleteProject: (project: Project) => void;
   onFindPeople: (id: string) => void;
   onTogglePublish: (project: Project) => void;
+  /** Toggle the founder's active project (drives Match). */
+  onSetActiveProject: (projectId: string | null) => void;
+  /** Current role read from auth metadata. */
+  role: Role;
+  /** Called after the role switch persists; parent refreshes session. */
+  onRoleSwitched: (role: Role) => void | Promise<void>;
 };
 
 const formatBytes = (bytes: number): string => {
@@ -78,6 +89,9 @@ export const MyNetDashboard = ({
   onDeleteProject,
   onFindPeople,
   onTogglePublish,
+  onSetActiveProject,
+  role,
+  onRoleSwitched,
 }: Props) => {
   const [editing, setEditing] = useState(false);
 
@@ -117,7 +131,11 @@ export const MyNetDashboard = ({
                 : "Everything you've set up, at a glance."}
           </p>
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex flex-col items-end gap-3">
+          <RoleSwitcher
+            currentRole={role}
+            onSwitched={onRoleSwitched}
+          />
           {editing ? (
             <Button
               variant="gold"
@@ -189,10 +207,25 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
-      {/* BUILDING - always shown. Empty state surfaces a "New project"
+      {/* For builders: a feed of 5 recently published projects so
+          they can browse what's open without leaving MyNet. Hidden
+          when the user is in founder mode (they have their own
+          projects section instead). */}
+      {role === "builder" ? (
+        <Section
+          title="Projects to consider"
+          eyebrow="03"
+          icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
+        >
+          <FeaturedProjects />
+        </Section>
+      ) : null}
+
+      {/* BUILDING - founders only. Empty state surfaces a "New project"
           card so the user knows the section is even here. Pending users
           can preview the surface but the action buttons are gated until
           their submission is approved. */}
+      {role === "founder" ? (
       <Section
         title="What you're building"
         eyebrow="03"
@@ -250,6 +283,12 @@ export const MyNetDashboard = ({
                 onDelete={() => onDeleteProject(p)}
                 onFindPeople={() => onFindPeople(p.id)}
                 onTogglePublish={() => onTogglePublish(p)}
+                isActive={profile.activeProjectId === p.id}
+                onSetActive={() =>
+                  onSetActiveProject(
+                    profile.activeProjectId === p.id ? null : p.id,
+                  )
+                }
               />
             ))}
           </div>
@@ -259,12 +298,16 @@ export const MyNetDashboard = ({
             onOpen={onOpenProject}
             onFindPeople={onFindPeople}
             disableFindPeople={isPending}
+            activeProjectId={profile.activeProjectId}
+            onSetActive={onSetActiveProject}
           />
         )}
       </Section>
+      ) : null}
 
-      {/* APPLICATIONS - both panels always shown. They render their
-          own empty states internally. */}
+      {/* APPLICATIONS - both panels always shown for the relevant
+          role. Builders see their outgoing pitches; founders see
+          incoming applications on their projects. */}
       <Section
         title="My applications"
         eyebrow="04"
@@ -273,13 +316,15 @@ export const MyNetDashboard = ({
         <ApplicationsPanel ownedProjects={projects} mode="sent" />
       </Section>
 
-      <Section
-        title="Applications received"
-        eyebrow="05"
-        icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
-      >
-        <ApplicationsPanel ownedProjects={projects} mode="received" />
-      </Section>
+      {role === "founder" ? (
+        <Section
+          title="Applications received"
+          eyebrow="05"
+          icon={<Briefcase className="h-3.5 w-3.5 text-gold" />}
+        >
+          <ApplicationsPanel ownedProjects={projects} mode="received" />
+        </Section>
+      ) : null}
     </>
   );
 };
@@ -463,72 +508,108 @@ const ProjectsDisplay = ({
   onOpen,
   onFindPeople,
   disableFindPeople = false,
+  activeProjectId,
+  onSetActive,
 }: {
   projects: Project[];
   onOpen: (id: string) => void;
   onFindPeople: (id: string) => void;
   disableFindPeople?: boolean;
+  activeProjectId?: string | null;
+  onSetActive?: (projectId: string | null) => void;
 }) => (
   <div className="grid md:grid-cols-2 gap-4">
-    {projects.map((p) => (
-      <article
-        key={p.id}
-        className="rounded-sm border border-border bg-card p-6 hover:border-gold/40 transition-colors"
-      >
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <h3 className="font-display text-2xl leading-tight truncate flex-1">
-            {p.title}
-          </h3>
-          <span
-            className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest flex-shrink-0 ${
-              p.isPublished
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                : "border-border bg-background text-muted-foreground"
-            }`}
-          >
-            {p.isPublished ? "Public" : "Draft"}
-          </span>
-        </div>
-
-        {p.description && (
-          <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
-            {p.description}
-          </p>
-        )}
-
-        <ProjectCriteriaPreview criteria={p.criteria} />
-
-        <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-border">
-          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-            {p.savedPersonIds.length} saved
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onOpen(p.id)}
-            >
-              <Eye className="h-4 w-4" />
-              View
-            </Button>
-            <Button
-              variant="outlineGold"
-              size="sm"
-              onClick={() => onFindPeople(p.id)}
-              disabled={disableFindPeople}
-              title={
-                disableFindPeople
-                  ? "Available once your review is approved."
-                  : undefined
-              }
-            >
-              <Search className="h-4 w-4" />
-              Find people
-            </Button>
+    {projects.map((p) => {
+      const isActive = activeProjectId === p.id;
+      return (
+        <article
+          key={p.id}
+          className={`rounded-sm border bg-card p-6 transition-colors ${
+            isActive
+              ? "border-gold/70 ring-1 ring-gold/30"
+              : "border-border hover:border-gold/40"
+          }`}
+        >
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <h3 className="font-display text-2xl leading-tight truncate flex-1">
+              {p.title}
+            </h3>
+            <div className="flex flex-col gap-1 items-end flex-shrink-0">
+              {isActive ? (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold/60 bg-gold/15 text-[10px] font-mono uppercase tracking-widest text-gold">
+                  <Star className="h-2.5 w-2.5 fill-gold text-gold" />
+                  Match focus
+                </span>
+              ) : null}
+              <span
+                className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest ${
+                  p.isPublished
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                    : "border-border bg-background text-muted-foreground"
+                }`}
+              >
+                {p.isPublished ? "Public" : "Draft"}
+              </span>
+            </div>
           </div>
-        </div>
-      </article>
-    ))}
+
+          {p.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
+              {p.description}
+            </p>
+          )}
+
+          <ProjectCriteriaPreview criteria={p.criteria} />
+
+          <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-border">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+              {p.savedPersonIds.length} saved
+            </span>
+            <div className="flex items-center gap-2">
+              {onSetActive ? (
+                <Button
+                  variant={isActive ? "gold" : "ghost"}
+                  size="sm"
+                  onClick={() => onSetActive(isActive ? null : p.id)}
+                  title={
+                    isActive
+                      ? "Clear Match focus"
+                      : "Use this project for Match"
+                  }
+                >
+                  <Star
+                    className={`h-4 w-4 ${isActive ? "fill-current" : ""}`}
+                  />
+                  {isActive ? "Focus" : "Use for Match"}
+                </Button>
+              ) : null}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpen(p.id)}
+              >
+                <Eye className="h-4 w-4" />
+                View
+              </Button>
+              <Button
+                variant="outlineGold"
+                size="sm"
+                onClick={() => onFindPeople(p.id)}
+                disabled={disableFindPeople}
+                title={
+                  disableFindPeople
+                    ? "Available once your review is approved."
+                    : undefined
+                }
+              >
+                <Search className="h-4 w-4" />
+                Find people
+              </Button>
+            </div>
+          </div>
+        </article>
+      );
+    })}
   </div>
 );
 
@@ -564,5 +645,135 @@ const ProjectCriteriaPreview = ({
         <span className="text-muted-foreground/60">+{skills.length - 3}</span>
       )}
     </div>
+  );
+};
+
+// Builder-only feed of up to five recently published projects so a
+// builder lands on MyNet and immediately sees what's open. Each card
+// links into /talent so they can apply or browse from there.
+const FeaturedProjects = () => {
+  const [items, setItems] = useState<PublicProject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    listPublishedProjects()
+      .then((rows) => {
+        if (!cancelled) setItems(rows.slice(0, 5));
+      })
+      .catch(() => {
+        // soft-fail; empty state renders below
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded-sm border border-border bg-card/40 p-8 text-sm text-muted-foreground">
+        Loading projects...
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="rounded-sm border border-dashed border-border bg-card/40 p-8 text-center">
+        <h3 className="font-display text-xl mb-2">No projects yet.</h3>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          Founders are still spinning things up. Check back soon, or open
+          Talents to browse everything.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {items.map((p) => (
+        <FeaturedProjectCard key={p.id} project={p} />
+      ))}
+      <Link
+        to="/talent"
+        className="rounded-sm border border-dashed border-border bg-card/40 p-6 hover:border-gold/40 hover:bg-card transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-gold"
+      >
+        Browse all projects
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
+};
+
+const FeaturedProjectCard = ({ project }: { project: PublicProject }) => {
+  const founderUrl = getAvatarUrl(project.founderAvatarPath);
+  return (
+    <Link
+      to={`/match`}
+      className="group block rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-5"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <h3 className="font-display text-xl leading-tight truncate flex-1 group-hover:text-gold transition-colors">
+          {project.title}
+        </h3>
+        {project.businessType ? (
+          <span className="px-2 py-1 rounded-sm border border-gold/30 bg-gold/5 text-[10px] font-mono uppercase tracking-widest text-gold flex-shrink-0">
+            {project.businessType}
+          </span>
+        ) : null}
+      </div>
+
+      {(project.founderFullName || project.founderHeadline) ? (
+        <div className="flex items-center gap-2 mb-4">
+          {founderUrl ? (
+            <img
+              src={founderUrl}
+              alt={project.founderFullName}
+              className="h-7 w-7 rounded-sm object-cover border border-gold/30"
+              loading="lazy"
+            />
+          ) : (
+            <div className="h-7 w-7 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center font-display text-[10px] text-gold">
+              {(project.founderFullName[0] ?? "?").toUpperCase()}
+            </div>
+          )}
+          <span className="text-xs text-muted-foreground truncate">
+            <span className="text-foreground">
+              {project.founderFullName || "Anonymous"}
+            </span>
+            {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
+          </span>
+        </div>
+      ) : null}
+
+      {project.description ? (
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
+          {project.description}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap gap-3 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+        {project.criteria.commitment ? (
+          <span className="inline-flex items-center gap-1.5">
+            <BriefcaseIcon className="h-3 w-3 text-gold" />
+            {project.criteria.commitment}
+          </span>
+        ) : null}
+        {project.criteria.location ? (
+          <span className="inline-flex items-center gap-1.5">
+            <MapPinIcon className="h-3 w-3 text-gold" />
+            {project.criteria.location}
+          </span>
+        ) : null}
+        {project.criteria.skills.slice(0, 2).map((s) => (
+          <span key={s} className="text-[11px] normal-case tracking-normal text-muted-foreground">
+            {s}
+          </span>
+        ))}
+      </div>
+    </Link>
   );
 };

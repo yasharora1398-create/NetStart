@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useMemo, useCallback, useState } from "react";
 import {
   Stack,
   useFocusEffect,
@@ -19,6 +19,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowLeft,
+  Bookmark,
+  BookmarkCheck,
   Briefcase,
   Check,
   Eye,
@@ -27,6 +29,7 @@ import {
   MapPin,
   Pencil,
   Sparkles,
+  Star,
   Trash2,
   Undo2,
   X,
@@ -37,18 +40,58 @@ import {
   getAvatarUrl,
   getCandidatesByIds,
   getProjectById,
+  getPublicFounder,
   listApplicationsForProject,
   removePerson,
+  setProjectLifecycle,
   setProjectPublished,
   updateApplicationStatus,
   type IncomingApplication,
+  type PublicFounder,
 } from "@/lib/api";
-import type { Candidate, Project } from "@/lib/types";
-import { fonts, theme } from "@/lib/theme";
+import type {
+  Candidate,
+  Project,
+  ProjectLifecycle,
+  PublicProject,
+} from "@/lib/types";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import {
+  addSavedProject,
+  refreshSavedProject,
+  removeSavedProject,
+  setActiveSavedProject,
+  useActiveSavedProjectId,
+  useIsProjectSaved,
+} from "@/lib/savedProjects";
+import { MothEmptyState } from "@/components/MothEmptyState";
+import { MothLoader } from "@/components/MothLoader";
+
+// Re-pack a (private) Project + (public) Founder pair into the
+// PublicProject shape the local saved-projects store expects.
+const toPublicProject = (
+  p: Project,
+  f: PublicFounder | null,
+): PublicProject => ({
+  id: p.id,
+  ownerId: p.ownerId,
+  title: p.title,
+  description: p.description,
+  criteria: p.criteria,
+  businessType: p.businessType,
+  lifecycleState: p.lifecycleState,
+  createdAt: p.createdAt,
+  founderFullName: f?.fullName ?? "",
+  founderHeadline: f?.headline ?? "",
+  founderAvatarPath: f?.avatarPath ?? null,
+});
 
 type Tab = "saved" | "applications";
 
 export default function ProjectDetailScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -58,6 +101,20 @@ export default function ProjectDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("saved");
   const [acting, setActing] = useState<string | null>(null);
+  // Builder-side state (only fetched when viewer != owner)
+  const [founder, setFounder] = useState<PublicFounder | null>(null);
+
+  const isOwner = Boolean(
+    project && user && project.ownerId === user.id,
+  );
+
+  // Saved-projects state — only meaningful for the builder POV. The
+  // hooks no-op cleanly for owners (they just won't render the
+  // bookmark UI). Reading the active id keeps the focus star in sync
+  // when set/cleared from the Saved tab.
+  const isSaved = useIsProjectSaved(id ?? "");
+  const activeSavedId = useActiveSavedProjectId();
+  const isFocus = Boolean(id) && activeSavedId === id;
 
   const reload = useCallback(async () => {
     if (!id) return;
@@ -65,22 +122,35 @@ export default function ProjectDetailScreen() {
     try {
       const proj = await getProjectById(id);
       setProject(proj);
-      if (proj) {
+      if (!proj) return;
+      const ownerView = Boolean(user && proj.ownerId === user.id);
+      if (ownerView) {
         const [people, applications] = await Promise.all([
           proj.savedPersonIds.length > 0
             ? getCandidatesByIds(proj.savedPersonIds)
             : Promise.resolve([] as Candidate[]),
-          listApplicationsForProject(proj.id).catch(() => [] as IncomingApplication[]),
+          listApplicationsForProject(proj.id).catch(
+            () => [] as IncomingApplication[],
+          ),
         ]);
         setSaved(people);
         setApps(applications);
+      } else {
+        // Builder POV: fetch founder profile so the row can render
+        // their name + LinkedIn alongside the project body.
+        const f = await getPublicFounder(proj.ownerId).catch(() => null);
+        setFounder(f);
+        // If the builder already saved this project, freshen the
+        // cached row so the Saved tab reflects the latest title/desc
+        // without forcing them to unsave + resave.
+        refreshSavedProject(toPublicProject(proj, f));
       }
     } catch {
       // silent — empty state will render
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, user]);
 
   useFocusEffect(
     useCallback(() => {
@@ -129,6 +199,21 @@ export default function ProjectDetailScreen() {
     );
   };
 
+  const handleSetLifecycle = async (next: ProjectLifecycle) => {
+    if (!project || project.lifecycleState === next) return;
+    const prevState = project.lifecycleState;
+    setProject((p) => (p ? { ...p, lifecycleState: next } : p));
+    try {
+      await setProjectLifecycle(project.id, next);
+    } catch (err) {
+      setProject((p) => (p ? { ...p, lifecycleState: prevState } : p));
+      Alert.alert(
+        "Couldn't update",
+        err instanceof Error ? err.message : "Try again.",
+      );
+    }
+  };
+
   const handleTogglePublish = async () => {
     if (!project) return;
     const next = !project.isPublished;
@@ -169,7 +254,7 @@ export default function ProjectDetailScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
-          <ActivityIndicator color={theme.gold} />
+          <MothLoader size={160} />
         </View>
       </SafeAreaView>
     );
@@ -203,14 +288,36 @@ export default function ProjectDetailScreen() {
           <Text style={styles.headerTitle} numberOfLines={1}>
             {project.title}
           </Text>
-          <Pressable
-            onPress={() =>
-              router.push(`/edit-project?id=${project.id}` as never)
-            }
-            hitSlop={12}
-          >
-            <Pencil size={18} color={theme.gold} />
-          </Pressable>
+          {isOwner ? (
+            <Pressable
+              onPress={() =>
+                router.push(`/edit-project?id=${project.id}` as never)
+              }
+              hitSlop={12}
+            >
+              <Pencil size={18} color={theme.gold} />
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => {
+                if (isSaved) {
+                  removeSavedProject(project.id);
+                } else {
+                  addSavedProject(toPublicProject(project, founder));
+                }
+              }}
+              hitSlop={12}
+              accessibilityLabel={
+                isSaved ? "Remove from saved" : "Save project"
+              }
+            >
+              {isSaved ? (
+                <BookmarkCheck size={20} color={theme.gold} fill={theme.gold} />
+              ) : (
+                <Bookmark size={20} color={theme.text} />
+              )}
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.heroBox}>
@@ -243,29 +350,62 @@ export default function ProjectDetailScreen() {
               {project.description}
             </Text>
           ) : null}
-          <Pressable
-            onPress={handleTogglePublish}
-            style={({ pressed }) => [
-              styles.publishToggle,
-              pressed && { opacity: 0.85 },
-            ]}
-          >
-            {project.isPublished ? (
-              <>
-                <EyeOff size={12} color={theme.textMuted} />
-                <Text style={styles.publishToggleText}>Unpublish</Text>
-              </>
-            ) : (
-              <>
-                <Eye size={12} color={theme.gold} />
-                <Text
-                  style={[styles.publishToggleText, { color: theme.gold }]}
-                >
-                  Publish to Talent
-                </Text>
-              </>
-            )}
-          </Pressable>
+          {isOwner ? (
+            <View style={styles.ownerControlsRow}>
+              <Pressable
+                onPress={handleTogglePublish}
+                style={({ pressed }) => [
+                  styles.publishToggle,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                {project.isPublished ? (
+                  <>
+                    <EyeOff size={12} color={theme.textMuted} />
+                    <Text style={styles.publishToggleText}>Unpublish</Text>
+                  </>
+                ) : (
+                  <>
+                    <Eye size={12} color={theme.gold} />
+                    <Text
+                      style={[styles.publishToggleText, { color: theme.gold }]}
+                    >
+                      Publish to Talent
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+
+              {/* Lifecycle picker. Only Active projects appear in
+                  Browse / Search; the others stay listed for the
+                  owner but are hidden from builders. */}
+              {(["active", "paused", "filled", "closed"] as const).map(
+                (s) => {
+                  const on = project.lifecycleState === s;
+                  return (
+                    <Pressable
+                      key={s}
+                      onPress={() => handleSetLifecycle(s)}
+                      style={({ pressed }) => [
+                        styles.lifecycleChip,
+                        on && styles.lifecycleChipOn,
+                        pressed && { opacity: 0.8 },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.lifecycleChipText,
+                          on && { color: theme.gold },
+                        ]}
+                      >
+                        {s}
+                      </Text>
+                    </Pressable>
+                  );
+                },
+              )}
+            </View>
+          ) : null}
           {(project.criteria.commitment || project.criteria.location) && (
             <View style={styles.metaRow}>
               {project.criteria.commitment ? (
@@ -288,27 +428,33 @@ export default function ProjectDetailScreen() {
           )}
         </View>
 
-        {/* Tabs */}
+        {/* Tabs (owner only). Builders see the public detail view below. */}
+        {isOwner && (
+          <>
         <View style={styles.tabs}>
           <TabButton
             label={`Saved (${saved.length})`}
             active={tab === "saved"}
             onPress={() => setTab("saved")}
+            styles={styles}
+            theme={theme}
           />
           <TabButton
             label={`Applications (${apps.length})`}
             active={tab === "applications"}
             onPress={() => setTab("applications")}
+            styles={styles}
+            theme={theme}
           />
         </View>
 
         {tab === "saved" ? (
           saved.length === 0 ? (
-            <View style={styles.center}>
-              <Text style={styles.empty}>
-                No saved candidates yet. Use the Match tab to start saving.
-              </Text>
-            </View>
+            <MothEmptyState
+              variant="saves"
+              title="No saved candidates yet."
+              sub="Use the Match tab to start saving operators against this project."
+            />
           ) : (
             <FlatList
               data={saved}
@@ -365,11 +511,11 @@ export default function ProjectDetailScreen() {
             />
           )
         ) : apps.length === 0 ? (
-          <View style={styles.center}>
-            <Text style={styles.empty}>
-              No applications yet. Publish the project so candidates can apply.
-            </Text>
-          </View>
+          <MothEmptyState
+            variant="apps"
+            title="No applications yet."
+            sub="Publish the project so candidates can apply. Their pitches land here."
+          />
         ) : (
           <FlatList
             data={apps}
@@ -401,11 +547,11 @@ export default function ProjectDetailScreen() {
                         </Text>
                       ) : null}
                     </View>
-                    <View style={[styles.statusPill, statusStyle(app.status)]}>
+                    <View style={[styles.statusPill, statusStyle(app.status, theme)]}>
                       <Text
                         style={[
                           styles.statusPillText,
-                          { color: statusColor(app.status) },
+                          { color: statusColor(app.status, theme) },
                         ]}
                       >
                         {statusLabel(app.status)}
@@ -485,19 +631,172 @@ export default function ProjectDetailScreen() {
             }}
           />
         )}
+          </>
+        )}
+
+        {/* Builder POV — when the viewer is not the project owner. */}
+        {!isOwner && (
+          <BuilderProjectBody
+            project={project}
+            founder={founder}
+            isSaved={isSaved}
+            isFocus={isFocus}
+            onToggleFocus={() => {
+              // Auto-save before promoting to focus so the builder
+              // doesn't have to do it in two taps.
+              if (!isSaved) {
+                addSavedProject(toPublicProject(project, founder));
+              }
+              setActiveSavedProject(project.id);
+            }}
+            onMessageFounder={() =>
+              router.push(`/chat/${project.ownerId}` as never)
+            }
+            styles={styles}
+            theme={theme}
+          />
+        )}
       </SafeAreaView>
     </>
   );
 }
 
+// ────────────────────────────────────────────────────────────────
+// Builder-facing project detail body. Shown when a non-owner
+// (typically a builder) navigates to /project/[id]. Renders the
+// founder profile + Apply CTA, or a status pill if they've already
+// applied.
+// ────────────────────────────────────────────────────────────────
+const BuilderProjectBody = ({
+  project,
+  founder,
+  isSaved,
+  isFocus,
+  onToggleFocus,
+  onMessageFounder,
+  styles,
+  theme,
+}: {
+  project: Project;
+  founder: PublicFounder | null;
+  isSaved: boolean;
+  isFocus: boolean;
+  onToggleFocus: () => void;
+  onMessageFounder: () => void;
+  styles: ReturnType<typeof makeStyles>;
+  theme: ThemePalette;
+}) => {
+  const founderUrl = getAvatarUrl(founder?.avatarPath ?? null);
+  const skills = project.criteria.skills;
+  return (
+    <View style={styles.builderBody}>
+      {project.description ? (
+        <View style={styles.builderSection}>
+          <Text style={styles.builderSectionLabel}>About this project</Text>
+          <Text style={styles.builderProse}>{project.description}</Text>
+        </View>
+      ) : null}
+
+      {skills.length > 0 ? (
+        <View style={styles.builderSection}>
+          <Text style={styles.builderSectionLabel}>Skills they're after</Text>
+          <View style={styles.skillRow}>
+            {skills.map((s) => (
+              <View key={s} style={styles.skillChip}>
+                <Text style={styles.skillText}>{s}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {founder && (
+        <View style={styles.builderSection}>
+          <Text style={styles.builderSectionLabel}>The founder</Text>
+          <View style={styles.builderFounderCard}>
+            {founderUrl ? (
+              <Image source={{ uri: founderUrl }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarInitials}>
+                  {(founder.fullName[0] ?? "?").toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name} numberOfLines={1}>
+                {founder.fullName || "Anonymous founder"}
+              </Text>
+              {founder.headline ? (
+                <Text style={styles.sub} numberOfLines={2}>
+                  {founder.headline}
+                </Text>
+              ) : null}
+              {founder.linkedinUrl ? (
+                <Pressable
+                  onPress={() => Linking.openURL(founder.linkedinUrl)}
+                  style={styles.linkRow}
+                >
+                  <ExternalLink size={11} color={theme.gold} />
+                  <Text style={styles.linkText}>LinkedIn</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Sticky CTA cluster: focus toggle (when saved) + Message
+          founder primary action. The builder's first message creates
+          the pending request. */}
+      <View style={styles.builderCtaWrap}>
+        {isSaved ? (
+          <Pressable
+            onPress={onToggleFocus}
+            style={({ pressed }) => [
+              styles.focusToggleBtn,
+              isFocus && styles.focusToggleBtnOn,
+              pressed && { opacity: 0.85 },
+            ]}
+          >
+            <Star
+              size={13}
+              color={theme.gold}
+              fill={isFocus ? theme.gold : "transparent"}
+            />
+            <Text style={styles.focusToggleText}>
+              {isFocus ? "Current focus" : "Set as focus"}
+            </Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          onPress={onMessageFounder}
+          style={({ pressed }) => [
+            styles.builderApplyBtn,
+            pressed && { opacity: 0.85 },
+          ]}
+        >
+          <Text style={styles.builderApplyText}>
+            Message {founder?.fullName.split(" ")[0] || "founder"}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
 const TabButton = ({
   label,
   active,
   onPress,
+  styles,
+  theme,
 }: {
   label: string;
   active: boolean;
   onPress: () => void;
+  styles: ReturnType<typeof makeStyles>;
+  theme: ThemePalette;
 }) => (
   <Pressable
     onPress={onPress}
@@ -522,7 +821,7 @@ const statusLabel = (s: string) =>
         ? "Rejected"
         : "Withdrawn";
 
-const statusColor = (s: string) =>
+const statusColor = (s: string, theme: ThemePalette) =>
   s === "accepted"
     ? theme.emerald
     : s === "rejected"
@@ -531,12 +830,12 @@ const statusColor = (s: string) =>
         ? theme.textMuted
         : theme.gold;
 
-const statusStyle = (s: string) => {
-  const c = statusColor(s);
+const statusStyle = (s: string, theme: ThemePalette) => {
+  const c = statusColor(s, theme);
   return { borderColor: c + "66", backgroundColor: c + "1A" };
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
   empty: { color: theme.textMuted, textAlign: "center", lineHeight: 20 },
@@ -632,6 +931,30 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   publishToggleText: {
+    color: theme.textMuted,
+    fontFamily: fonts.mono,
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+  },
+  ownerControlsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 10,
+  },
+  lifecycleChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: theme.border,
+    borderRadius: 2,
+  },
+  lifecycleChipOn: {
+    borderColor: theme.goldSoft,
+    backgroundColor: theme.goldGlow,
+  },
+  lifecycleChipText: {
     color: theme.textMuted,
     fontFamily: fonts.mono,
     fontSize: 10,
@@ -780,5 +1103,91 @@ const styles = StyleSheet.create({
   actionReset: {
     paddingHorizontal: 6,
     paddingVertical: 5,
+  },
+  // Builder POV: body sections, founder card, apply CTA / status pill
+  builderBody: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 28,
+  },
+  builderSection: { marginBottom: 22 },
+  builderSectionLabel: {
+    color: theme.gold,
+    fontFamily: fonts.mono,
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 1.8,
+    marginBottom: 8,
+  },
+  builderProse: {
+    color: theme.text,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  builderFounderCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    backgroundColor: theme.bgElev,
+    borderWidth: 1,
+    borderColor: theme.border,
+    borderRadius: 12,
+  },
+  builderCtaWrap: {
+    marginTop: "auto",
+    gap: 10,
+  },
+  focusToggleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: theme.border,
+    backgroundColor: theme.bgElev,
+  },
+  focusToggleBtnOn: {
+    borderColor: theme.goldSoft,
+    backgroundColor: theme.goldGlow,
+  },
+  focusToggleText: {
+    color: theme.gold,
+    fontSize: 12,
+    fontFamily: fonts.mono,
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  builderApplyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 50,
+    backgroundColor: theme.gold,
+    borderRadius: 12,
+  },
+  builderApplyText: {
+    color: theme.textOnPrimary,
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+  },
+  builderStatus: {
+    height: 50,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  builderStatusText: {
+    fontFamily: fonts.mono,
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
   },
 });

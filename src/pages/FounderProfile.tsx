@@ -7,6 +7,7 @@ import {
   Linkedin,
   Loader2,
   MapPin,
+  MessageCircle,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -186,8 +187,18 @@ const FounderProfile = () => {
                   </div>
                 )}
 
-                {founder.linkedinUrl && (
-                  <div className="mt-6 pt-6 border-t border-border">
+                <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  {user && id && user.id !== id ? (
+                    <Link to={`/chats/${id}`} className="inline-block">
+                      <Button variant="gold" size="lg">
+                        <MessageCircle className="h-4 w-4" />
+                        Message {founder.fullName.split(" ")[0] || "founder"}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <span />
+                  )}
+                  {founder.linkedinUrl && (
                     <a
                       href={founder.linkedinUrl}
                       target="_blank"
@@ -195,11 +206,11 @@ const FounderProfile = () => {
                       className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
                     >
                       <Linkedin className="h-4 w-4" />
-                      {founder.linkedinUrl}
+                      LinkedIn
                       <ExternalLink className="h-3 w-3 opacity-60" />
                     </a>
-                  </div>
-                )}
+                  )}
+                </div>
               </header>
 
               <section>

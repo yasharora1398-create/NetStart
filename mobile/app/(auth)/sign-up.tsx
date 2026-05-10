@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "expo-router";
 import {
   ActivityIndicator,
@@ -12,15 +12,22 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowRight } from "lucide-react-native";
+import { ArrowRight, Rocket, Users } from "lucide-react-native";
 import { useAuth } from "@/lib/auth";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import type { Role } from "@/lib/userRole";
 
 export default function SignUp() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { signUp } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Founder = has a startup, looking for people to join.
+  // Builder = looking for a startup to join.
+  const [role, setRole] = useState<Role>("builder");
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
@@ -32,7 +39,7 @@ export default function SignUp() {
       return;
     }
     setSubmitting(true);
-    const { error } = await signUp(email.trim(), password, name.trim());
+    const { error } = await signUp(email.trim(), password, name.trim(), role);
     setSubmitting(false);
     if (error) {
       Alert.alert("Sign up failed", error.message);
@@ -52,7 +59,7 @@ export default function SignUp() {
       >
         <View style={styles.container}>
           <Text style={styles.eyebrow}>Create account</Text>
-          <Text style={styles.h1}>Join NetStart.</Text>
+          <Text style={styles.h1}>Join Vettd.</Text>
           <Text style={styles.body}>
             Founders and operators who actually ship.
           </Text>
@@ -98,6 +105,67 @@ export default function SignUp() {
             />
           </View>
 
+          {/* Role picker — founder vs builder. Drives Match filtering
+              and the Apply / Request-chat CTA semantics throughout the
+              app. Stored on the auth user's user_metadata.role. */}
+          <View style={styles.field}>
+            <Text style={styles.label}>I am a…</Text>
+            <View style={styles.roleRow}>
+              <Pressable
+                onPress={() => setRole("founder")}
+                style={({ pressed }) => [
+                  styles.roleBtn,
+                  role === "founder" && styles.roleBtnActive,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <Rocket
+                  size={16}
+                  color={role === "founder" ? theme.gold : theme.textMuted}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.roleTitle,
+                      role === "founder" && { color: theme.gold },
+                    ]}
+                  >
+                    Founder
+                  </Text>
+                  <Text style={styles.roleHint}>
+                    I have a startup, looking for people to join.
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable
+                onPress={() => setRole("builder")}
+                style={({ pressed }) => [
+                  styles.roleBtn,
+                  role === "builder" && styles.roleBtnActive,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <Users
+                  size={16}
+                  color={role === "builder" ? theme.gold : theme.textMuted}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.roleTitle,
+                      role === "builder" && { color: theme.gold },
+                    ]}
+                  >
+                    Builder
+                  </Text>
+                  <Text style={styles.roleHint}>
+                    I'm looking for a startup to join.
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+
           <Pressable
             style={({ pressed }) => [
               styles.primaryBtn,
@@ -129,7 +197,7 @@ export default function SignUp() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   flex: { flex: 1 },
   container: { flex: 1, padding: 24, justifyContent: "center" },
@@ -201,5 +269,34 @@ const styles = StyleSheet.create({
     color: theme.gold,
     fontSize: 14,
     fontWeight: "600",
+  },
+  roleRow: {
+    gap: 8,
+  },
+  roleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: theme.bgElev,
+    borderWidth: 1,
+    borderColor: theme.border,
+    borderRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  roleBtnActive: {
+    borderColor: theme.gold,
+    backgroundColor: theme.goldGlow,
+  },
+  roleTitle: {
+    color: theme.text,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  roleHint: {
+    color: theme.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

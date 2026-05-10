@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -26,9 +26,12 @@ import {
   type PublicFounder,
 } from "@/lib/api";
 import type { PublicProject } from "@/lib/types";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 export default function FounderProfileScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [founder, setFounder] = useState<PublicFounder | null>(null);
@@ -139,13 +142,13 @@ export default function FounderProfileScreen() {
           </View>
 
           {founder.bio ? (
-            <Section title="Pitch / Bio">
+            <Section title="Pitch / Bio" styles={styles}>
               <Text style={styles.bio}>{founder.bio}</Text>
             </Section>
           ) : null}
 
           {founder.skills.length > 0 ? (
-            <Section title="Skills">
+            <Section title="Skills" styles={styles}>
               <View style={styles.skillRow}>
                 {founder.skills.map((s) => (
                   <View key={s} style={styles.skillChip}>
@@ -157,7 +160,7 @@ export default function FounderProfileScreen() {
           ) : null}
 
           {founder.linkedinUrl ? (
-            <Section title="Contact">
+            <Section title="Contact" styles={styles}>
               <Pressable
                 onPress={() => Linking.openURL(founder.linkedinUrl)}
                 style={styles.linkRow}
@@ -173,6 +176,7 @@ export default function FounderProfileScreen() {
 
           <Section
             title={`Active projects (${projects.length})`}
+            styles={styles}
           >
             {projects.length === 0 ? (
               <Text style={styles.empty}>No published projects yet.</Text>
@@ -206,9 +210,11 @@ export default function FounderProfileScreen() {
 const Section = ({
   title,
   children,
+  styles,
 }: {
   title: string;
   children: React.ReactNode;
+  styles: ReturnType<typeof makeStyles>;
 }) => (
   <View style={{ marginBottom: 22 }}>
     <Text style={styles.sectionTitle}>{title}</Text>
@@ -216,7 +222,7 @@ const Section = ({
   </View>
 );
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
   empty: { color: theme.textMuted, textAlign: "center", lineHeight: 20 },

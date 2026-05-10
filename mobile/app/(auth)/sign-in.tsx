@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "expo-router";
 import {
   ActivityIndicator,
@@ -14,9 +14,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowRight } from "lucide-react-native";
 import { useAuth } from "@/lib/auth";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 export default function SignIn() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +43,7 @@ export default function SignIn() {
         style={styles.flex}
       >
         <View style={styles.container}>
-          <Text style={styles.eyebrow}>NetStart</Text>
+          <Text style={styles.eyebrow}>Vettd</Text>
           <Text style={styles.h1}>Welcome back.</Text>
           <Text style={styles.body}>Sign in to continue.</Text>
 
@@ -118,7 +121,7 @@ export default function SignIn() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   flex: { flex: 1 },
   container: { flex: 1, padding: 24, justifyContent: "center" },

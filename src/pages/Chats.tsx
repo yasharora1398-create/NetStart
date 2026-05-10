@@ -1,365 +1,253 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Briefcase,
-  Check,
-  ExternalLink,
-  Inbox,
-  Linkedin,
-  Loader2,
-  MessageCircle,
-  Sparkles,
-} from "lucide-react";
-import { toast } from "sonner";
+/**
+ * Chats — full-bleed two-column layout. Left rail: thread list with
+ * search. Right pane: active conversation with realtime updates.
+ *
+ * URL drives selection: /chats shows the placeholder; /chats/:id
+ * opens that thread. Selecting a thread navigates so deep links work
+ * and the back button does the right thing.
+ */
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { AlertCircle, MessageCircle, RefreshCw } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useReviewStatus } from "@/hooks/useReviewStatus";
 import {
-  acceptChatRequest,
-  getAvatarUrl,
-  listChatContacts,
-  listNotifications,
-  markNotificationsRead,
+  getCandidatesByIds,
+  listChatThreads,
+  type ChatThreadSummary,
 } from "@/lib/mynet-storage";
-import type { AppNotification, ChatContact } from "@/lib/mynet-types";
-
-const initials = (name: string): string => {
-  if (!name.trim()) return "?";
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
-};
-
-const formatWhen = (iso: string): string => {
-  try {
-    const d = new Date(iso);
-    const diff = Date.now() - d.getTime();
-    const min = Math.round(diff / 60_000);
-    if (min < 1) return "just now";
-    if (min < 60) return `${min}m ago`;
-    const h = Math.round(min / 60);
-    if (h < 24) return `${h}h ago`;
-    const days = Math.round(h / 24);
-    if (days < 7) return `${days}d ago`;
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  } catch {
-    return iso;
-  }
-};
+import {
+  ChatThreadList,
+  mergeThreadProfiles,
+  type ThreadListItem,
+} from "@/components/chat/ChatThreadList";
+import { ChatConversation } from "@/components/chat/ChatConversation";
+import { cn } from "@/lib/utils";
 
 const Chats = () => {
   const { user, loading } = useAuth();
-  const [items, setItems] = useState<AppNotification[]>([]);
-  const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [loadingData, setLoadingData] = useState(false);
-  const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const reviewStatus = useReviewStatus();
+  const needsSetup =
+    Boolean(user) && reviewStatus !== null && reviewStatus !== "accepted";
+  const { id: routeContactId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [threads, setThreads] = useState<ChatThreadSummary[]>([]);
+  const [profiles, setProfiles] = useState<Map<string, { fullName: string; avatarPath: string | null }>>(
+    () => new Map(),
+  );
+  const [loadingThreads, setLoadingThreads] = useState(true);
 
-  const refresh = async () => {
-    setLoadingData(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadThreads = useCallback(async () => {
+    if (!user) return;
+    setLoadingThreads(true);
+    setLoadError(null);
     try {
-      const [list, c] = await Promise.all([
-        listNotifications(50),
-        listChatContacts().catch(() => [] as ChatContact[]),
-      ]);
-      setItems(list);
-      setContacts(c);
-      const unreadIds = list
-        .filter((n) => n.type === "chat_request" && !n.readAt)
-        .map((n) => n.id);
-      if (unreadIds.length > 0) {
-        markNotificationsRead(unreadIds).catch(() => {
-          /* swallow */
-        });
+      const ts = await listChatThreads();
+      setThreads(ts);
+      const ids = ts.map((t) => t.contactId);
+      if (ids.length > 0) {
+        try {
+          const cands = await getCandidatesByIds(ids);
+          const next = new Map<string, { fullName: string; avatarPath: string | null }>();
+          for (const c of cands) {
+            next.set(c.userId, {
+              fullName: c.fullName,
+              avatarPath: c.avatarPath,
+            });
+          }
+          setProfiles(next);
+        } catch (err) {
+          // Profile fetch failed — rows still render with raw names.
+          // Logged so we can see it in the dev console.
+          console.error("getCandidatesByIds failed:", err);
+        }
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load.");
+      // Surface the underlying Supabase error so we can debug missing
+      // RPCs / RLS issues instead of silently showing an empty state.
+      console.error("listChatThreads failed:", err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : err && typeof err === "object" && "message" in err
+            ? String((err as { message?: unknown }).message ?? "")
+            : "Unknown error";
+      setLoadError(msg || "Could not load conversations.");
     } finally {
-      setLoadingData(false);
+      setLoadingThreads(false);
     }
-  };
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    setLoadingData(true);
-    Promise.all([
-      listNotifications(50),
-      listChatContacts().catch(() => [] as ChatContact[]),
-    ])
-      .then(([list, c]) => {
-        if (cancelled) return;
-        setItems(list);
-        setContacts(c);
-        const unreadIds = list
-          .filter((n) => n.type === "chat_request" && !n.readAt)
-          .map((n) => n.id);
-        if (unreadIds.length > 0) {
-          markNotificationsRead(unreadIds).catch(() => {
-            /* swallow */
-          });
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          toast.error(err instanceof Error ? err.message : "Failed to load.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingData(false);
-      });
-    return () => {
-      cancelled = true;
-    };
   }, [user]);
 
-  const isAuthed = Boolean(user) && !loading;
-  // Hide chat requests from contacts we've already accepted, so the
-  // request doesn't linger after Accept.
-  const acceptedIds = new Set(contacts.map((c) => c.contactId));
-  const requests = items.filter(
-    (n) =>
-      n.type === "chat_request" &&
-      (n.fromUserId == null || !acceptedIds.has(n.fromUserId)),
+  useEffect(() => {
+    void loadThreads();
+  }, [loadThreads]);
+
+  // If the route id isn't already in the threads list (e.g. user
+  // landed via a deep link or just clicked Message on a profile), we
+  // still want a row at the top so they can see who they're talking
+  // to. We synthesize a placeholder thread row.
+  const items: ThreadListItem[] = useMemo(() => {
+    const merged = mergeThreadProfiles(
+      threads,
+      Array.from(profiles.entries()).map(([userId, p]) => ({
+        userId,
+        fullName: p.fullName,
+        linkedinUrl: "",
+        headline: "",
+        bio: "",
+        skills: [],
+        location: "",
+        commitment: "",
+        resumeName: null,
+        resumePath: null,
+        avatarPath: p.avatarPath,
+      })),
+    );
+    if (
+      routeContactId &&
+      !merged.some((t) => t.contactId === routeContactId)
+    ) {
+      merged.unshift({
+        contactId: routeContactId,
+        lastBody: "",
+        lastAt: null,
+        lastSender: null,
+        state: "none",
+        acceptedAt: null,
+        fullName: profiles.get(routeContactId)?.fullName ?? "",
+        avatarPath: profiles.get(routeContactId)?.avatarPath ?? null,
+      });
+    }
+    return merged;
+  }, [threads, profiles, routeContactId]);
+
+  const selected = useMemo(
+    () => items.find((t) => t.contactId === routeContactId) ?? null,
+    [items, routeContactId],
   );
 
-  const handleAccept = async (n: AppNotification) => {
-    if (acceptingId) return;
-    setAcceptingId(n.id);
-    try {
-      await acceptChatRequest(n.id);
-      toast.success("Chat accepted. They're now in your DMs.");
-      await refresh();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not accept.");
-    } finally {
-      setAcceptingId(null);
-    }
-  };
-
   return (
-    <AppLayout blurred={!isAuthed}>
-        <div className="container max-w-3xl">
-          <header className="mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
-              <Sparkles className="h-3 w-3 text-gold" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-                Chats
-              </span>
+    <AppLayout>
+      <AuthGate
+        authLoading={loading}
+        signedIn={Boolean(user)}
+        needsSetup={needsSetup}
+        authTitle="Sign in to chat"
+        authBody="Conversations live with your account so we can keep the thread going across devices."
+        setupTitle="Finish setting up MyNet to chat."
+        setupBody="Chat unlocks once your MyNet profile is set up. It only takes a minute."
+      >
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div
+              className={cn(
+                "grid h-[calc(100vh-9rem)] min-h-[520px] overflow-hidden rounded-2xl border border-border bg-card/40 shadow-sm",
+                // One column on mobile, two on md+. On mobile we hide
+                // whichever pane isn't relevant (list when a thread
+                // is open, pane when not).
+                "md:grid-cols-[320px_1fr]",
+              )}
+            >
+              <div
+                className={cn(
+                  "min-h-0",
+                  selected ? "hidden md:flex md:flex-col" : "flex flex-col",
+                )}
+              >
+                <ChatThreadList
+                  items={items}
+                  selectedId={routeContactId ?? null}
+                  currentUserId={user?.id ?? null}
+                  loading={loadingThreads}
+                  onSelect={(id) => navigate(`/chats/${id}`)}
+                />
+              </div>
+              <div
+                className={cn(
+                  "min-h-0",
+                  selected ? "flex flex-col" : "hidden md:flex md:flex-col",
+                )}
+              >
+                {selected && user ? (
+                  <ChatConversation
+                    key={selected.contactId}
+                    contactId={selected.contactId}
+                    currentUserId={user.id}
+                    initialProfile={
+                      selected.fullName || selected.avatarPath
+                        ? {
+                            fullName: selected.fullName,
+                            headline: "",
+                            avatarPath: selected.avatarPath,
+                            linkedinUrl: "",
+                          }
+                        : null
+                    }
+                    onThreadsChanged={loadThreads}
+                    onThreadDeleted={() => {
+                      setThreads((prev) =>
+                        prev.filter((t) => t.contactId !== selected.contactId),
+                      );
+                      navigate("/chats");
+                    }}
+                  />
+                ) : loadError ? (
+                  <ErrorPanel message={loadError} onRetry={loadThreads} />
+                ) : (
+                  <Placeholder />
+                )}
+              </div>
             </div>
-            <h1 className="font-display text-4xl md:text-6xl leading-[1] mb-4">
-              Conversations.
-            </h1>
-            <p className="text-muted-foreground max-w-xl">
-              Chat requests land in Requests. Once you accept, they show up in
-              your DMs.
-            </p>
-          </header>
-
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-2xl">
-                Requests{" "}
-                <span className="text-muted-foreground">
-                  ({requests.length})
-                </span>
-              </h2>
-            </div>
-
-            {loadingData ? (
-              <Loading />
-            ) : requests.length === 0 ? (
-              <Empty
-                icon={<Inbox className="h-6 w-6 text-gold mx-auto mb-3" />}
-                title="No requests yet."
-                body="When a founder asks you to chat, or you ask one to look at your profile, it will show up here."
-              />
-            ) : (
-              <ul className="space-y-3">
-                {requests.map((r) => (
-                  <li
-                    key={r.id}
-                    className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-5"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-                        <MessageCircle className="h-4 w-4 text-gold" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-3 mb-1">
-                          <h3 className="font-display text-lg leading-tight">
-                            {r.title}
-                          </h3>
-                          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex-shrink-0">
-                            {formatWhen(r.createdAt)}
-                          </span>
-                        </div>
-                        {r.body && (
-                          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line mb-4">
-                            {r.body}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {r.fromUserId ? (
-                            <Link to={`/u/${r.fromUserId}`}>
-                              <Button variant="outlineGold" size="sm">
-                                <Briefcase className="h-4 w-4" />
-                                Check out their business
-                              </Button>
-                            </Link>
-                          ) : (
-                            <Button
-                              variant="outlineGold"
-                              size="sm"
-                              disabled
-                              title="Sender info missing on this request"
-                            >
-                              <Briefcase className="h-4 w-4" />
-                              Check out their business
-                            </Button>
-                          )}
-                          <Button
-                            variant="gold"
-                            size="sm"
-                            onClick={() => handleAccept(r)}
-                            disabled={
-                              acceptingId === r.id || r.fromUserId == null
-                            }
-                          >
-                            {acceptingId === r.id ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Accepting...
-                              </>
-                            ) : (
-                              <>
-                                <Check className="h-4 w-4" />
-                                Accept chat
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-2xl">
-                DMs{" "}
-                <span className="text-muted-foreground">
-                  ({contacts.length})
-                </span>
-              </h2>
-            </div>
-
-            {contacts.length === 0 ? (
-              <Empty
-                icon={
-                  <MessageCircle className="h-6 w-6 text-gold mx-auto mb-3" />
-                }
-                title="No contacts yet."
-                body="Accept a chat request and they'll show up here. In-app messaging is coming soon. For now, reach out via LinkedIn."
-              />
-            ) : (
-              <ul className="space-y-3">
-                {contacts.map((c) => {
-                  const avatar = getAvatarUrl(c.avatarPath);
-                  return (
-                    <li
-                      key={c.contactId}
-                      className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-5"
-                    >
-                      <div className="flex items-center gap-4">
-                        {avatar ? (
-                          <img
-                            src={avatar}
-                            alt={c.fullName}
-                            className="h-12 w-12 rounded-sm object-cover border border-gold/40 flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="h-12 w-12 rounded-sm bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
-                            <span className="font-display text-base text-gold">
-                              {initials(c.fullName)}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-display text-lg leading-tight truncate">
-                            {c.fullName || "Unnamed"}
-                          </h3>
-                          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                            Connected {formatWhen(c.connectedAt)}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Link to={`/u/${c.contactId}`}>
-                            <Button variant="ghost" size="sm">
-                              <Briefcase className="h-4 w-4" />
-                              View
-                            </Button>
-                          </Link>
-                          {c.linkedinUrl && (
-                            <a
-                              href={c.linkedinUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Button variant="outlineGold" size="sm">
-                                <Linkedin className="h-4 w-4" />
-                                Message
-                                <ExternalLink className="h-3 w-3 opacity-60" />
-                              </Button>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
+          </div>
         </div>
-
-      {!loading && !user && <AuthGate />}
+      </AuthGate>
     </AppLayout>
   );
 };
 
-const Loading = () => (
-  <div className="rounded-sm border border-border bg-card/40 p-8 text-center">
-    <Loader2 className="h-5 w-5 text-gold animate-spin mx-auto mb-3" />
-    <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-      Loading...
+const Placeholder = () => (
+  <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+    <MessageCircle className="size-6 text-muted-foreground" aria-hidden />
+    <p className="font-display text-base text-foreground">
+      Select a conversation
+    </p>
+    <p className="max-w-sm text-sm text-muted-foreground">
+      Pick a thread on the left to read it, or open someone's profile to
+      start a new one.
     </p>
   </div>
 );
 
-const Empty = ({
-  icon,
-  title,
-  body,
+// Surfaces the actual server error so we can debug missing RPCs and
+// RLS denials instead of silently rendering empty space. Most common
+// hits here are migrations 0019/0020 not applied (PGRST202) and the
+// realtime publication missing chat_messages.
+const ErrorPanel = ({
+  message,
+  onRetry,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
+  message: string;
+  onRetry: () => void;
 }) => (
-  <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
-    {icon}
-    <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-2">
-      Empty
+  <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+    <AlertCircle className="size-6 text-destructive" aria-hidden />
+    <p className="font-display text-base text-foreground">
+      Couldn't load conversations
     </p>
-    <h3 className="font-display text-2xl mb-2">{title}</h3>
-    <p className="text-sm text-muted-foreground max-w-md mx-auto">{body}</p>
+    <p className="max-w-md text-sm text-muted-foreground break-words">
+      {message}
+    </p>
+    <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
+      <RefreshCw className="size-3.5" />
+      Retry
+    </Button>
   </div>
 );
 

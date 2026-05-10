@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  Bookmark,
+  BookmarkCheck,
   Briefcase,
   Check,
   Compass,
@@ -36,6 +38,11 @@ import {
   matchProjectsForMe,
   requestReview,
 } from "@/lib/mynet-storage";
+import {
+  addSavedProject,
+  removeSavedProject,
+  useIsProjectSaved,
+} from "@/lib/savedProjects";
 import type {
   ApplicationStatus,
   PublicProject,
@@ -287,10 +294,12 @@ const Talent = () => {
                       <h3 className="font-display text-xl sm:text-2xl leading-tight">
                         {p.title}
                       </h3>
-                      {isOwn && (
+                      {isOwn ? (
                         <span className="px-2 py-1 rounded-sm border border-gold/40 bg-gold/10 text-[10px] font-mono uppercase tracking-widest text-gold flex-shrink-0">
                           Your project
                         </span>
+                      ) : (
+                        <SaveProjectButton project={p} />
                       )}
                     </div>
 
@@ -424,6 +433,36 @@ const Talent = () => {
         onApplied={handleApplied}
       />
     </AppLayout>
+  );
+};
+
+// Bookmark toggle. Persists builder-side via the localStorage-backed
+// savedProjects store; the Saved page reads from the same store.
+const SaveProjectButton = ({ project }: { project: PublicProject }) => {
+  const isSaved = useIsProjectSaved(project.id);
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isSaved) {
+          removeSavedProject(project.id);
+          toast.success("Removed from saved.");
+        } else {
+          addSavedProject(project);
+          toast.success("Saved.");
+        }
+      }}
+      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+      aria-label={isSaved ? "Remove from saved" : "Save project"}
+    >
+      {isSaved ? (
+        <BookmarkCheck className="h-4 w-4 text-gold" />
+      ) : (
+        <Bookmark className="h-4 w-4" />
+      )}
+    </button>
   );
 };
 

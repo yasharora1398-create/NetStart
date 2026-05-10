@@ -1,13 +1,17 @@
-import { ArrowRight, Eye, EyeOff, MoreVertical, Pencil, Search, Trash2, Users } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, CheckCircle, Eye, EyeOff, MoreVertical, Pause, Pencil, Search, Star, Trash2, Users, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Project } from "@/lib/mynet-types";
+import type { Project, ProjectLifecycle } from "@/lib/mynet-types";
+import { setProjectLifecycle } from "@/lib/mynet-storage";
 import { hasAnyCriteria } from "@/lib/matching";
 
 type ProjectCardProps = {
@@ -17,7 +21,21 @@ type ProjectCardProps = {
   onFindPeople: () => void;
   onOpen: () => void;
   onTogglePublish: () => void;
+  onLifecycleChanged?: () => void;
+  /** Is this the founder's currently-active project? */
+  isActive?: boolean;
+  /** Mark this project as the one driving Match. Pass null-clear via the same handler. */
+  onSetActive?: () => void;
 };
+
+const lifecycleLabel = (s: ProjectLifecycle): string =>
+  s === "active"
+    ? "Active"
+    : s === "paused"
+      ? "Paused"
+      : s === "filled"
+        ? "Filled"
+        : "Closed";
 
 export const ProjectCard = ({
   project,
@@ -26,12 +44,38 @@ export const ProjectCard = ({
   onFindPeople,
   onOpen,
   onTogglePublish,
+  onLifecycleChanged,
+  isActive,
+  onSetActive,
 }: ProjectCardProps) => {
   const savedCount = project.savedPersonIds.length;
   const criteriaSet = hasAnyCriteria(project.criteria);
+  const [lifecycle, setLifecycle] = useState<ProjectLifecycle>(
+    project.lifecycleState,
+  );
+
+  const handleLifecycle = async (next: ProjectLifecycle) => {
+    if (next === lifecycle) return;
+    const prev = lifecycle;
+    setLifecycle(next);
+    try {
+      await setProjectLifecycle(project.id, next);
+      toast.success(`Marked ${lifecycleLabel(next).toLowerCase()}.`);
+      onLifecycleChanged?.();
+    } catch (err) {
+      setLifecycle(prev);
+      toast.error(err instanceof Error ? err.message : "Could not update.");
+    }
+  };
 
   return (
-    <div className="group relative rounded-sm border border-border bg-card hover:border-gold/40 transition-all overflow-hidden">
+    <div
+      className={`group relative rounded-sm border bg-card transition-all overflow-hidden ${
+        isActive
+          ? "border-gold/70 ring-1 ring-gold/30"
+          : "border-border hover:border-gold/40"
+      }`}
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
       <div className="relative p-6">
@@ -46,15 +90,28 @@ export const ProjectCard = ({
             </h3>
           </button>
 
-          <span
-            className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest flex-shrink-0 ${
-              project.isPublished
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                : "border-border bg-background text-muted-foreground"
-            }`}
-          >
-            {project.isPublished ? "Public" : "Draft"}
-          </span>
+          <div className="flex flex-col gap-1 items-end flex-shrink-0">
+            {isActive ? (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold/60 bg-gold/15 text-[10px] font-mono uppercase tracking-widest text-gold">
+                <Star className="h-2.5 w-2.5 fill-gold text-gold" />
+                Match focus
+              </span>
+            ) : null}
+            <span
+              className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest ${
+                project.isPublished
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                  : "border-border bg-background text-muted-foreground"
+              }`}
+            >
+              {project.isPublished ? "Public" : "Draft"}
+            </span>
+            {lifecycle !== "active" ? (
+              <span className="px-2 py-1 rounded-sm border border-gold/40 bg-gold/10 text-[10px] font-mono uppercase tracking-widest text-gold">
+                {lifecycleLabel(lifecycle)}
+              </span>
+            ) : null}
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -82,6 +139,46 @@ export const ProjectCard = ({
                     Publish to talent
                   </>
                 )}
+              </DropdownMenuItem>
+              {onSetActive ? (
+                <DropdownMenuItem onClick={onSetActive}>
+                  <Star
+                    className={`h-4 w-4 ${isActive ? "fill-gold text-gold" : ""}`}
+                  />
+                  {isActive ? "Clear Match focus" : "Use for Match"}
+                </DropdownMenuItem>
+              ) : null}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                Lifecycle
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => handleLifecycle("active")}
+                disabled={lifecycle === "active"}
+              >
+                <CheckCircle className="h-4 w-4" />
+                Active
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleLifecycle("paused")}
+                disabled={lifecycle === "paused"}
+              >
+                <Pause className="h-4 w-4" />
+                Paused
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleLifecycle("filled")}
+                disabled={lifecycle === "filled"}
+              >
+                <CheckCircle className="h-4 w-4" />
+                Filled
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleLifecycle("closed")}
+                disabled={lifecycle === "closed"}
+              >
+                <X className="h-4 w-4" />
+                Closed
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

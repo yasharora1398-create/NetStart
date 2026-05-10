@@ -40,3 +40,6 @@ service-account*.json
 
 # Claude local settings (per-user, not shared)
 .claude/settings.local.json
+
+# Stray nested clone of the repo, not part of the codebase.
+/NetStart/

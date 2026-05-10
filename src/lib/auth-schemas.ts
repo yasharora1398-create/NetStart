@@ -18,6 +18,12 @@ export const signUpSchema = z.object({
     .regex(/[a-z]/, "Password must include a lowercase letter")
     .regex(/[A-Z]/, "Password must include an uppercase letter")
     .regex(/[0-9]/, "Password must include a number"),
+  // Role picked at sign-up so we can skip the wizard's mode question
+  // and route post-verification users straight to the right setup
+  // path. Stored on user_metadata.role.
+  role: z.enum(["founder", "builder"], {
+    required_error: "Pick founder or builder",
+  }),
 });
 
 export type SignInValues = z.infer<typeof signInSchema>;

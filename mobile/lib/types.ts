@@ -9,6 +9,15 @@ export type ResumeMeta = {
   uploadedAt: string;
 };
 
+// Founder proof-of-work file. Same shape as ResumeMeta but tracked
+// separately so a profile can carry both if the user ever switches
+// roles. Lives in the `proofs` storage bucket.
+export type ProofMeta = {
+  name: string;
+  size: number;
+  uploadedAt: string;
+};
+
 export type CandidateProfile = {
   headline: string;
   bio: string;
@@ -21,8 +30,16 @@ export type CandidateProfile = {
 export type Profile = {
   linkedinUrl: string;
   resume: ResumeMeta | null;
+  // Founder-specific. Both empty for builders.
+  websiteUrl: string;
+  proof: ProofMeta | null;
+  // Founder's currently-focused project. Used to pick which project's
+  // criteria drive the Browse / Search ranking.
+  activeProjectId: string | null;
   reviewStatus: ReviewStatus;
   reviewReason: string | null;
+  reviewedAt: string | null;
+  submittedAt: string | null;
   fullName: string;
   avatarPath: string | null;
   candidate: CandidateProfile;
@@ -35,16 +52,21 @@ export type ProjectCriteria = {
   keywords: string;
 };
 
+export type ProjectLifecycle = "active" | "paused" | "filled" | "closed";
+
 export type Project = {
   id: string;
   title: string;
   description: string;
   criteria: ProjectCriteria;
+  businessType: string;
+  lifecycleState: ProjectLifecycle;
   savedPersonIds: string[];
   passedPersonIds: string[];
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+  ownerId: string;
 };
 
 export type PublicProject = {
@@ -53,6 +75,8 @@ export type PublicProject = {
   title: string;
   description: string;
   criteria: ProjectCriteria;
+  businessType: string;
+  lifecycleState: ProjectLifecycle;
   createdAt: string;
   founderFullName: string;
   founderHeadline: string;
@@ -103,8 +127,13 @@ export const emptyCandidate = (): CandidateProfile => ({
 export const emptyProfile = (): Profile => ({
   linkedinUrl: "",
   resume: null,
+  websiteUrl: "",
+  proof: null,
+  activeProjectId: null,
   reviewStatus: "draft",
   reviewReason: null,
+  reviewedAt: null,
+  submittedAt: null,
   fullName: "",
   avatarPath: null,
   candidate: emptyCandidate(),

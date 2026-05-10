@@ -10,6 +10,7 @@ import {
   type Profile,
   type Project,
   type ProjectCriteria,
+  type ProjectLifecycle,
   type PublicProject,
   type ResumeMeta,
   type ReviewStatus,
@@ -17,6 +18,7 @@ import {
 
 const AVATARS_BUCKET = "avatars";
 const RESUMES_BUCKET = "resumes";
+const PROOFS_BUCKET = "proofs";
 
 // ---- Helpers ------------------------------------------------------
 
@@ -52,6 +54,20 @@ export const getAvatarUrl = (path: string | null): string | null => {
   return data.publicUrl ?? null;
 };
 
+// Resumes live in a private bucket, so we mint a short-lived signed
+// URL on demand. Returns null if the path is missing or the bucket
+// rejects the request.
+export const getResumeUrl = async (
+  path: string | null,
+): Promise<string | null> => {
+  if (!path) return null;
+  const { data, error } = await supabase.storage
+    .from(RESUMES_BUCKET)
+    .createSignedUrl(path, 60 * 5);
+  if (error) return null;
+  return data?.signedUrl ?? null;
+};
+
 // ---- Profile ------------------------------------------------------
 
 type ProfileRow = {
@@ -62,8 +78,17 @@ type ProfileRow = {
   resume_name: string | null;
   resume_size: number | null;
   resume_uploaded_at: string | null;
+  // Founder-only fields (added in migrations 0017 / 0018)
+  website_url: string | null;
+  proof_path: string | null;
+  proof_name: string | null;
+  proof_size: number | null;
+  proof_uploaded_at: string | null;
+  active_project_id: string | null;
   review_status: ReviewStatus | null;
   review_reason: string | null;
+  reviewed_at: string | null;
+  submitted_at: string | null;
   headline: string | null;
   bio: string | null;
   skills: unknown;
@@ -83,8 +108,20 @@ const profileFromRow = (row: ProfileRow): Profile => ({
           uploadedAt: row.resume_uploaded_at ?? new Date().toISOString(),
         }
       : null,
+  websiteUrl: row.website_url ?? "",
+  proof:
+    row.proof_path && row.proof_name
+      ? {
+          name: row.proof_name,
+          size: row.proof_size ?? 0,
+          uploadedAt: row.proof_uploaded_at ?? new Date().toISOString(),
+        }
+      : null,
+  activeProjectId: row.active_project_id ?? null,
   reviewStatus: row.review_status ?? "draft",
   reviewReason: row.review_reason ?? null,
+  reviewedAt: row.reviewed_at ?? null,
+  submittedAt: row.submitted_at ?? null,
   fullName: row.full_name ?? "",
   avatarPath: row.avatar_path ?? null,
   candidate: {
@@ -279,6 +316,97 @@ export const removeResume = async (
   if (error) throw error;
 };
 
+// ---- Founder website + proof-of-work --------------------------------
+// Founders use these instead of resume_*. The `proofs` storage bucket
+// (migration 0017) holds the file, structured `<user_id>/<filename>`.
+
+export const setWebsite = async (
+  userId: string,
+  url: string,
+): Promise<void> => {
+  const { error } = await supabase.from("profiles").upsert(
+    { user_id: userId, website_url: url ?? "" },
+    { onConflict: "user_id" },
+  );
+  if (error) throw error;
+};
+
+export const getProofPath = async (
+  userId: string,
+): Promise<string | null> => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("proof_path")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return (data?.proof_path as string | null) ?? null;
+};
+
+export const uploadProofFromUri = async (
+  userId: string,
+  fileUri: string,
+  fileName: string,
+  fileSize: number,
+  mimeType: string | null,
+  previousPath: string | null,
+): Promise<{ name: string; size: number; uploadedAt: string; path: string }> => {
+  const safeName = fileName.replace(/[^A-Za-z0-9._-]+/g, "_");
+  const path = `${userId}/${Date.now()}_${safeName}`;
+  const fileRes = await fetch(fileUri);
+  const blob = await fileRes.blob();
+  const arrayBuffer = await blob.arrayBuffer();
+  const { error: upErr } = await supabase.storage
+    .from(PROOFS_BUCKET)
+    .upload(path, arrayBuffer, {
+      contentType: mimeType || "application/octet-stream",
+      cacheControl: "3600",
+      upsert: false,
+    });
+  if (upErr) throw upErr;
+  const uploadedAt = new Date().toISOString();
+  const { error: profErr } = await supabase.from("profiles").upsert(
+    {
+      user_id: userId,
+      proof_path: path,
+      proof_name: fileName,
+      proof_size: fileSize,
+      proof_mime_type: mimeType,
+      proof_uploaded_at: uploadedAt,
+    },
+    { onConflict: "user_id" },
+  );
+  if (profErr) {
+    await supabase.storage.from(PROOFS_BUCKET).remove([path]);
+    throw profErr;
+  }
+  if (previousPath) {
+    await supabase.storage.from(PROOFS_BUCKET).remove([previousPath]);
+  }
+  return { name: fileName, size: fileSize, uploadedAt, path };
+};
+
+export const removeProof = async (
+  userId: string,
+  path: string | null,
+): Promise<void> => {
+  if (path) {
+    await supabase.storage.from(PROOFS_BUCKET).remove([path]);
+  }
+  const { error } = await supabase.from("profiles").upsert(
+    {
+      user_id: userId,
+      proof_path: null,
+      proof_name: null,
+      proof_size: null,
+      proof_mime_type: null,
+      proof_uploaded_at: null,
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) throw error;
+};
+
 // ---- Projects -----------------------------------------------------
 
 type ProjectRow = {
@@ -287,6 +415,8 @@ type ProjectRow = {
   title: string;
   description: string;
   criteria: Partial<ProjectCriteria> | null;
+  business_type: string | null;
+  lifecycle_state: string | null;
   is_published: boolean | null;
   created_at: string;
   updated_at: string;
@@ -330,11 +460,14 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
       title: p.title,
       description: p.description,
       criteria: criteriaFromJson(p.criteria),
+      businessType: p.business_type ?? "",
+      lifecycleState: (p.lifecycle_state ?? "active") as ProjectLifecycle,
       savedPersonIds: people.saved,
       passedPersonIds: people.passed,
       isPublished: Boolean(p.is_published),
       createdAt: p.created_at,
       updatedAt: p.updated_at,
+      ownerId: p.owner_id,
     };
   });
 };
@@ -343,7 +476,12 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
 
 export const createProject = async (
   userId: string,
-  data: { title: string; description: string; criteria: ProjectCriteria },
+  data: {
+    title: string;
+    description: string;
+    criteria: ProjectCriteria;
+    businessType?: string;
+  },
 ): Promise<Project> => {
   const { data: row, error } = await supabase
     .from("projects")
@@ -352,6 +490,7 @@ export const createProject = async (
       title: data.title,
       description: data.description,
       criteria: data.criteria,
+      business_type: data.businessType ?? "",
     })
     .select("*")
     .single();
@@ -362,17 +501,25 @@ export const createProject = async (
     title: r.title,
     description: r.description,
     criteria: criteriaFromJson(r.criteria),
+    businessType: r.business_type ?? "",
+    lifecycleState: (r.lifecycle_state ?? "active") as ProjectLifecycle,
     savedPersonIds: [],
     passedPersonIds: [],
     isPublished: Boolean(r.is_published),
     createdAt: r.created_at,
     updatedAt: r.updated_at,
+    ownerId: r.owner_id,
   };
 };
 
 export const updateProjectMeta = async (
   projectId: string,
-  data: { title: string; description: string; criteria: ProjectCriteria },
+  data: {
+    title: string;
+    description: string;
+    criteria: ProjectCriteria;
+    businessType?: string;
+  },
 ): Promise<void> => {
   const { error } = await supabase
     .from("projects")
@@ -380,8 +527,22 @@ export const updateProjectMeta = async (
       title: data.title,
       description: data.description,
       criteria: data.criteria,
+      business_type: data.businessType ?? "",
     })
     .eq("id", projectId);
+  if (error) throw error;
+};
+
+// Set or clear the founder's "currently focused" project. Drives
+// Browse / Search ranking on mobile. Pass null to clear.
+export const setActiveProject = async (
+  userId: string,
+  projectId: string | null,
+): Promise<void> => {
+  const { error } = await supabase.from("profiles").upsert(
+    { user_id: userId, active_project_id: projectId },
+    { onConflict: "user_id" },
+  );
   if (error) throw error;
 };
 
@@ -416,6 +577,8 @@ type PublishedRpcRow = {
   founder_full_name: string;
   founder_headline: string;
   founder_avatar: string | null;
+  business_type?: string | null;
+  lifecycle_state?: string | null;
 };
 
 export const listPublishedProjects = async (): Promise<PublicProject[]> => {
@@ -429,6 +592,8 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
+    businessType: p.business_type ?? "",
+    lifecycleState: (p.lifecycle_state ?? "active") as ProjectLifecycle,
     createdAt: p.created_at,
     founderFullName: p.founder_full_name ?? "",
     founderHeadline: p.founder_headline ?? "",
@@ -618,6 +783,85 @@ export const updateApplicationStatus = async (
   if (error) throw error;
 };
 
+// Founder-side: every application across every project the caller
+// owns, with the candidate fields needed to render the row.
+export type ReceivedApplication = {
+  id: string;
+  message: string;
+  status: ApplicationStatus;
+  createdAt: string;
+  projectId: string;
+  projectTitle: string;
+  candidate: Candidate;
+};
+
+type ReceivedAppRow = {
+  application_id: string;
+  message: string;
+  status: ApplicationStatus;
+  created_at: string;
+  project_id: string;
+  project_title: string;
+  candidate_user_id: string;
+  candidate_full_name: string;
+  candidate_linkedin: string;
+  candidate_headline: string;
+  candidate_skills: unknown;
+  candidate_location: string;
+  candidate_commitment: string;
+  candidate_resume_name: string | null;
+  candidate_resume_path: string | null;
+  candidate_avatar_path: string | null;
+};
+
+export const listReceivedApplications = async (): Promise<
+  ReceivedApplication[]
+> => {
+  const { data, error } = await supabase.rpc("list_received_applications");
+  if (error) throw error;
+  return ((data ?? []) as ReceivedAppRow[]).map((r) => ({
+    id: r.application_id,
+    message: r.message ?? "",
+    status: r.status,
+    createdAt: r.created_at,
+    projectId: r.project_id,
+    projectTitle: r.project_title,
+    candidate: {
+      userId: r.candidate_user_id,
+      fullName: r.candidate_full_name ?? "",
+      linkedinUrl: r.candidate_linkedin ?? "",
+      headline: r.candidate_headline ?? "",
+      bio: "",
+      skills: skillsFromJson(r.candidate_skills),
+      location: r.candidate_location ?? "",
+      commitment: r.candidate_commitment ?? "",
+      resumeName: r.candidate_resume_name ?? null,
+      resumePath: r.candidate_resume_path ?? null,
+      avatarPath: r.candidate_avatar_path ?? null,
+    },
+  }));
+};
+
+// Per-side archive. Builders archive their own view (the founder
+// still sees the application on theirs, and vice-versa).
+export const archiveApplicationForCandidate = async (
+  applicationId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("archive_application_for_candidate", {
+    app_id: applicationId,
+  });
+  if (error) throw error;
+};
+
+export const archiveApplicationForOwner = async (
+  applicationId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("archive_application_for_owner", {
+    app_id: applicationId,
+  });
+  if (error) throw error;
+};
+
 // ---- Single project + saved people ------------------------------
 
 export const getProjectById = async (
@@ -646,11 +890,14 @@ export const getProjectById = async (
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
+    businessType: p.business_type ?? "",
+    lifecycleState: (p.lifecycle_state ?? "active") as ProjectLifecycle,
     savedPersonIds: saved,
     passedPersonIds: passed,
     isPublished: Boolean(p.is_published),
     createdAt: p.created_at,
     updatedAt: p.updated_at,
+    ownerId: p.owner_id,
   };
 };
 
@@ -741,6 +988,8 @@ export const listPublishedProjectsForOwner = async (
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
+    businessType: "",
+    lifecycleState: "active" as ProjectLifecycle,
     createdAt: p.created_at,
     founderFullName: "",
     founderHeadline: "",
@@ -773,6 +1022,40 @@ export const matchCandidatesForProject = async (
     resumePath: row.resume_path ?? null,
     avatarPath: row.avatar_path ?? null,
     similarity: row.similarity ?? 0,
+  }));
+};
+
+// Search-tab use: list every accepted, open-to-work builder. Founders
+// filter the results client-side. The SECURITY DEFINER RPC scrubs
+// fields so we only get safe public columns.
+type OpenCandidateRow = {
+  user_id: string;
+  full_name: string;
+  linkedin_url: string;
+  headline: string;
+  bio: string;
+  skills: unknown;
+  candidate_location: string;
+  candidate_commitment: string;
+  resume_name: string | null;
+  resume_path: string | null;
+};
+
+export const listOpenCandidates = async (): Promise<Candidate[]> => {
+  const { data, error } = await supabase.rpc("list_open_candidates");
+  if (error) throw error;
+  return ((data ?? []) as OpenCandidateRow[]).map((row) => ({
+    userId: row.user_id,
+    fullName: row.full_name ?? "",
+    linkedinUrl: row.linkedin_url ?? "",
+    headline: row.headline ?? "",
+    bio: row.bio ?? "",
+    skills: skillsFromJson(row.skills),
+    location: row.candidate_location ?? "",
+    commitment: row.candidate_commitment ?? "",
+    resumeName: row.resume_name ?? null,
+    resumePath: row.resume_path ?? null,
+    avatarPath: null,
   }));
 };
 
@@ -814,6 +1097,306 @@ export const getCandidatesByIds = async (
     resumeName: row.resume_name ?? null,
     resumePath: row.resume_path ?? null,
     avatarPath: row.avatar_path ?? null,
+  }));
+};
+
+// ---- Chat / DMs ---------------------------------------------------
+//
+// Backend lives in migrations 0011 (chat_contacts + request/accept) and
+// 0013 (chat_messages + list_chat_thread + send_chat_message). The
+// flow is:
+//   1. Sender calls request_chat(target) → recipient gets a
+//      chat_request notification.
+//   2. Recipient taps Accept in Threads → accept_chat_request promotes
+//      both sides into chat_contacts.
+//   3. Either side calls send_chat_message — RLS requires both users
+//      to be in chat_contacts together.
+//   4. UI subscribes to realtime inserts on chat_messages to render
+//      incoming DMs live.
+
+export type ChatMessage = {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  body: string;
+  createdAt: string;
+  deliveredAt: string | null;
+  readAt: string | null;
+};
+
+type ChatThreadRow = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  body: string;
+  created_at: string;
+  delivered_at: string | null;
+  read_at: string | null;
+};
+
+// Send a chat request notification. The target's notification feed
+// gets a "wants to chat" entry; until they accept, no messages can be
+// sent (RLS on send_chat_message blocks it).
+export const requestChat = async (
+  targetUserId: string,
+  projectId: string | null = null,
+): Promise<void> => {
+  const { error } = await supabase.rpc("request_chat", {
+    target_user_id: targetUserId,
+    project_id: projectId,
+  });
+  if (error) throw error;
+};
+
+// Accept an inbound chat_request notification. Promotes both users
+// into chat_contacts and notifies the sender.
+export const acceptChatRequest = async (
+  notificationId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("accept_chat_request", {
+    notification_id: notificationId,
+  });
+  if (error) throw error;
+};
+
+// Load the full message thread between the current user and another.
+export const listChatThread = async (
+  otherUserId: string,
+  limit = 200,
+): Promise<ChatMessage[]> => {
+  const { data, error } = await supabase.rpc("list_chat_thread", {
+    other_user_id: otherUserId,
+    msg_limit: limit,
+  });
+  if (error) throw error;
+  return ((data ?? []) as ChatThreadRow[]).map((r) => ({
+    id: r.id,
+    senderId: r.sender_id,
+    recipientId: r.recipient_id,
+    body: r.body,
+    createdAt: r.created_at,
+    deliveredAt: r.delivered_at,
+    readAt: r.read_at,
+  }));
+};
+
+// Bulk-mark every undelivered message from `otherUserId` to me as
+// delivered. Called by the global "I'm online" subscription when an
+// inbound message lands.
+export const markMessagesDelivered = async (
+  otherUserId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("mark_messages_delivered", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+};
+
+// Bulk-mark every unread message from `otherUserId` to me as read.
+// Called when the chat screen with this sender is opened (and on
+// every new INSERT while it's in the foreground).
+export const markMessagesRead = async (
+  otherUserId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("mark_messages_read", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+};
+
+// Send a chat message. Throws if the two users aren't chat_contacts
+// (the recipient hasn't accepted yet).
+export const sendChatMessage = async (
+  recipientUserId: string,
+  body: string,
+): Promise<string> => {
+  const { data, error } = await supabase.rpc("send_chat_message", {
+    recipient_user_id: recipientUserId,
+    message_body: body,
+  });
+  if (error) throw error;
+  return data as string;
+};
+
+// Stage 4 unified send. First message creates the pending row, the
+// 2-per-48h window throttles unaccepted threads, and accepted
+// threads pass straight through. The error message "limit_reached"
+// signals the UI to render a wait state.
+export type ThreadState =
+  | "outbound"
+  | "inbound"
+  | "accepted"
+  | "declined"
+  | "none";
+export type ChatThreadState = {
+  state: ThreadState;
+  acceptedAt: string | null;
+  pendingCount: number;
+  pendingWindowStartAt: string | null;
+};
+
+export const requestOrSendChatMessage = async (
+  recipientUserId: string,
+  body: string,
+): Promise<{
+  messageId: string;
+  pendingCount: number;
+  pendingWindowStartAt: string | null;
+}> => {
+  const { data, error } = await supabase.rpc(
+    "request_or_send_chat_message",
+    {
+      recipient_user_id: recipientUserId,
+      message_body: body,
+    },
+  );
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | {
+        message_id: string;
+        pending_count: number;
+        pending_window_start_at: string | null;
+      }
+    | null;
+  return {
+    messageId: row?.message_id ?? "",
+    pendingCount: row?.pending_count ?? 0,
+    pendingWindowStartAt: row?.pending_window_start_at ?? null,
+  };
+};
+
+// Recipient accepts an inbound chat. Creates the mutual rows and
+// drops the pending limit. Idempotent: safe if already accepted.
+export const acceptChatThread = async (
+  requesterUserId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("accept_chat_thread", {
+    requester_user_id: requesterUserId,
+  });
+  if (error) throw error;
+};
+
+// Recipient declines an inbound chat. The thread remains in the
+// list with state="declined" so both sides can choose to delete.
+export const declineChatThread = async (
+  requesterUserId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("decline_chat_thread", {
+    requester_user_id: requesterUserId,
+  });
+  if (error) throw error;
+};
+
+// Either side calls this to drop the thread from their own list.
+// Removes both chat_contacts rows so the row doesn't pop back in
+// next time the other party messages.
+export const deleteChatThread = async (
+  otherUserId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc("delete_chat_thread", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+};
+
+// Founder-only: change the lifecycle state on one of their
+// projects. Browse / Search hide non-active projects.
+export const setProjectLifecycle = async (
+  projectId: string,
+  state: ProjectLifecycle,
+): Promise<void> => {
+  const { error } = await supabase.rpc("set_project_lifecycle", {
+    project_id: projectId,
+    new_state: state,
+  });
+  if (error) throw error;
+};
+
+// Read the current pending state for one thread. Mobile uses this
+// to decide whether to render the limit indicator or the Accept
+// button.
+// Threads list with pending state baked in. Returns one row per
+// known counterparty (someone I've sent or received a message from,
+// or someone who's pending acceptance from me).
+export type ChatThreadSummary = {
+  contactId: string;
+  lastBody: string;
+  lastAt: string | null;
+  lastSender: string | null;
+  state: ThreadState;
+  acceptedAt: string | null;
+};
+
+type ChatThreadsRpcRow = {
+  contact_id: string;
+  last_body: string | null;
+  last_at: string | null;
+  last_sender: string | null;
+  state: ThreadState;
+  accepted_at: string | null;
+};
+
+export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
+  const { data, error } = await supabase.rpc("list_chat_threads");
+  if (error) throw error;
+  return ((data ?? []) as ChatThreadsRpcRow[]).map((r) => ({
+    contactId: r.contact_id,
+    lastBody: r.last_body ?? "",
+    lastAt: r.last_at ?? null,
+    lastSender: r.last_sender ?? null,
+    state: r.state ?? "none",
+    acceptedAt: r.accepted_at ?? null,
+  }));
+};
+
+export const getChatThreadState = async (
+  otherUserId: string,
+): Promise<ChatThreadState> => {
+  const { data, error } = await supabase.rpc("get_chat_thread_state", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | {
+        state: ThreadState;
+        accepted_at: string | null;
+        request_message_count: number;
+        request_window_start_at: string | null;
+      }
+    | null;
+  return {
+    state: row?.state ?? "none",
+    acceptedAt: row?.accepted_at ?? null,
+    pendingCount: row?.request_message_count ?? 0,
+    pendingWindowStartAt: row?.request_window_start_at ?? null,
+  };
+};
+
+export type ChatContact = {
+  contactId: string;
+  fullName: string;
+  linkedinUrl: string;
+  avatarPath: string | null;
+  connectedAt: string;
+};
+
+type ChatContactRow = {
+  contact_id: string;
+  full_name: string;
+  linkedin_url: string;
+  avatar_path: string | null;
+  connected_at: string;
+};
+
+export const listChatContacts = async (): Promise<ChatContact[]> => {
+  const { data, error } = await supabase.rpc("list_chat_contacts");
+  if (error) throw error;
+  return ((data ?? []) as ChatContactRow[]).map((r) => ({
+    contactId: r.contact_id,
+    fullName: r.full_name ?? "",
+    linkedinUrl: r.linkedin_url ?? "",
+    avatarPath: r.avatar_path ?? null,
+    connectedAt: r.connected_at,
   }));
 };
 

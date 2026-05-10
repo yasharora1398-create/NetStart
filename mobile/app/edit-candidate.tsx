@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Stack, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -38,12 +38,15 @@ import {
   HEADLINE_OPTIONS,
   LOCATION_OPTIONS,
 } from "@/lib/options";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 const BIO_MIN = 60;
 const SKILLS_MIN = 2;
 
 export default function EditCandidateScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -315,7 +318,13 @@ export default function EditCandidateScreen() {
             </View>
           </View>
 
-          <Field label="Full name">
+          {/* Required-field indicator legend. The asterisks on the
+              labels below mark fields you can't submit without. */}
+          <Text style={styles.requiredLegend}>
+            * required to submit for review
+          </Text>
+
+          <Field label="Full name *">
             <TextInput
               value={fullName}
               onChangeText={setFullName}
@@ -326,7 +335,7 @@ export default function EditCandidateScreen() {
             />
           </Field>
 
-          <Field label="Headline">
+          <Field label="Headline *">
             <OptionPicker
               value={headline}
               onChange={setHeadline}
@@ -337,7 +346,7 @@ export default function EditCandidateScreen() {
           </Field>
 
           <Field
-            label="Pitch / Bio"
+            label={`Pitch / Bio *  ${bioLen < BIO_MIN ? `(${BIO_MIN - bioLen} more chars)` : "✓"}`}
             rightLabel={`${bioLen}/${BIO_MIN}`}
           >
             <TextInput
@@ -372,7 +381,7 @@ export default function EditCandidateScreen() {
           </Field>
 
           <Field
-            label="Skills"
+            label={`Skills *  ${skills.length < SKILLS_MIN ? `(add ${SKILLS_MIN - skills.length} more)` : "✓"}`}
             rightLabel={`${skills.length}/${SKILLS_MIN} min`}
           >
             <TagInput
@@ -387,7 +396,7 @@ export default function EditCandidateScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   headerBar: {
@@ -484,6 +493,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   avatarRemoveText: { color: theme.destructive, fontSize: 11 },
+  requiredLegend: {
+    color: theme.textDim,
+    fontFamily: fonts.mono,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginBottom: 14,
+  },
   input: {
     backgroundColor: theme.bgElev,
     borderWidth: 1,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bookmark,
@@ -13,7 +13,9 @@ import {
   Linkedin,
   Loader2,
   MapPin,
+  Maximize2,
   MessageCircle,
+  Minimize2,
   Search,
   Sparkles,
   X,
@@ -38,6 +40,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ApplyDialog } from "@/components/mynet/ApplyDialog";
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
 import {
@@ -48,8 +52,10 @@ import {
   listOpenCandidates,
   listProjects,
   listPublishedProjects,
-  requestChat,
+  requestOrSendChatMessage,
+  setPersonStatus,
 } from "@/lib/mynet-storage";
+import { addSavedProject, removeSavedProject, useIsProjectSaved } from "@/lib/savedProjects";
 import type {
   ApplicationStatus,
   Candidate,
@@ -118,11 +124,27 @@ const Match = () => {
     <AppLayout blurred={!isAuthed}>
         <div className="container">
           <header className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
-              <Sparkles className="h-3 w-3 text-gold" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-                Match
-              </span>
+            <div className="flex items-start justify-between gap-3 mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5">
+                <Sparkles className="h-3 w-3 text-gold" />
+                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+                  Match
+                </span>
+              </div>
+              {/* Search shortcut to the filterable browse view (Talents).
+                  Mirrors the magnifying-glass affordance on mobile. */}
+              {userMode === "looker" ? (
+                <Link
+                  to="/talent"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-border hover:border-gold/60 text-muted-foreground hover:text-gold transition-colors"
+                  aria-label="Browse all projects"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  <span className="text-[11px] font-mono uppercase tracking-widest">
+                    Browse all
+                  </span>
+                </Link>
+              ) : null}
             </div>
             <h1 className="font-display text-4xl md:text-6xl leading-[1] mb-4">
               {userMode === "builder"
@@ -155,6 +177,7 @@ const Match = () => {
 // ============= Builder view: swipe through lookers ===================
 
 const BuilderView = () => {
+  const { user } = useAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [query, setQuery] = useState("");
@@ -163,6 +186,14 @@ const BuilderView = () => {
   const [commitmentFilter, setCommitmentFilter] = useState("");
   const [decided, setDecided] = useState<Set<string>>(new Set());
   const [detail, setDetail] = useState<Candidate | null>(null);
+  // Founder's active/first project — drives where Save lands plus
+  // the "Matching for [project]" banner. Title kept alongside the
+  // id so we can show it without a second fetch.
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [activeProjectTitle, setActiveProjectTitle] = useState<string | null>(
+    null,
+  );
+  const [hasMultipleProjects, setHasMultipleProjects] = useState(false);
 
   useEffect(() => {
     setLoadingData(true);
@@ -173,6 +204,35 @@ const BuilderView = () => {
       )
       .finally(() => setLoadingData(false));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [profile, projects] = await Promise.all([
+          getProfile(user.id),
+          listProjects(user.id),
+        ]);
+        if (cancelled) return;
+        setHasMultipleProjects(projects.length > 1);
+        // Prefer the explicitly-picked active project; fall back to
+        // the first one the founder owns. Saves go here.
+        const picked =
+          profile.activeProjectId &&
+          projects.find((p) => p.id === profile.activeProjectId);
+        const fallback = projects[0] ?? null;
+        const project = picked || fallback;
+        setActiveProjectId(project?.id ?? null);
+        setActiveProjectTitle(project?.title ?? null);
+      } catch {
+        // soft-fail; Save will warn the user it isn't persisting
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -206,84 +266,229 @@ const BuilderView = () => {
   );
 
   const current = filtered[0] ?? null;
+  // When `approving` is set, the card slides left and the info pane
+  // slides in from the right. Confirming a chat / closing advances
+  // the deck by adding the candidate to `decided`.
+  const [approving, setApproving] = useState<Candidate | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // ESC exits full-screen. Listener only attaches when fullscreen is
+  // on so we don't capture keys for unrelated screens.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fullscreen]);
 
   const decline = () => {
     if (!current) return;
+    setApproving(null);
     setDecided((prev) => new Set(prev).add(current.userId));
   };
   const accept = () => {
     if (!current) return;
-    setDetail(current);
+    setApproving(current);
+  };
+  const closeInfo = (decideThem: boolean) => {
+    const target = approving ?? detail;
+    if (decideThem && target) {
+      setDecided((prev) => new Set(prev).add(target.userId));
+    }
+    setApproving(null);
+    setDetail(null);
   };
 
   return (
     <>
-      <Filters
-        query={query}
-        setQuery={setQuery}
-        skill={skillFilter}
-        setSkill={setSkillFilter}
-        location={locationFilter}
-        setLocation={setLocationFilter}
-        commitment={commitmentFilter}
-        setCommitment={setCommitmentFilter}
-        skillOptions={allSkills}
-        onClear={() => {
-          setQuery("");
-          setSkillFilter("");
-          setLocationFilter("");
-          setCommitmentFilter("");
-        }}
-        hasFilters={hasFilters}
-      />
+      {/* Active-project banner + Filters are hidden in full-screen
+          mode so the deck takes over the whole canvas. */}
+      {!fullscreen && activeProjectTitle ? (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-gold/30 bg-gold/5 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <Sparkles className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+            <span className="text-muted-foreground">Matching for</span>
+            <span className="font-medium text-foreground">
+              {activeProjectTitle}
+            </span>
+          </div>
+          {hasMultipleProjects ? (
+            <Link
+              to="/mynet"
+              className="text-[11px] font-mono uppercase tracking-widest text-gold hover:underline"
+            >
+              Switch project
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+
+      {!fullscreen ? (
+        <Filters
+          query={query}
+          setQuery={setQuery}
+          skill={skillFilter}
+          setSkill={setSkillFilter}
+          location={locationFilter}
+          setLocation={setLocationFilter}
+          commitment={commitmentFilter}
+          setCommitment={setCommitmentFilter}
+          skillOptions={allSkills}
+          onClear={() => {
+            setQuery("");
+            setSkillFilter("");
+            setLocationFilter("");
+            setCommitmentFilter("");
+          }}
+          hasFilters={hasFilters}
+        />
+      ) : null}
 
       {loadingData ? (
         <Loading />
       ) : !current ? (
-        <Empty
-          title="That's everyone for now."
-          body={
+        <MothEmptyState
+          variant={hasFilters ? "filters" : "caught"}
+          title={hasFilters ? "No matches." : "You're caught up."}
+          sub={
             hasFilters
-              ? "No one matches those filters. Loosen them and try again."
-              : "You've worked through every looker that's open right now. Check back soon."
+              ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
+              : "You've worked through every looker that's open right now. New ones will land here as they sign up."
           }
         />
       ) : (
-        <div className="max-w-[640px] mx-auto">
-          <CandidateSquareCard candidate={current} />
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <DecisionButton variant="decline" onClick={decline} />
-            <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              {filtered.length} left
-            </p>
-            <DecisionButton variant="accept" onClick={accept} />
+        <div
+          className={cn(
+            "relative",
+            fullscreen
+              ? "fixed inset-0 z-50 bg-background overflow-hidden"
+              : "",
+          )}
+        >
+          {/* Full-screen toggle. Floats top-LEFT in fullscreen so it
+              never sits next to the info pane's close button (which
+              lives at the right edge). */}
+          <div
+            className={cn(
+              "flex",
+              fullscreen
+                ? "absolute top-4 left-4 z-20"
+                : "justify-end mb-4",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => setFullscreen((v) => !v)}
+              aria-label={fullscreen ? "Exit full-screen" : "Full-screen"}
+              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:border-gold/40 hover:text-gold transition-colors"
+            >
+              {fullscreen ? (
+                <>
+                  <Minimize2 className="h-3.5 w-3.5" />
+                  Exit
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  Full-screen
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Deck stage — single flex row, justify-center. The card
+              + side buttons (or action buttons when approving) move
+              together as a unit. No absolute positioning, no big
+              gaps; the card visibly slides left as the action
+              buttons grow into existence on the right. */}
+          <div
+            className={cn(
+              "relative mx-auto flex items-center justify-center gap-6 px-4",
+              fullscreen
+                ? "min-h-[calc(100vh-72px)] py-12"
+                : "min-h-[760px] py-6",
+            )}
+          >
+            {/* X button — collapses out of the flex layout when the
+                user approves so the row doesn't keep dead space. */}
+            <button
+              type="button"
+              onClick={decline}
+              aria-label="Pass"
+              className={cn(
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-destructive/40 bg-card text-destructive shadow-sm hover:bg-destructive/10 hover:border-destructive/60 transition-all duration-500",
+                approving &&
+                  "opacity-0 pointer-events-none scale-75 -mr-[80px]",
+              )}
+            >
+              <X className="h-6 w-6" strokeWidth={2.2} />
+            </button>
+
+            {/* The card itself — fixed width, never shifts on its
+                own. Justify-center on the parent does the visual
+                slide as the action column grows on the right. */}
+            <div className="w-full max-w-[520px] flex-shrink-0">
+              <MatchCandidateCard candidate={current} />
+            </div>
+
+            {/* ✓ button — same collapse trick on the other side. */}
+            <button
+              type="button"
+              onClick={accept}
+              aria-label="Approve"
+              disabled={Boolean(approving)}
+              className={cn(
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold/60 bg-card text-gold shadow-sm hover:bg-gold/10 transition-all duration-500",
+                approving &&
+                  "opacity-0 pointer-events-none scale-75 -ml-[80px]",
+              )}
+            >
+              <Check className="h-6 w-6" strokeWidth={2.4} />
+            </button>
+
+            {/* Action column — only the LinkedIn / resume / save /
+                message buttons. No box, no headings. Width animates
+                from 0 to auto so the card recenters smoothly. */}
+            <div
+              className={cn(
+                "transition-all duration-500 ease-out overflow-hidden",
+                approving ? "max-w-[120px] opacity-100" : "max-w-0 opacity-0 -ml-6",
+              )}
+            >
+              <div className="w-[88px]">
+                {approving ? (
+                  <CandidateActions
+                    candidate={approving}
+                    activeProjectId={activeProjectId}
+                    onClose={() => closeInfo(true)}
+                  />
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       )}
-
-      <CandidateDetailDialog
-        candidate={detail}
-        onClose={() => {
-          if (detail) {
-            setDecided((prev) => new Set(prev).add(detail.userId));
-          }
-          setDetail(null);
-        }}
-      />
     </>
   );
 };
 
-const CandidateSquareCard = ({ candidate }: { candidate: Candidate }) => {
+// Mirrors the mobile profile card: full-width square photo at the
+// top, then name, then pills (commitment / location / skills), then
+// optional bio underneath. Sized to feel like a phone-card on
+// desktop (~520px wide, image fills the top half).
+const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
   const avatar = getAvatarUrl(candidate.avatarPath);
   return (
-    <article className="rounded-sm border border-border bg-card overflow-hidden grid grid-cols-1 md:grid-cols-2">
-      <div className="aspect-square md:aspect-auto md:h-auto bg-gold/5 border-b md:border-b-0 md:border-r border-border relative">
+    <article className="overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
+      {/* Picture square — full-width, 1:1 aspect, dominates the card. */}
+      <div className="relative w-full aspect-square bg-gold/5">
         {avatar ? (
           <img
             src={avatar}
             alt={candidate.fullName}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -293,95 +498,81 @@ const CandidateSquareCard = ({ candidate }: { candidate: Candidate }) => {
           </div>
         )}
       </div>
-      <div className="p-6 md:p-8 flex flex-col">
-        <h2 className="font-display text-3xl md:text-4xl leading-tight mb-2">
+
+      {/* Body — name, pills, bio. */}
+      <div className="p-5">
+        <h2 className="mb-2 font-display text-2xl leading-tight text-foreground">
           {candidate.fullName || "Unnamed"}
         </h2>
-        {candidate.headline && (
-          <p className="text-sm text-muted-foreground mb-5">
-            {candidate.headline}
-          </p>
-        )}
-        {candidate.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-5">
-            {candidate.skills.map((s) => (
+
+        {(candidate.commitment ||
+          candidate.location ||
+          candidate.skills.length > 0) ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {candidate.commitment ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+                <Sparkles className="h-3 w-3" />
+                {candidate.commitment}
+              </span>
+            ) : null}
+            {candidate.location ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+                <MapPin className="h-3 w-3" />
+                {candidate.location}
+              </span>
+            ) : null}
+            {candidate.skills.slice(0, 5).map((s) => (
               <span
                 key={s}
-                className="px-2.5 py-1 text-xs rounded-sm border border-gold/30 bg-gold/5"
+                className="rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground"
               >
                 {s}
               </span>
             ))}
           </div>
-        )}
-        {candidate.bio && (
-          <p className="text-sm leading-relaxed text-foreground/90 line-clamp-6">
+        ) : null}
+
+        {candidate.headline ? (
+          <p className="mb-2 text-sm font-medium text-foreground/90">
+            {candidate.headline}
+          </p>
+        ) : null}
+
+        {candidate.bio ? (
+          <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
             {candidate.bio}
           </p>
-        )}
-        <div className="mt-auto pt-5 flex flex-wrap gap-2">
-          {candidate.commitment && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border bg-background font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              <Briefcase className="h-3 w-3 text-gold" />
-              {candidate.commitment}
-            </span>
-          )}
-          {candidate.location && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border bg-background font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              <MapPin className="h-3 w-3 text-gold" />
-              {candidate.location}
-            </span>
-          )}
-        </div>
+        ) : null}
       </div>
     </article>
   );
 };
 
-const DecisionButton = ({
-  variant,
-  onClick,
-}: {
-  variant: "accept" | "decline";
-  onClick: () => void;
-}) => {
-  const accept = variant === "accept";
-  const Icon = accept ? Check : X;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={accept ? "Accept" : "Decline"}
-      className={`h-16 w-16 rounded-sm border-2 flex items-center justify-center transition-all ${
-        accept
-          ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/80 hover:shadow-[0_0_22px_rgba(16,185,129,0.45)]"
-          : "border-destructive/50 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:border-destructive/80 hover:shadow-[0_0_22px_rgba(239,68,68,0.4)]"
-      }`}
-    >
-      <Icon className="h-7 w-7" />
-    </button>
-  );
-};
-
-const CandidateDetailDialog = ({
+// Founder-side action column. The card already shows bio / skills /
+// headline; the only thing this column adds is the actions you'd
+// take after deciding to engage: open LinkedIn, open the resume,
+// save the candidate, message them, or back out. No surrounding
+// box — the buttons themselves stand free next to the card.
+const CandidateActions = ({
   candidate,
+  activeProjectId,
   onClose,
 }: {
-  candidate: Candidate | null;
+  candidate: Candidate;
+  activeProjectId: string | null;
   onClose: () => void;
 }) => {
+  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
-  const [chatRequested, setChatRequested] = useState(false);
   const [working, setWorking] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
 
   useEffect(() => {
     setSaved(false);
-    setChatRequested(false);
     setResumeUrl(null);
     setResumeError(null);
-    const path = candidate?.resumePath;
+    const path = candidate.resumePath;
     if (!path) return;
     let cancelled = false;
     getResumeSignedUrl(path)
@@ -394,200 +585,122 @@ const CandidateDetailDialog = ({
     return () => {
       cancelled = true;
     };
-  }, [candidate?.userId, candidate?.resumePath]);
+  }, [candidate.userId, candidate.resumePath]);
 
-  if (!candidate) {
-    return (
-      <Dialog open={false} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent />
-      </Dialog>
-    );
-  }
-
-  const avatar = getAvatarUrl(candidate.avatarPath);
-
-  const handleRequestChat = async () => {
-    if (chatRequested || working) return;
+  const handleSave = async () => {
+    if (working) return;
+    if (!activeProjectId) {
+      setSaved((s) => !s);
+      toast.message("No active project", {
+        description: "Pick one in MyNet so saves attach to a project.",
+      });
+      return;
+    }
     setWorking(true);
     try {
-      await requestChat(candidate.userId, null);
-      setChatRequested(true);
-      toast.success("Chat request sent.");
+      const next = !saved;
+      await setPersonStatus(activeProjectId, candidate.userId, "saved");
+      setSaved(next);
+      toast.success(next ? "Saved." : "Removed.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not send.");
+      toast.error(err instanceof Error ? err.message : "Could not save.");
     } finally {
       setWorking(false);
     }
   };
 
+  const handleMessage = () => {
+    onClose();
+    navigate(`/chats/${candidate.userId}`);
+  };
+
   return (
-    <Dialog open={Boolean(candidate)} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="p-0 bg-card border-gold-soft w-[95vw] sm:w-[min(70vw,860px)] max-w-[95vw] max-h-[88vh] overflow-hidden flex flex-col">
-        <DialogTitle className="sr-only">{candidate.fullName}</DialogTitle>
+    <div className="flex flex-col items-center gap-3">
+      {/* LinkedIn */}
+      {candidate.linkedinUrl ? (
+        <a
+          href={candidate.linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open LinkedIn"
+          title="LinkedIn"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+        >
+          <Linkedin className="h-6 w-6" />
+        </a>
+      ) : (
+        <span
+          aria-label="LinkedIn unavailable"
+          title="No LinkedIn on file"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-card/60 text-muted-foreground/50 cursor-not-allowed"
+        >
+          <Linkedin className="h-6 w-6" />
+        </span>
+      )}
 
-        <div className="grid md:grid-cols-[260px_1fr] gap-0 flex-1 overflow-hidden">
-          <div className="relative bg-gold/5 border-b md:border-b-0 md:border-r border-border min-h-[220px]">
-            {avatar ? (
-              <img
-                src={avatar}
-                alt={candidate.fullName}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-display text-6xl text-gold/60">
-                  {initials(candidate.fullName)}
-                </span>
-              </div>
-            )}
-          </div>
+      {/* Resume */}
+      {candidate.resumeName && resumeUrl ? (
+        <a
+          href={resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open resume"
+          title={candidate.resumeName}
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+        >
+          <FileText className="h-6 w-6" />
+        </a>
+      ) : (
+        <span
+          aria-label={
+            candidate.resumeName ? "Resume loading" : "No resume on file"
+          }
+          title={candidate.resumeName ?? "No resume on file"}
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-card/60 text-muted-foreground/50 cursor-not-allowed"
+        >
+          <FileText className="h-6 w-6" />
+        </span>
+      )}
 
-          <div className="overflow-y-auto p-6 md:p-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-              Operator profile
-            </p>
-            <h2 className="font-display text-3xl md:text-4xl leading-tight mb-2">
-              {candidate.fullName}
-            </h2>
-            {candidate.headline && (
-              <p className="text-sm text-muted-foreground mb-5">
-                {candidate.headline}
-              </p>
-            )}
+      {/* Save (gold accent so it reads as primary) */}
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={working}
+        aria-label={saved ? "Remove from saved" : "Save"}
+        title={saved ? "Saved" : "Save"}
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md disabled:opacity-50"
+      >
+        {saved ? (
+          <BookmarkCheck className="h-6 w-6 fill-current" />
+        ) : (
+          <Bookmark className="h-6 w-6" />
+        )}
+      </button>
 
-            {candidate.bio && (
-              <section className="mb-6">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
-                  Pitch / Bio
-                </p>
-                <p className="text-sm leading-relaxed whitespace-pre-line">
-                  {candidate.bio}
-                </p>
-              </section>
-            )}
+      {/* Message — primary action */}
+      <button
+        type="button"
+        onClick={handleMessage}
+        disabled={working}
+        aria-label="Message"
+        title="Message"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/60 bg-gold text-gold-foreground shadow-sm transition-all hover:bg-gold/90 hover:shadow-md disabled:opacity-50"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </button>
 
-            {candidate.skills.length > 0 && (
-              <section className="mb-6">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
-                  Skills
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {candidate.skills.map((s) => (
-                    <span
-                      key={s}
-                      className="px-2.5 py-1 text-xs rounded-sm border border-gold/30 bg-gold/5"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {candidate.linkedinUrl && (
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
-                    LinkedIn
-                  </p>
-                  <a
-                    href={candidate.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-gold hover:underline break-all"
-                  >
-                    <Linkedin className="h-4 w-4" />
-                    Profile
-                    <ExternalLink className="h-3 w-3 opacity-60" />
-                  </a>
-                </div>
-              )}
-              {candidate.resumeName && (
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
-                    Resume
-                  </p>
-                  {resumeUrl ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <a
-                        href={resumeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span className="truncate max-w-[260px]">
-                          {candidate.resumeName}
-                        </span>
-                        <ExternalLink className="h-3 w-3 opacity-60" />
-                      </a>
-                      <a
-                        href={resumeUrl}
-                        download={candidate.resumeName}
-                        className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        Download
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                      <FileText className="h-4 w-4 text-gold" />
-                      <span className="truncate">{candidate.resumeName}</span>
-                      <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground/70">
-                        {resumeError ? "· not accessible" : "· loading..."}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-          </div>
-        </div>
-
-        <div className="border-t border-border bg-background/40 px-6 md:px-8 py-4 flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outlineGold"
-            size="lg"
-            onClick={() => setSaved((s) => !s)}
-            className="flex-1 min-w-[160px]"
-          >
-            {saved ? (
-              <>
-                <BookmarkCheck className="h-4 w-4" />
-                Saved
-              </>
-            ) : (
-              <>
-                <Bookmark className="h-4 w-4" />
-                Save for later
-              </>
-            )}
-          </Button>
-          <Button
-            variant="gold"
-            size="lg"
-            onClick={handleRequestChat}
-            disabled={chatRequested || working}
-            className="flex-1 min-w-[170px]"
-          >
-            {chatRequested ? (
-              <>
-                <Check className="h-4 w-4" />
-                Chat requested
-              </>
-            ) : (
-              <>
-                <MessageCircle className="h-4 w-4" />
-                {working ? "Sending..." : "Request to chat"}
-              </>
-            )}
-          </Button>
-          <Button variant="ghost" size="lg" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      {/* Back / dismiss */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Back to deck"
+        title="Back"
+        className="mt-1 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground"
+      >
+        <X className="h-5 w-5" />
+      </button>
+    </div>
   );
 };
 
@@ -689,11 +802,12 @@ const LookerView = () => {
       {loadingData ? (
         <Loading />
       ) : !current ? (
-        <Empty
-          title="No projects right now."
-          body={
+        <MothEmptyState
+          variant={hasFilters ? "filters" : "platform"}
+          title={hasFilters ? "No matches." : "No projects right now."}
+          sub={
             hasFilters
-              ? "No projects match those filters. Try fewer keywords."
+              ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
               : "Be early. Once founders publish projects, they'll show up here."
           }
         />

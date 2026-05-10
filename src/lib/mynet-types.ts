@@ -5,11 +5,16 @@ export type ProjectCriteria = {
   keywords: string;
 };
 
+export type ProjectLifecycle = "active" | "paused" | "filled" | "closed";
+
 export type Project = {
   id: string;
+  ownerId: string;
   title: string;
   description: string;
   criteria: ProjectCriteria;
+  businessType: string;
+  lifecycleState: ProjectLifecycle;
   savedPersonIds: string[];
   passedPersonIds: string[];
   isPublished: boolean;
@@ -41,6 +46,9 @@ export type Profile = {
   reviewReason: string | null;
   fullName: string;
   avatarPath: string | null;
+  // Founder's currently-focused project. Drives which project's
+  // criteria Match uses to rank candidates and is where saves land.
+  activeProjectId: string | null;
   candidate: CandidateProfile;
 };
 
@@ -119,6 +127,8 @@ export type PublicProject = {
   title: string;
   description: string;
   criteria: ProjectCriteria;
+  businessType: string;
+  lifecycleState: ProjectLifecycle;
   createdAt: string;
   founderFullName: string;
   founderHeadline: string;
@@ -148,6 +158,7 @@ export const emptyProfile = (): Profile => ({
   reviewReason: null,
   fullName: "",
   avatarPath: null,
+  activeProjectId: null,
   candidate: emptyCandidate(),
 });
 

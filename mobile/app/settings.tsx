@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Stack, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -21,9 +21,12 @@ import {
 
 import { Field } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 export default function SettingsScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { user, updateEmail, updatePassword, signOut } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -241,7 +244,7 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   headerBar: {

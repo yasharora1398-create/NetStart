@@ -1,7 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   StyleSheet,
@@ -9,12 +10,20 @@ import {
   View,
 } from "react-native";
 import {
+  ArrowRight,
+  BookOpen,
   CheckCircle2,
   Clock,
+  Eye,
   LogOut,
+  Moon,
   Pencil,
+  Rocket,
   Settings as SettingsIcon,
   Sparkles,
+  Star,
+  Sun,
+  Users,
   XCircle,
 } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
@@ -25,11 +34,22 @@ import {
   type Project,
   type ReviewStatus,
 } from "@/lib/types";
-import { getAvatarUrl, getProfile, listProjects } from "@/lib/api";
-import { fonts, theme } from "@/lib/theme";
+import {
+  getAvatarUrl,
+  getProfile,
+  listProjects,
+  setActiveProject,
+} from "@/lib/api";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { resetTutorial, triggerTutorialReplay } from "@/lib/tutorial";
+import { readMetadataRole, updateRole, type Role } from "@/lib/userRole";
+import { confirmSignOut } from "@/lib/confirmSignOut";
 
 export default function MyNetScreen() {
   const { user, signOut } = useAuth();
+  const { theme, mode, toggle } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const router = useRouter();
   const [profile, setProfile] = useState<Profile>(emptyProfile());
   const [projects, setProjects] = useState<Project[]>([]);
@@ -70,6 +90,36 @@ export default function MyNetScreen() {
   const avatarUrl = getAvatarUrl(profile.avatarPath);
   const name = profile.fullName || user?.email || "Your profile";
 
+  // Role chosen at signup (lives on the auth user's user_metadata).
+  // Existing users without a role fall back to a heuristic: owning a
+  // project means they're a founder, otherwise builder.
+  const role: Role =
+    readMetadataRole(user) ?? (projects.length > 0 ? "founder" : "builder");
+
+  // Toggle role with confirmation. Persists to user_metadata so it
+  // survives sign-out / reinstall. The warning copy spells out what
+  // changes so a founder doesn't accidentally lose project context.
+  const toggleRole = () => {
+    const next: Role = role === "founder" ? "builder" : "founder";
+    const title =
+      next === "founder" ? "Switch to Founder?" : "Switch to Builder?";
+    const body =
+      next === "founder"
+        ? "You'll see operators in Match instead of projects. Builders apply to your projects, and you'll need at least one project posted to start matching."
+        : projects.length > 0
+          ? `You have ${projects.length} project${projects.length === 1 ? "" : "s"} that will stay saved, but Match will switch to showing founders looking for builders. Switch back anytime.`
+          : "You'll see founders posting projects in Match instead of operators. Switch back anytime.";
+    Alert.alert(title, body, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: `Switch to ${next === "founder" ? "Founder" : "Builder"}`,
+        onPress: () => {
+          void updateRole(next);
+        },
+      },
+    ]);
+  };
+
   return (
     <Screen>
       <View style={styles.eyebrow}>
@@ -78,6 +128,25 @@ export default function MyNetScreen() {
       </View>
       <Text style={styles.h1}>{name}</Text>
       {user?.email ? <Text style={styles.email}>{user.email}</Text> : null}
+
+      {/* Role badge — shows the role picked at sign-up. Tap to switch. */}
+      <Pressable
+        onPress={toggleRole}
+        style={({ pressed }) => [
+          styles.roleBadge,
+          pressed && { opacity: 0.75 },
+        ]}
+      >
+        {role === "founder" ? (
+          <Rocket size={12} color={theme.gold} />
+        ) : (
+          <Users size={12} color={theme.gold} />
+        )}
+        <Text style={styles.roleBadgeText}>
+          {role === "founder" ? "Founder" : "Builder"}
+        </Text>
+        <Text style={styles.roleBadgeHint}>tap to switch</Text>
+      </Pressable>
 
       {/* Avatar + status pill */}
       <View style={styles.headerCard}>
@@ -108,7 +177,8 @@ export default function MyNetScreen() {
         </View>
       ) : null}
 
-      {/* Credentials block */}
+      {/* Credentials block. Founders see Website + Proof; builders
+          see Resume. LinkedIn shows for both. */}
       <Section
         title="Credentials"
         onEdit={() => router.push("/edit-credentials" as never)}
@@ -121,96 +191,208 @@ export default function MyNetScreen() {
         }
       >
         <Row label="LinkedIn" value={profile.linkedinUrl || "Not set"} />
-        <Row
-          label="Resume"
-          value={profile.resume ? profile.resume.name : "Not uploaded"}
-        />
+        {role === "founder" ? (
+          <>
+            <Row
+              label="Website"
+              value={profile.websiteUrl || "Not set"}
+            />
+            <Row
+              label="Proof"
+              value={profile.proof ? profile.proof.name : "Not uploaded"}
+            />
+          </>
+        ) : (
+          <Row
+            label="Resume"
+            value={profile.resume ? profile.resume.name : "Not uploaded"}
+          />
+        )}
       </Section>
 
-      {/* Candidate block */}
-      <Section
-        title="Candidate profile"
-        onEdit={() => router.push("/edit-candidate" as never)}
-      >
-        <Row
-          label="Open to work"
-          value={profile.candidate.isOpenToWork ? "Yes" : "Off"}
-          good={profile.candidate.isOpenToWork}
-        />
-        <Row label="Headline" value={profile.candidate.headline || "—"} />
-        <Row label="Location" value={profile.candidate.location || "—"} />
-        <Row label="Commitment" value={profile.candidate.commitment || "—"} />
-        <Row
-          label="Skills"
-          value={
-            profile.candidate.skills.length > 0
-              ? profile.candidate.skills.join(", ")
-              : "—"
-          }
-        />
-        {profile.candidate.bio ? (
-          <Text style={styles.bio}>{profile.candidate.bio}</Text>
-        ) : null}
-      </Section>
+      {/* Candidate profile only applies to builders. Founders are
+          represented by their projects, not a candidate bio. */}
+      {role === "builder" ? (
+        <Section
+          title="Candidate profile"
+          onEdit={() => router.push("/edit-candidate" as never)}
+        >
+          <Row
+            label="Open to work"
+            value={profile.candidate.isOpenToWork ? "Yes" : "Off"}
+            good={profile.candidate.isOpenToWork}
+          />
+          <Row label="Headline" value={profile.candidate.headline || "-"} />
+          <Row label="Location" value={profile.candidate.location || "-"} />
+          <Row
+            label="Commitment"
+            value={profile.candidate.commitment || "-"}
+          />
+          <Row
+            label="Skills"
+            value={
+              profile.candidate.skills.length > 0
+                ? profile.candidate.skills.join(", ")
+                : "-"
+            }
+          />
+          {profile.candidate.bio ? (
+            <Text style={styles.bio}>{profile.candidate.bio}</Text>
+          ) : null}
+        </Section>
+      ) : null}
 
       {/* Projects */}
       <Section
         title={`Projects (${projects.length})`}
-        onEdit={() => router.push("/edit-project" as never)}
+        onEdit={
+          projects.length > 0
+            ? () => router.push("/edit-project" as never)
+            : undefined
+        }
         editLabel="+ New"
       >
         {projects.length === 0 ? (
-          <Text style={styles.dim}>
-            You haven't created a project yet. Use the web app to set one up.
-          </Text>
-        ) : (
-          projects.map((p) => (
+          role === "founder" ? (
             <Pressable
-              key={p.id}
-              onPress={() =>
-                router.push(`/project/${p.id}` as never)
-              }
+              onPress={() => router.push("/edit-project" as never)}
               style={({ pressed }) => [
-                styles.projectCard,
-                pressed && { opacity: 0.7 },
+                styles.onboardCard,
+                pressed && { opacity: 0.85 },
               ]}
             >
-              <View style={styles.projectHead}>
-                <Text style={styles.projectTitle}>{p.title}</Text>
-                <View
-                  style={[
-                    styles.publishedPill,
-                    p.isPublished
-                      ? styles.publishedOn
-                      : styles.publishedOff,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.publishedPillText,
-                      p.isPublished
-                        ? { color: theme.emerald }
-                        : { color: theme.textMuted },
-                    ]}
-                  >
-                    {p.isPublished ? "Public" : "Draft"}
-                  </Text>
-                </View>
-              </View>
-              {p.description ? (
-                <Text style={styles.projectDesc} numberOfLines={2}>
-                  {p.description}
-                </Text>
-              ) : null}
-              <Text style={styles.projectSaved}>
-                {p.savedPersonIds.length} saved · tap to manage
+              <Rocket size={20} color={theme.gold} />
+              <Text style={styles.onboardTitle}>Post your first project</Text>
+              <Text style={styles.onboardBody}>
+                Tell builders what you're building, the skills you need, and the
+                commitment level. Takes about a minute. Once it's live,
+                operators can apply.
               </Text>
+              <View style={styles.onboardCta}>
+                <Text style={styles.onboardCtaText}>Create project</Text>
+                <ArrowRight size={14} color={theme.textOnPrimary} />
+              </View>
             </Pressable>
-          ))
+          ) : (
+            <Text style={styles.dim}>
+              No projects yet. Switch to Founder if you want to post one.
+            </Text>
+          )
+        ) : (
+          projects.map((p) => {
+            const isActive = profile.activeProjectId === p.id;
+            const handleStar = async () => {
+              if (!user) return;
+              // Toggle: tap star on the active one to clear, on any
+              // other to make it active. Optimistic UI.
+              const next = isActive ? null : p.id;
+              setProfile((prev) => ({ ...prev, activeProjectId: next }));
+              try {
+                await setActiveProject(user.id, next);
+              } catch {
+                // Revert on failure.
+                setProfile((prev) => ({
+                  ...prev,
+                  activeProjectId: isActive ? p.id : null,
+                }));
+              }
+            };
+            return (
+              <Pressable
+                key={p.id}
+                onPress={() => router.push(`/project/${p.id}` as never)}
+                style={({ pressed }) => [
+                  styles.projectCard,
+                  isActive && styles.projectCardActive,
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <View style={styles.projectHead}>
+                  <Text style={styles.projectTitle}>{p.title}</Text>
+                  <View style={styles.projectHeadRight}>
+                    {/* Star marks the founder's currently-focused
+                        project. Browse / Search rank against this. */}
+                    {role === "founder" && (
+                      <Pressable
+                        onPress={handleStar}
+                        hitSlop={10}
+                        style={({ pressed }) => [
+                          styles.starBtn,
+                          pressed && { opacity: 0.7 },
+                        ]}
+                      >
+                        <Star
+                          size={16}
+                          color={isActive ? theme.gold : theme.textDim}
+                          fill={isActive ? theme.gold : "transparent"}
+                        />
+                      </Pressable>
+                    )}
+                    <View
+                      style={[
+                        styles.publishedPill,
+                        p.isPublished
+                          ? styles.publishedOn
+                          : styles.publishedOff,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.publishedPillText,
+                          p.isPublished
+                            ? { color: theme.emerald }
+                            : { color: theme.textMuted },
+                        ]}
+                      >
+                        {p.isPublished ? "Public" : "Draft"}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                {p.description ? (
+                  <Text style={styles.projectDesc} numberOfLines={2}>
+                    {p.description}
+                  </Text>
+                ) : null}
+                <Text style={styles.projectSaved}>
+                  {isActive ? "Active project · " : ""}
+                  {p.savedPersonIds.length} saved · tap to manage
+                </Text>
+              </Pressable>
+            );
+          })
         )}
       </Section>
 
+      {/* Preview your card - shows the user how their card looks
+          to the OTHER side. Founder sees their project; builder sees
+          their candidate profile. */}
+      <Pressable
+        onPress={() => router.push("/preview-card" as never)}
+        style={({ pressed }) => [
+          styles.previewBtn,
+          pressed && { opacity: 0.85 },
+        ]}
+      >
+        <Eye size={16} color={theme.gold} />
+        <Text style={styles.previewBtnText}>Preview your card</Text>
+      </Pressable>
+
       <View style={styles.bottomRow}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.bottomBtn,
+            pressed && { opacity: 0.7 },
+          ]}
+          onPress={async () => {
+            await resetTutorial();
+            triggerTutorialReplay();
+            router.push("/(tabs)" as never);
+          }}
+        >
+          <BookOpen size={16} color={theme.gold} />
+          <Text style={styles.tutorialText}>Tutorial</Text>
+        </Pressable>
         <Pressable
           style={({ pressed }) => [
             styles.bottomBtn,
@@ -226,17 +408,36 @@ export default function MyNetScreen() {
             styles.bottomBtn,
             pressed && { opacity: 0.7 },
           ]}
-          onPress={() => signOut()}
+          onPress={() => confirmSignOut(signOut)}
         >
           <LogOut size={16} color={theme.destructive} />
           <Text style={styles.signOutText}>Sign out</Text>
         </Pressable>
       </View>
+
+      {/* Dark / Light mode toggle — full-width below the three buttons. */}
+      <Pressable
+        onPress={toggle}
+        style={({ pressed }) => [
+          styles.modeBtn,
+          pressed && { opacity: 0.7 },
+        ]}
+      >
+        {mode === "light" ? (
+          <Moon size={16} color={theme.gold} />
+        ) : (
+          <Sun size={16} color={theme.gold} />
+        )}
+        <Text style={styles.modeText}>
+          {mode === "light" ? "Dark mode" : "Light mode"}
+        </Text>
+      </Pressable>
     </Screen>
   );
 }
 
 const StatusPill = ({ status }: { status: ReviewStatus }) => {
+  const { theme } = useTheme();
   const config = {
     draft: {
       label: "Draft",
@@ -310,7 +511,10 @@ const Section = ({
   children: React.ReactNode;
   onEdit?: () => void;
   editLabel?: string;
-}) => (
+}) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  return (
   <View style={styles.section}>
     <View style={styles.sectionHead}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -330,7 +534,8 @@ const Section = ({
     </View>
     <View style={styles.sectionBody}>{children}</View>
   </View>
-);
+  );
+};
 
 const Row = ({
   label,
@@ -340,19 +545,23 @@ const Row = ({
   label: string;
   value: string;
   good?: boolean;
-}) => (
-  <View style={styles.row}>
-    <Text style={styles.rowLabel}>{label}</Text>
-    <Text
-      style={[styles.rowValue, good ? { color: theme.emerald } : null]}
-      numberOfLines={2}
-    >
-      {value}
-    </Text>
-  </View>
-);
+}) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  return (
+    <View style={styles.row}>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text
+        style={[styles.rowValue, good ? { color: theme.emerald } : null]}
+        numberOfLines={2}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+};
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   eyebrow: {
     flexDirection: "row",
@@ -385,7 +594,34 @@ const styles = StyleSheet.create({
     color: theme.textMuted,
     fontFamily: fonts.mono,
     fontSize: 12,
+    marginBottom: 12,
+  },
+  roleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: theme.gold,
+    backgroundColor: theme.goldGlow,
+    borderRadius: 999,
     marginBottom: 20,
+  },
+  roleBadgeText: {
+    color: theme.gold,
+    fontFamily: fonts.display,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  roleBadgeHint: {
+    color: theme.textMuted,
+    fontFamily: fonts.mono,
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    marginLeft: 4,
   },
   headerCard: {
     flexDirection: "row",
@@ -517,16 +753,75 @@ const styles = StyleSheet.create({
     borderTopColor: theme.border,
   },
   dim: { color: theme.textMuted, fontSize: 13, lineHeight: 19 },
+  // First-run onboarding card. Replaces the dim "use the web app"
+  // text that used to live here. Bold, tappable, makes the next
+  // action obvious for a founder who just signed up.
+  onboardCard: {
+    gap: 10,
+    padding: 18,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.goldSoft,
+    backgroundColor: theme.goldGlow,
+  },
+  onboardTitle: {
+    color: theme.text,
+    fontFamily: fonts.display,
+    fontSize: 18,
+    letterSpacing: -0.2,
+    marginTop: 2,
+  },
+  onboardBody: {
+    color: theme.textMuted,
+    fontSize: 13.5,
+    lineHeight: 19,
+  },
+  onboardCta: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 6,
+    backgroundColor: theme.gold,
+  },
+  onboardCtaText: {
+    color: theme.textOnPrimary,
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+  },
   projectCard: {
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "transparent",
+    marginBottom: 8,
+  },
+  projectCardActive: {
+    borderColor: theme.gold,
+    backgroundColor: theme.goldGlow,
   },
   projectHead: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 8,
     marginBottom: 4,
+  },
+  projectHeadRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  starBtn: {
+    width: 28,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
   },
   projectTitle: {
     color: theme.text,
@@ -585,4 +880,44 @@ const styles = StyleSheet.create({
   },
   settingsText: { color: theme.textMuted, fontSize: 14, fontWeight: "500" },
   signOutText: { color: theme.destructive, fontSize: 14, fontWeight: "500" },
+  tutorialText: { color: theme.gold, fontSize: 14, fontWeight: "500" },
+  previewBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: theme.goldSoft,
+    backgroundColor: theme.goldGlow,
+    borderRadius: 4,
+    paddingVertical: 14,
+    marginBottom: 10,
+  },
+  previewBtnText: {
+    color: theme.gold,
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 0.2,
+  },
+  // Dark / Light mode toggle — full width, sits below the three-button row.
+  modeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: theme.gold,
+    backgroundColor: theme.bgElev,
+    borderRadius: 4,
+    paddingVertical: 14,
+    marginTop: 10,
+  },
+  modeText: {
+    color: theme.gold,
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 0.2,
+  },
 });

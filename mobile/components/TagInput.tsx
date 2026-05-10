@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -7,7 +7,8 @@ import {
   View,
 } from "react-native";
 import { X } from "lucide-react-native";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 type TagInputProps = {
   value: string[];
@@ -16,6 +17,8 @@ type TagInputProps = {
 };
 
 export const TagInput = ({ value, onChange, placeholder }: TagInputProps) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [draft, setDraft] = useState("");
 
   const commit = () => {
@@ -65,7 +68,7 @@ export const TagInput = ({ value, onChange, placeholder }: TagInputProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   wrap: { gap: 8 },
   input: {
     backgroundColor: theme.bgElev,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Stack, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -25,16 +25,23 @@ import { Field } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
 import {
   getProfile,
+  getProofPath,
   getResumePath,
+  removeProof,
   removeResume,
   setLinkedIn,
+  setWebsite,
   submitProfile,
+  uploadProofFromUri,
   uploadResumeFromUri,
 } from "@/lib/api";
 import { emptyProfile, type Profile } from "@/lib/types";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { readMetadataRole, type Role } from "@/lib/userRole";
 
 const MAX_RESUME_BYTES = 4 * 1024 * 1024;
+const MAX_PROOF_BYTES = 10 * 1024 * 1024;
 
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -53,14 +60,24 @@ const isValidLinkedIn = (url: string): boolean => {
 };
 
 export default function EditCredentialsScreen() {
-  const { user } = useAuth();
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const { user, emailVerified } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile>(emptyProfile());
   const [linkedin, setLinkedin] = useState("");
+  const [website, setWebsiteText] = useState("");
   const [savingLinkedin, setSavingLinkedin] = useState(false);
+  const [savingWebsite, setSavingWebsite] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Role drives which fields render. Defaults to builder for legacy
+  // users without a role in metadata; once they have a project the
+  // app considers them a founder anyway.
+  const role: Role = readMetadataRole(user) ?? "builder";
+  const isFounder = role === "founder";
 
   useEffect(() => {
     if (!user) return;
@@ -70,6 +87,7 @@ export default function EditCredentialsScreen() {
         if (cancelled) return;
         setProfile(p);
         setLinkedin(p.linkedinUrl);
+        setWebsiteText(p.websiteUrl);
       })
       .catch(() => {})
       .finally(() => {
@@ -81,6 +99,7 @@ export default function EditCredentialsScreen() {
   }, [user]);
 
   const linkedinDirty = linkedin.trim() !== profile.linkedinUrl.trim();
+  const websiteDirty = website.trim() !== profile.websiteUrl.trim();
 
   const handleSaveLinkedIn = async () => {
     if (!user) return;
@@ -100,6 +119,91 @@ export default function EditCredentialsScreen() {
     } finally {
       setSavingLinkedin(false);
     }
+  };
+
+  const handleSaveWebsite = async () => {
+    if (!user) return;
+    setSavingWebsite(true);
+    try {
+      await setWebsite(user.id, website.trim());
+      setProfile((p) => ({ ...p, websiteUrl: website.trim() }));
+    } catch (err) {
+      Alert.alert(
+        "Could not save",
+        err instanceof Error ? err.message : "Try again.",
+      );
+    } finally {
+      setSavingWebsite(false);
+    }
+  };
+
+  const handlePickProof = async () => {
+    if (!user) return;
+    const result = await DocumentPicker.getDocumentAsync({
+      // Founders can upload anything that demonstrates progress: a
+      // deck (pdf/pptx), product screenshots (png/jpg), or a video.
+      type: "*/*",
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    if (asset.size && asset.size > MAX_PROOF_BYTES) {
+      Alert.alert(
+        "File too large",
+        `Max ${formatBytes(MAX_PROOF_BYTES)}. Yours is ${formatBytes(asset.size)}.`,
+      );
+      return;
+    }
+    setUploading(true);
+    try {
+      const previousPath = await getProofPath(user.id);
+      const meta = await uploadProofFromUri(
+        user.id,
+        asset.uri,
+        asset.name,
+        asset.size ?? 0,
+        asset.mimeType ?? null,
+        previousPath,
+      );
+      setProfile((p) => ({
+        ...p,
+        proof: { name: meta.name, size: meta.size, uploadedAt: meta.uploadedAt },
+      }));
+    } catch (err) {
+      Alert.alert(
+        "Upload failed",
+        err instanceof Error ? err.message : "Try again.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveProof = async () => {
+    if (!user) return;
+    Alert.alert("Remove proof?", "You can re-upload anytime.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          setUploading(true);
+          try {
+            const path = await getProofPath(user.id);
+            await removeProof(user.id, path);
+            setProfile((p) => ({ ...p, proof: null }));
+          } catch (err) {
+            Alert.alert(
+              "Could not remove",
+              err instanceof Error ? err.message : "Try again.",
+            );
+          } finally {
+            setUploading(false);
+          }
+        },
+      },
+    ]);
   };
 
   const handlePickResume = async () => {
@@ -171,16 +275,41 @@ export default function EditCredentialsScreen() {
 
   const handleSubmitForReview = async () => {
     if (!user) return;
-    if (!profile.linkedinUrl && !profile.resume && !linkedinDirty) {
+
+    // Stage 0: email verification gate. Submission goes nowhere if
+    // the email hasn't been confirmed - the admin reviewer would
+    // otherwise have to chase fake addresses.
+    if (!emailVerified) {
       Alert.alert(
-        "Add something first",
-        "Add LinkedIn or upload a resume before submitting.",
+        "Verify your email first",
+        "We sent a verification link to your address when you signed up. Click it before submitting MyNet for review.",
       );
       return;
     }
+
+    // Role-aware required fields:
+    //   founder -> proof file (mandatory). Website + LinkedIn optional.
+    //   builder -> at least one of LinkedIn or resume.
+    if (isFounder) {
+      if (!profile.proof) {
+        Alert.alert(
+          "Proof required",
+          "Upload at least one file showing what you're building before submitting.",
+        );
+        return;
+      }
+    } else {
+      if (!profile.linkedinUrl && !profile.resume && !linkedinDirty) {
+        Alert.alert(
+          "Add something first",
+          "Add LinkedIn or upload a resume before submitting.",
+        );
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      // Save linkedin if dirty
       if (linkedinDirty) {
         if (!isValidLinkedIn(linkedin)) {
           Alert.alert("Invalid LinkedIn", "URL must be a linkedin.com link.");
@@ -189,6 +318,10 @@ export default function EditCredentialsScreen() {
         }
         await setLinkedIn(user.id, linkedin.trim());
         setProfile((p) => ({ ...p, linkedinUrl: linkedin.trim() }));
+      }
+      if (isFounder && websiteDirty) {
+        await setWebsite(user.id, website.trim());
+        setProfile((p) => ({ ...p, websiteUrl: website.trim() }));
       }
       await submitProfile();
       Alert.alert("Submitted", "We'll review your credentials soon.");
@@ -286,61 +419,156 @@ export default function EditCredentialsScreen() {
             ) : null}
           </Field>
 
-          {/* Resume */}
-          <Field label="Resume" hint="PDF or DOC, max 4 MB.">
-            {profile.resume ? (
-              <View style={styles.resumeCard}>
-                <View style={styles.resumeIcon}>
-                  <FileText size={16} color={theme.gold} />
+          {/* Founder-only: website + proof. Builders see resume. */}
+          {isFounder ? (
+            <>
+              <Field
+                label="Website"
+                hint="Optional. Link to whatever you're building."
+              >
+                <TextInput
+                  value={website}
+                  onChangeText={setWebsiteText}
+                  placeholder="https://your-startup.com"
+                  placeholderTextColor={theme.textDim}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                  style={styles.input}
+                />
+                {websiteDirty ? (
+                  <Pressable
+                    onPress={handleSaveWebsite}
+                    disabled={savingWebsite}
+                    style={({ pressed }) => [
+                      styles.savePill,
+                      pressed && { opacity: 0.85 },
+                    ]}
+                  >
+                    {savingWebsite ? (
+                      <ActivityIndicator size="small" color={theme.bg} />
+                    ) : (
+                      <>
+                        <Save size={12} color={theme.bg} />
+                        <Text style={styles.savePillText}>Save website</Text>
+                      </>
+                    )}
+                  </Pressable>
+                ) : profile.websiteUrl ? (
+                  <Text style={styles.savedHint}>Saved</Text>
+                ) : null}
+              </Field>
+
+              <Field
+                label="Proof of work *"
+                hint="Required. Deck, screenshots, demo video, anything that shows progress. Max 10 MB."
+              >
+                {profile.proof ? (
+                  <View style={styles.resumeCard}>
+                    <View style={styles.resumeIcon}>
+                      <FileText size={16} color={theme.gold} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.resumeName} numberOfLines={1}>
+                        {profile.proof.name}
+                      </Text>
+                      <Text style={styles.resumeMeta}>
+                        {formatBytes(profile.proof.size)}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={handlePickProof}
+                      disabled={uploading}
+                      hitSlop={6}
+                    >
+                      <Text style={styles.resumeAction}>Replace</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={handleRemoveProof}
+                      disabled={uploading}
+                      hitSlop={6}
+                      style={{ marginLeft: 6 }}
+                    >
+                      <Trash2 size={16} color={theme.destructive} />
+                    </Pressable>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={handlePickProof}
+                    disabled={uploading}
+                    style={({ pressed }) => [
+                      styles.uploadBtn,
+                      pressed && { opacity: 0.85 },
+                    ]}
+                  >
+                    {uploading ? (
+                      <ActivityIndicator size="small" color={theme.gold} />
+                    ) : (
+                      <>
+                        <Upload size={14} color={theme.gold} />
+                        <Text style={styles.uploadText}>Upload proof of work</Text>
+                      </>
+                    )}
+                  </Pressable>
+                )}
+              </Field>
+            </>
+          ) : (
+            <Field label="Resume" hint="PDF or DOC, max 4 MB.">
+              {profile.resume ? (
+                <View style={styles.resumeCard}>
+                  <View style={styles.resumeIcon}>
+                    <FileText size={16} color={theme.gold} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.resumeName} numberOfLines={1}>
+                      {profile.resume.name}
+                    </Text>
+                    <Text style={styles.resumeMeta}>
+                      {formatBytes(profile.resume.size)}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={handlePickResume}
+                    disabled={uploading}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.resumeAction}>Replace</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleRemoveResume}
+                    disabled={uploading}
+                    hitSlop={6}
+                    style={{ marginLeft: 6 }}
+                  >
+                    <Trash2 size={16} color={theme.destructive} />
+                  </Pressable>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.resumeName} numberOfLines={1}>
-                    {profile.resume.name}
-                  </Text>
-                  <Text style={styles.resumeMeta}>
-                    {formatBytes(profile.resume.size)}
-                  </Text>
-                </View>
+              ) : (
                 <Pressable
                   onPress={handlePickResume}
                   disabled={uploading}
-                  hitSlop={6}
+                  style={({ pressed }) => [
+                    styles.uploadBtn,
+                    pressed && { opacity: 0.85 },
+                  ]}
                 >
-                  <Text style={styles.resumeAction}>Replace</Text>
+                  {uploading ? (
+                    <ActivityIndicator size="small" color={theme.gold} />
+                  ) : (
+                    <>
+                      <Upload size={14} color={theme.gold} />
+                      <Text style={styles.uploadText}>Upload resume</Text>
+                    </>
+                  )}
                 </Pressable>
-                <Pressable
-                  onPress={handleRemoveResume}
-                  disabled={uploading}
-                  hitSlop={6}
-                  style={{ marginLeft: 6 }}
-                >
-                  <Trash2 size={16} color={theme.destructive} />
-                </Pressable>
-              </View>
-            ) : (
-              <Pressable
-                onPress={handlePickResume}
-                disabled={uploading}
-                style={({ pressed }) => [
-                  styles.uploadBtn,
-                  pressed && { opacity: 0.85 },
-                ]}
-              >
-                {uploading ? (
-                  <ActivityIndicator size="small" color={theme.gold} />
-                ) : (
-                  <>
-                    <Upload size={14} color={theme.gold} />
-                    <Text style={styles.uploadText}>Upload resume</Text>
-                  </>
-                )}
-              </Pressable>
-            )}
-          </Field>
+              )}
+            </Field>
+          )}
 
           <View style={styles.statusBox}>
             <Text style={styles.statusLabel}>Current status</Text>
-            <Text style={[styles.statusValue, statusValueColor(status)]}>
+            <Text style={[styles.statusValue, statusValueColor(status, theme)]}>
               {statusLabel(status)}
             </Text>
           </View>
@@ -380,7 +608,7 @@ const statusLabel = (s: string) =>
           ? "Rejected"
           : s;
 
-const statusValueColor = (s: string) => ({
+const statusValueColor = (s: string, theme: ThemePalette) => ({
   color:
     s === "accepted"
       ? theme.emerald
@@ -391,7 +619,7 @@ const statusValueColor = (s: string) => ({
           : theme.textMuted,
 });
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   headerBar: {

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User, AuthError } from "@supabase/supabase-js";
 import { getSupabase, isSupabaseConfigured, MISSING_CONFIG_MESSAGE } from "@/lib/supabase";
 import { isAdminUser } from "@/lib/mynet-storage";
+import { setSavedProjectsUser } from "@/lib/savedProjects";
 
 type AuthResult = { error: AuthError | Error | null };
 
@@ -25,6 +26,7 @@ type AuthContextValue = {
     email: string,
     password: string,
     name: string,
+    role: "founder" | "builder",
   ) => Promise<SignUpResult>;
   signOut: (scope?: "local" | "global") => Promise<void>;
   requestPasswordReset: (email: string) => Promise<AuthResult>;
@@ -62,10 +64,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!mounted) return;
       setSession(data.session);
       setLoading(false);
+      // Hydrate per-user local stores from localStorage.
+      setSavedProjectsUser(data.session?.user?.id ?? null);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
+      // Rebind per-user local stores on every auth change so different
+      // users on the same device see their own saves.
+      setSavedProjectsUser(next?.user?.id ?? null);
     });
 
     return () => {
@@ -98,11 +105,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
-  const signUp: AuthContextValue["signUp"] = async (email, password, name) => {
+  const signUp: AuthContextValue["signUp"] = async (
+    email,
+    password,
+    name,
+    role,
+  ) => {
     if (!isSupabaseConfigured) return notConfiguredSignUp();
     // After the user clicks the verification link in the email, send
     // them to /authenticated. Supabase auto-creates a session at
-    // verify-time and the page reads that - keeps them signed in.
+    // verify-time and the page reads that — keeps them signed in.
     const emailRedirectTo =
       typeof window !== "undefined"
         ? `${window.location.origin}/authenticated`
@@ -110,7 +122,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await getSupabase().auth.signUp({
       email: normalizeEmail(email),
       password,
-      options: { data: { name: name.trim() }, emailRedirectTo },
+      options: {
+        data: { name: name.trim(), role },
+        emailRedirectTo,
+      },
     });
     if (error) return { error, duplicate: false };
 

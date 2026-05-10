@@ -8,6 +8,9 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { clearPushToken, registerForPush } from "./push";
+import { setSavedUser } from "./savedCount";
+import { setSavedProjectsUser } from "./savedProjects";
+import { setSentRequestsUser } from "./sentRequests";
 
 type AuthValue = {
   session: Session | null;
@@ -19,6 +22,7 @@ type AuthValue = {
     email: string,
     password: string,
     name: string,
+    role: "founder" | "builder",
   ) => Promise<{ error: Error | null }>;
   signOut: (scope?: "local" | "global") => Promise<void>;
   requestPasswordReset: (
@@ -44,6 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!mounted) return;
       setSession(data.session);
       setLoading(false);
+      // Hydrate per-user local stores from AsyncStorage.
+      void setSavedUser(data.session?.user?.id ?? null);
+      void setSavedProjectsUser(data.session?.user?.id ?? null);
+      void setSentRequestsUser(data.session?.user?.id ?? null);
       if (data.session?.user) {
         // fire-and-forget; failure is silent
         void registerForPush();
@@ -51,6 +59,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next);
+      // Rebind per-user local stores on every auth change so different
+      // users on the same device see their own data.
+      void setSavedUser(next?.user?.id ?? null);
+      void setSavedProjectsUser(next?.user?.id ?? null);
+      void setSentRequestsUser(next?.user?.id ?? null);
       if (event === "SIGNED_IN" && next?.user) {
         void registerForPush();
       }
@@ -73,11 +86,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
-  const signUp: AuthValue["signUp"] = async (email, password, name) => {
+  const signUp: AuthValue["signUp"] = async (email, password, name, role) => {
+    // Verification email lands on the web app's /authenticated page
+    // (same target the waitlist signup uses). Once email is verified,
+    // Supabase auto-creates the session and the user can come back to
+    // the mobile app and sign in normally. Mobile-native deep linking
+    // can be added later once we have a real bundle id + universal
+    // links configured.
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: { name, role },
+        emailRedirectTo: "https://polln8.com/authenticated",
+      },
+    });
+    return { error };
+  };
+
+  const requestPasswordReset: AuthValue["requestPasswordReset"] = async (
+    email,
+  ) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://polln8.com/reset-password",
     });
     return { error };
   };
@@ -95,13 +126,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateEmail: AuthValue["updateEmail"] = async (newEmail) => {
     const { error } = await supabase.auth.updateUser({ email: newEmail });
-    return { error };
-  };
-
-  const requestPasswordReset: AuthValue["requestPasswordReset"] = async (
-    email,
-  ) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
     return { error };
   };
 

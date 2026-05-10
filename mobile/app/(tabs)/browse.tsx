@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   Pressable,
@@ -21,37 +20,30 @@ import {
 } from "lucide-react-native";
 import { useAuth } from "@/lib/auth";
 import {
-  createApplication,
   getAvatarUrl,
-  listMyApplications,
   listPublishedProjects,
 } from "@/lib/api";
-import type {
-  ApplicationStatus,
-  PublicProject,
-} from "@/lib/types";
-import { fonts, theme } from "@/lib/theme";
+import type { PublicProject } from "@/lib/types";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { MothEmptyState } from "@/components/MothEmptyState";
+import { MothLoader } from "@/components/MothLoader";
 
 export default function BrowseScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [projects, setProjects] = useState<PublicProject[]>([]);
-  const [applied, setApplied] = useState<Map<string, ApplicationStatus>>(
-    new Map(),
-  );
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([listPublishedProjects(), listMyApplications()])
-      .then(([list, mine]) => {
-        if (cancelled) return;
-        setProjects(list);
-        const map = new Map<string, ApplicationStatus>();
-        for (const a of mine) map.set(a.projectId, a.status);
-        setApplied(map);
+    listPublishedProjects()
+      .then((list) => {
+        if (!cancelled) setProjects(list);
       })
       .catch(() => {
         // silent — empty state will show
@@ -74,55 +66,34 @@ export default function BrowseScreen() {
       })
     : projects;
 
-  const handleApply = (project: PublicProject) => {
+  // Stage 4: "Apply" was removed in favor of a universal chat
+  // request. Tapping the CTA on a card now opens a chat thread with
+  // the founder; the builder's first message creates the pending row.
+  const handleRequestChat = (project: PublicProject) => {
     if (project.ownerId === user?.id) return;
-    Alert.prompt(
-      `Apply to ${project.title}`,
-      "Pitch yourself in a short note (min 10 chars).",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Send",
-          onPress: async (text?: string) => {
-            const note = (text ?? "").trim();
-            if (note.length < 10) {
-              Alert.alert("Too short", "Pitch yourself in at least 10 chars.");
-              return;
-            }
-            try {
-              await createApplication(project.id, note);
-              setApplied((prev) => {
-                const next = new Map(prev);
-                next.set(project.id, "pending");
-                return next;
-              });
-              Alert.alert("Sent", "Your application is on its way.");
-            } catch (err) {
-              const m =
-                err instanceof Error
-                  ? err.message
-                  : "Could not send.";
-              Alert.alert(
-                "Failed",
-                m.includes("duplicate")
-                  ? "You've already applied to this project."
-                  : m,
-              );
-            }
-          },
-        },
-      ],
-      "plain-text",
-      "",
-    );
+    router.push(`/chat/${project.ownerId}` as never);
   };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
-        <View style={styles.eyebrow}>
-          <Compass size={12} color={theme.gold} />
-          <Text style={styles.eyebrowText}>Browse</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.eyebrow}>
+            <Compass size={12} color={theme.gold} />
+            <Text style={styles.eyebrowText}>Browse</Text>
+          </View>
+          {/* Magnifying glass routes to /search where filters tighten
+              criteria for a single search session. */}
+          <Pressable
+            onPress={() => router.push("/search" as never)}
+            hitSlop={12}
+            style={({ pressed }) => [
+              styles.searchIconBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Search size={18} color={theme.gold} />
+          </Pressable>
         </View>
         <Text style={styles.h1}>Open projects.</Text>
 
@@ -135,7 +106,7 @@ export default function BrowseScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search title, skills, founder..."
+            placeholder="Quick filter by title, skill, founder..."
             placeholderTextColor={theme.textDim}
             style={styles.searchInput}
             autoCapitalize="none"
@@ -146,20 +117,18 @@ export default function BrowseScreen() {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator color={theme.gold} />
+          <MothLoader size={160} />
         </View>
       ) : filtered.length === 0 ? (
-        <View style={styles.empty}>
-          <Compass size={20} color={theme.gold} />
-          <Text style={styles.emptyTitle}>
-            {query ? "No matches" : "Nothing here yet"}
-          </Text>
-          <Text style={styles.emptyBody}>
-            {query
-              ? "Try fewer or different keywords."
-              : "Check back soon. Founders are spinning things up."}
-          </Text>
-        </View>
+        <MothEmptyState
+          variant={query ? "filters" : "platform"}
+          title={query ? "No matches." : "Nothing here yet."}
+          sub={
+            query
+              ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
+              : "Check back soon. Founders are spinning things up."
+          }
+        />
       ) : (
         <FlatList
           data={filtered}
@@ -167,11 +136,16 @@ export default function BrowseScreen() {
           contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           renderItem={({ item: p }) => {
-            const status = applied.get(p.id);
             const isOwn = p.ownerId === user?.id;
             const founderUrl = getAvatarUrl(p.founderAvatarPath);
             return (
-              <View style={styles.card}>
+              <Pressable
+                onPress={() => router.push(`/project/${p.id}` as never)}
+                style={({ pressed }) => [
+                  styles.card,
+                  pressed && { opacity: 0.92 },
+                ]}
+              >
                 <View style={styles.cardHead}>
                   <Text style={styles.cardTitle}>{p.title}</Text>
                   {isOwn && (
@@ -222,8 +196,20 @@ export default function BrowseScreen() {
                   </Text>
                 ) : null}
 
-                {(p.criteria.commitment || p.criteria.location) && (
+                {(p.businessType || p.criteria.commitment || p.criteria.location) && (
                   <View style={styles.metaRow}>
+                    {p.businessType ? (
+                      <View
+                        style={[
+                          styles.metaChip,
+                          { backgroundColor: theme.goldGlow, borderColor: theme.goldSoft },
+                        ]}
+                      >
+                        <Text style={[styles.metaText, { color: theme.gold }]}>
+                          {p.businessType}
+                        </Text>
+                      </View>
+                    ) : null}
                     {p.criteria.commitment ? (
                       <View style={styles.metaChip}>
                         <Briefcase size={10} color={theme.gold} />
@@ -259,31 +245,20 @@ export default function BrowseScreen() {
                   </Text>
                   {isOwn ? (
                     <Text style={styles.ownLabel}>Public listing</Text>
-                  ) : status ? (
-                    <View style={[styles.statusPill, statusStyle(status)]}>
-                      <Text
-                        style={[
-                          styles.statusPillText,
-                          { color: statusColor(status) },
-                        ]}
-                      >
-                        {statusLabel(status)}
-                      </Text>
-                    </View>
                   ) : (
                     <Pressable
-                      onPress={() => handleApply(p)}
+                      onPress={() => handleRequestChat(p)}
                       style={({ pressed }) => [
                         styles.applyBtn,
                         pressed && { opacity: 0.85 },
                       ]}
                     >
-                      <Text style={styles.applyText}>Apply</Text>
+                      <Text style={styles.applyText}>Message</Text>
                       <ArrowRight size={14} color={theme.bg} />
                     </Pressable>
                   )}
                 </View>
-              </View>
+              </Pressable>
             );
           }}
         />
@@ -292,35 +267,25 @@ export default function BrowseScreen() {
   );
 }
 
-const statusLabel = (s: ApplicationStatus) =>
-  s === "pending"
-    ? "Applied"
-    : s === "accepted"
-      ? "Accepted"
-      : s === "rejected"
-        ? "Rejected"
-        : "Withdrawn";
-
-const statusColor = (s: ApplicationStatus) =>
-  s === "accepted"
-    ? theme.emerald
-    : s === "rejected"
-      ? theme.destructive
-      : s === "withdrawn"
-        ? theme.textMuted
-        : theme.gold;
-
-const statusStyle = (s: ApplicationStatus) => {
-  const c = statusColor(s);
-  return {
-    borderColor: c + "66",
-    backgroundColor: c + "1A",
-  };
-};
-
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   header: { padding: 20, paddingBottom: 12 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  searchIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: theme.goldSoft,
+    backgroundColor: theme.goldGlow,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   eyebrow: {
     flexDirection: "row",
     alignItems: "center",
@@ -331,8 +296,6 @@ const styles = StyleSheet.create({
     borderColor: theme.goldSoft,
     backgroundColor: theme.goldGlow,
     borderRadius: 2,
-    alignSelf: "flex-start",
-    marginBottom: 12,
   },
   eyebrowText: {
     color: theme.gold,
@@ -426,16 +389,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   founderAvatar: {
-    width: 26,
-    height: 26,
-    borderRadius: 4,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: theme.goldSoft,
   },
   founderAvatarFallback: {
-    width: 26,
-    height: 26,
-    borderRadius: 4,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: theme.goldSoft,
     backgroundColor: theme.goldGlow,
@@ -445,15 +408,13 @@ const styles = StyleSheet.create({
   founderInitials: {
     color: theme.gold,
     fontFamily: fonts.display,
-    fontSize: 11,
+    fontSize: 18,
   },
-  founderName: { color: theme.text, fontSize: 12 },
+  founderName: { color: theme.text, fontSize: 13.5, fontWeight: "600" },
   founderHeadline: {
-    color: theme.textDim,
-    fontFamily: fonts.mono,
-    fontSize: 9,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
+    color: theme.textMuted,
+    fontSize: 11,
+    marginTop: 2,
   },
   cardDesc: {
     color: theme.textMuted,

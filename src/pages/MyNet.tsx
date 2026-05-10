@@ -36,6 +36,8 @@ import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 import { MyNetWizard } from "@/components/mynet/MyNetWizard";
 import { MyNetDashboard } from "@/components/mynet/MyNetDashboard";
+import { getSupabase } from "@/lib/supabase";
+import type { Role } from "@/components/netstart/RoleSwitcher";
 
 import {
   createProject,
@@ -46,6 +48,7 @@ import {
   removeAvatar,
   removePerson,
   removeResume,
+  setActiveProject,
   setLinkedIn,
   setOpenToWork,
   setPersonStatus,
@@ -85,8 +88,29 @@ const SAMPLE_PROJECTS: Project[] = [
   },
 ];
 
-const errorMessage = (err: unknown): string =>
-  err instanceof Error ? err.message : "Something went wrong.";
+// Supabase throws PostgrestError objects that aren't `instanceof
+// Error`, so a naive Error-check here masks every database failure
+// behind a generic "Something went wrong." Fall through to anything
+// that has a string `.message`, then `.details`, then `.hint`, so
+// users (and we, in toast logs) actually see what the DB said.
+const errorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object") {
+    const e = err as {
+      message?: unknown;
+      details?: unknown;
+      hint?: unknown;
+      code?: unknown;
+    };
+    if (typeof e.message === "string" && e.message.length > 0) {
+      const code = typeof e.code === "string" ? ` (${e.code})` : "";
+      return `${e.message}${code}`;
+    }
+    if (typeof e.details === "string" && e.details.length > 0) return e.details;
+    if (typeof e.hint === "string" && e.hint.length > 0) return e.hint;
+  }
+  return "Something went wrong.";
+};
 
 const MyNet = () => {
   const { user, loading } = useAuth();
@@ -215,6 +239,32 @@ const MyNet = () => {
     } catch (err) {
       toast.error(errorMessage(err));
       throw err;
+    }
+  };
+
+  // Refresh after a role flip so the auth user object (and therefore
+  // the dashboard's UI mode) reflects the new role on the next render.
+  const handleRoleSwitched = async () => {
+    try {
+      // Force a session refresh so user_metadata.role lands locally.
+      await getSupabase().auth.refreshSession();
+      await refreshAll();
+    } catch {
+      // ignore — onAuthStateChange usually fires on its own
+    }
+  };
+
+  const handleSetActiveProject = async (projectId: string | null) => {
+    if (!uid) return;
+    const previous = profile.activeProjectId;
+    // Optimistic update — flip the star immediately, revert on error.
+    setProfile((p) => ({ ...p, activeProjectId: projectId }));
+    try {
+      await setActiveProject(uid, projectId);
+      toast.success(projectId ? "Set as Match focus." : "Cleared focus.");
+    } catch (err) {
+      setProfile((p) => ({ ...p, activeProjectId: previous }));
+      toast.error(errorMessage(err));
     }
   };
 
@@ -382,6 +432,10 @@ const MyNet = () => {
               profile={profile}
               onProfileRefresh={refreshAll}
               onSubmitComplete={() => setEditingPending(false)}
+              preselectedRole={(() => {
+                const r = user?.user_metadata?.role;
+                return r === "founder" || r === "builder" ? r : undefined;
+              })()}
             />
             <BackToHome />
           </main>
@@ -485,6 +539,14 @@ const MyNet = () => {
               onDeleteProject={handleDeleteProject}
               onFindPeople={(id) => setFindForId(id)}
               onTogglePublish={handleTogglePublish}
+              onSetActiveProject={handleSetActiveProject}
+              role={(() => {
+                const r = user?.user_metadata?.role;
+                // Default to builder for legacy users with no role
+                // stamp; the founder side requires a deliberate flip.
+                return r === "founder" ? "founder" : "builder";
+              })() as Role}
+              onRoleSwitched={handleRoleSwitched}
             />
           ) : (
             <>

@@ -25,20 +25,25 @@ import Animated, {
 import {
   Bookmark,
   ChevronDown,
-  Heart,
   MapPin,
+  Search,
   Sparkles,
+  Undo2,
   X,
 } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import {
   getAvatarUrl,
   listProjects,
   matchCandidatesForProject,
+  removePerson,
   setPersonStatus,
 } from "@/lib/api";
 import type { Candidate, Project } from "@/lib/types";
 import { fonts, theme } from "@/lib/theme";
+import { MothEmptyState } from "@/components/MothEmptyState";
+import { MothLoader } from "@/components/MothLoader";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_W * 0.28;
@@ -47,12 +52,20 @@ type RankedCandidate = Candidate & { similarity: number };
 
 export default function MatchScreen() {
   const { user } = useAuth();
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [candidates, setCandidates] = useState<RankedCandidate[]>([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [picker, setPicker] = useState(false);
+  // Undo cache for the last swipe. The header button rolls the deck
+  // back one card and removes the saved/passed row from Supabase so
+  // the candidate reappears on the next reload.
+  const [lastSwipe, setLastSwipe] = useState<{
+    candidate: RankedCandidate;
+    status: "saved" | "passed";
+  } | null>(null);
 
   // Load owned projects (user must own at least one to run Match).
   useEffect(() => {
@@ -114,6 +127,7 @@ export default function MatchScreen() {
   const decide = async (direction: "left" | "right") => {
     if (!activeProject || !current) return;
     const status = direction === "right" ? "saved" : "passed";
+    setLastSwipe({ candidate: current, status });
     setIndex((i) => i + 1);
     try {
       await setPersonStatus(activeProject.id, current.userId, status);
@@ -122,13 +136,60 @@ export default function MatchScreen() {
     }
   };
 
+  const handleUndo = async () => {
+    if (!activeProject || !lastSwipe) return;
+    const { candidate } = lastSwipe;
+    setLastSwipe(null);
+    setIndex((i) => Math.max(0, i - 1));
+    setCandidates((prev) => {
+      const exists = prev.some((c) => c.userId === candidate.userId);
+      return exists ? prev : [candidate, ...prev];
+    });
+    try {
+      await removePerson(activeProject.id, candidate.userId);
+    } catch {
+      // silent — DB row may not exist if the previous save failed
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.eyebrow}>
-          <Sparkles size={12} color={theme.gold} />
-          <Text style={styles.eyebrowText}>Match</Text>
+        <View style={styles.headerTopRow}>
+          <View style={styles.eyebrow}>
+            <Sparkles size={12} color={theme.gold} />
+            <Text style={styles.eyebrowText}>Match</Text>
+          </View>
+          <View style={styles.headerActions}>
+            {/* Undo: rolls the deck back one card and clears the
+                last save/pass on the server. Only enabled when
+                there's a swipe to undo. */}
+            <Pressable
+              onPress={handleUndo}
+              disabled={!lastSwipe}
+              hitSlop={12}
+              style={({ pressed }) => [
+                styles.searchIconBtn,
+                !lastSwipe && { opacity: 0.35 },
+                pressed && lastSwipe && { opacity: 0.7 },
+              ]}
+            >
+              <Undo2 size={18} color={theme.gold} />
+            </Pressable>
+            {/* Magnifying glass opens the Search page where filters
+                tighten criteria for one specific search. */}
+            <Pressable
+              onPress={() => router.push("/search" as never)}
+              hitSlop={12}
+              style={({ pressed }) => [
+                styles.searchIconBtn,
+                pressed && { opacity: 0.7 },
+              ]}
+            >
+              <Search size={18} color={theme.gold} />
+            </Pressable>
+          </View>
         </View>
         <Text style={styles.h1}>For you.</Text>
 
@@ -188,30 +249,23 @@ export default function MatchScreen() {
       <View style={styles.deck}>
         {loading && projects.length === 0 ? (
           <View style={styles.center}>
-            <ActivityIndicator color={theme.gold} />
+            <MothLoader size={180} />
           </View>
         ) : projects.length === 0 ? (
-          <View style={styles.empty}>
-            <Sparkles size={20} color={theme.gold} />
-            <Text style={styles.emptyTitle}>No projects yet</Text>
-            <Text style={styles.emptyBody}>
-              Create a project on the web to unlock matching. Match ranks
-              operators against your project's criteria.
-            </Text>
-          </View>
+          <MothEmptyState
+            variant="blank"
+            title="No projects yet."
+            sub="Create a project on the web to unlock matching. Match ranks operators against your project's criteria."
+          />
         ) : loading ? (
           <View style={styles.center}>
-            <ActivityIndicator color={theme.gold} />
+            <MothLoader size={180} />
           </View>
         ) : remaining === 0 ? (
-          <View style={styles.empty}>
-            <Heart size={20} color={theme.gold} />
-            <Text style={styles.emptyTitle}>You're caught up</Text>
-            <Text style={styles.emptyBody}>
-              No more candidates ranked against this project. Lower the
-              criteria or wait for new operators to join.
-            </Text>
-          </View>
+          <MothEmptyState
+            variant="caught"
+            sub="No more candidates ranked against this project. Lower the criteria or wait for new operators to join."
+          />
         ) : (
           <View style={styles.deckInner}>
             {next && <CandidateCard candidate={next} stacked />}
@@ -414,6 +468,27 @@ const CandidateCard = ({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  searchIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: theme.goldSoft,
+    backgroundColor: theme.goldGlow,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   eyebrow: {
     flexDirection: "row",
@@ -426,7 +501,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.goldGlow,
     borderRadius: 2,
     alignSelf: "flex-start",
-    marginBottom: 12,
   },
   eyebrowText: {
     color: theme.gold,

@@ -1,10 +1,12 @@
 import "react-native-gesture-handler";
-import { ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider as NavThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { useCallback, useEffect, useMemo } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { MothLoader } from "@/components/MothLoader";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
@@ -20,7 +22,7 @@ import { useFonts } from "expo-font";
 import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/lib/auth";
-import { theme } from "@/lib/theme";
+import { ThemeProvider, useTheme } from "@/lib/themeMode";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -41,26 +43,9 @@ const mapWebLinkToMobile = (link: string): string | null => {
   return "/(tabs)/threads";
 };
 
-const navTheme = {
-  dark: true,
-  colors: {
-    primary: theme.gold,
-    background: theme.bg,
-    card: theme.bgElev,
-    text: theme.text,
-    border: theme.border,
-    notification: theme.gold,
-  },
-  fonts: {
-    regular: { fontFamily: "System", fontWeight: "400" as const },
-    medium: { fontFamily: "System", fontWeight: "500" as const },
-    bold: { fontFamily: "System", fontWeight: "700" as const },
-    heavy: { fontFamily: "System", fontWeight: "900" as const },
-  },
-};
-
 const RouteGuard = () => {
   const { session, loading } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const segments = useSegments();
 
@@ -104,7 +89,7 @@ const RouteGuard = () => {
           justifyContent: "center",
         }}
       >
-        <ActivityIndicator color={theme.gold} />
+        <MothLoader size={220} />
       </View>
     );
   }
@@ -143,15 +128,53 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.bg }}>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <ThemeProvider value={navTheme}>
-            <RouteGuard />
-            <StatusBar style="light" />
-          </ThemeProvider>
-        </AuthProvider>
-      </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <ThemedShell />
+            </ThemeProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }
+
+// Inner shell that lives INSIDE ThemeProvider so it can read the
+// dynamic theme via useTheme() and apply it to the navigation theme,
+// the status bar, and a top-level background.
+const ThemedShell = () => {
+  const { mode, theme } = useTheme();
+
+  const navTheme = useMemo(
+    () => ({
+      dark: mode === "dark",
+      colors: {
+        primary: theme.gold,
+        background: theme.bg,
+        card: theme.bgElev,
+        text: theme.text,
+        border: theme.border,
+        notification: theme.gold,
+      },
+      fonts: {
+        regular: { fontFamily: "System", fontWeight: "400" as const },
+        medium: { fontFamily: "System", fontWeight: "500" as const },
+        bold: { fontFamily: "System", fontWeight: "700" as const },
+        heavy: { fontFamily: "System", fontWeight: "900" as const },
+      },
+    }),
+    [mode, theme],
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.bg }}>
+      <NavThemeProvider value={navTheme}>
+        <RouteGuard />
+        <StatusBar style={mode === "dark" ? "light" : "dark"} />
+      </NavThemeProvider>
+    </View>
+  );
+};

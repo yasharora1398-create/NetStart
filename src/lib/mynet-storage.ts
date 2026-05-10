@@ -20,10 +20,16 @@ import {
   type Profile,
   type Project,
   type ProjectCriteria,
+  type ProjectLifecycle,
   type PublicProject,
   type ResumeMeta,
   type ReviewStatus,
 } from "./mynet-types";
+
+const lifecycleFrom = (raw: string | null | undefined): ProjectLifecycle =>
+  raw === "paused" || raw === "filled" || raw === "closed"
+    ? raw
+    : "active";
 
 const RESUMES_BUCKET = "resumes";
 const AVATARS_BUCKET = "avatars";
@@ -80,6 +86,7 @@ type ProfileRow = {
   candidate_commitment: string | null;
   is_open_to_work: boolean | null;
   avatar_path: string | null;
+  active_project_id: string | null;
 };
 
 type ProjectRow = {
@@ -88,6 +95,8 @@ type ProjectRow = {
   title: string;
   description: string;
   criteria: Partial<ProjectCriteria> | null;
+  business_type: string | null;
+  lifecycle_state: string | null;
   is_published: boolean | null;
   created_at: string;
   updated_at: string;
@@ -127,6 +136,7 @@ const profileFromRow = (row: ProfileRow): Profile => ({
   reviewReason: row.review_reason ?? null,
   fullName: row.full_name ?? "",
   avatarPath: row.avatar_path ?? null,
+  activeProjectId: row.active_project_id ?? null,
   candidate: candidateFromRow(row),
 });
 
@@ -366,9 +376,12 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
     const people = byProject.get(p.id) ?? { saved: [], passed: [] };
     return {
       id: p.id,
+      ownerId: p.owner_id,
       title: p.title,
       description: p.description,
       criteria: criteriaFromJson(p.criteria),
+      businessType: p.business_type ?? "",
+      lifecycleState: lifecycleFrom(p.lifecycle_state),
       savedPersonIds: people.saved,
       passedPersonIds: people.passed,
       isPublished: Boolean(p.is_published),
@@ -380,7 +393,12 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
 
 export const createProject = async (
   userId: string,
-  data: { title: string; description: string; criteria: ProjectCriteria },
+  data: {
+    title: string;
+    description: string;
+    criteria: ProjectCriteria;
+    businessType?: string;
+  },
 ): Promise<Project> => {
   const { data: row, error } = await getSupabase()
     .from("projects")
@@ -389,6 +407,10 @@ export const createProject = async (
       title: data.title,
       description: data.description,
       criteria: data.criteria,
+      // business_type is NOT NULL with a default of '' (migration
+      // 0018). Send "" when no value was passed so the insert
+      // doesn't trip the not-null check on older Supabase rows.
+      business_type: data.businessType ?? "",
     })
     .select("*")
     .single();
@@ -402,9 +424,12 @@ export const createProject = async (
   });
   return {
     id: r.id,
+    ownerId: r.owner_id,
     title: r.title,
     description: r.description,
     criteria: criteriaFromJson(r.criteria),
+    businessType: r.business_type ?? "",
+    lifecycleState: lifecycleFrom(r.lifecycle_state),
     savedPersonIds: [],
     passedPersonIds: [],
     isPublished: Boolean(r.is_published),
@@ -413,9 +438,42 @@ export const createProject = async (
   };
 };
 
+// Founder picks which of their projects drives Match's ranking
+// (and where Saves land). Pass null to clear the focus. RLS allows
+// updating only your own profile row.
+export const setActiveProject = async (
+  userId: string,
+  projectId: string | null,
+): Promise<void> => {
+  const { error } = await getSupabase()
+    .from("profiles")
+    .update({ active_project_id: projectId })
+    .eq("user_id", userId);
+  if (error) throw error;
+};
+
+// Founder-only: change the lifecycle state on one of their
+// projects. Browse / Search hide non-active projects so this is
+// how they signal "filled" / "paused" without deleting.
+export const setProjectLifecycle = async (
+  projectId: string,
+  state: ProjectLifecycle,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("set_project_lifecycle", {
+    project_id: projectId,
+    new_state: state,
+  });
+  if (error) throw error;
+};
+
 export const updateProject = async (
   projectId: string,
-  data: { title: string; description: string; criteria: ProjectCriteria },
+  data: {
+    title: string;
+    description: string;
+    criteria: ProjectCriteria;
+    businessType?: string;
+  },
 ): Promise<void> => {
   const { error } = await getSupabase()
     .from("projects")
@@ -423,6 +481,9 @@ export const updateProject = async (
       title: data.title,
       description: data.description,
       criteria: data.criteria,
+      ...(data.businessType !== undefined
+        ? { business_type: data.businessType }
+        : {}),
     })
     .eq("id", projectId);
   if (error) throw error;
@@ -567,6 +628,8 @@ type ProjectMatchRow = {
   title: string;
   description: string;
   criteria: Partial<ProjectCriteria> | null;
+  business_type: string | null;
+  lifecycle_state: string | null;
   created_at: string;
   similarity: number;
   founder_full_name: string;
@@ -585,6 +648,8 @@ export const matchProjectsForMe = async (): Promise<
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
+    businessType: p.business_type ?? "",
+    lifecycleState: lifecycleFrom(p.lifecycle_state),
     createdAt: p.created_at,
     similarity: p.similarity ?? 0,
     founderFullName: p.founder_full_name ?? "",
@@ -612,6 +677,8 @@ type PublishedRpcRow = {
   title: string;
   description: string;
   criteria: Partial<ProjectCriteria> | null;
+  business_type: string | null;
+  lifecycle_state: string | null;
   created_at: string;
   founder_full_name: string;
   founder_headline: string;
@@ -629,6 +696,8 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
+    businessType: p.business_type ?? "",
+    lifecycleState: lifecycleFrom(p.lifecycle_state),
     createdAt: p.created_at,
     founderFullName: p.founder_full_name ?? "",
     founderHeadline: p.founder_headline ?? "",
@@ -858,6 +927,8 @@ type FounderProjectRow = {
   title: string;
   description: string;
   criteria: Partial<ProjectCriteria> | null;
+  business_type: string | null;
+  lifecycle_state: string | null;
   created_at: string;
 };
 
@@ -875,6 +946,8 @@ export const listPublishedProjectsForOwner = async (
     title: p.title,
     description: p.description,
     criteria: criteriaFromJson(p.criteria),
+    businessType: p.business_type ?? "",
+    lifecycleState: lifecycleFrom(p.lifecycle_state),
     createdAt: p.created_at,
     founderFullName: "",
     founderHeadline: "",
@@ -1042,12 +1115,265 @@ export const listChatContacts = async (): Promise<
   }));
 };
 
+// ---- Role -----------------------------------------------------------
+
+// Founder vs builder is stored on auth user_metadata so it rides with
+// the account across devices. Switching doesn't touch the profile row,
+// so a builder's headline / bio / skills survive a round-trip through
+// the founder role and come back intact on switch-back.
+export const setRole = async (
+  role: "founder" | "builder",
+): Promise<void> => {
+  const { error } = await getSupabase().auth.updateUser({
+    data: { role },
+  });
+  if (error) throw error;
+};
+
+// ---- Account deletion ---------------------------------------------
+
+// Wipes the caller's auth user + all owned/visible-to-them rows in
+// the public schema. Backed by migration 0022. After this resolves,
+// the client should sign out (the JWT is already invalid).
+export const deleteMyAccount = async (): Promise<void> => {
+  const { error } = await getSupabase().rpc("delete_my_account");
+  if (error) throw error;
+};
+
+// ---- Chat / DMs (Stage 4 unified flow) ----------------------------
+//
+// Backend in migrations 0011 (chat_contacts) → 0013 (chat_messages) →
+// 0014 (delivered/read ticks) → 0019 (unified pending-thread send +
+// 2/48h throttle) → 0020 (decline + delete + lifecycle). Flow:
+//   1. Sender calls request_or_send_chat_message — first message
+//      creates a pending row, subsequent messages within 48h get
+//      throttled to 2 (raises 'limit_reached').
+//   2. Recipient sees the inbound thread with state="inbound" and
+//      can Accept (creates the mutual contact rows and unlocks
+//      unlimited messaging) or Decline (state→"declined", thread
+//      stays so both sides can choose to delete).
+//   3. Either side can deleteChatThread to drop the thread from
+//      their own list (removes the chat_contacts row).
+//   4. Realtime: subscribe to INSERT/UPDATE on chat_messages to
+//      render new messages and read-receipt ticks live.
+
+export type ChatMessage = {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  body: string;
+  createdAt: string;
+  deliveredAt: string | null;
+  readAt: string | null;
+};
+
+type ChatThreadRow = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  body: string;
+  created_at: string;
+  delivered_at: string | null;
+  read_at: string | null;
+};
+
+export type ThreadState =
+  | "outbound"
+  | "inbound"
+  | "accepted"
+  | "declined"
+  | "none";
+
+export type ChatThreadState = {
+  state: ThreadState;
+  acceptedAt: string | null;
+  pendingCount: number;
+  pendingWindowStartAt: string | null;
+};
+
+export type ChatThreadSummary = {
+  contactId: string;
+  lastBody: string;
+  lastAt: string | null;
+  lastSender: string | null;
+  state: ThreadState;
+  acceptedAt: string | null;
+};
+
+type ChatThreadsRpcRow = {
+  contact_id: string;
+  last_body: string | null;
+  last_at: string | null;
+  last_sender: string | null;
+  state: ThreadState;
+  accepted_at: string | null;
+};
+
+// Load the full message thread between the current user and another.
+export const listChatThread = async (
+  otherUserId: string,
+  limit = 200,
+): Promise<ChatMessage[]> => {
+  const { data, error } = await getSupabase().rpc("list_chat_thread", {
+    other_user_id: otherUserId,
+    msg_limit: limit,
+  });
+  if (error) throw error;
+  return ((data ?? []) as ChatThreadRow[]).map((r) => ({
+    id: r.id,
+    senderId: r.sender_id,
+    recipientId: r.recipient_id,
+    body: r.body,
+    createdAt: r.created_at,
+    deliveredAt: r.delivered_at,
+    readAt: r.read_at,
+  }));
+};
+
+// Threads list with pending state baked in. One row per known
+// counterparty (someone I've sent or received from, or someone
+// who's pending acceptance from me).
+export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
+  const { data, error } = await getSupabase().rpc("list_chat_threads");
+  if (error) throw error;
+  return ((data ?? []) as ChatThreadsRpcRow[]).map((r) => ({
+    contactId: r.contact_id,
+    lastBody: r.last_body ?? "",
+    lastAt: r.last_at ?? null,
+    lastSender: r.last_sender ?? null,
+    state: r.state ?? "none",
+    acceptedAt: r.accepted_at ?? null,
+  }));
+};
+
+export const getChatThreadState = async (
+  otherUserId: string,
+): Promise<ChatThreadState> => {
+  const { data, error } = await getSupabase().rpc("get_chat_thread_state", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | {
+        state: ThreadState;
+        accepted_at: string | null;
+        request_message_count: number;
+        request_window_start_at: string | null;
+      }
+    | null;
+  return {
+    state: row?.state ?? "none",
+    acceptedAt: row?.accepted_at ?? null,
+    pendingCount: row?.request_message_count ?? 0,
+    pendingWindowStartAt: row?.request_window_start_at ?? null,
+  };
+};
+
+// Unified send. First message creates the pending row, the 2-per-48h
+// window throttles unaccepted threads, accepted threads pass through.
+// Throws "limit_reached" when the pending window is full so the UI
+// can render a wait state.
+export const requestOrSendChatMessage = async (
+  recipientUserId: string,
+  body: string,
+): Promise<{
+  messageId: string;
+  pendingCount: number;
+  pendingWindowStartAt: string | null;
+}> => {
+  const { data, error } = await getSupabase().rpc(
+    "request_or_send_chat_message",
+    {
+      recipient_user_id: recipientUserId,
+      message_body: body,
+    },
+  );
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | {
+        message_id: string;
+        pending_count: number;
+        pending_window_start_at: string | null;
+      }
+    | null;
+  return {
+    messageId: row?.message_id ?? "",
+    pendingCount: row?.pending_count ?? 0,
+    pendingWindowStartAt: row?.pending_window_start_at ?? null,
+  };
+};
+
+export const acceptChatThread = async (
+  requesterUserId: string,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("accept_chat_thread", {
+    requester_user_id: requesterUserId,
+  });
+  if (error) throw error;
+};
+
+export const declineChatThread = async (
+  requesterUserId: string,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("decline_chat_thread", {
+    requester_user_id: requesterUserId,
+  });
+  if (error) throw error;
+};
+
+export const deleteChatThread = async (
+  otherUserId: string,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("delete_chat_thread", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+};
+
+export const markMessagesDelivered = async (
+  otherUserId: string,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("mark_messages_delivered", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+};
+
+export const markMessagesRead = async (
+  otherUserId: string,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("mark_messages_read", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+};
+
 export const markNotificationsRead = async (ids: string[]): Promise<void> => {
   if (ids.length === 0) return;
   const { error } = await getSupabase()
     .from("notifications")
     .update({ read_at: new Date().toISOString() })
     .in("id", ids)
+    .is("read_at", null);
+  if (error) throw error;
+};
+
+// Mark every notification I have from a specific sender as read.
+// Used when the user opens a chat thread — clears the bell badge
+// for chat_request / accept / decline notifications tied to that
+// conversation. RLS already constrains updates to my own row, so a
+// generic update is safe.
+export const markNotificationsReadForSender = async (
+  fromUserId: string,
+): Promise<void> => {
+  const { data: userResp } = await getSupabase().auth.getUser();
+  const uid = userResp.user?.id;
+  if (!uid) return;
+  const { error } = await getSupabase()
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", uid)
+    .eq("from_user_id", fromUserId)
     .is("read_at", null);
   if (error) throw error;
 };

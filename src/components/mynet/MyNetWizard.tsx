@@ -49,6 +49,7 @@ import {
   type Profile,
 } from "@/lib/mynet-types";
 import {
+  BUSINESS_TYPE_OPTIONS,
   COMMITMENT_OPTIONS,
   HEADLINE_OPTIONS,
   LOCATION_OPTIONS,
@@ -65,6 +66,12 @@ type Props = {
   profile: Profile;
   onProfileRefresh: () => void | Promise<void>;
   onSubmitComplete?: () => void;
+  /**
+   * Pre-picked role from sign-up. When supplied, the wizard skips
+   * the mode-pick step and goes straight to "looking" or "building"
+   * after credentials. Comes from `user_metadata.role`.
+   */
+  preselectedRole?: "founder" | "builder";
 };
 
 const isValidLinkedIn = (url: string): boolean => {
@@ -90,6 +97,7 @@ export const MyNetWizard = ({
   profile,
   onProfileRefresh,
   onSubmitComplete,
+  preselectedRole,
 }: Props) => {
   // Rejected users start at credentials so they can update and resubmit.
   const [stage, setStage] = useState<Stage>(
@@ -123,6 +131,7 @@ export const MyNetWizard = ({
 
   // Step 3 - building
   const [projectTitle, setProjectTitle] = useState("");
+  const [projectBusinessType, setProjectBusinessType] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [projectSkills, setProjectSkills] = useState<string[]>([]);
   const [projectCommitment, setProjectCommitment] = useState("");
@@ -222,7 +231,15 @@ export const MyNetWizard = ({
         setPendingResume(null);
       }
       await onProfileRefresh();
-      setStage("mode");
+      // If sign-up already captured the role, skip the mode pick
+      // and go straight into the matching half-of-the-wizard.
+      if (preselectedRole === "builder") {
+        setStage("looking");
+      } else if (preselectedRole === "founder") {
+        setStage("building");
+      } else {
+        setStage("mode");
+      }
     } catch (err) {
       toast.error(errMsg(err));
     } finally {
@@ -286,6 +303,7 @@ export const MyNetWizard = ({
           location: projectLocation,
           keywords: projectKeywords.trim(),
         },
+        businessType: projectBusinessType.trim(),
       });
       await submitProfile();
       await onProfileRefresh();
@@ -321,9 +339,19 @@ export const MyNetWizard = ({
         <StepShell
           eyebrow="Step 01 of 03"
           title="Drop your credentials."
-          subtitle="LinkedIn or a resume helps us verify you. We strongly recommend both, but either one will do."
+          subtitle={
+            preselectedRole === "founder"
+              ? "LinkedIn helps operators verify you when they consider applying."
+              : "LinkedIn or a resume helps us verify you. We strongly recommend both, but either one will do."
+          }
         >
-          <div className="grid md:grid-cols-2 gap-6 mb-10">
+          <div
+            className={
+              preselectedRole === "founder"
+                ? "grid gap-6 mb-10"
+                : "grid md:grid-cols-2 gap-6 mb-10"
+            }
+          >
             <Field
               label="LinkedIn"
               hint="Optional but strongly recommended"
@@ -338,45 +366,49 @@ export const MyNetWizard = ({
               />
             </Field>
 
-            <Field
-              label="Resume"
-              hint="PDF or DOC, max 4 MB"
-              icon={<FileText className="h-3.5 w-3.5 text-gold" />}
-            >
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".pdf,.doc,.docx,application/pdf"
-                onChange={onFileChange}
-                className="sr-only"
-              />
-              {pendingResume ? (
-                <ResumeRow
-                  name={pendingResume.name}
-                  size={formatBytes(pendingResume.size)}
-                  pending
-                  onReplace={() => fileRef.current?.click()}
-                  onClear={() => setPendingResume(null)}
+            {/* Resume only matters for builders. Founders pitch via
+                their project page, not via a resume upload. */}
+            {preselectedRole !== "founder" ? (
+              <Field
+                label="Resume"
+                hint="PDF or DOC, max 4 MB"
+                icon={<FileText className="h-3.5 w-3.5 text-gold" />}
+              >
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf"
+                  onChange={onFileChange}
+                  className="sr-only"
                 />
-              ) : profile.resume ? (
-                <ResumeRow
-                  name={profile.resume.name}
-                  size={formatBytes(profile.resume.size)}
-                  onReplace={() => fileRef.current?.click()}
-                  onClear={handleRemoveExistingResume}
-                />
-              ) : (
-                <Button
-                  variant="outlineGold"
-                  size="lg"
-                  onClick={() => fileRef.current?.click()}
-                  className="w-full h-11"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload resume
-                </Button>
-              )}
-            </Field>
+                {pendingResume ? (
+                  <ResumeRow
+                    name={pendingResume.name}
+                    size={formatBytes(pendingResume.size)}
+                    pending
+                    onReplace={() => fileRef.current?.click()}
+                    onClear={() => setPendingResume(null)}
+                  />
+                ) : profile.resume ? (
+                  <ResumeRow
+                    name={profile.resume.name}
+                    size={formatBytes(profile.resume.size)}
+                    onReplace={() => fileRef.current?.click()}
+                    onClear={handleRemoveExistingResume}
+                  />
+                ) : (
+                  <Button
+                    variant="outlineGold"
+                    size="lg"
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full h-11"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload resume
+                  </Button>
+                )}
+              </Field>
+            ) : null}
           </div>
 
           <Footer
@@ -615,7 +647,18 @@ export const MyNetWizard = ({
                 </Field>
               </div>
 
-              <div className="mt-5">
+              <div className="grid md:grid-cols-2 gap-6 mt-5">
+                <Field
+                  label="Business type"
+                  hint="Optional. Helps builders filter."
+                >
+                  <Autocomplete
+                    value={projectBusinessType}
+                    onChange={setProjectBusinessType}
+                    options={BUSINESS_TYPE_OPTIONS}
+                    placeholder="SaaS, Marketplace, Hardware..."
+                  />
+                </Field>
                 <Field label="Keywords" hint="Optional. Helps matching.">
                   <Input
                     value={projectKeywords}

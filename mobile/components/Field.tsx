@@ -1,6 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 type FieldProps = {
   label: string;
@@ -9,18 +10,22 @@ type FieldProps = {
   children: ReactNode;
 };
 
-export const Field = ({ label, hint, rightLabel, children }: FieldProps) => (
-  <View style={styles.field}>
-    <View style={styles.labelRow}>
-      <Text style={styles.label}>{label}</Text>
-      {rightLabel ? <Text style={styles.right}>{rightLabel}</Text> : null}
+export const Field = ({ label, hint, rightLabel, children }: FieldProps) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  return (
+    <View style={styles.field}>
+      <View style={styles.labelRow}>
+        <Text style={styles.label}>{label}</Text>
+        {rightLabel ? <Text style={styles.right}>{rightLabel}</Text> : null}
+      </View>
+      {children}
+      {hint ? <Text style={styles.hint}>{hint}</Text> : null}
     </View>
-    {children}
-    {hint ? <Text style={styles.hint}>{hint}</Text> : null}
-  </View>
-);
+  );
+};
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   field: { marginBottom: 16 },
   labelRow: {
     flexDirection: "row",

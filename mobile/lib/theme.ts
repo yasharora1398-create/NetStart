@@ -1,20 +1,30 @@
-// Mirror the web app's design tokens.
-// Accent is the website's blue (Tailwind blue-400 / blue-500). The token
-// names below still say "gold" because every screen references them that
-// way; the values point at blue. Effectively a one-line theme swap.
+// Vettd — single-accent forest green on warm off-white. This is the
+// LIGHT theme used by screens that haven't migrated to `useTheme()`
+// yet. Token names match the previous theme so unchanged components
+// reskin automatically — `gold` now means forest green, `marigold`
+// is the same accent, `goldGlow` is the accent-subtle bg, etc.
 export const theme = {
-  bg: "#0a0a0a",          // background
-  bgElev: "#111111",      // card
-  border: "#272727",
-  borderSoft: "#3a3a3a",
-  goldSoft: "rgba(59,130,246,0.45)",    // accent border, blue-500 / 45%
-  text: "#e6e6e6",
-  textMuted: "#9ca3af",
-  textDim: "#6b6b6b",
-  gold: "#60a5fa",                       // accent, blue-400
-  goldGlow: "rgba(59,130,246,0.12)",     // accent glow, blue-500 / 12%
-  emerald: "#34d399",
-  destructive: "#ef4444",
+  bg: "#FAFAF7",            // warm off-white page
+  bgElev: "#FFFFFF",         // cards
+  bgAlt: "#F2F1ED",          // alt sections
+  bgSubtle: "#FFFFFF",       // subtle elevated (= cards)
+  border: "#E1E1DC",
+  borderSoft: "#D9D9D6",     // stronger / input border
+  goldSoft: "#C8DDD0",       // accent subtle border
+  text: "#0F1410",            // primary text
+  textMuted: "#4A4D52",       // secondary text
+  textDim: "#6B6E73",         // muted / captions
+  gold: "#1F5F3E",            // forest green primary
+  goldDeep: "#174A30",        // primary hover
+  goldLight: "#1F5F3E",       // alias
+  goldGlow: "#E8F0EA",         // accent subtle bg (peach equivalent)
+  marigold: "#1F5F3E",
+  marigoldLight: "#E8F0EA",
+  sage: "#C8DDD0",
+  sageDeep: "#1F5F3E",
+  cream: "#FFFFFF",
+  emerald: "#1F5F3E",          // success = accent
+  destructive: "#7A2620",
 } as const;
 
 export const fonts = {
