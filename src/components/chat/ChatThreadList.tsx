@@ -69,8 +69,22 @@ export const ChatThreadList = ({
   }, [items, q]);
 
   return (
-    <aside className="flex h-full min-h-0 flex-col border-r border-border bg-card/30">
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+    <aside className="flex h-full min-h-0 flex-col md:border-r md:border-border md:bg-card/30">
+      {/* Mobile mirrors the native app header: gold-eyebrow pill +
+          big display title. Desktop keeps the compact tile header
+          to fit the two-column split layout. */}
+      <div className="md:hidden px-5 pt-5 pb-2">
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-sm border border-gold-soft bg-gold/5 px-2.5 py-1">
+          <Inbox className="size-3 text-gold" aria-hidden />
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-gold">
+            Threads
+          </span>
+        </div>
+        <h1 className="font-display text-3xl text-foreground">
+          Conversations.
+        </h1>
+      </div>
+      <div className="hidden md:flex items-center justify-between border-b border-border px-4 py-3">
         <h2 className="font-display text-base text-foreground">
           Conversations
         </h2>
@@ -78,7 +92,9 @@ export const ChatThreadList = ({
           {items.length}
         </span>
       </div>
-      <div className="border-b border-border px-3 py-2">
+      {/* Search input — desktop only. The native app has no
+          per-thread search in the list, so mobile drops it too. */}
+      <div className="hidden md:block border-b border-border px-3 py-2">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
