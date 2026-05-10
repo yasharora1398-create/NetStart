@@ -813,17 +813,22 @@ const LookerView = () => {
     query || skillFilter || locationFilter || commitmentFilter,
   );
 
+  // `current` is the next undecided project in the deck. `displayed`
+  // is what's actually on screen — usually `current`, but when the
+  // user taps a sibling project in the info panel we override it so
+  // they can browse the founder's other work in place.
   const current = filtered[0] ?? null;
+  const displayed = approving ?? current;
 
   const decline = () => {
-    if (!current) return;
+    if (!displayed) return;
     setApproving(null);
-    setLastDecided(current);
-    setDecided((prev) => new Set(prev).add(current.id));
+    setLastDecided(displayed);
+    setDecided((prev) => new Set(prev).add(displayed.id));
   };
   const accept = () => {
-    if (!current) return;
-    setApproving(current);
+    if (!displayed) return;
+    setApproving(displayed);
   };
   const closeInfo = (decideThem: boolean) => {
     if (decideThem && approving) {
@@ -954,7 +959,7 @@ const LookerView = () => {
             </button>
 
             <div className="w-full max-w-[520px] flex-shrink-0 flex flex-col gap-3">
-              <MatchProjectCard project={current} />
+              <MatchProjectCard project={displayed!} />
               {/* Wide Previous button — same width as the card,
                   sitting directly underneath. Restores the last
                   decided project so a stray pass / approve doesn't
@@ -990,17 +995,18 @@ const LookerView = () => {
               className={cn(
                 "transition-all duration-500 ease-out overflow-hidden",
                 approving
-                  ? "max-w-[360px] opacity-100"
+                  ? "max-w-[540px] opacity-100"
                   : "max-w-0 opacity-0 -ml-6",
               )}
             >
-              <div className="w-[340px]">
+              <div className="w-[520px]">
                 {approving ? (
                   <ProjectInfoPanel
                     project={approving}
                     canGoBack={Boolean(lastDecided)}
                     onClose={() => closeInfo(true)}
                     onBack={goBack}
+                    onSwitchProject={(p) => setApproving(p)}
                   />
                 ) : null}
               </div>
@@ -1024,25 +1030,30 @@ const ProjectInfoPanel = ({
   canGoBack,
   onClose,
   onBack,
+  onSwitchProject,
 }: {
   project: PublicProject;
   canGoBack: boolean;
   onClose: () => void;
   onBack: () => void;
+  onSwitchProject: (p: PublicProject) => void;
 }) => {
   const navigate = useNavigate();
   const saved = useIsProjectSaved(project.id);
   const [founder, setFounder] = useState<PublicFounder | null>(null);
-  const [otherProjects, setOtherProjects] = useState<PublicProject[]>([]);
+  // Every published project from this founder, including the one
+  // currently on the deck. The active one is highlighted; clicking
+  // any other swaps which one the deck displays.
+  const [allProjects, setAllProjects] = useState<PublicProject[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Re-fetch whenever the panel opens for a different project so
-  // the bio / skills / website / LinkedIn / other projects don't
-  // lag the deck. Both calls are RLS-cheap; do them in parallel.
+  // Re-fetch when the founder changes (i.e. user moved to a card
+  // from a different owner). Switching between sibling projects
+  // inside the same panel shouldn't refetch.
   useEffect(() => {
     setLoading(true);
     setFounder(null);
-    setOtherProjects([]);
+    setAllProjects([]);
     let cancelled = false;
     Promise.all([
       getPublicFounder(project.ownerId),
@@ -1051,7 +1062,7 @@ const ProjectInfoPanel = ({
       .then(([f, projects]) => {
         if (cancelled) return;
         setFounder(f);
-        setOtherProjects(projects.filter((p) => p.id !== project.id));
+        setAllProjects(projects);
       })
       .catch(() => {
         if (!cancelled) setFounder(null);
@@ -1062,7 +1073,7 @@ const ProjectInfoPanel = ({
     return () => {
       cancelled = true;
     };
-  }, [project.ownerId, project.id]);
+  }, [project.ownerId]);
 
   const handleToggleSave = () => {
     if (saved) {
@@ -1164,32 +1175,67 @@ const ProjectInfoPanel = ({
               </div>
             ) : null}
 
-            {otherProjects.length > 0 ? (
+            {allProjects.length > 0 ? (
               <div className="mb-4">
                 <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Also building
+                  Projects ({allProjects.length})
                 </p>
                 <ul className="space-y-2">
-                  {otherProjects.slice(0, 3).map((p) => (
-                    <li
-                      key={p.id}
-                      className="rounded-sm border border-border bg-background/40 p-2.5"
-                    >
-                      <p className="line-clamp-1 text-xs font-medium text-foreground">
-                        {p.title}
-                      </p>
-                      {p.description ? (
-                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
-                          {p.description}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                  {otherProjects.length > 3 ? (
-                    <li className="text-[11px] text-muted-foreground">
-                      +{otherProjects.length - 3} more
-                    </li>
-                  ) : null}
+                  {allProjects.map((p) => {
+                    const isActive = p.id === project.id;
+                    return (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isActive) return;
+                            onSwitchProject(p);
+                          }}
+                          aria-current={isActive ? "true" : undefined}
+                          aria-label={
+                            isActive
+                              ? `${p.title} (currently viewing)`
+                              : `View ${p.title}`
+                          }
+                          className={cn(
+                            "block w-full rounded-sm border bg-background/40 p-3 text-left transition-colors",
+                            isActive
+                              ? "border-emerald-500/60 bg-emerald-500/5 cursor-default"
+                              : "border-border hover:border-gold/50 hover:bg-card",
+                          )}
+                        >
+                          <div className="mb-1 flex items-center gap-2">
+                            <p className="line-clamp-1 flex-1 text-sm font-medium text-foreground">
+                              {p.title}
+                            </p>
+                            {isActive ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                Viewing
+                              </span>
+                            ) : null}
+                          </div>
+                          {p.description ? (
+                            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                              {p.description}
+                            </p>
+                          ) : null}
+                          {p.criteria.skills.length > 0 ? (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {p.criteria.skills.slice(0, 4).map((s) => (
+                                <span
+                                  key={s}
+                                  className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] text-muted-foreground"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ) : null}
