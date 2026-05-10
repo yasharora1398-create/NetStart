@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useAuth } from "@/context/AuthContext";
+import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
 import { logPageView } from "@/lib/analytics";
 import WhySection from "@/components/marketing/WhySection";
 
@@ -37,13 +38,13 @@ const Waitlist = () => {
     path: "/",
   });
   const { mode, toggle } = useTheme();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const confirmSignOut = useConfirmSignOut();
   const [persona, setPersona] = useState<Persona>("founder");
 
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success("Signed out.");
-  };
+  // Routed through the shared confirm dialog so a stray click on
+  // "Sign out" in the nav doesn't drop the session without warning.
+  const handleSignOut = () => confirmSignOut();
 
   // Log one unique view per device per day. The migration's
   // (device_id, day) primary key collapses repeat hits to a no-op.

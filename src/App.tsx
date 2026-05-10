@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
+import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
 import Index from "./pages/Index.tsx";
 import Waitlist from "./pages/Waitlist.tsx";
 import Authenticated from "./pages/Authenticated.tsx";
@@ -20,6 +21,8 @@ import Talent from "./pages/Talent.tsx";
 import Admin from "./pages/Admin.tsx";
 import Chats from "./pages/Chats.tsx";
 import Match from "./pages/Match.tsx";
+import Saved from "./pages/Saved.tsx";
+import Applications from "./pages/Applications.tsx";
 import Settings from "./pages/Settings.tsx";
 import Standards from "./pages/Standards.tsx";
 import HowItWorks from "./pages/HowItWorks.tsx";
@@ -56,6 +59,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <SignOutConfirmProvider>
           <SidebarProvider>
             <EmailVerifyBanner />
           <Routes>
@@ -93,6 +97,9 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/match" element={<Internal><Match /></Internal>} />
             <Route path="/chats" element={<Internal><Chats /></Internal>} />
+            <Route path="/chats/:id" element={<Internal><Chats /></Internal>} />
+            <Route path="/saved" element={<Internal><Saved /></Internal>} />
+            <Route path="/applications" element={<Internal><Applications /></Internal>} />
             <Route path="/standards" element={<Internal><Standards /></Internal>} />
             <Route path="/download" element={<Internal><DownloadPage /></Internal>} />
             <Route path="/settings" element={<Internal><Settings /></Internal>} />
@@ -107,6 +114,7 @@ const App = () => (
             />
           </Routes>
           </SidebarProvider>
+          </SignOutConfirmProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

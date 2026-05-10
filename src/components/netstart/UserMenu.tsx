@@ -1,6 +1,5 @@
 import { LogOut, Settings as SettingsIcon, User } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
+import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
 
 const initials = (name: string | undefined, email: string | undefined) => {
   const source = (name?.trim() || email || "?").trim();
@@ -19,19 +19,18 @@ const initials = (name: string | undefined, email: string | undefined) => {
 };
 
 export const UserMenu = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const confirmSignOut = useConfirmSignOut();
   if (!user) return null;
 
   const name = (user.user_metadata?.name as string | undefined) ?? undefined;
   const email = user.email ?? undefined;
   const label = name ?? email ?? "Account";
 
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success("Signed out.");
-    navigate("/", { replace: true });
-  };
+  // Routed through the shared confirm dialog so a misclick on the
+  // dropdown doesn't end the session. The dialog handles toast +
+  // post-signout navigation.
+  const handleSignOut = () => confirmSignOut();
 
   return (
     <DropdownMenu>

@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
+import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
 
 const COLLAPSED_KEY = "polln8.sidebar.collapsed";
 const EXPANDED_WIDTH = "248px";
@@ -31,8 +32,12 @@ const HOME_ITEMS: Item[] = [
 const APP_ITEMS: Item[] = [
   { to: "/mynet", label: "MyNet", icon: MyNetIcon },
   { to: "/match", label: "Match", icon: MatchIcon },
-  { to: "/talent", label: "Talents", icon: TalentsIcon },
+  // Talents (the filterable browse view) is reachable via the
+  // search icon on Match. We removed it from the top-level nav so
+  // the IA matches mobile (Match deck + magnifying-glass).
+  { to: "/saved", label: "Saved", icon: SavedIcon },
   { to: "/chats", label: "Chat", icon: ChatIcon },
+  { to: "/applications", label: "Applications", icon: ApplicationsIcon },
 ];
 
 const ABOUT_ITEMS: Item[] = [
@@ -43,7 +48,8 @@ const ABOUT_ITEMS: Item[] = [
 
 export const Sidebar = () => {
   const { mode, setMode } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const confirmSignOut = useConfirmSignOut();
 
   // Persist collapse state across sessions; default to expanded so a
   // first-time visitor sees the full nav.
@@ -66,10 +72,9 @@ export const Sidebar = () => {
     };
   }, [collapsed]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success("Signed out.");
-  };
+  // Routed through the app-wide confirmation dialog so a single
+  // misclick on the avatar menu doesn't drop the session.
+  const handleSignOut = () => confirmSignOut();
 
   return (
     <aside
@@ -332,6 +337,37 @@ function StandardsIcon() {
     >
       <path d="M8 2 L13 4 v3.5 c0 3.2 -2.2 5.6 -5 6.5 c-2.8 -0.9 -5 -3.3 -5 -6.5 V4 Z" />
       <path d="M5.8 8.1 L7.4 9.6 L10.4 6.6" />
+    </svg>
+  );
+}
+
+function SavedIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 2.5 H12 V13.5 L8 10.7 L4 13.5 Z" />
+    </svg>
+  );
+}
+
+function ApplicationsIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 4.5 H13.5 V12 a1 1 0 0 1 -1 1 H3.5 a1 1 0 0 1 -1 -1 Z" />
+      <path d="M2.5 4.5 L8 8.5 L13.5 4.5" />
     </svg>
   );
 }
