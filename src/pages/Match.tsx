@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowRight,
   Bookmark,
   BookmarkCheck,
   Briefcase,
   Check,
   ChevronLeft,
-  ChevronRight,
   ExternalLink,
   FileText,
+  Globe,
   Linkedin,
   Loader2,
   MapPin,
@@ -35,12 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ApplyDialog } from "@/components/mynet/ApplyDialog";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -49,16 +42,13 @@ import {
   getAvatarUrl,
   getProfile,
   getResumeSignedUrl,
-  listMyApplications,
   listOpenCandidates,
   listProjects,
   listPublishedProjects,
-  requestOrSendChatMessage,
   setPersonStatus,
 } from "@/lib/mynet-storage";
 import { addSavedProject, removeSavedProject, useIsProjectSaved } from "@/lib/savedProjects";
 import type {
-  ApplicationStatus,
   Candidate,
   Profile,
   PublicProject,
@@ -750,26 +740,23 @@ const CandidateActions = ({
 
 const LookerView = () => {
   const [projects, setProjects] = useState<PublicProject[]>([]);
-  const [applied, setApplied] = useState<Map<string, ApplicationStatus>>(
-    new Map(),
-  );
   const [loadingData, setLoadingData] = useState(false);
   const [query, setQuery] = useState("");
   const [skillFilter, setSkillFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [commitmentFilter, setCommitmentFilter] = useState("");
-  const [index, setIndex] = useState(0);
-  const [applyTarget, setApplyTarget] = useState<PublicProject | null>(null);
+  // Same deck pattern as the founder side: passed/seen project ids
+  // drop out of `filtered`. `approving` is the project the user
+  // tapped ✓ on — drives the action pane that slides in from the
+  // right. `lastDecided` powers Undo / the Back button in the pane.
+  const [decided, setDecided] = useState<Set<string>>(new Set());
+  const [approving, setApproving] = useState<PublicProject | null>(null);
+  const [lastDecided, setLastDecided] = useState<PublicProject | null>(null);
 
   useEffect(() => {
     setLoadingData(true);
-    Promise.all([listPublishedProjects(), listMyApplications()])
-      .then(([list, mine]) => {
-        setProjects(list);
-        const map = new Map<string, ApplicationStatus>();
-        for (const a of mine) map.set(a.projectId, a.status);
-        setApplied(map);
-      })
+    listPublishedProjects()
+      .then((list) => setProjects(list))
       .catch((err) =>
         toast.error(err instanceof Error ? err.message : "Failed to load."),
       )
@@ -782,6 +769,7 @@ const LookerView = () => {
     const loc = locationFilter.trim().toLowerCase();
     const com = commitmentFilter.trim().toLowerCase();
     return projects.filter((p) => {
+      if (decided.has(p.id)) return false;
       if (q) {
         const hay = `${p.title} ${p.description} ${p.criteria.skills.join(
           " ",
@@ -798,7 +786,7 @@ const LookerView = () => {
         return false;
       return true;
     });
-  }, [projects, query, skillFilter, locationFilter, commitmentFilter]);
+  }, [projects, query, skillFilter, locationFilter, commitmentFilter, decided]);
 
   const allSkills = useMemo(() => {
     const set = new Set<string>();
@@ -810,14 +798,35 @@ const LookerView = () => {
     query || skillFilter || locationFilter || commitmentFilter,
   );
 
-  // Reset index when filtered list shrinks past it.
-  const safeIndex = filtered.length === 0 ? 0 : Math.min(index, filtered.length - 1);
-  const current = filtered[safeIndex] ?? null;
+  const current = filtered[0] ?? null;
 
-  const prev = () => setIndex((i) => (filtered.length === 0 ? 0 : (i - 1 + filtered.length) % filtered.length));
-  const next = () => setIndex((i) => (filtered.length === 0 ? 0 : (i + 1) % filtered.length));
-
-  const status = current ? applied.get(current.id) : undefined;
+  const decline = () => {
+    if (!current) return;
+    setApproving(null);
+    setLastDecided(current);
+    setDecided((prev) => new Set(prev).add(current.id));
+  };
+  const accept = () => {
+    if (!current) return;
+    setApproving(current);
+  };
+  const closeInfo = (decideThem: boolean) => {
+    if (decideThem && approving) {
+      setLastDecided(approving);
+      setDecided((prev) => new Set(prev).add(approving.id));
+    }
+    setApproving(null);
+  };
+  const goBack = () => {
+    if (!lastDecided) return;
+    setDecided((prev) => {
+      const next = new Set(prev);
+      next.delete(lastDecided.id);
+      return next;
+    });
+    setApproving(null);
+    setLastDecided(null);
+  };
 
   return (
     <>
@@ -836,7 +845,6 @@ const LookerView = () => {
           setSkillFilter("");
           setLocationFilter("");
           setCommitmentFilter("");
-          setIndex(0);
         }}
         hasFilters={hasFilters}
       />
@@ -854,62 +862,196 @@ const LookerView = () => {
           }
         />
       ) : (
-        <div className="max-w-[520px] mx-auto">
-          <MatchProjectCard project={current} />
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <ArrowButton direction="prev" onClick={prev} />
-            <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              {safeIndex + 1} / {filtered.length}
-            </p>
-            <ArrowButton direction="next" onClick={next} />
-          </div>
-          <div className="mt-6 flex justify-center">
-            {status ? (
-              <span
-                className={`inline-flex items-center px-3 py-1.5 rounded-sm border text-[11px] font-mono uppercase tracking-widest ${
-                  status === "accepted"
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : status === "rejected"
-                      ? "border-destructive/40 bg-destructive/10 text-destructive"
-                      : status === "withdrawn"
-                        ? "border-border bg-background text-muted-foreground"
-                        : "border-gold/40 bg-gold/10 text-gold"
-                }`}
+        <div className="relative">
+          {/* Top-bar Undo, mirroring the founder-side BuilderView. */}
+          {lastDecided ? (
+            <div className="flex justify-end mb-4">
+              <button
+                type="button"
+                onClick={goBack}
+                aria-label={`Undo: bring back ${lastDecided.title}`}
+                title={`Undo: bring back "${lastDecided.title}"`}
+                className="inline-flex items-center gap-1.5 rounded-sm border border-gold/40 bg-gold/5 px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/70 transition-colors"
               >
-                {status === "pending"
-                  ? "Applied"
-                  : status === "accepted"
-                    ? "Accepted"
-                    : status === "rejected"
-                      ? "Rejected"
-                      : "Withdrawn"}
-              </span>
-            ) : (
-              <Button
-                variant="gold"
-                size="xl"
-                onClick={() => setApplyTarget(current)}
-              >
-                Application
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            )}
+                <Undo2 className="h-3.5 w-3.5" />
+                Undo
+              </button>
+            </div>
+          ) : null}
+
+          {/* Deck stage — X | Card | ✓ in a centered flex row. The
+              card is fixed width; the side buttons collapse out when
+              the user accepts so the action column can slide in
+              without shifting the card horizontally. */}
+          <div className="relative mx-auto flex items-center justify-center gap-6 px-4 min-h-[760px] py-6">
+            <button
+              type="button"
+              onClick={decline}
+              aria-label="Pass"
+              className={cn(
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-destructive/40 bg-card text-destructive shadow-sm hover:bg-destructive/10 hover:border-destructive/60 transition-all duration-500",
+                approving &&
+                  "opacity-0 pointer-events-none scale-75 -mr-[80px]",
+              )}
+            >
+              <X className="h-6 w-6" strokeWidth={2.2} />
+            </button>
+
+            <div className="w-full max-w-[520px] flex-shrink-0">
+              <MatchProjectCard project={current} />
+            </div>
+
+            <button
+              type="button"
+              onClick={accept}
+              aria-label="Approve"
+              disabled={Boolean(approving)}
+              className={cn(
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold/60 bg-card text-gold shadow-sm hover:bg-gold/10 transition-all duration-500",
+                approving &&
+                  "opacity-0 pointer-events-none scale-75 -ml-[80px]",
+              )}
+            >
+              <Check className="h-6 w-6" strokeWidth={2.4} />
+            </button>
+
+            <div
+              className={cn(
+                "transition-all duration-500 ease-out overflow-hidden",
+                approving ? "max-w-[120px] opacity-100" : "max-w-0 opacity-0 -ml-6",
+              )}
+            >
+              <div className="w-[88px]">
+                {approving ? (
+                  <ProjectActions
+                    project={approving}
+                    canGoBack={Boolean(lastDecided)}
+                    onClose={() => closeInfo(true)}
+                    onBack={goBack}
+                  />
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       )}
-
-      <ApplyDialog
-        project={applyTarget}
-        onClose={() => setApplyTarget(null)}
-        onApplied={(projectId) => {
-          setApplied((prev) => {
-            const next = new Map(prev);
-            next.set(projectId, "pending");
-            return next;
-          });
-        }}
-      />
     </>
+  );
+};
+
+// Builder-side action column — visual twin of CandidateActions.
+// Website, LinkedIn, Save, Request chat (Message), Back to previous
+// card. Save bookmarks the project locally so the builder can come
+// back to it later from /saved.
+const ProjectActions = ({
+  project,
+  canGoBack,
+  onClose,
+  onBack,
+}: {
+  project: PublicProject;
+  canGoBack: boolean;
+  onClose: () => void;
+  onBack: () => void;
+}) => {
+  const navigate = useNavigate();
+  const saved = useIsProjectSaved(project.id);
+
+  const handleToggleSave = () => {
+    if (saved) {
+      removeSavedProject(project.id);
+      toast.success("Removed.");
+    } else {
+      addSavedProject(project.id);
+      toast.success("Saved.");
+    }
+  };
+
+  const handleMessage = () => {
+    onClose();
+    navigate(`/chats/${project.ownerId}`);
+  };
+
+  const websiteRaw = (project as PublicProject & { website_url?: string })
+    .website_url;
+  // PublicProject doesn't carry the founder's website today — only
+  // the FounderProfile fetch does. Hide the button when missing
+  // instead of pretending it's there.
+  const website = typeof websiteRaw === "string" && websiteRaw ? websiteRaw : null;
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      {website ? (
+        <a
+          href={website}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open website"
+          title="Website"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+        >
+          <Globe className="h-6 w-6" />
+        </a>
+      ) : null}
+
+      <Link
+        to={`/u/${project.ownerId}`}
+        aria-label="Open founder profile"
+        title="Founder profile"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+      >
+        <ExternalLink className="h-6 w-6" />
+      </Link>
+
+      <button
+        type="button"
+        onClick={handleToggleSave}
+        aria-label={saved ? "Remove from saved" : "Save"}
+        title={saved ? "Saved" : "Save"}
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+      >
+        {saved ? (
+          <BookmarkCheck className="h-6 w-6 fill-current" />
+        ) : (
+          <Bookmark className="h-6 w-6" />
+        )}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleMessage}
+        aria-label="Request chat"
+        title="Request chat"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/60 bg-gold text-gold-foreground shadow-sm transition-all hover:bg-gold/90 hover:shadow-md"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </button>
+
+      {/* Back button — sits next to Request chat. Restores the last-
+          decided project so the builder can revisit a card they
+          accepted or passed by accident. Disabled when there's
+          nothing to go back to. */}
+      <button
+        type="button"
+        onClick={onBack}
+        disabled={!canGoBack}
+        aria-label="Back to previous card"
+        title="Back to previous card"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-all hover:border-gold/40 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close info"
+        title="Close"
+        className="mt-1 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground"
+      >
+        <X className="h-5 w-5" />
+      </button>
+    </div>
   );
 };
 
@@ -984,26 +1126,6 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
         ) : null}
       </div>
     </article>
-  );
-};
-
-const ArrowButton = ({
-  direction,
-  onClick,
-}: {
-  direction: "prev" | "next";
-  onClick: () => void;
-}) => {
-  const Icon = direction === "next" ? ChevronRight : ChevronLeft;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={direction === "next" ? "Next" : "Previous"}
-      className="h-16 w-16 rounded-sm border-2 border-gold/40 bg-gold/5 text-gold hover:bg-gold/15 hover:border-gold/70 hover:shadow-[0_0_22px_rgba(234,179,8,0.35)] transition-all flex items-center justify-center"
-    >
-      <Icon className="h-7 w-7" />
-    </button>
   );
 };
 
