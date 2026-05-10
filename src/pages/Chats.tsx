@@ -144,11 +144,19 @@ const Chats = () => {
         setupTitle="Finish setting up MyNet to chat."
         setupBody="Chat unlocks once your MyNet profile is set up. It only takes a minute."
       >
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-6xl">
+        {/* Desktop wraps the panes in a rounded card with side
+            padding. Mobile goes full-bleed so the surface feels
+            like a native chat screen instead of a browser tile.
+            Negative margins on mobile escape AppLayout's <main>
+            pt-12 / px-* so the list and conversation reach the
+            screen edges. */}
+        <div className="-mx-4 -mt-12 md:m-0 md:px-4 lg:px-8">
+          <div className="md:mx-auto md:max-w-6xl">
             <div
               className={cn(
-                "grid h-[calc(100vh-9rem)] min-h-[520px] overflow-hidden rounded-2xl border border-border bg-card/40 shadow-sm",
+                "grid overflow-hidden bg-card/40",
+                "h-[calc(100dvh-84px)] min-h-[420px]",
+                "md:rounded-2xl md:border md:border-border md:shadow-sm md:min-h-[520px] md:h-[calc(100vh-9rem)]",
                 // One column on mobile, two on md+. On mobile we hide
                 // whichever pane isn't relevant (list when a thread
                 // is open, pane when not).
