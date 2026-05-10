@@ -46,6 +46,7 @@ import {
   listOpenCandidates,
   listProjects,
   listPublishedProjects,
+  listPublishedProjectsForOwner,
   setPersonStatus,
   type PublicFounder,
 } from "@/lib/mynet-storage";
@@ -754,6 +755,18 @@ const LookerView = () => {
   const [decided, setDecided] = useState<Set<string>>(new Set());
   const [approving, setApproving] = useState<PublicProject | null>(null);
   const [lastDecided, setLastDecided] = useState<PublicProject | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // ESC exits full-screen. Listener only attaches when fullscreen
+  // is on so we don't capture keys for unrelated screens.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fullscreen]);
 
   useEffect(() => {
     setLoadingData(true);
@@ -832,24 +845,26 @@ const LookerView = () => {
 
   return (
     <>
-      <Filters
-        query={query}
-        setQuery={setQuery}
-        skill={skillFilter}
-        setSkill={setSkillFilter}
-        location={locationFilter}
-        setLocation={setLocationFilter}
-        commitment={commitmentFilter}
-        setCommitment={setCommitmentFilter}
-        skillOptions={allSkills}
-        onClear={() => {
-          setQuery("");
-          setSkillFilter("");
-          setLocationFilter("");
-          setCommitmentFilter("");
-        }}
-        hasFilters={hasFilters}
-      />
+      {!fullscreen ? (
+        <Filters
+          query={query}
+          setQuery={setQuery}
+          skill={skillFilter}
+          setSkill={setSkillFilter}
+          location={locationFilter}
+          setLocation={setLocationFilter}
+          commitment={commitmentFilter}
+          setCommitment={setCommitmentFilter}
+          skillOptions={allSkills}
+          onClear={() => {
+            setQuery("");
+            setSkillFilter("");
+            setLocationFilter("");
+            setCommitmentFilter("");
+          }}
+          hasFilters={hasFilters}
+        />
+      ) : null}
 
       {loadingData ? (
         <Loading />
@@ -864,10 +879,24 @@ const LookerView = () => {
           }
         />
       ) : (
-        <div className="relative">
-          {/* Top-bar Undo, mirroring the founder-side BuilderView. */}
-          {lastDecided ? (
-            <div className="flex justify-end mb-4">
+        <div
+          className={cn(
+            "relative",
+            fullscreen
+              ? "fixed inset-0 z-50 bg-background overflow-hidden"
+              : "",
+          )}
+        >
+          {/* Top-bar controls: undo + full-screen toggle. */}
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              fullscreen
+                ? "absolute top-4 left-4 z-20"
+                : "justify-end mb-4",
+            )}
+          >
+            {lastDecided ? (
               <button
                 type="button"
                 onClick={goBack}
@@ -878,14 +907,39 @@ const LookerView = () => {
                 <Undo2 className="h-3.5 w-3.5" />
                 Undo
               </button>
-            </div>
-          ) : null}
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setFullscreen((v) => !v)}
+              aria-label={fullscreen ? "Exit full-screen" : "Full-screen"}
+              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:border-gold/40 hover:text-gold transition-colors"
+            >
+              {fullscreen ? (
+                <>
+                  <Minimize2 className="h-3.5 w-3.5" />
+                  Exit
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  Full-screen
+                </>
+              )}
+            </button>
+          </div>
 
           {/* Deck stage — X | Card | ✓ in a centered flex row. The
               card is fixed width; the side buttons collapse out when
               the user accepts so the action column can slide in
               without shifting the card horizontally. */}
-          <div className="relative mx-auto flex items-center justify-center gap-6 px-4 min-h-[760px] py-6">
+          <div
+            className={cn(
+              "relative mx-auto flex items-center justify-center gap-6 px-4",
+              fullscreen
+                ? "min-h-[calc(100vh-72px)] py-12"
+                : "min-h-[760px] py-6",
+            )}
+          >
             <button
               type="button"
               onClick={decline}
@@ -964,17 +1018,25 @@ const ProjectInfoPanel = ({
   const navigate = useNavigate();
   const saved = useIsProjectSaved(project.id);
   const [founder, setFounder] = useState<PublicFounder | null>(null);
+  const [otherProjects, setOtherProjects] = useState<PublicProject[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Re-fetch whenever the panel opens for a different project so
-  // the bio / skills / website / LinkedIn don't lag the deck.
+  // the bio / skills / website / LinkedIn / other projects don't
+  // lag the deck. Both calls are RLS-cheap; do them in parallel.
   useEffect(() => {
     setLoading(true);
     setFounder(null);
+    setOtherProjects([]);
     let cancelled = false;
-    getPublicFounder(project.ownerId)
-      .then((f) => {
-        if (!cancelled) setFounder(f);
+    Promise.all([
+      getPublicFounder(project.ownerId),
+      listPublishedProjectsForOwner(project.ownerId).catch(() => []),
+    ])
+      .then(([f, projects]) => {
+        if (cancelled) return;
+        setFounder(f);
+        setOtherProjects(projects.filter((p) => p.id !== project.id));
       })
       .catch(() => {
         if (!cancelled) setFounder(null);
@@ -985,7 +1047,7 @@ const ProjectInfoPanel = ({
     return () => {
       cancelled = true;
     };
-  }, [project.ownerId]);
+  }, [project.ownerId, project.id]);
 
   const handleToggleSave = () => {
     if (saved) {
@@ -1084,6 +1146,36 @@ const ProjectInfoPanel = ({
                     <ExternalLink className="h-3 w-3 opacity-60" />
                   </a>
                 ) : null}
+              </div>
+            ) : null}
+
+            {otherProjects.length > 0 ? (
+              <div className="mb-4">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Also building
+                </p>
+                <ul className="space-y-2">
+                  {otherProjects.slice(0, 3).map((p) => (
+                    <li
+                      key={p.id}
+                      className="rounded-sm border border-border bg-background/40 p-2.5"
+                    >
+                      <p className="line-clamp-1 text-xs font-medium text-foreground">
+                        {p.title}
+                      </p>
+                      {p.description ? (
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                          {p.description}
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                  {otherProjects.length > 3 ? (
+                    <li className="text-[11px] text-muted-foreground">
+                      +{otherProjects.length - 3} more
+                    </li>
+                  ) : null}
+                </ul>
               </div>
             ) : null}
           </>
