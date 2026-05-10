@@ -167,6 +167,22 @@ export const MyNetDashboard = ({
         )}
       </Section>
 
+      {/* PREVIEW - shows the user the same card others see. Helps
+          them spot bad copy / missing fields before they go live. */}
+      {!editing ? (
+        <Section
+          title="How others see you"
+          eyebrow="01.5"
+          icon={<Eye className="h-3.5 w-3.5 text-gold" />}
+        >
+          <MyCardPreview
+            profile={profile}
+            projects={projects}
+            role={role}
+          />
+        </Section>
+      ) : null}
+
       {/* LOOKING - always shown. Empty candidate gets the editor by
           default while editing, or a "tell us about you" prompt
           when read-only. */}
@@ -777,3 +793,178 @@ const FeaturedProjectCard = ({ project }: { project: PublicProject }) => {
     </Link>
   );
 };
+
+// Renders the user's profile / project the way the OTHER side of
+// the network sees it on Match. Builders see their own candidate
+// card (what founders flip through); founders see their active
+// project card (what builders see). Helps the user catch missing
+// fields, weak copy, or a stale photo before going live.
+const MyCardPreview = ({
+  profile,
+  projects,
+  role,
+}: {
+  profile: Profile;
+  projects: Project[];
+  role: Role;
+}) => {
+  if (role === "builder") {
+    return <CandidatePreviewCard profile={profile} />;
+  }
+  // Founder POV: prefer the active project, fall back to the first.
+  const active =
+    projects.find((p) => p.id === profile.activeProjectId) ?? projects[0];
+  if (!active) {
+    return (
+      <div className="rounded-sm border border-dashed border-border bg-card/40 p-8 text-center">
+        <h3 className="font-display text-xl mb-2">No project to preview</h3>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          Post a project below and it'll appear here as builders will see it
+          on Match.
+        </p>
+      </div>
+    );
+  }
+  return <ProjectPreviewCard project={active} profile={profile} />;
+};
+
+const CandidatePreviewCard = ({ profile }: { profile: Profile }) => {
+  const url = getAvatarUrl(profile.avatarPath);
+  const c = profile.candidate;
+  return (
+    <article className="mx-auto max-w-[480px] overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
+      <div className="relative w-full aspect-square bg-gold/5">
+        {url ? (
+          <img
+            src={url}
+            alt={profile.fullName}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="font-display text-7xl text-gold/60">
+              {(profile.fullName.trim()[0] ?? "?").toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="p-5">
+        <h3 className="mb-2 font-display text-2xl leading-tight">
+          {profile.fullName || "Unnamed"}
+        </h3>
+        {(c.commitment || c.location || c.skills.length > 0) ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {c.commitment ? <PreviewPill>{c.commitment}</PreviewPill> : null}
+            {c.location ? <PreviewPill>{c.location}</PreviewPill> : null}
+            {c.skills.slice(0, 5).map((s) => (
+              <PreviewPill key={s} muted>
+                {s}
+              </PreviewPill>
+            ))}
+          </div>
+        ) : null}
+        {c.headline ? (
+          <p className="mb-2 text-sm font-medium text-foreground/90">
+            {c.headline}
+          </p>
+        ) : null}
+        {c.bio ? (
+          <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            {c.bio}
+          </p>
+        ) : (
+          <p className="text-sm italic text-muted-foreground/60">
+            No bio yet. Founders see a blank pitch where this would be.
+          </p>
+        )}
+      </div>
+    </article>
+  );
+};
+
+const ProjectPreviewCard = ({
+  project,
+  profile,
+}: {
+  project: Project;
+  profile: Profile;
+}) => {
+  const url = getAvatarUrl(profile.avatarPath);
+  return (
+    <article className="mx-auto max-w-[480px] overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
+      <div className="relative w-full aspect-square bg-gold/5">
+        {url ? (
+          <img
+            src={url}
+            alt={profile.fullName}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="font-display text-7xl text-gold/60">
+              {(profile.fullName.trim()[0] ?? "?").toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="p-5">
+        <h3 className="mb-1 font-display text-2xl leading-tight">
+          {project.title || "Untitled project"}
+        </h3>
+        <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          by {profile.fullName || "Anonymous"}
+        </p>
+        {project.businessType ||
+        project.criteria.commitment ||
+        project.criteria.location ||
+        project.criteria.skills.length > 0 ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {project.businessType ? (
+              <PreviewPill>{project.businessType}</PreviewPill>
+            ) : null}
+            {project.criteria.commitment ? (
+              <PreviewPill>{project.criteria.commitment}</PreviewPill>
+            ) : null}
+            {project.criteria.location ? (
+              <PreviewPill>{project.criteria.location}</PreviewPill>
+            ) : null}
+            {project.criteria.skills.slice(0, 5).map((s) => (
+              <PreviewPill key={s} muted>
+                {s}
+              </PreviewPill>
+            ))}
+          </div>
+        ) : null}
+        {project.description ? (
+          <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            {project.description}
+          </p>
+        ) : (
+          <p className="text-sm italic text-muted-foreground/60">
+            No description yet. Builders see a blank pitch here.
+          </p>
+        )}
+      </div>
+    </article>
+  );
+};
+
+const PreviewPill = ({
+  children,
+  muted,
+}: {
+  children: React.ReactNode;
+  muted?: boolean;
+}) => (
+  <span
+    className={
+      muted
+        ? "rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground"
+        : "inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold"
+    }
+  >
+    {children}
+  </span>
+);

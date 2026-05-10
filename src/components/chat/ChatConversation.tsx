@@ -31,7 +31,9 @@ import {
   CheckCheck,
   ExternalLink,
   Linkedin,
+  Mail,
   MoreVertical,
+  Search as SearchIcon,
   Send,
   Trash2,
   X,
@@ -67,6 +69,7 @@ import {
   type ThreadState,
 } from "@/lib/mynet-storage";
 import type { Candidate } from "@/lib/mynet-types";
+import { markThreadUnread } from "@/lib/threadUnread";
 import { dayKey, formatDayDivider, formatTime } from "./ChatTime";
 
 const initials = (name: string): string => {
@@ -123,6 +126,12 @@ export const ChatConversation = ({
     null,
   );
   const [draft, setDraft] = useState("");
+  // Local in-thread message search. Toggled by the magnifying-glass
+  // icon in the header; filters the visible messages by case-
+  // insensitive substring match. Cleared when the user navigates to
+  // a different thread.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
   // Track whether we should auto-scroll on the next message — only
   // when the user is already near the bottom of the thread.
@@ -140,9 +149,19 @@ export const ChatConversation = ({
       pendingWindowStartAt: null,
     });
     setDraft("");
+    setSearchOpen(false);
+    setSearchQuery("");
     setLoading(true);
     stickToBottomRef.current = true;
   }, [contactId, initialProfile]);
+
+  // Filtered view of the messages for the open thread. When the
+  // search bar is empty (or closed), the full list passes through.
+  const visibleMessages = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!searchOpen || !q) return messages;
+    return messages.filter((m) => m.body.toLowerCase().includes(q));
+  }, [messages, searchOpen, searchQuery]);
 
   // Initial load: thread state + messages + (full) counterparty
   // profile. Profile fetch falls back to the candidate / founder RPCs;
@@ -444,7 +463,33 @@ export const ChatConversation = ({
         contactId={contactId}
         onDelete={handleDelete}
         deleting={busy === "delete"}
+        searchOpen={searchOpen}
+        onToggleSearch={() => {
+          setSearchOpen((v) => {
+            if (v) setSearchQuery("");
+            return !v;
+          });
+        }}
       />
+
+      {searchOpen ? (
+        <div className="flex items-center gap-2 border-b border-border bg-card/30 px-4 py-2 sm:px-6">
+          <SearchIcon
+            className="size-3.5 flex-shrink-0 text-muted-foreground"
+            aria-hidden
+          />
+          <input
+            autoFocus
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search messages in this thread"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+          />
+          <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+            {searchQuery.trim() ? `${visibleMessages.length} match${visibleMessages.length === 1 ? "" : "es"}` : ""}
+          </span>
+        </div>
+      ) : null}
 
       {isInbound ? (
         <InboundBanner
@@ -468,17 +513,24 @@ export const ChatConversation = ({
           <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
             Loading...
           </div>
-        ) : messages.length === 0 ? (
+        ) : visibleMessages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
             <p className="text-sm font-medium text-foreground">
-              No messages yet.
+              {searchOpen && searchQuery.trim()
+                ? "No matches."
+                : "No messages yet."}
             </p>
             <p className="max-w-sm text-xs text-muted-foreground">
-              Say hi. Your first message creates the thread.
+              {searchOpen && searchQuery.trim()
+                ? "Nothing in this thread matches that. Try fewer words."
+                : "Say hi. Your first message creates the thread."}
             </p>
           </div>
         ) : (
-          <MessageList messages={messages} currentUserId={currentUserId} />
+          <MessageList
+            messages={visibleMessages}
+            currentUserId={currentUserId}
+          />
         )}
       </div>
 
@@ -514,12 +566,16 @@ const Header = ({
   contactId,
   onDelete,
   deleting,
+  searchOpen,
+  onToggleSearch,
 }: {
   profile: CounterpartyProfile | null;
   url: string | null;
   contactId: string;
   onDelete: () => void;
   deleting: boolean;
+  searchOpen: boolean;
+  onToggleSearch: () => void;
 }) => (
   <header className="flex items-center gap-3 border-b border-border bg-card/30 px-4 py-3 sm:px-6">
     <Link
@@ -547,6 +603,14 @@ const Header = ({
       ) : null}
     </div>
     <div className="flex items-center gap-1">
+      <Button
+        variant={searchOpen ? "secondary" : "ghost"}
+        size="icon"
+        aria-label={searchOpen ? "Close search" : "Search messages"}
+        onClick={onToggleSearch}
+      >
+        <SearchIcon className="size-4" />
+      </Button>
       {profile?.linkedinUrl ? (
         <Button asChild variant="ghost" size="icon" aria-label="Open LinkedIn">
           <a
@@ -569,7 +633,16 @@ const Header = ({
             <MoreVertical className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem
+            onSelect={() => {
+              markThreadUnread(contactId);
+              toast.success("Marked unread.");
+            }}
+          >
+            <Mail className="mr-2 size-4" />
+            Mark as unread
+          </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={onDelete}
             disabled={deleting}

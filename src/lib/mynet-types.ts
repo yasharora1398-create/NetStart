@@ -28,6 +28,14 @@ export type ResumeMeta = {
   uploadedAt: string;
 };
 
+// Founder proof-of-work file. Same shape as ResumeMeta but tracked
+// separately so a profile can carry both if the user switches roles.
+export type ProofMeta = {
+  name: string;
+  size: number;
+  uploadedAt: string;
+};
+
 export type ReviewStatus = "draft" | "pending" | "accepted" | "rejected";
 
 export type CandidateProfile = {
@@ -42,6 +50,10 @@ export type CandidateProfile = {
 export type Profile = {
   linkedinUrl: string;
   resume: ResumeMeta | null;
+  // Founder fields. websiteUrl is what they're building; proof is a
+  // file showing prior shipped work. Both empty for builders.
+  websiteUrl: string;
+  proof: ProofMeta | null;
   reviewStatus: ReviewStatus;
   reviewReason: string | null;
   fullName: string;
@@ -154,6 +166,8 @@ export const emptyCandidate = (): CandidateProfile => ({
 export const emptyProfile = (): Profile => ({
   linkedinUrl: "",
   resume: null,
+  websiteUrl: "",
+  proof: null,
   reviewStatus: "draft",
   reviewReason: null,
   fullName: "",

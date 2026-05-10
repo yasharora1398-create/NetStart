@@ -13,6 +13,10 @@ import { Search, Inbox } from "lucide-react";
 import type { ChatThreadSummary } from "@/lib/mynet-storage";
 import type { Candidate } from "@/lib/mynet-types";
 import { getAvatarUrl } from "@/lib/mynet-storage";
+import {
+  clearThreadUnread,
+  useThreadUnreadFlags,
+} from "@/lib/threadUnread";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -50,6 +54,10 @@ export const ChatThreadList = ({
   onSelect,
 }: Props) => {
   const [query, setQuery] = useState("");
+  // Read the unread-flag set so any change in another component
+  // (e.g. user marks a thread unread from the chat header) repaints
+  // this list. The hook returns a Set; we look up by contactId.
+  const unreadFlags = useThreadUnreadFlags();
   const q = query.trim().toLowerCase();
   const filtered = useMemo(() => {
     if (!q) return items;
@@ -104,7 +112,15 @@ export const ChatThreadList = ({
                 item={it}
                 active={it.contactId === selectedId}
                 currentUserId={currentUserId}
-                onSelect={() => onSelect(it.contactId)}
+                markedUnread={unreadFlags.has(it.contactId)}
+                onSelect={() => {
+                  // Clearing the unread flag on open matches the
+                  // user's mental model: "I'm reading it now, so it's
+                  // not unread anymore." If they want it back, they
+                  // hit Mark as unread in the chat header dropdown.
+                  clearThreadUnread(it.contactId);
+                  onSelect(it.contactId);
+                }}
               />
             ))}
           </ul>
@@ -118,11 +134,13 @@ const ThreadRow = ({
   item,
   active,
   currentUserId,
+  markedUnread,
   onSelect,
 }: {
   item: ThreadListItem;
   active: boolean;
   currentUserId: string | null;
+  markedUnread: boolean;
   onSelect: () => void;
 }) => {
   const url = getAvatarUrl(item.avatarPath);
@@ -142,15 +160,30 @@ const ThreadRow = ({
           active && "bg-accent text-accent-foreground",
         )}
       >
-        <Avatar className="size-10 shrink-0">
-          {url ? <AvatarImage src={url} alt="" /> : null}
-          <AvatarFallback className="text-xs">
-            {initials(item.fullName)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative shrink-0">
+          <Avatar className="size-10">
+            {url ? <AvatarImage src={url} alt="" /> : null}
+            <AvatarFallback className="text-xs">
+              {initials(item.fullName)}
+            </AvatarFallback>
+          </Avatar>
+          {markedUnread ? (
+            <span
+              aria-label="Marked unread"
+              className="absolute -top-0.5 -right-0.5 block size-2.5 rounded-full bg-gold ring-2 ring-card"
+            />
+          ) : null}
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-sm font-medium text-foreground">
+            <span
+              className={cn(
+                "truncate text-sm",
+                markedUnread
+                  ? "font-semibold text-foreground"
+                  : "font-medium text-foreground",
+              )}
+            >
               {item.fullName || "Unnamed"}
             </span>
             <span className="shrink-0 text-[11px] text-muted-foreground">
@@ -158,7 +191,14 @@ const ThreadRow = ({
             </span>
           </div>
           <div className="mt-0.5 flex items-center gap-2">
-            <span className="truncate text-xs text-muted-foreground">
+            <span
+              className={cn(
+                "truncate text-xs",
+                markedUnread
+                  ? "text-foreground/80 font-medium"
+                  : "text-muted-foreground",
+              )}
+            >
               {preview}
             </span>
             <StateBadge state={item.state} fromMe={isFromMe} />

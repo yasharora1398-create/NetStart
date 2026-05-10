@@ -35,12 +35,16 @@ import {
 import {
   createProject,
   getAvatarUrl,
+  getProofPath,
   getResumePath,
+  removeProof,
   removeResume,
   setLinkedIn,
+  setWebsite,
   submitProfile,
   updateCandidate,
   uploadAvatar,
+  uploadProof,
   uploadResume,
 } from "@/lib/mynet-storage";
 import {
@@ -109,6 +113,11 @@ export const MyNetWizard = ({
   const [pendingResume, setPendingResume] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Step 1 - founder-only credential extras (website + proof file)
+  const [website, setWebsiteValue] = useState(profile.websiteUrl ?? "");
+  const [pendingProof, setPendingProof] = useState<File | null>(null);
+  const proofRef = useRef<HTMLInputElement>(null);
+
   // Step 3 - profile picture (required, both modes)
   const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -149,6 +158,29 @@ export const MyNetWizard = ({
       return;
     }
     setPendingResume(file);
+  };
+
+  const onProofChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_RESUME_BYTES) {
+      toast.error(`File too large. Max ${formatBytes(MAX_RESUME_BYTES)}.`);
+      return;
+    }
+    setPendingProof(file);
+  };
+
+  const handleRemoveExistingProof = async () => {
+    if (!profile.proof) return;
+    try {
+      const path = await getProofPath(uid);
+      await removeProof(uid, path);
+      await onProfileRefresh();
+      toast.success("Proof removed.");
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
   };
 
   const onAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -229,6 +261,18 @@ export const MyNetWizard = ({
         const previousPath = await getResumePath(uid);
         await uploadResume(uid, pendingResume, previousPath);
         setPendingResume(null);
+      }
+      // Founder-only fields. Website saves on every step submission
+      // (cheap upsert); proof uploads only when a new file is queued.
+      if (preselectedRole === "founder") {
+        if (website.trim() !== profile.websiteUrl) {
+          await setWebsite(uid, website);
+        }
+        if (pendingProof) {
+          const previousPath = await getProofPath(uid);
+          await uploadProof(uid, pendingProof, previousPath);
+          setPendingProof(null);
+        }
       }
       await onProfileRefresh();
       // If sign-up already captured the role, skip the mode pick
@@ -345,13 +389,7 @@ export const MyNetWizard = ({
               : "LinkedIn or a resume helps us verify you. We strongly recommend both, but either one will do."
           }
         >
-          <div
-            className={
-              preselectedRole === "founder"
-                ? "grid gap-6 mb-10"
-                : "grid md:grid-cols-2 gap-6 mb-10"
-            }
-          >
+          <div className="grid md:grid-cols-2 gap-6 mb-10">
             <Field
               label="LinkedIn"
               hint="Optional but strongly recommended"
@@ -408,7 +446,66 @@ export const MyNetWizard = ({
                   </Button>
                 )}
               </Field>
-            ) : null}
+            ) : (
+              <>
+                {/* Founder-only: website link to whatever they're
+                    building, plus a proof file (deck, demo video,
+                    screenshots, anything that shows the project is
+                    real). Both optional but strongly hinted at. */}
+                <Field
+                  label="What you're building"
+                  hint="Optional. Public site, landing page, or repo."
+                >
+                  <Input
+                    type="url"
+                    value={website}
+                    onChange={(e) => setWebsiteValue(e.target.value)}
+                    placeholder="https://your-startup.com"
+                    className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                  />
+                </Field>
+
+                <Field
+                  label="Proof of work"
+                  hint="Deck, demo video, screenshots. PDF, image, or doc."
+                  icon={<FileText className="h-3.5 w-3.5 text-gold" />}
+                >
+                  <input
+                    ref={proofRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.mp4,application/pdf,image/*"
+                    onChange={onProofChange}
+                    className="sr-only"
+                  />
+                  {pendingProof ? (
+                    <ResumeRow
+                      name={pendingProof.name}
+                      size={formatBytes(pendingProof.size)}
+                      pending
+                      onReplace={() => proofRef.current?.click()}
+                      onClear={() => setPendingProof(null)}
+                    />
+                  ) : profile.proof ? (
+                    <ResumeRow
+                      name={profile.proof.name}
+                      size={formatBytes(profile.proof.size)}
+                      onReplace={() => proofRef.current?.click()}
+                      onClear={handleRemoveExistingProof}
+                    />
+                  ) : (
+                    <Button
+                      variant="outlineGold"
+                      size="lg"
+                      onClick={() => proofRef.current?.click()}
+                      className="w-full h-11"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Upload proof
+                    </Button>
+                  )}
+                </Field>
+              </>
+            )}
           </div>
 
           <Footer

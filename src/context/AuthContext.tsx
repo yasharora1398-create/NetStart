@@ -3,6 +3,7 @@ import type { Session, User, AuthError } from "@supabase/supabase-js";
 import { getSupabase, isSupabaseConfigured, MISSING_CONFIG_MESSAGE } from "@/lib/supabase";
 import { isAdminUser } from "@/lib/mynet-storage";
 import { setSavedProjectsUser } from "@/lib/savedProjects";
+import { setThreadUnreadUser } from "@/lib/threadUnread";
 
 type AuthResult = { error: AuthError | Error | null };
 
@@ -66,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       // Hydrate per-user local stores from localStorage.
       setSavedProjectsUser(data.session?.user?.id ?? null);
+      setThreadUnreadUser(data.session?.user?.id ?? null);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
@@ -73,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Rebind per-user local stores on every auth change so different
       // users on the same device see their own saves.
       setSavedProjectsUser(next?.user?.id ?? null);
+      setThreadUnreadUser(next?.user?.id ?? null);
     });
 
     return () => {

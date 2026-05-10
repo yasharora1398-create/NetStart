@@ -32,6 +32,7 @@ const lifecycleFrom = (raw: string | null | undefined): ProjectLifecycle =>
     : "active";
 
 const RESUMES_BUCKET = "resumes";
+const PROOFS_BUCKET = "proofs";
 const AVATARS_BUCKET = "avatars";
 
 const refreshCandidateEmbedding = async (
@@ -77,6 +78,11 @@ type ProfileRow = {
   resume_name: string | null;
   resume_size: number | null;
   resume_uploaded_at: string | null;
+  website_url: string | null;
+  proof_path: string | null;
+  proof_name: string | null;
+  proof_size: number | null;
+  proof_uploaded_at: string | null;
   review_status: ReviewStatus | null;
   review_reason: string | null;
   headline: string | null;
@@ -130,6 +136,15 @@ const profileFromRow = (row: ProfileRow): Profile => ({
           name: row.resume_name,
           size: row.resume_size ?? 0,
           uploadedAt: row.resume_uploaded_at ?? new Date().toISOString(),
+        }
+      : null,
+  websiteUrl: row.website_url ?? "",
+  proof:
+    row.proof_path && row.proof_name
+      ? {
+          name: row.proof_name,
+          size: row.proof_size ?? 0,
+          uploadedAt: row.proof_uploaded_at ?? new Date().toISOString(),
         }
       : null,
   reviewStatus: row.review_status ?? "draft",
@@ -254,6 +269,115 @@ export const getResumePath = async (userId: string): Promise<string | null> => {
     .maybeSingle();
   if (error) throw error;
   return (data?.resume_path as string | null) ?? null;
+};
+
+// ---- Founder website + proof --------------------------------------
+
+export const setWebsite = async (
+  userId: string,
+  url: string,
+): Promise<void> => {
+  // website_url is NOT NULL DEFAULT '' (migration 0017), so an empty
+  // string clears it cleanly without violating the constraint.
+  const { error } = await getSupabase()
+    .from("profiles")
+    .upsert(
+      { user_id: userId, website_url: url.trim() },
+      { onConflict: "user_id" },
+    );
+  if (error) throw error;
+};
+
+// Upload a founder's proof-of-work file to the `proofs` bucket. Same
+// shape as uploadResume — replaces the previous file, writes the
+// metadata onto the profiles row, rolls back the storage write if
+// the profiles update fails.
+export const uploadProof = async (
+  userId: string,
+  file: File,
+  previousPath: string | null,
+): Promise<import("@/lib/mynet-types").ProofMeta & { path: string }> => {
+  const supabase = getSupabase();
+  const safeName = file.name.replace(/[^A-Za-z0-9._-]+/g, "_");
+  const path = `${userId}/${Date.now()}_${safeName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(PROOFS_BUCKET)
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || undefined,
+    });
+  if (uploadError) throw uploadError;
+
+  const uploadedAt = new Date().toISOString();
+
+  const { error: profileError } = await supabase.from("profiles").upsert(
+    {
+      user_id: userId,
+      proof_path: path,
+      proof_name: file.name,
+      proof_size: file.size,
+      proof_mime_type: file.type || null,
+      proof_uploaded_at: uploadedAt,
+    },
+    { onConflict: "user_id" },
+  );
+  if (profileError) {
+    await supabase.storage.from(PROOFS_BUCKET).remove([path]);
+    throw profileError;
+  }
+
+  if (previousPath) {
+    await supabase.storage.from(PROOFS_BUCKET).remove([previousPath]);
+  }
+
+  return { name: file.name, size: file.size, uploadedAt, path };
+};
+
+export const removeProof = async (
+  userId: string,
+  path: string | null,
+): Promise<void> => {
+  const supabase = getSupabase();
+  if (path) {
+    await supabase.storage.from(PROOFS_BUCKET).remove([path]);
+  }
+  const { error } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        user_id: userId,
+        proof_path: null,
+        proof_name: null,
+        proof_size: null,
+        proof_mime_type: null,
+        proof_uploaded_at: null,
+      },
+      { onConflict: "user_id" },
+    );
+  if (error) throw error;
+};
+
+export const getProofPath = async (userId: string): Promise<string | null> => {
+  const { data, error } = await getSupabase()
+    .from("profiles")
+    .select("proof_path")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return (data?.proof_path as string | null) ?? null;
+};
+
+export const getProofSignedUrl = async (
+  path: string,
+  expiresInSeconds = 60 * 60,
+): Promise<string | null> => {
+  const { data, error } = await getSupabase()
+    .storage.from(PROOFS_BUCKET)
+    .createSignedUrl(path, expiresInSeconds);
+  if (error) return null;
+  return data?.signedUrl ?? null;
 };
 
 // ---- Admin --------------------------------------------------------

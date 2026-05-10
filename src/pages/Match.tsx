@@ -18,6 +18,7 @@ import {
   Minimize2,
   Search,
   Sparkles,
+  Undo2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -283,9 +284,15 @@ const BuilderView = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [fullscreen]);
 
+  // Last candidate we decided on (passed or sent to info pane).
+  // Drives the undo button so a stray click on X doesn't lose
+  // someone permanently.
+  const [lastDecided, setLastDecided] = useState<Candidate | null>(null);
+
   const decline = () => {
     if (!current) return;
     setApproving(null);
+    setLastDecided(current);
     setDecided((prev) => new Set(prev).add(current.userId));
   };
   const accept = () => {
@@ -295,10 +302,21 @@ const BuilderView = () => {
   const closeInfo = (decideThem: boolean) => {
     const target = approving ?? detail;
     if (decideThem && target) {
+      setLastDecided(target);
       setDecided((prev) => new Set(prev).add(target.userId));
     }
     setApproving(null);
     setDetail(null);
+  };
+  const undo = () => {
+    if (!lastDecided) return;
+    setDecided((prev) => {
+      const next = new Set(prev);
+      next.delete(lastDecided.userId);
+      return next;
+    });
+    setApproving(null);
+    setLastDecided(null);
   };
 
   return (
@@ -367,17 +385,28 @@ const BuilderView = () => {
               : "",
           )}
         >
-          {/* Full-screen toggle. Floats top-LEFT in fullscreen so it
-              never sits next to the info pane's close button (which
-              lives at the right edge). */}
+          {/* Top-bar controls: undo + full-screen toggle. Undo only
+              renders once we have a `lastDecided` to bring back. */}
           <div
             className={cn(
-              "flex",
+              "flex items-center gap-2",
               fullscreen
                 ? "absolute top-4 left-4 z-20"
                 : "justify-end mb-4",
             )}
           >
+            {lastDecided ? (
+              <button
+                type="button"
+                onClick={undo}
+                aria-label={`Undo: bring back ${lastDecided.fullName}`}
+                title={`Undo: bring back ${lastDecided.fullName || "last candidate"}`}
+                className="inline-flex items-center gap-1.5 rounded-sm border border-gold/40 bg-gold/5 px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/70 transition-colors"
+              >
+                <Undo2 className="h-3.5 w-3.5" />
+                Undo
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => setFullscreen((v) => !v)}
