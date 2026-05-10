@@ -1,0 +1,150 @@
+/**
+ * Mobile swipe-card wrapper. Renders one card the user can drag
+ * left or right; past the threshold the card flies off-screen and
+ * the corresponding callback fires. No animation deps — pointer
+ * events + CSS transforms.
+ *
+ * Visual model mirrors the Expo Match deck (`mobile/app/(tabs)/
+ * index.tsx`): a stacked under-card peeks behind the top card,
+ * and Save / Pass pills fade in on either edge as the user drags.
+ */
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { cn } from "@/lib/utils";
+
+type Props = {
+  top: ReactNode;
+  under?: ReactNode;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
+  /** Key changes when the deck advances; resets the gesture state. */
+  resetKey: string;
+};
+
+const SWIPE_FRACTION = 0.28;
+const FLY_DISTANCE = 1.4;
+const FLY_DURATION_MS = 220;
+
+export const MobileSwipeCard = ({
+  top,
+  under,
+  onSwipeLeft,
+  onSwipeRight,
+  resetKey,
+}: Props) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const startRef = useRef<{ x: number; pointerId: number } | null>(null);
+  const widthRef = useRef<number>(0);
+  const [tx, setTx] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [flying, setFlying] = useState<"left" | "right" | null>(null);
+
+  useEffect(() => {
+    setTx(0);
+    setFlying(null);
+  }, [resetKey]);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    widthRef.current = el.getBoundingClientRect().width || 1;
+  }, [top]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (flying) return;
+    startRef.current = { x: e.clientX, pointerId: e.pointerId };
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    setDragging(true);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!startRef.current || flying) return;
+    if (e.pointerId !== startRef.current.pointerId) return;
+    setTx(e.clientX - startRef.current.x);
+  };
+
+  const release = useCallback(
+    (dir: "left" | "right" | null) => {
+      if (!dir) {
+        setTx(0);
+        setDragging(false);
+        return;
+      }
+      const w = widthRef.current || 1;
+      setFlying(dir);
+      setDragging(false);
+      setTx(dir === "right" ? w * FLY_DISTANCE : -w * FLY_DISTANCE);
+      window.setTimeout(() => {
+        if (dir === "right") onSwipeRight();
+        else onSwipeLeft();
+      }, FLY_DURATION_MS);
+    },
+    [onSwipeLeft, onSwipeRight],
+  );
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!startRef.current) return;
+    if (e.pointerId !== startRef.current.pointerId) return;
+    const w = widthRef.current || 1;
+    const threshold = w * SWIPE_FRACTION;
+    const dir = tx > threshold ? "right" : tx < -threshold ? "left" : null;
+    startRef.current = null;
+    release(dir);
+  };
+
+  const w = widthRef.current || 1;
+  const rotate = (tx / w) * 12;
+  const opacityRight = Math.min(1, Math.max(0, tx / (w * SWIPE_FRACTION)));
+  const opacityLeft = Math.min(1, Math.max(0, -tx / (w * SWIPE_FRACTION)));
+
+  return (
+    <div ref={wrapperRef} className="relative w-full">
+      {under ? (
+        <div className="pointer-events-none absolute inset-0 -z-10 scale-[0.97] opacity-90">
+          {under}
+        </div>
+      ) : null}
+
+      <div
+        className={cn(
+          "relative touch-pan-y select-none will-change-transform",
+          dragging ? "transition-none" : "transition-transform ease-out",
+        )}
+        style={{
+          transform: `translateX(${tx}px) rotate(${rotate}deg)`,
+          transitionDuration: flying
+            ? `${FLY_DURATION_MS}ms`
+            : dragging
+              ? "0ms"
+              : "200ms",
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        {top}
+
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-md border-2 border-gold/70 bg-gold/15 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-gold"
+          style={{ opacity: opacityRight }}
+        >
+          Save
+        </span>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-4 top-4 rotate-12 rounded-md border-2 border-destructive/70 bg-destructive/15 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-destructive"
+          style={{ opacity: opacityLeft }}
+        >
+          Pass
+        </span>
+      </div>
+    </div>
+  );
+};

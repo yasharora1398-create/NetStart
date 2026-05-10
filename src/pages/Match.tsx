@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { MobileSwipeCard } from "@/components/netstart/MobileSwipeCard";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
@@ -933,13 +934,12 @@ const LookerView = () => {
             </button>
           </div>
 
-          {/* Deck stage — X | Card | ✓ in a centered flex row. The
-              card is fixed width; the side buttons collapse out when
-              the user accepts so the action column can slide in
-              without shifting the card horizontally. */}
+          {/* DESKTOP deck stage — X | Card | ✓ row with a slide-in
+              info panel on accept. Hidden under 768px in favour of
+              the swipe deck below. */}
           <div
             className={cn(
-              "relative mx-auto flex items-center justify-center gap-6 px-4",
+              "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4",
               fullscreen
                 ? "min-h-[calc(100vh-72px)] py-12"
                 : "min-h-[760px] py-6",
@@ -960,11 +960,6 @@ const LookerView = () => {
 
             <div className="w-full max-w-[520px] flex-shrink-0 flex flex-col gap-3">
               <MatchProjectCard project={displayed!} />
-              {/* Wide Previous button — same width as the card,
-                  sitting directly underneath. Restores the last
-                  decided project so a stray pass / approve doesn't
-                  lose a card. Disabled until there's something to
-                  go back to. */}
               <button
                 type="button"
                 onClick={goBack}
@@ -1012,6 +1007,53 @@ const LookerView = () => {
               </div>
             </div>
           </div>
+
+          {/* MOBILE deck — swipe-left = pass, swipe-right = save +
+              open the info sheet. Mirrors the Expo Match feel:
+              one card, stacked under-card peeking, no side
+              buttons. The wide Previous button sits underneath. */}
+          <div className="md:hidden mx-auto w-full max-w-[520px] px-3 py-4 flex flex-col gap-3">
+            <MobileSwipeCard
+              top={<MatchProjectCard project={displayed!} />}
+              under={
+                filtered[1] ? (
+                  <MatchProjectCard project={filtered[1]} />
+                ) : null
+              }
+              resetKey={displayed!.id}
+              onSwipeLeft={decline}
+              onSwipeRight={accept}
+            />
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={!lastDecided}
+              aria-label="Previous card"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold/40 bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold/10 hover:border-gold/70 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold/40"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </button>
+          </div>
+
+          {/* MOBILE info sheet — slides up from the bottom over the
+              entire viewport when the user swipes right on a card.
+              Same ProjectInfoPanel content, just a sheet instead
+              of a sidebar. Hidden on desktop where the slide-in
+              panel above handles it. */}
+          {approving ? (
+            <div className="md:hidden fixed inset-0 z-50 flex flex-col bg-background">
+              <div className="flex-1 overflow-y-auto p-4 pb-32">
+                <ProjectInfoPanel
+                  project={approving}
+                  canGoBack={Boolean(lastDecided)}
+                  onClose={() => closeInfo(true)}
+                  onBack={goBack}
+                  onSwitchProject={(p) => setApproving(p)}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </>
