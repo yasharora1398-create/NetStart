@@ -82,6 +82,13 @@ export const MobileSwipeCard = ({
       window.setTimeout(() => {
         if (dir === "right") onSwipeRight();
         else onSwipeLeft();
+        // Reset the card to centre. For swipe-right (accept) the
+        // parent keeps the same project on screen behind the info
+        // sheet, so without this the card would stay flown off.
+        // For swipe-left the parent advances and the resetKey
+        // useEffect would have done this anyway — harmless.
+        setTx(0);
+        setFlying(null);
       }, FLY_DURATION_MS);
     },
     [onSwipeLeft, onSwipeRight],

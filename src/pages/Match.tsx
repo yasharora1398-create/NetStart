@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { MobileSwipeCard } from "@/components/netstart/MobileSwipeCard";
+import { BottomSheet } from "@/components/netstart/BottomSheet";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
@@ -820,6 +821,9 @@ const LookerView = () => {
   // they can browse the founder's other work in place.
   const current = filtered[0] ?? null;
   const displayed = approving ?? current;
+  // Mobile-only filter sheet open/close. Triggered by the search
+  // icon in the mobile top bar.
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const decline = () => {
     if (!displayed) return;
@@ -829,13 +833,14 @@ const LookerView = () => {
   };
   const accept = () => {
     if (!displayed) return;
+    // Swipe-right is a decision: stamp it into the deck so when the
+    // info sheet is dismissed the deck has already advanced. The
+    // info sheet stays visible until the user drags it down.
+    setLastDecided(displayed);
+    setDecided((prev) => new Set(prev).add(displayed.id));
     setApproving(displayed);
   };
-  const closeInfo = (decideThem: boolean) => {
-    if (decideThem && approving) {
-      setLastDecided(approving);
-      setDecided((prev) => new Set(prev).add(approving.id));
-    }
+  const closeInfo = () => {
     setApproving(null);
   };
   const goBack = () => {
@@ -849,27 +854,34 @@ const LookerView = () => {
     setLastDecided(null);
   };
 
+  const filtersNode = (
+    <Filters
+      query={query}
+      setQuery={setQuery}
+      skill={skillFilter}
+      setSkill={setSkillFilter}
+      location={locationFilter}
+      setLocation={setLocationFilter}
+      commitment={commitmentFilter}
+      setCommitment={setCommitmentFilter}
+      skillOptions={allSkills}
+      onClear={() => {
+        setQuery("");
+        setSkillFilter("");
+        setLocationFilter("");
+        setCommitmentFilter("");
+      }}
+      hasFilters={hasFilters}
+    />
+  );
+
   return (
     <>
+      {/* Desktop renders the filter row inline at the top. Mobile
+          hides it; the search icon in the mobile top bar opens
+          the same Filters in a bottom sheet instead. */}
       {!fullscreen ? (
-        <Filters
-          query={query}
-          setQuery={setQuery}
-          skill={skillFilter}
-          setSkill={setSkillFilter}
-          location={locationFilter}
-          setLocation={setLocationFilter}
-          commitment={commitmentFilter}
-          setCommitment={setCommitmentFilter}
-          skillOptions={allSkills}
-          onClear={() => {
-            setQuery("");
-            setSkillFilter("");
-            setLocationFilter("");
-            setCommitmentFilter("");
-          }}
-          hasFilters={hasFilters}
-        />
+        <div className="hidden md:block">{filtersNode}</div>
       ) : null}
 
       {loadingData ? (
@@ -893,10 +905,10 @@ const LookerView = () => {
               : "",
           )}
         >
-          {/* Top-bar controls: undo + full-screen toggle. */}
+          {/* DESKTOP top-bar controls: undo + full-screen toggle. */}
           <div
             className={cn(
-              "flex items-center gap-2",
+              "hidden md:flex items-center gap-2",
               fullscreen
                 ? "absolute top-4 left-4 z-20"
                 : "justify-end mb-4",
@@ -931,6 +943,35 @@ const LookerView = () => {
                   Full-screen
                 </>
               )}
+            </button>
+          </div>
+
+          {/* MOBILE top-bar — just two icons in the top-right.
+              Previous rewinds the deck by one card. Search opens
+              the filter bottom sheet (same Filters component the
+              desktop renders inline above). */}
+          <div className="md:hidden flex items-center justify-end gap-2 px-4 py-2">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={!lastDecided}
+              aria-label="Previous card"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-gold transition-colors hover:bg-gold/10 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(true)}
+              aria-label="Search and filter"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full border bg-card text-gold transition-colors",
+                hasFilters
+                  ? "border-gold/60 bg-gold/10"
+                  : "border-border hover:bg-gold/10 hover:border-gold/40",
+              )}
+            >
+              <Search className="h-4 w-4" />
             </button>
           </div>
 
@@ -999,7 +1040,7 @@ const LookerView = () => {
                   <ProjectInfoPanel
                     project={approving}
                     canGoBack={Boolean(lastDecided)}
-                    onClose={() => closeInfo(true)}
+                    onClose={() => closeInfo()}
                     onBack={goBack}
                     onSwitchProject={(p) => setApproving(p)}
                   />
@@ -1010,9 +1051,8 @@ const LookerView = () => {
 
           {/* MOBILE deck — swipe-left = pass, swipe-right = save +
               open the info sheet. Mirrors the Expo Match feel:
-              one card, stacked under-card peeking, no side
-              buttons. The wide Previous button sits underneath. */}
-          <div className="md:hidden mx-auto w-full max-w-[520px] px-3 py-4 flex flex-col gap-3">
+              one card, stacked under-card peeking, no buttons. */}
+          <div className="md:hidden mx-auto w-full max-w-[520px] px-3 py-4">
             <MobileSwipeCard
               top={<MatchProjectCard project={displayed!} />}
               under={
@@ -1024,36 +1064,49 @@ const LookerView = () => {
               onSwipeLeft={decline}
               onSwipeRight={accept}
             />
-            <button
-              type="button"
-              onClick={goBack}
-              disabled={!lastDecided}
-              aria-label="Previous card"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold/40 bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold/10 hover:border-gold/70 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold/40"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </button>
           </div>
 
-          {/* MOBILE info sheet — slides up from the bottom over the
-              entire viewport when the user swipes right on a card.
-              Same ProjectInfoPanel content, just a sheet instead
-              of a sidebar. Hidden on desktop where the slide-in
-              panel above handles it. */}
-          {approving ? (
-            <div className="md:hidden fixed inset-0 z-50 flex flex-col bg-background">
-              <div className="flex-1 overflow-y-auto p-4 pb-32">
-                <ProjectInfoPanel
-                  project={approving}
-                  canGoBack={Boolean(lastDecided)}
-                  onClose={() => closeInfo(true)}
-                  onBack={goBack}
-                  onSwitchProject={(p) => setApproving(p)}
-                />
+          {/* MOBILE info sheet — bottom sheet (~85dvh) that slides
+              up on swipe-right. The card behind stays visible in
+              the gap at the top. Drag the handle down to dismiss
+              and the deck moves on (the project was already
+              stamped decided by accept()). */}
+          <div className="md:hidden">
+            <BottomSheet
+              open={Boolean(approving)}
+              onClose={() => closeInfo()}
+            >
+              <div className="p-4 pb-12">
+                {approving ? (
+                  <ProjectInfoPanel
+                    project={approving}
+                    canGoBack={Boolean(lastDecided)}
+                    onClose={() => closeInfo()}
+                    onBack={goBack}
+                    onSwitchProject={(p) => setApproving(p)}
+                  />
+                ) : null}
               </div>
-            </div>
-          ) : null}
+            </BottomSheet>
+          </div>
+
+          {/* MOBILE filter sheet — same Filters component the
+              desktop renders inline, surfaced via the search icon
+              in the mobile top bar. */}
+          <div className="md:hidden">
+            <BottomSheet
+              open={mobileFiltersOpen}
+              onClose={() => setMobileFiltersOpen(false)}
+              heightClass="h-[70dvh]"
+            >
+              <div className="p-4 pb-12">
+                <h2 className="font-display text-2xl mb-4">
+                  Search + filter
+                </h2>
+                {filtersNode}
+              </div>
+            </BottomSheet>
+          </div>
         </div>
       )}
     </>
