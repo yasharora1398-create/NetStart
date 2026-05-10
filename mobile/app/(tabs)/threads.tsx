@@ -37,6 +37,11 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { clearUnread } from "@/lib/unread";
+import {
+  clearThreadUnread,
+  markThreadUnread,
+  useThreadUnreadFlags,
+} from "@/lib/threadUnread";
 import type { Candidate } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
@@ -67,6 +72,10 @@ export default function ThreadsScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  // Marked-unread set, kept in sync with the local store via pub/sub.
+  // Repaints the list whenever the user marks/clears from the chat
+  // header on this device or another.
+  const unreadFlags = useThreadUnreadFlags();
 
   const refresh = useCallback(async () => {
     if (!user) return;
@@ -107,6 +116,28 @@ export default function ThreadsScreen() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setRows((prev) => prev.filter((r) => r.contactId !== otherId));
     void deleteChatThread(otherId).catch(() => void refresh());
+  };
+
+  // Long-press a row to toggle the "marked unread" flag. Mirrors the
+  // web's chat-header dropdown action; keeps both clients consistent
+  // for users who jump between phone and laptop.
+  const handleLongPress = (otherId: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const isMarked = unreadFlags.has(otherId);
+    Alert.alert(
+      isMarked ? "Clear unread?" : "Mark as unread?",
+      isMarked
+        ? "Removes the dot from this thread."
+        : "Adds a dot you'll see until you open it again.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: isMarked ? "Clear" : "Mark unread",
+          onPress: () =>
+            isMarked ? clearThreadUnread(otherId) : markThreadUnread(otherId),
+        },
+      ],
+    );
   };
 
   const handleAccept = async (otherId: string) => {
@@ -164,9 +195,14 @@ export default function ThreadsScreen() {
             <ThreadRow
               row={item}
               accepting={acceptingId === item.contactId}
-              onPress={() =>
-                router.push(`/chat/${item.contactId}` as never)
-              }
+              markedUnread={unreadFlags.has(item.contactId)}
+              onPress={() => {
+                // Tapping the row clears the flag — same UX as web:
+                // "I'm reading it now, so it's not unread anymore."
+                clearThreadUnread(item.contactId);
+                router.push(`/chat/${item.contactId}` as never);
+              }}
+              onLongPress={() => handleLongPress(item.contactId)}
               onAccept={() => handleAccept(item.contactId)}
               onDelete={() => handleDelete(item.contactId)}
               styles={styles}
@@ -182,7 +218,9 @@ export default function ThreadsScreen() {
 const ThreadRow = ({
   row,
   accepting,
+  markedUnread,
   onPress,
+  onLongPress,
   onAccept,
   onDelete,
   styles,
@@ -190,7 +228,9 @@ const ThreadRow = ({
 }: {
   row: Row;
   accepting: boolean;
+  markedUnread: boolean;
   onPress: () => void;
+  onLongPress: () => void;
   onAccept: () => void;
   onDelete: () => void;
   styles: ReturnType<typeof makeStyles>;
@@ -209,23 +249,34 @@ const ThreadRow = ({
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={350}
       style={({ pressed }) => [
         styles.row,
         pressed && { backgroundColor: theme.bgElev },
       ]}
     >
-      {url ? (
-        <Image source={{ uri: url }} style={styles.avatar} />
-      ) : (
-        <View style={styles.avatarFallback}>
-          <Text style={styles.avatarInitials}>
-            {(display[0] ?? "?").toUpperCase()}
-          </Text>
-        </View>
-      )}
+      <View>
+        {url ? (
+          <Image source={{ uri: url }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <Text style={styles.avatarInitials}>
+              {(display[0] ?? "?").toUpperCase()}
+            </Text>
+          </View>
+        )}
+        {markedUnread ? <View style={styles.unreadDot} /> : null}
+      </View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <View style={styles.rowHead}>
-          <Text style={styles.name} numberOfLines={1}>
+          <Text
+            style={[
+              styles.name,
+              markedUnread && { fontWeight: "700" },
+            ]}
+            numberOfLines={1}
+          >
             {display}
           </Text>
           {row.lastAt ? (
@@ -278,7 +329,16 @@ const ThreadRow = ({
               </Text>
             </View>
           )}
-          <Text style={styles.preview} numberOfLines={1}>
+          <Text
+            style={[
+              styles.preview,
+              markedUnread && {
+                color: theme.text,
+                fontWeight: "600",
+              },
+            ]}
+            numberOfLines={1}
+          >
             {row.lastBody || sub || "No messages yet"}
           </Text>
         </View>
@@ -408,6 +468,20 @@ const makeStyles = (theme: ThemePalette) =>
       color: theme.gold,
       fontFamily: fonts.display,
       fontSize: 17,
+    },
+    // Small gold pip overlaid on the avatar's top-right when the user
+    // has marked this thread unread. Same visual language as the
+    // web's threadUnread dot.
+    unreadDot: {
+      position: "absolute",
+      top: -2,
+      right: -2,
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: theme.gold,
+      borderWidth: 2,
+      borderColor: theme.bg,
     },
     rowHead: {
       flexDirection: "row",

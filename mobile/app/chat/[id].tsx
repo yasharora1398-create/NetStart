@@ -37,7 +37,10 @@ import {
   CheckCheck,
   CornerUpLeft,
   Copy as CopyIcon,
+  Mail,
   MessageCircle,
+  MoreVertical,
+  Search as SearchIcon,
   Send,
   Trash2,
   User,
@@ -59,6 +62,7 @@ import {
 } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { markThreadUnread } from "@/lib/threadUnread";
 import type { Candidate } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
@@ -243,7 +247,16 @@ export default function ChatScreen() {
   // future enhancement; for now Delete just hides the bubble on this
   // device so testing feels right.
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  // Header overflow menu: Mark unread / Search / Delete chat. Mirrors
+  // the web's chat-header dropdown.
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  // In-thread search. When `searchOpen` is true an input slides in
+  // below the header and filters the visible messages by case-
+  // insensitive substring match.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<TextInput>(null);
+  const searchInputRef = useRef<TextInput>(null);
 
   // Load the other person's profile so the header can show their name
   // and avatar.
@@ -253,6 +266,11 @@ export default function ChatScreen() {
     setLoading(true);
     // Fakes don't exist in Supabase — synthesize a placeholder so the
     // chat header still renders something useful during testing.
+    // New contact opened — drop any header search/menu state from the
+    // previous thread.
+    setSearchOpen(false);
+    setSearchQuery("");
+    setHeaderMenuOpen(false);
     if (isFake) {
       setCandidate({
         userId: otherId,
@@ -542,6 +560,26 @@ export default function ChatScreen() {
     );
   };
 
+  // Header overflow menu helpers ----------------------------------
+  const handleToggleSearch = () => {
+    setHeaderMenuOpen(false);
+    setSearchOpen((open) => {
+      const next = !open;
+      if (!next) setSearchQuery("");
+      else setTimeout(() => searchInputRef.current?.focus(), 50);
+      return next;
+    });
+  };
+
+  const handleMarkUnread = () => {
+    setHeaderMenuOpen(false);
+    if (isFake) return;
+    markThreadUnread(otherId);
+    // Pop back so the dot is visible in the threads list. Same
+    // affordance as web (close the chat after marking).
+    router.back();
+  };
+
   // Long-press menu handlers --------------------------------------
   const closeMenu = () => setMenuFor(null);
 
@@ -576,13 +614,18 @@ export default function ChatScreen() {
     });
   };
 
-  // Filter out locally-deleted messages, then build the FlatList
-  // payload (messages + day-divider headers + per-bubble grouping
-  // metadata). Memoized so it doesn't recompute on every keystroke.
-  const listItems = useMemo<ListItem[]>(
-    () => buildListItems(messages.filter((m) => !hidden.has(m.id))),
-    [messages, hidden],
-  );
+  // Filter out locally-deleted messages and (when search is open and
+  // non-empty) anything that doesn't match the query. Then build the
+  // FlatList payload (messages + day dividers + grouping flags).
+  const listItems = useMemo<ListItem[]>(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const visible = messages.filter((m) => {
+      if (hidden.has(m.id)) return false;
+      if (searchOpen && q && !m.text.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    return buildListItems(visible);
+  }, [messages, hidden, searchOpen, searchQuery]);
 
   const dismissIntro = () => {
     setShowIntro(false);
@@ -624,6 +667,21 @@ export default function ChatScreen() {
             </Text>
           ) : null}
         </View>
+        {/* Header overflow button — Mark unread / Search / Delete.
+            Hidden for fake test contacts since none of those actions
+            make sense without a real backend row. */}
+        {!isFake && (
+          <Pressable
+            onPress={() => setHeaderMenuOpen(true)}
+            hitSlop={10}
+            style={({ pressed }) => [
+              styles.headerIconBtn,
+              pressed && { opacity: 0.6 },
+            ]}
+          >
+            <MoreVertical size={20} color={theme.text} />
+          </Pressable>
+        )}
         {/* Stage 4: prominent Accept pill on the contact name when
             this is an inbound chat request. Tapping promotes both
             sides into mutual contacts. */}
@@ -648,6 +706,28 @@ export default function ChatScreen() {
           </Pressable>
         )}
       </View>
+
+      {/* Search bar — appears below the header when the user picks
+          "Search messages" from the overflow menu. Filters the
+          visible bubbles by case-insensitive substring match. */}
+      {searchOpen && (
+        <View style={styles.searchBar}>
+          <SearchIcon size={14} color={theme.textMuted} />
+          <TextInput
+            ref={searchInputRef}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search messages in this thread"
+            placeholderTextColor={theme.textDim}
+            style={styles.searchInput}
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          <Pressable onPress={handleToggleSearch} hitSlop={8}>
+            <X size={14} color={theme.textMuted} />
+          </Pressable>
+        </View>
+      )}
 
       {/* Big in-chat Accept banner when this is an inbound request.
           Same action as the header button - just impossible to miss. */}
@@ -938,6 +1018,65 @@ export default function ChatScreen() {
         </Pressable>
       </Modal>
 
+      {/* Chat header overflow menu — Search messages / Mark unread /
+          Delete chat. Same Modal pattern as the bubble long-press
+          menu above so visuals stay consistent. */}
+      <Modal
+        visible={headerMenuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setHeaderMenuOpen(false)}
+      >
+        <Pressable
+          style={styles.menuBackdrop}
+          onPress={() => setHeaderMenuOpen(false)}
+        >
+          <View style={styles.menuCard}>
+            <Pressable
+              onPress={handleToggleSearch}
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.bgAlt },
+              ]}
+            >
+              <SearchIcon size={16} color={theme.text} strokeWidth={2} />
+              <Text style={styles.menuItemText}>
+                {searchOpen ? "Close search" : "Search messages"}
+              </Text>
+            </Pressable>
+            <View style={styles.menuDivider} />
+            <Pressable
+              onPress={handleMarkUnread}
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.bgAlt },
+              ]}
+            >
+              <Mail size={16} color={theme.text} strokeWidth={2} />
+              <Text style={styles.menuItemText}>Mark as unread</Text>
+            </Pressable>
+            <View style={styles.menuDivider} />
+            <Pressable
+              onPress={() => {
+                setHeaderMenuOpen(false);
+                handleDeleteThread();
+              }}
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.bgAlt },
+              ]}
+            >
+              <Trash2 size={16} color={theme.destructive} strokeWidth={2} />
+              <Text
+                style={[styles.menuItemText, { color: theme.destructive }]}
+              >
+                Delete chat
+              </Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
       {/* Intro modal — dimmed + blurred backdrop with chat icon, copy,
           and an OK button. Shown only when navigated in via the CTA. */}
       {showIntro && (
@@ -1004,6 +1143,29 @@ const makeStyles = (theme: ThemePalette) =>
       height: 32,
       alignItems: "center",
       justifyContent: "center",
+    },
+    headerIconBtn: {
+      width: 36,
+      height: 36,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 18,
+    },
+    searchBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+      backgroundColor: theme.bgAlt,
+    },
+    searchInput: {
+      flex: 1,
+      color: theme.text,
+      fontSize: 14,
+      paddingVertical: 0,
     },
     avatar: {
       width: 36,

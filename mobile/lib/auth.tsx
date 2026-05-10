@@ -11,6 +11,7 @@ import { clearPushToken, registerForPush } from "./push";
 import { setSavedUser } from "./savedCount";
 import { setSavedProjectsUser } from "./savedProjects";
 import { setSentRequestsUser } from "./sentRequests";
+import { setThreadUnreadUser } from "./threadUnread";
 
 type AuthValue = {
   session: Session | null;
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       void setSavedUser(data.session?.user?.id ?? null);
       void setSavedProjectsUser(data.session?.user?.id ?? null);
       void setSentRequestsUser(data.session?.user?.id ?? null);
+      void setThreadUnreadUser(data.session?.user?.id ?? null);
       if (data.session?.user) {
         // fire-and-forget; failure is silent
         void registerForPush();
@@ -64,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       void setSavedUser(next?.user?.id ?? null);
       void setSavedProjectsUser(next?.user?.id ?? null);
       void setSentRequestsUser(next?.user?.id ?? null);
+      void setThreadUnreadUser(next?.user?.id ?? null);
       if (event === "SIGNED_IN" && next?.user) {
         void registerForPush();
       }
