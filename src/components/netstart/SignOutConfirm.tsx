@@ -91,7 +91,7 @@ export const SignOutConfirmProvider = ({ children }: { children: ReactNode }) =>
             <AlertDialogDescription>
               {scope === "local"
                 ? "You'll be signed out of this device. Other devices stay signed in. You can sign back in any time with your email and password."
-                : "You'll be signed out everywhere — this device and any others you're signed in on. You can sign back in any time with your email and password."}
+                : "You'll be signed out everywhere. This device, plus any others you're signed in on. You can sign back in any time with your email and password."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
