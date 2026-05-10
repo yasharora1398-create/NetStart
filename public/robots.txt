@@ -1,14 +1,29 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# Polln8 robots.txt
+# Public surfaces are crawlable; auth-gated product routes are
+# explicitly disallowed because they redirect to "/" in production
+# anyway and have no SEO value (and we don't want to leak account
+# routes into search results).
 
 User-agent: *
 Allow: /
+
+# Auth-gated product surfaces — redirect to "/" in production but
+# blocked here as belt-and-braces so crawlers don't index empty
+# placeholders or login wallpaper.
+Disallow: /mynet
+Disallow: /match
+Disallow: /talent
+Disallow: /saved
+Disallow: /applications
+Disallow: /chats
+Disallow: /settings
+Disallow: /admin
+Disallow: /u/
+
+# Auth-flow internals — irrelevant to search.
+Disallow: /authenticated
+Disallow: /check-email
+Disallow: /forgot-password
+Disallow: /reset-password
+
+Sitemap: https://polln8.com/sitemap.xml
