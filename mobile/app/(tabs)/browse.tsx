@@ -37,6 +37,15 @@ export default function BrowseScreen() {
   const [projects, setProjects] = useState<PublicProject[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  // Symmetric to the Match screen's redirect: a founder who lands
+  // on Browse (via stale state or a direct deep link) bounces back
+  // to their swipe deck. Tab bar already hides Browse from them.
+  const role = user?.user_metadata?.role as string | undefined;
+  useEffect(() => {
+    if (role === "founder") {
+      router.replace("/(tabs)" as never);
+    }
+  }, [role, router]);
 
   useEffect(() => {
     let cancelled = false;

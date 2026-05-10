@@ -59,6 +59,15 @@ export default function MatchScreen() {
   // using the light-mode static export from "@/lib/theme".
   const { theme } = useTheme();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  // Builders shouldn't see the candidate swipe deck. The tab bar
+  // hides this screen for them, but a stale router state or a
+  // direct deep link could still land them here — bounce to Browse.
+  const role = user?.user_metadata?.role as string | undefined;
+  useEffect(() => {
+    if (role === "builder") {
+      router.replace("/(tabs)/browse" as never);
+    }
+  }, [role, router]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [candidates, setCandidates] = useState<RankedCandidate[]>([]);

@@ -149,6 +149,11 @@ export default function TabLayout() {
   const { theme, mode } = useTheme();
   const { user } = useAuth();
   const savedCount = useSavedCount();
+  // Builders browse projects; founders swipe candidates. We swap
+  // which of Match/Browse is the visible primary tab based on the
+  // role stamped on user_metadata at sign-up (or after a role switch).
+  const role = (user?.user_metadata?.role as string | undefined) ?? "builder";
+  const isBuilder = role === "builder";
   // Per-tab unread badges. Saved bumps when a swipe lands; Threads
   // bumps on every inbound chat_message INSERT. Both clear the moment
   // the user opens that tab (handled in the saved.tsx / threads.tsx
@@ -330,18 +335,37 @@ export default function TabLayout() {
         },
       }}
     >
-      {/* Match (the swipe deck) is the discovery tab. Search is
-          accessible via the magnifying-glass icon in Match's header,
-          not as its own tab. Browse stays as a route but is hidden
-          from the bar - we keep the file so old links don't break. */}
+      {/* Match (the founder swipe deck through candidates) is the
+          discovery tab for founders only. Builders see Browse — a
+          project list — in the same slot. Whichever is not the
+          user's side is hidden from the tab bar via href:null but
+          stays routable so old deep links don't break. */}
       <Tabs.Screen
         name="index"
-        options={{
-          title: "Match",
-          tabBarIcon: ({ color, size }) => <Flame size={size - 4} color={color} />,
-        }}
+        options={
+          isBuilder
+            ? { href: null }
+            : {
+                title: "Match",
+                tabBarIcon: ({ color, size }) => (
+                  <Flame size={size - 4} color={color} />
+                ),
+              }
+        }
       />
-      <Tabs.Screen name="browse" options={{ href: null }} />
+      <Tabs.Screen
+        name="browse"
+        options={
+          isBuilder
+            ? {
+                title: "Browse",
+                tabBarIcon: ({ color, size }) => (
+                  <Flame size={size - 4} color={color} />
+                ),
+              }
+            : { href: null }
+        }
+      />
       <Tabs.Screen
         name="saved"
         options={{
