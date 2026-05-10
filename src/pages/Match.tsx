@@ -41,11 +41,13 @@ import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
 import {
   getAvatarUrl,
   getProfile,
+  getPublicFounder,
   getResumeSignedUrl,
   listOpenCandidates,
   listProjects,
   listPublishedProjects,
   setPersonStatus,
+  type PublicFounder,
 } from "@/lib/mynet-storage";
 import { addSavedProject, removeSavedProject, useIsProjectSaved } from "@/lib/savedProjects";
 import type {
@@ -918,12 +920,14 @@ const LookerView = () => {
             <div
               className={cn(
                 "transition-all duration-500 ease-out overflow-hidden",
-                approving ? "max-w-[120px] opacity-100" : "max-w-0 opacity-0 -ml-6",
+                approving
+                  ? "max-w-[360px] opacity-100"
+                  : "max-w-0 opacity-0 -ml-6",
               )}
             >
-              <div className="w-[88px]">
+              <div className="w-[340px]">
                 {approving ? (
-                  <ProjectActions
+                  <ProjectInfoPanel
                     project={approving}
                     canGoBack={Boolean(lastDecided)}
                     onClose={() => closeInfo(true)}
@@ -939,11 +943,14 @@ const LookerView = () => {
   );
 };
 
-// Builder-side action column — visual twin of CandidateActions.
-// Website, LinkedIn, Save, Request chat (Message), Back to previous
-// card. Save bookmarks the project locally so the builder can come
-// back to it later from /saved.
-const ProjectActions = ({
+// Builder-side info panel — the founder's full public profile
+// rendered inline beside the project card on accept. Bio, skills,
+// website, LinkedIn — same content as /u/<founder> but laid out as
+// a side panel so the builder can read it without leaving the
+// deck. The icon-only action column on the founder side is
+// intentionally different because it's framing a person, not a
+// project; this surface frames a person.
+const ProjectInfoPanel = ({
   project,
   canGoBack,
   onClose,
@@ -956,6 +963,29 @@ const ProjectActions = ({
 }) => {
   const navigate = useNavigate();
   const saved = useIsProjectSaved(project.id);
+  const [founder, setFounder] = useState<PublicFounder | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Re-fetch whenever the panel opens for a different project so
+  // the bio / skills / website / LinkedIn don't lag the deck.
+  useEffect(() => {
+    setLoading(true);
+    setFounder(null);
+    let cancelled = false;
+    getPublicFounder(project.ownerId)
+      .then((f) => {
+        if (!cancelled) setFounder(f);
+      })
+      .catch(() => {
+        if (!cancelled) setFounder(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [project.ownerId]);
 
   const handleToggleSave = () => {
     if (saved) {
@@ -972,86 +1002,133 @@ const ProjectActions = ({
     navigate(`/chats/${project.ownerId}`);
   };
 
-  const websiteRaw = (project as PublicProject & { website_url?: string })
-    .website_url;
-  // PublicProject doesn't carry the founder's website today — only
-  // the FounderProfile fetch does. Hide the button when missing
-  // instead of pretending it's there.
-  const website = typeof websiteRaw === "string" && websiteRaw ? websiteRaw : null;
-
   return (
-    <div className="flex flex-col items-center gap-3">
-      {website ? (
-        <a
-          href={website}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Open website"
-          title="Website"
-          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
-        >
-          <Globe className="h-6 w-6" />
-        </a>
-      ) : null}
-
-      <Link
-        to={`/u/${project.ownerId}`}
-        aria-label="Open founder profile"
-        title="Founder profile"
-        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
-      >
-        <ExternalLink className="h-6 w-6" />
-      </Link>
-
-      <button
-        type="button"
-        onClick={handleToggleSave}
-        aria-label={saved ? "Remove from saved" : "Save"}
-        title={saved ? "Saved" : "Save"}
-        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
-      >
-        {saved ? (
-          <BookmarkCheck className="h-6 w-6 fill-current" />
-        ) : (
-          <Bookmark className="h-6 w-6" />
-        )}
-      </button>
-
-      <button
-        type="button"
-        onClick={handleMessage}
-        aria-label="Request chat"
-        title="Request chat"
-        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/60 bg-gold text-gold-foreground shadow-sm transition-all hover:bg-gold/90 hover:shadow-md"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </button>
-
-      {/* Back button — sits next to Request chat. Restores the last-
-          decided project so the builder can revisit a card they
-          accepted or passed by accident. Disabled when there's
-          nothing to go back to. */}
-      <button
-        type="button"
-        onClick={onBack}
-        disabled={!canGoBack}
-        aria-label="Back to previous card"
-        title="Back to previous card"
-        className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-all hover:border-gold/40 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-
+    <article className="relative rounded-2xl border border-gold-soft bg-card shadow-sm">
+      {/* Close in the corner so the panel header isn't cluttered. */}
       <button
         type="button"
         onClick={onClose}
         aria-label="Close info"
-        title="Close"
-        className="mt-1 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground"
+        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground"
       >
-        <X className="h-5 w-5" />
+        <X className="h-4 w-4" />
       </button>
-    </div>
+
+      <div className="p-5">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+          About the founder
+        </p>
+        <h3 className="mb-1 font-display text-xl leading-tight text-foreground">
+          {founder?.fullName || project.founderFullName || "Loading…"}
+        </h3>
+        {founder?.headline || project.founderHeadline ? (
+          <p className="mb-4 text-xs text-muted-foreground">
+            {founder?.headline || project.founderHeadline}
+          </p>
+        ) : null}
+
+        {loading && !founder ? (
+          <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Loading details
+          </div>
+        ) : (
+          <>
+            {founder?.bio ? (
+              <p className="mb-4 line-clamp-6 text-sm leading-relaxed text-foreground/90">
+                {founder.bio}
+              </p>
+            ) : null}
+
+            {founder && founder.skills.length > 0 ? (
+              <div className="mb-4">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Skills
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {founder.skills.slice(0, 8).map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-[11px] text-muted-foreground"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {founder?.websiteUrl || founder?.linkedinUrl ? (
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                {founder.websiteUrl ? (
+                  <a
+                    href={founder.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    Website
+                    <ExternalLink className="h-3 w-3 opacity-60" />
+                  </a>
+                ) : null}
+                {founder.linkedinUrl ? (
+                  <a
+                    href={founder.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" />
+                    LinkedIn
+                    <ExternalLink className="h-3 w-3 opacity-60" />
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+          </>
+        )}
+
+        <div className="mt-5 flex items-center gap-2 border-t border-border pt-4">
+          {/* Back to previous card. Sits next to Request chat as a
+              small icon button so the builder can rewind one card
+              without leaving the panel. */}
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={!canGoBack}
+            aria-label="Back to previous card"
+            title="Back to previous card"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleMessage}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-gold/60 bg-gold px-4 py-2.5 text-sm font-semibold text-gold-foreground transition-all hover:bg-gold/90 hover:shadow-md"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Request chat
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleSave}
+            aria-label={saved ? "Remove from saved" : "Save"}
+            title={saved ? "Saved" : "Save"}
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold/40 bg-card text-gold transition-all hover:bg-gold/10 hover:border-gold/70"
+          >
+            {saved ? (
+              <BookmarkCheck className="h-5 w-5 fill-current" />
+            ) : (
+              <Bookmark className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+      </div>
+    </article>
   );
 };
 
