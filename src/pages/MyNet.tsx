@@ -54,6 +54,7 @@ import {
   setLinkedIn,
   setOpenToWork,
   setPersonStatus,
+  setProjectLifecycle,
   setProjectPublished,
   setWebsite,
   submitProfile,
@@ -70,6 +71,7 @@ import {
   type Profile,
   type Project,
   type ProjectCriteria,
+  type ProjectLifecycle,
 } from "@/lib/mynet-types";
 
 const SAMPLE_PROJECTS: Project[] = [
@@ -213,6 +215,34 @@ const MyNet = () => {
     try {
       await setProjectPublished(project.id, next);
       toast.success(next ? "Project published." : "Project unpublished.");
+    } catch (err) {
+      setProjects(snapshot);
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const handleSetLifecycle = async (
+    project: Project,
+    next: ProjectLifecycle,
+  ) => {
+    if (next === project.lifecycleState) return;
+    const snapshot = projects;
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === project.id ? { ...p, lifecycleState: next } : p,
+      ),
+    );
+    try {
+      await setProjectLifecycle(project.id, next);
+      toast.success(
+        next === "active"
+          ? "Project marked active."
+          : next === "paused"
+            ? "Project paused."
+            : next === "filled"
+              ? "Project marked filled."
+              : "Project closed.",
+      );
     } catch (err) {
       setProjects(snapshot);
       toast.error(errorMessage(err));
@@ -562,6 +592,7 @@ const MyNet = () => {
               onDeleteProject={handleDeleteProject}
               onFindPeople={(id) => setFindForId(id)}
               onTogglePublish={handleTogglePublish}
+              onSetLifecycle={handleSetLifecycle}
               onSetActiveProject={handleSetActiveProject}
               role={(() => {
                 const r = user?.user_metadata?.role;

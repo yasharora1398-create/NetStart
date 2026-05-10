@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { ArrowRight, CheckCircle, Eye, EyeOff, MoreVertical, Pause, Pencil, Search, Star, Trash2, Users, X } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Project, ProjectLifecycle } from "@/lib/mynet-types";
-import { setProjectLifecycle } from "@/lib/mynet-storage";
 import { hasAnyCriteria } from "@/lib/matching";
 
 type ProjectCardProps = {
@@ -21,7 +18,7 @@ type ProjectCardProps = {
   onFindPeople: () => void;
   onOpen: () => void;
   onTogglePublish: () => void;
-  onLifecycleChanged?: () => void;
+  onSetLifecycle: (state: ProjectLifecycle) => void;
   /** Is this the founder's currently-active project? */
   isActive?: boolean;
   /** Mark this project as the one driving Match. Pass null-clear via the same handler. */
@@ -44,29 +41,13 @@ export const ProjectCard = ({
   onFindPeople,
   onOpen,
   onTogglePublish,
-  onLifecycleChanged,
+  onSetLifecycle,
   isActive,
   onSetActive,
 }: ProjectCardProps) => {
   const savedCount = project.savedPersonIds.length;
   const criteriaSet = hasAnyCriteria(project.criteria);
-  const [lifecycle, setLifecycle] = useState<ProjectLifecycle>(
-    project.lifecycleState,
-  );
-
-  const handleLifecycle = async (next: ProjectLifecycle) => {
-    if (next === lifecycle) return;
-    const prev = lifecycle;
-    setLifecycle(next);
-    try {
-      await setProjectLifecycle(project.id, next);
-      toast.success(`Marked ${lifecycleLabel(next).toLowerCase()}.`);
-      onLifecycleChanged?.();
-    } catch (err) {
-      setLifecycle(prev);
-      toast.error(err instanceof Error ? err.message : "Could not update.");
-    }
-  };
+  const lifecycle = project.lifecycleState;
 
   return (
     <div
@@ -153,28 +134,28 @@ export const ProjectCard = ({
                 Lifecycle
               </DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => handleLifecycle("active")}
+                onClick={() => onSetLifecycle("active")}
                 disabled={lifecycle === "active"}
               >
                 <CheckCircle className="h-4 w-4" />
                 Active
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleLifecycle("paused")}
+                onClick={() => onSetLifecycle("paused")}
                 disabled={lifecycle === "paused"}
               >
                 <Pause className="h-4 w-4" />
                 Paused
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleLifecycle("filled")}
+                onClick={() => onSetLifecycle("filled")}
                 disabled={lifecycle === "filled"}
               >
                 <CheckCircle className="h-4 w-4" />
                 Filled
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleLifecycle("closed")}
+                onClick={() => onSetLifecycle("closed")}
                 disabled={lifecycle === "closed"}
               >
                 <X className="h-4 w-4" />

@@ -11,8 +11,6 @@ import {
   MapPin,
   Pencil,
   Plus,
-  Search,
-  Star,
   Telescope,
 } from "lucide-react";
 
@@ -27,7 +25,7 @@ import type {
   CandidateProfile,
   Profile,
   Project,
-  ProjectCriteria,
+  ProjectLifecycle,
   PublicProject,
 } from "@/lib/mynet-types";
 import { RoleSwitcher, type Role } from "@/components/netstart/RoleSwitcher";
@@ -51,6 +49,7 @@ type Props = {
   onDeleteProject: (project: Project) => void;
   onFindPeople: (id: string) => void;
   onTogglePublish: (project: Project) => void;
+  onSetLifecycle: (project: Project, state: ProjectLifecycle) => void;
   /** Toggle the founder's active project (drives Match). */
   onSetActiveProject: (projectId: string | null) => void;
   /** Current role read from auth metadata. */
@@ -89,6 +88,7 @@ export const MyNetDashboard = ({
   onDeleteProject,
   onFindPeople,
   onTogglePublish,
+  onSetLifecycle,
   onSetActiveProject,
   role,
   onRoleSwitched,
@@ -292,7 +292,7 @@ export const MyNetDashboard = ({
               </span>
             )}
           </button>
-        ) : editing ? (
+        ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {projects.map((p) => (
               <ProjectCard
@@ -303,6 +303,7 @@ export const MyNetDashboard = ({
                 onDelete={() => onDeleteProject(p)}
                 onFindPeople={() => onFindPeople(p.id)}
                 onTogglePublish={() => onTogglePublish(p)}
+                onSetLifecycle={(state) => onSetLifecycle(p, state)}
                 isActive={profile.activeProjectId === p.id}
                 onSetActive={() =>
                   onSetActiveProject(
@@ -312,15 +313,6 @@ export const MyNetDashboard = ({
               />
             ))}
           </div>
-        ) : (
-          <ProjectsDisplay
-            projects={projects}
-            onOpen={onOpenProject}
-            onFindPeople={onFindPeople}
-            disableFindPeople={isPending}
-            activeProjectId={profile.activeProjectId}
-            onSetActive={onSetActiveProject}
-          />
         )}
       </Section>
       ) : null}
@@ -562,151 +554,6 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
             ))}
           </div>
         </div>
-      )}
-    </div>
-  );
-};
-
-const ProjectsDisplay = ({
-  projects,
-  onOpen,
-  onFindPeople,
-  disableFindPeople = false,
-  activeProjectId,
-  onSetActive,
-}: {
-  projects: Project[];
-  onOpen: (id: string) => void;
-  onFindPeople: (id: string) => void;
-  disableFindPeople?: boolean;
-  activeProjectId?: string | null;
-  onSetActive?: (projectId: string | null) => void;
-}) => (
-  <div className="grid md:grid-cols-2 gap-4">
-    {projects.map((p) => {
-      const isActive = activeProjectId === p.id;
-      return (
-        <article
-          key={p.id}
-          className={`rounded-sm border bg-card p-6 transition-colors ${
-            isActive
-              ? "border-gold/70 ring-1 ring-gold/30"
-              : "border-border hover:border-gold/40"
-          }`}
-        >
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <h3 className="font-display text-2xl leading-tight truncate flex-1">
-              {p.title}
-            </h3>
-            <div className="flex flex-col gap-1 items-end flex-shrink-0">
-              {isActive ? (
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold/60 bg-gold/15 text-[10px] font-mono uppercase tracking-widest text-gold">
-                  <Star className="h-2.5 w-2.5 fill-gold text-gold" />
-                  Match focus
-                </span>
-              ) : null}
-              <span
-                className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest ${
-                  p.isPublished
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : "border-border bg-background text-muted-foreground"
-                }`}
-              >
-                {p.isPublished ? "Public" : "Draft"}
-              </span>
-            </div>
-          </div>
-
-          {p.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
-              {p.description}
-            </p>
-          )}
-
-          <ProjectCriteriaPreview criteria={p.criteria} />
-
-          <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-border">
-            <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-              {p.savedPersonIds.length} saved
-            </span>
-            <div className="flex items-center gap-2">
-              {onSetActive ? (
-                <Button
-                  variant={isActive ? "gold" : "ghost"}
-                  size="sm"
-                  onClick={() => onSetActive(isActive ? null : p.id)}
-                  title={
-                    isActive
-                      ? "Clear Match focus"
-                      : "Use this project for Match"
-                  }
-                >
-                  <Star
-                    className={`h-4 w-4 ${isActive ? "fill-current" : ""}`}
-                  />
-                  {isActive ? "Focus" : "Use for Match"}
-                </Button>
-              ) : null}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onOpen(p.id)}
-              >
-                <Eye className="h-4 w-4" />
-                View
-              </Button>
-              <Button
-                variant="outlineGold"
-                size="sm"
-                onClick={() => onFindPeople(p.id)}
-                disabled={disableFindPeople}
-                title={
-                  disableFindPeople
-                    ? "Available once your review is approved."
-                    : undefined
-                }
-              >
-                <Search className="h-4 w-4" />
-                Find people
-              </Button>
-            </div>
-          </div>
-        </article>
-      );
-    })}
-  </div>
-);
-
-const ProjectCriteriaPreview = ({
-  criteria,
-}: {
-  criteria: ProjectCriteria;
-}) => {
-  const { skills, commitment, location } = criteria;
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-      {commitment && (
-        <span className="inline-flex items-center gap-1.5">
-          <Briefcase className="h-3 w-3 text-gold" />
-          {commitment}
-        </span>
-      )}
-      {location && (
-        <span className="inline-flex items-center gap-1.5">
-          <MapPin className="h-3 w-3 text-gold" />
-          {location}
-        </span>
-      )}
-      {skills.slice(0, 3).map((s) => (
-        <span
-          key={s}
-          className="px-1.5 py-0.5 rounded-sm border border-gold/30 bg-gold/5 normal-case tracking-normal text-foreground/80"
-        >
-          {s}
-        </span>
-      ))}
-      {skills.length > 3 && (
-        <span className="text-muted-foreground/60">+{skills.length - 3}</span>
       )}
     </div>
   );
