@@ -9,8 +9,8 @@
 //
 // Set secrets:
 //   supabase secrets set RESEND_API_KEY=re_...
-//   supabase secrets set RESEND_FROM="NetStart <noreply@yourdomain.com>"
-//   supabase secrets set APP_BASE_URL="https://netstart.vercel.app"
+//   supabase secrets set RESEND_FROM="Polln8 <noreply@polln8.com>"
+//   supabase secrets set APP_BASE_URL="https://polln8.com"
 //
 // Then in Supabase Dashboard create a Database Webhook:
 //   Table: public.notifications
@@ -25,8 +25,8 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const RESEND_FROM = Deno.env.get("RESEND_FROM") ?? "NetStart <noreply@example.com>";
-const APP_BASE_URL = Deno.env.get("APP_BASE_URL") ?? "https://netstart.app";
+const RESEND_FROM = Deno.env.get("RESEND_FROM") ?? "Polln8 <noreply@polln8.com>";
+const APP_BASE_URL = Deno.env.get("APP_BASE_URL") ?? "https://polln8.com";
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET");
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -76,15 +76,15 @@ serve(async (req) => {
     <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:#0a0a0a;color:#e6e6e6;padding:24px;">
       <div style="max-width:520px;margin:0 auto;border:1px solid #2a2a2a;border-radius:4px;overflow:hidden;background:#111;">
         <div style="padding:24px 28px;border-bottom:1px solid #2a2a2a;">
-          <p style="margin:0 0 8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:0.25em;color:#c8a45c;text-transform:uppercase;">NetStart</p>
+          <p style="margin:0 0 8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:0.25em;color:#c8a45c;text-transform:uppercase;">Polln8</p>
           <h1 style="margin:0;font-size:22px;line-height:1.2;color:#fff;">${escapeHtml(title)}</h1>
         </div>
         <div style="padding:24px 28px;font-size:14px;line-height:1.6;white-space:pre-line;color:#bdbdbd;">${escapeHtml(body)}</div>
         <div style="padding:0 28px 28px;">
-          <a href="${linkUrl}" style="display:inline-block;background:#c8a45c;color:#0a0a0a;padding:10px 18px;border-radius:2px;font-weight:600;text-decoration:none;font-size:13px;">Open NetStart</a>
+          <a href="${linkUrl}" style="display:inline-block;background:#c8a45c;color:#0a0a0a;padding:10px 18px;border-radius:2px;font-weight:600;text-decoration:none;font-size:13px;">Open Polln8</a>
         </div>
         <div style="padding:16px 28px;border-top:1px solid #2a2a2a;font-size:11px;color:#666;">
-          You're getting this because you have an account on NetStart.
+          You're getting this because you have a Polln8 account. Manage your account at <a href="${APP_BASE_URL.replace(/\/$/, "")}/settings" style="color:#888;">Settings</a>.
         </div>
       </div>
     </div>
