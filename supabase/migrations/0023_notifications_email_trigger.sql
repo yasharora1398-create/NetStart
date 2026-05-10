@@ -4,10 +4,13 @@
 -- into public.notifications fires an HTTP POST to the edge function,
 -- which renders the email and hands it to Resend.
 --
--- One-time setup (run once in SQL Editor BEFORE this migration applies,
--- since the trigger reads the secret from a GUC):
+-- One-time setup (run once in SQL Editor BEFORE this migration applies):
 --
---   alter database postgres set "app.notify_email_webhook_secret" = '<secret>';
+--   select vault.create_secret(
+--     '<your-webhook-secret>',
+--     'notify_email_webhook_secret',
+--     'X-Webhook-Secret for notify-email edge function'
+--   );
 --
 -- The same secret must also be set as the WEBHOOK_SECRET edge-function
 -- secret so the function can verify inbound calls.
@@ -15,7 +18,7 @@
 create extension if not exists pg_net with schema extensions;
 
 -- Trigger function. SECURITY DEFINER so it runs with privileges to read
--- the GUC and call net.http_post regardless of who inserted the row.
+-- vault and call net.http_post regardless of who inserted the row.
 create or replace function public.notify_email_on_notification()
 returns trigger
 language plpgsql
@@ -23,10 +26,15 @@ security definer
 set search_path = public, extensions
 as $$
 declare
-  v_secret text := current_setting('app.notify_email_webhook_secret', true);
+  v_secret text;
 begin
-  -- Soft-fail if the secret hasn't been set yet — we don't want
-  -- notifications to error out and roll back the insert.
+  -- Read secret from Supabase Vault. Soft-fail if the secret isn't set
+  -- yet so notifications still insert; emails just don't go out.
+  select decrypted_secret into v_secret
+  from vault.decrypted_secrets
+  where name = 'notify_email_webhook_secret'
+  limit 1;
+
   if v_secret is null or v_secret = '' then
     return new;
   end if;
