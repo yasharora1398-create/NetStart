@@ -854,8 +854,8 @@ const LookerView = () => {
           }
         />
       ) : (
-        <div className="max-w-[640px] mx-auto">
-          <ProjectSquareCard project={current} />
+        <div className="max-w-[520px] mx-auto">
+          <MatchProjectCard project={current} />
           <div className="mt-6 flex items-center justify-center gap-4">
             <ArrowButton direction="prev" onClick={prev} />
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
@@ -913,16 +913,20 @@ const LookerView = () => {
   );
 };
 
-const ProjectSquareCard = ({ project }: { project: PublicProject }) => {
+// Builder-side project card. Visual twin of MatchCandidateCard so
+// builders and founders see the same deck shape — full-width 1:1
+// photo at top, then title, then pills, then optional description.
+const MatchProjectCard = ({ project }: { project: PublicProject }) => {
   const avatar = getAvatarUrl(project.founderAvatarPath);
   return (
-    <article className="rounded-sm border border-border bg-card overflow-hidden grid grid-cols-1 md:grid-cols-2">
-      <div className="aspect-square md:aspect-auto md:h-auto bg-gold/5 border-b md:border-b-0 md:border-r border-border relative">
+    <article className="overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
+      {/* Picture square — full-width, 1:1 aspect, dominates the card. */}
+      <div className="relative w-full aspect-square bg-gold/5">
         {avatar ? (
           <img
             src={avatar}
             alt={project.founderFullName}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -932,51 +936,52 @@ const ProjectSquareCard = ({ project }: { project: PublicProject }) => {
           </div>
         )}
       </div>
-      <div className="p-6 md:p-8 flex flex-col">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-          Project
-        </p>
-        <h2 className="font-display text-3xl md:text-4xl leading-tight mb-2">
+
+      {/* Body — title, byline, pills, description. */}
+      <div className="p-5">
+        <h2 className="mb-1 font-display text-2xl leading-tight text-foreground">
           {project.title}
         </h2>
-        <p className="text-sm text-muted-foreground mb-5">
+        <p className="mb-3 text-sm text-muted-foreground">
           by{" "}
           <span className="text-foreground">
             {project.founderFullName || "Anonymous"}
           </span>
-          {project.founderHeadline && ` · ${project.founderHeadline}`}
+          {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
         </p>
-        {project.criteria.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-5">
-            {project.criteria.skills.map((s) => (
+
+        {(project.criteria.commitment ||
+          project.criteria.location ||
+          project.criteria.skills.length > 0) ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {project.criteria.commitment ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+                <Briefcase className="h-3 w-3" />
+                {project.criteria.commitment}
+              </span>
+            ) : null}
+            {project.criteria.location ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+                <MapPin className="h-3 w-3" />
+                {project.criteria.location}
+              </span>
+            ) : null}
+            {project.criteria.skills.slice(0, 5).map((s) => (
               <span
                 key={s}
-                className="px-2.5 py-1 text-xs rounded-sm border border-gold/30 bg-gold/5"
+                className="rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground"
               >
                 {s}
               </span>
             ))}
           </div>
-        )}
-        {project.description && (
-          <p className="text-sm leading-relaxed text-foreground/90 line-clamp-6">
+        ) : null}
+
+        {project.description ? (
+          <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
             {project.description}
           </p>
-        )}
-        <div className="mt-auto pt-5 flex flex-wrap gap-2">
-          {project.criteria.commitment && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border bg-background font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              <Briefcase className="h-3 w-3 text-gold" />
-              {project.criteria.commitment}
-            </span>
-          )}
-          {project.criteria.location && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border bg-background font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              <MapPin className="h-3 w-3 text-gold" />
-              {project.criteria.location}
-            </span>
-          )}
-        </div>
+        ) : null}
       </div>
     </article>
   );
