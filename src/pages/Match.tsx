@@ -103,8 +103,21 @@ const Match = () => {
 
   const isAuthed = Boolean(user) && !loading;
   const isAccepted = profile?.reviewStatus === "accepted";
-  // Builder if they have at least one project, otherwise a looker.
-  const userMode: "builder" | "looker" = hasProjects ? "builder" : "looker";
+  // Auth role is the primary signal: a builder swipes projects, a
+  // founder swipes candidates. Fall back to project ownership only
+  // for legacy users who pre-date the role stamp on user_metadata.
+  // (Naming is unfortunate: userMode "builder" = founder-side view;
+  // "looker" = builder-side view. Kept for now since both branches
+  // below already use those names.)
+  const role = user?.user_metadata?.role as string | undefined;
+  const userMode: "builder" | "looker" =
+    role === "builder"
+      ? "looker"
+      : role === "founder"
+        ? "builder"
+        : hasProjects
+          ? "builder"
+          : "looker";
 
   const Locked = (
     <div className="rounded-sm border border-gold-soft bg-card p-12 text-center max-w-2xl mx-auto">
