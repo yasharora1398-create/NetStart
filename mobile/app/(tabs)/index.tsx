@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -41,7 +41,8 @@ import {
   setPersonStatus,
 } from "@/lib/api";
 import type { Candidate, Project } from "@/lib/types";
-import { fonts, theme } from "@/lib/theme";
+import { fonts } from "@/lib/theme";
+import { useTheme, type ThemePalette } from "@/lib/themeMode";
 import { MothEmptyState } from "@/components/MothEmptyState";
 import { MothLoader } from "@/components/MothLoader";
 
@@ -53,6 +54,11 @@ type RankedCandidate = Candidate & { similarity: number };
 export default function MatchScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  // Reads the active palette (light/dark) from the global theme
+  // store. Without this, the screen was frozen at module-load time
+  // using the light-mode static export from "@/lib/theme".
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [candidates, setCandidates] = useState<RankedCandidate[]>([]);
@@ -268,11 +274,20 @@ export default function MatchScreen() {
           />
         ) : (
           <View style={styles.deckInner}>
-            {next && <CandidateCard candidate={next} stacked />}
+            {next && (
+              <CandidateCard
+                candidate={next}
+                stacked
+                styles={styles}
+                theme={theme}
+              />
+            )}
             <SwipeCard
               key={current!.userId + index}
               candidate={current!}
               onDecide={decide}
+              styles={styles}
+              theme={theme}
             />
           </View>
         )}
@@ -310,9 +325,13 @@ export default function MatchScreen() {
 const SwipeCard = ({
   candidate,
   onDecide,
+  styles,
+  theme,
 }: {
   candidate: RankedCandidate;
   onDecide: (dir: "left" | "right") => void;
+  styles: ReturnType<typeof makeStyles>;
+  theme: ThemePalette;
 }) => {
   const x = useSharedValue(0);
 
@@ -367,7 +386,7 @@ const SwipeCard = ({
   return (
     <GestureDetector gesture={pan}>
       <Animated.View style={[styles.cardAbsolute, cardStyle]}>
-        <CandidateCard candidate={candidate} />
+        <CandidateCard candidate={candidate} styles={styles} theme={theme} />
         <Animated.View style={[styles.swipeBadge, styles.saveBadge, saveBadge]}>
           <Text style={styles.swipeBadgeText}>SAVE</Text>
         </Animated.View>
@@ -382,9 +401,13 @@ const SwipeCard = ({
 const CandidateCard = ({
   candidate,
   stacked = false,
+  styles,
+  theme,
 }: {
   candidate: RankedCandidate;
   stacked?: boolean;
+  styles: ReturnType<typeof makeStyles>;
+  theme: ThemePalette;
 }) => {
   const url = getAvatarUrl(candidate.avatarPath);
   const score = Math.round((candidate.similarity || 0) * 100);
@@ -465,7 +488,8 @@ const CandidateCard = ({
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemePalette) =>
+  StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
   headerTopRow: {
@@ -711,4 +735,4 @@ const styles = StyleSheet.create({
     borderColor: theme.gold,
     backgroundColor: theme.gold,
   },
-});
+  });
