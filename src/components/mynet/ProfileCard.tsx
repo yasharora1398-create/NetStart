@@ -5,6 +5,7 @@ import {
   FileText,
   Linkedin,
   Loader2,
+  Save,
   Send,
   Trash2,
   Upload,
@@ -15,8 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Profile, ReviewStatus } from "@/lib/mynet-types";
+import type { Role } from "@/components/netstart/RoleSwitcher";
 
-const MAX_RESUME_BYTES = 4 * 1024 * 1024;
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
 
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -34,34 +36,69 @@ const isValidLinkedIn = (url: string): boolean => {
   }
 };
 
+const isValidUrl = (url: string): boolean => {
+  if (!url.trim()) return true;
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export type ProfileSubmission = {
   linkedin?: string;
   file?: File;
   removeResume?: boolean;
+  // Founder-only fields. Mirrors what the wizard captures so accepted
+  // founders can edit them post-acceptance without going through review.
+  website?: string;
+  proofFile?: File;
+  removeProof?: boolean;
 };
 
 type ProfileCardProps = {
   profile: Profile;
+  role: Role;
   onSubmit: (changes: ProfileSubmission) => Promise<void>;
 };
 
-export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
+export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
   const [linkedin, setLinkedin] = useState(profile.linkedinUrl);
   const [linkedinDirty, setLinkedinDirty] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [removeRequested, setRemoveRequested] = useState(false);
+  const [website, setWebsite] = useState(profile.websiteUrl ?? "");
+  const [websiteDirty, setWebsiteDirty] = useState(false);
+  const [pendingProof, setPendingProof] = useState<File | null>(null);
+  const [removeProofRequested, setRemoveProofRequested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const proofRef = useRef<HTMLInputElement | null>(null);
+
+  const isFounder = role === "founder";
 
   useEffect(() => {
     if (!linkedinDirty) setLinkedin(profile.linkedinUrl);
   }, [profile.linkedinUrl, linkedinDirty]);
 
+  useEffect(() => {
+    if (!websiteDirty) setWebsite(profile.websiteUrl ?? "");
+  }, [profile.websiteUrl, websiteDirty]);
+
   const linkedinChanged = linkedin.trim() !== profile.linkedinUrl.trim();
   const resumeChanged = pendingFile !== null || removeRequested;
-  const hasChanges = linkedinChanged || resumeChanged;
+  const websiteChanged =
+    website.trim() !== (profile.websiteUrl ?? "").trim();
+  const proofChanged = pendingProof !== null || removeProofRequested;
+  const hasChanges =
+    linkedinChanged ||
+    resumeChanged ||
+    (isFounder && (websiteChanged || proofChanged));
+
   const isDraftLike =
     profile.reviewStatus === "draft" || profile.reviewStatus === "rejected";
+  const isAccepted = profile.reviewStatus === "accepted";
   const canSubmit = hasChanges || isDraftLike;
 
   const submitLabel =
@@ -69,20 +106,36 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
       ? "Submit for review"
       : profile.reviewStatus === "rejected"
         ? "Resubmit for review"
-        : hasChanges
-          ? "Update submission"
-          : "Submitted";
+        : isAccepted
+          ? hasChanges
+            ? "Save changes"
+            : "Saved"
+          : hasChanges
+            ? "Update submission"
+            : "Submitted";
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (file.size > MAX_RESUME_BYTES) {
-      toast.error(`File too large. Max ${formatBytes(MAX_RESUME_BYTES)}.`);
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error(`File too large. Max ${formatBytes(MAX_FILE_BYTES)}.`);
       return;
     }
     setPendingFile(file);
     setRemoveRequested(false);
+  };
+
+  const onProofFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error(`File too large. Max ${formatBytes(MAX_FILE_BYTES)}.`);
+      return;
+    }
+    setPendingProof(file);
+    setRemoveProofRequested(false);
   };
 
   const handleClearResume = () => {
@@ -93,11 +146,21 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
     }
   };
 
-  const handleUndoRemove = () => setRemoveRequested(false);
+  const handleClearProof = () => {
+    if (pendingProof) {
+      setPendingProof(null);
+    } else if (profile.proof) {
+      setRemoveProofRequested(true);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!isValidLinkedIn(linkedin)) {
       toast.error("Enter a valid LinkedIn URL.");
+      return;
+    }
+    if (isFounder && !isValidUrl(website)) {
+      toast.error("Enter a valid website URL.");
       return;
     }
     setSubmitting(true);
@@ -106,12 +169,20 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
       if (linkedinChanged) changes.linkedin = linkedin.trim();
       if (pendingFile) changes.file = pendingFile;
       else if (removeRequested) changes.removeResume = true;
+      if (isFounder) {
+        if (websiteChanged) changes.website = website.trim();
+        if (pendingProof) changes.proofFile = pendingProof;
+        else if (removeProofRequested) changes.removeProof = true;
+      }
 
       await onSubmit(changes);
 
       setPendingFile(null);
       setRemoveRequested(false);
       setLinkedinDirty(false);
+      setPendingProof(null);
+      setRemoveProofRequested(false);
+      setWebsiteDirty(false);
     } catch {
       // parent already toasts; keep local state for retry
     } finally {
@@ -125,6 +196,16 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
       ? {
           name: profile.resume.name,
           size: profile.resume.size,
+          isPending: false,
+        }
+      : null;
+
+  const displayProof = pendingProof
+    ? { name: pendingProof.name, size: pendingProof.size, isPending: true }
+    : profile.proof && !removeProofRequested
+      ? {
+          name: profile.proof.name,
+          size: profile.proof.size,
           isPending: false,
         }
       : null;
@@ -183,99 +264,145 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
             ) : null}
           </div>
 
-          {/* Resume */}
-          <div>
+          {/* Resume (builders) or Website (founders) */}
+          {!isFounder ? (
+            <div>
+              <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
+                <FileText className="h-3.5 w-3.5 text-gold" />
+                Resume
+              </Label>
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf"
+                onChange={onFileChange}
+                className="sr-only"
+                aria-label="Upload resume"
+              />
+
+              {displayResume ? (
+                <FileRow
+                  name={displayResume.name}
+                  size={displayResume.size}
+                  pending={displayResume.isPending}
+                  onReplace={() => fileRef.current?.click()}
+                  onClear={handleClearResume}
+                />
+              ) : (
+                <Button
+                  variant="outlineGold"
+                  size="lg"
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full h-11"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload resume
+                </Button>
+              )}
+
+              {removeRequested && !pendingFile && (
+                <UndoRow onUndo={() => setRemoveRequested(false)} />
+              )}
+
+              <p className="text-[11px] text-muted-foreground mt-2">
+                PDF or DOC, max 4 MB.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <Label
+                htmlFor="website"
+                className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2"
+              >
+                What you're building
+              </Label>
+              <Input
+                id="website"
+                type="url"
+                value={website}
+                onChange={(e) => {
+                  setWebsite(e.target.value);
+                  setWebsiteDirty(true);
+                }}
+                placeholder="https://your-startup.com"
+                className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+              />
+              {websiteChanged ? (
+                <p className="text-[11px] font-mono uppercase tracking-widest text-gold mt-2">
+                  Unsaved change
+                </p>
+              ) : profile.websiteUrl ? (
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Saved · <span className="text-foreground/80">{profile.websiteUrl}</span>
+                </p>
+              ) : (
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Public site, landing page, or repo. Optional.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Founder proof of work — full-width row beneath the grid. */}
+        {isFounder && (
+          <div className="mb-8">
             <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
               <FileText className="h-3.5 w-3.5 text-gold" />
-              Resume
+              Proof of work
             </Label>
 
             <input
-              ref={fileRef}
+              ref={proofRef}
               type="file"
-              accept=".pdf,.doc,.docx,application/pdf"
-              onChange={onFileChange}
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.mp4,application/pdf,image/*"
+              onChange={onProofFileChange}
               className="sr-only"
-              aria-label="Upload resume"
+              aria-label="Upload proof of work"
             />
 
-            {displayResume ? (
-              <div
-                className={`rounded-sm border bg-background p-3 flex items-center gap-3 ${
-                  displayResume.isPending ? "border-gold/50" : "border-border"
-                }`}
-              >
-                <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-4 w-4 text-gold" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{displayResume.name}</p>
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                    {formatBytes(displayResume.size)}
-                    {displayResume.isPending && (
-                      <span className="text-gold normal-case tracking-normal">
-                        {" "}
-                        · Ready to submit
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  Replace
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearResume}
-                  aria-label="Remove resume"
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
+            {displayProof ? (
+              <FileRow
+                name={displayProof.name}
+                size={displayProof.size}
+                pending={displayProof.isPending}
+                onReplace={() => proofRef.current?.click()}
+                onClear={handleClearProof}
+              />
             ) : (
               <Button
                 variant="outlineGold"
                 size="lg"
-                onClick={() => fileRef.current?.click()}
+                onClick={() => proofRef.current?.click()}
                 className="w-full h-11"
               >
                 <Upload className="h-4 w-4" />
-                Upload resume
+                Upload proof
               </Button>
             )}
 
-            {removeRequested && !pendingFile && (
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <p className="text-[11px] font-mono uppercase tracking-widest text-destructive">
-                  Will be removed on submit
-                </p>
-                <button
-                  type="button"
-                  onClick={handleUndoRemove}
-                  className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Undo
-                </button>
-              </div>
+            {removeProofRequested && !pendingProof && (
+              <UndoRow onUndo={() => setRemoveProofRequested(false)} />
             )}
 
             <p className="text-[11px] text-muted-foreground mt-2">
-              PDF or DOC, max 4 MB.
+              Deck, demo video, or screenshots. PDF, image, or doc, max 4 MB.
             </p>
           </div>
-        </div>
+        )}
 
         <div className="border-t border-border pt-6 flex items-center justify-between gap-4 flex-wrap">
           <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
             {hasChanges
-              ? "Click submit to send for review"
+              ? isAccepted
+                ? "Changes save immediately"
+                : "Click submit to send for review"
               : profile.reviewStatus === "draft"
                 ? "Add your details, then submit"
-                : "Your submission is up to date"}
+                : isAccepted
+                  ? "Your profile is up to date"
+                  : "Your submission is up to date"}
           </p>
           <Button
             variant="gold"
@@ -285,6 +412,8 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : isAccepted ? (
+              <Save className="h-4 w-4" />
             ) : (
               <Send className="h-4 w-4" />
             )}
@@ -295,6 +424,63 @@ export const ProfileCard = ({ profile, onSubmit }: ProfileCardProps) => {
     </div>
   );
 };
+
+const FileRow = ({
+  name,
+  size,
+  pending,
+  onReplace,
+  onClear,
+}: {
+  name: string;
+  size: number;
+  pending: boolean;
+  onReplace: () => void;
+  onClear: () => void;
+}) => (
+  <div
+    className={`rounded-sm border bg-background p-3 flex items-center gap-3 ${
+      pending ? "border-gold/50" : "border-border"
+    }`}
+  >
+    <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+      <FileText className="h-4 w-4 text-gold" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm truncate">{name}</p>
+      <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+        {formatBytes(size)}
+        {pending && (
+          <span className="text-gold normal-case tracking-normal">
+            {" "}
+            · Ready to save
+          </span>
+        )}
+      </p>
+    </div>
+    <Button variant="ghost" size="sm" onClick={onReplace}>
+      Replace
+    </Button>
+    <Button variant="ghost" size="sm" onClick={onClear} aria-label="Remove">
+      <Trash2 className="h-4 w-4 text-destructive" />
+    </Button>
+  </div>
+);
+
+const UndoRow = ({ onUndo }: { onUndo: () => void }) => (
+  <div className="mt-2 flex items-center justify-between gap-2">
+    <p className="text-[11px] font-mono uppercase tracking-widest text-destructive">
+      Will be removed on save
+    </p>
+    <button
+      type="button"
+      onClick={onUndo}
+      className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+    >
+      Undo
+    </button>
+  </div>
+);
 
 const StatusPill = ({ status }: { status: ReviewStatus }) => {
   const config = {

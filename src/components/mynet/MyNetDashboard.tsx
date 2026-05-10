@@ -161,9 +161,13 @@ export const MyNetDashboard = ({
       {/* CREDENTIALS - always shown */}
       <Section title="Credentials" eyebrow="01">
         {editing ? (
-          <ProfileCard profile={profile} onSubmit={onSubmitProfile} />
+          <ProfileCard
+            profile={profile}
+            role={role}
+            onSubmit={onSubmitProfile}
+          />
         ) : (
-          <CredentialsDisplay profile={profile} />
+          <CredentialsDisplay profile={profile} role={role} />
         )}
       </Section>
 
@@ -392,7 +396,13 @@ const InfoRow = ({
   </div>
 );
 
-const CredentialsDisplay = ({ profile }: { profile: Profile }) => (
+const CredentialsDisplay = ({
+  profile,
+  role,
+}: {
+  profile: Profile;
+  role: Role;
+}) => (
   <div className="rounded-sm border border-border bg-card p-6 md:p-8 grid md:grid-cols-2 gap-8">
     <InfoRow label="LinkedIn">
       {profile.linkedinUrl ? (
@@ -411,23 +421,61 @@ const CredentialsDisplay = ({ profile }: { profile: Profile }) => (
       )}
     </InfoRow>
 
-    <InfoRow label="Resume">
-      {profile.resume ? (
-        <div className="inline-flex items-center gap-3">
-          <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
-            <FileText className="h-4 w-4 text-gold" />
+    {role === "founder" ? (
+      <>
+        <InfoRow label="Website">
+          {profile.websiteUrl ? (
+            <a
+              href={profile.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-gold hover:underline break-all"
+            >
+              <span className="break-all">{profile.websiteUrl}</span>
+              <ExternalLink className="h-3 w-3 opacity-60 flex-shrink-0" />
+            </a>
+          ) : (
+            <span className="text-muted-foreground">Not added</span>
+          )}
+        </InfoRow>
+
+        <InfoRow label="Proof of work">
+          {profile.proof ? (
+            <div className="inline-flex items-center gap-3">
+              <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                <FileText className="h-4 w-4 text-gold" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm truncate">{profile.proof.name}</p>
+                <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                  {formatBytes(profile.proof.size)}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Not uploaded</span>
+          )}
+        </InfoRow>
+      </>
+    ) : (
+      <InfoRow label="Resume">
+        {profile.resume ? (
+          <div className="inline-flex items-center gap-3">
+            <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+              <FileText className="h-4 w-4 text-gold" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm truncate">{profile.resume.name}</p>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                {formatBytes(profile.resume.size)}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm truncate">{profile.resume.name}</p>
-            <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-              {formatBytes(profile.resume.size)}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <span className="text-muted-foreground">Not uploaded</span>
-      )}
-    </InfoRow>
+        ) : (
+          <span className="text-muted-foreground">Not uploaded</span>
+        )}
+      </InfoRow>
+    )}
   </div>
 );
 

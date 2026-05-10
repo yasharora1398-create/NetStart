@@ -43,20 +43,24 @@ import {
   createProject,
   deleteProject,
   getProfile,
+  getProofPath,
   getResumePath,
   listProjects,
   removeAvatar,
   removePerson,
+  removeProof,
   removeResume,
   setActiveProject,
   setLinkedIn,
   setOpenToWork,
   setPersonStatus,
   setProjectPublished,
+  setWebsite,
   submitProfile,
   updateCandidate,
   updateProject,
   uploadAvatar,
+  uploadProof,
   uploadResume,
 } from "@/lib/mynet-storage";
 import type { ProfileSubmission } from "@/components/mynet/ProfileCard";
@@ -228,6 +232,18 @@ const MyNet = () => {
         const previousPath = await getResumePath(uid);
         await removeResume(uid, previousPath);
       }
+      if (changes.website !== undefined) {
+        await setWebsite(uid, changes.website);
+      }
+      if (changes.proofFile) {
+        const previousPath = await getProofPath(uid);
+        await uploadProof(uid, changes.proofFile, previousPath);
+      } else if (changes.removeProof) {
+        const previousPath = await getProofPath(uid);
+        await removeProof(uid, previousPath);
+      }
+      // submit_profile() is a no-op for accepted users (it only flips
+      // draft/rejected -> pending), so this stays a single call site.
       await submitProfile();
       const fresh = await getProfile(uid);
       setProfile(fresh);
@@ -272,6 +288,7 @@ const MyNet = () => {
     title: string;
     description: string;
     criteria: ProjectCriteria;
+    businessType: string;
   }) => {
     if (!uid) return;
     try {
@@ -286,7 +303,12 @@ const MyNet = () => {
 
   const handleEditProject =
     (project: Project) =>
-    async (data: { title: string; description: string; criteria: ProjectCriteria }) => {
+    async (data: {
+      title: string;
+      description: string;
+      criteria: ProjectCriteria;
+      businessType: string;
+    }) => {
       try {
         await updateProject(project.id, data);
         setProjects((prev) =>
@@ -297,6 +319,7 @@ const MyNet = () => {
                   title: data.title,
                   description: data.description,
                   criteria: data.criteria,
+                  businessType: data.businessType,
                   updatedAt: new Date().toISOString(),
                 }
               : p,
@@ -570,6 +593,7 @@ const MyNet = () => {
               <section className="mb-12">
                 <ProfileCard
                   profile={displayProfile}
+                  role="builder"
                   onSubmit={handleSubmitProfile}
                 />
               </section>

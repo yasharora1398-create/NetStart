@@ -31,12 +31,17 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TagInput } from "./TagInput";
-import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
+import {
+  BUSINESS_TYPE_OPTIONS,
+  COMMITMENT_OPTIONS,
+  LOCATION_OPTIONS,
+} from "@/lib/options";
 import { type Project, type ProjectCriteria, emptyCriteria } from "@/lib/mynet-types";
 
 const schema = z.object({
   title: z.string().trim().min(2, "Give your project a name").max(80),
   description: z.string().trim().max(280).optional().default(""),
+  businessType: z.string().trim(),
   skills: z.array(z.string()),
   commitment: z.string().trim(),
   location: z.string().trim(),
@@ -53,12 +58,14 @@ type ProjectDialogProps = {
     title: string;
     description: string;
     criteria: ProjectCriteria;
+    businessType: string;
   }) => void | Promise<void>;
 };
 
 const toFormValues = (p?: Project): FormValues => ({
   title: p?.title ?? "",
   description: p?.description ?? "",
+  businessType: p?.businessType ?? "",
   skills: p?.criteria.skills ?? [],
   commitment: p?.criteria.commitment ?? "",
   location: p?.criteria.location ?? "",
@@ -95,6 +102,7 @@ export const ProjectDialog = ({
         title: values.title,
         description: values.description ?? "",
         criteria,
+        businessType: values.businessType,
       });
       onOpenChange(false);
     } catch {
@@ -235,6 +243,27 @@ export const ProjectDialog = ({
                         onChange={field.onChange}
                         options={LOCATION_OPTIONS}
                         placeholder="Type a city or pick remote..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="businessType"
+                render={({ field }) => (
+                  <FormItem className="mb-5">
+                    <FormLabel className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                      Business type
+                    </FormLabel>
+                    <FormControl>
+                      <Autocomplete
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={BUSINESS_TYPE_OPTIONS}
+                        placeholder="SaaS, Marketplace, Hardware..."
                       />
                     </FormControl>
                     <FormMessage />
