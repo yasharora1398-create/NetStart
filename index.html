@@ -2,8 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0F1614" />
+    <!-- `viewport-fit=cover` lets the page draw into the iOS
+         notch / dynamic island area so env(safe-area-inset-*) is
+         non-zero and the mobile bottom nav can avoid the home
+         indicator without leaving a white strip above it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Default to the dark surface so phone chrome (status bar /
+         Android nav bar) doesn't flash white before useTheme runs.
+         The boot script below corrects to light if that's what
+         the user picked previously. -->
+    <meta name="theme-color" content="#050505" />
 
     <!-- Title + description are tuned for the homepage. usePageMeta
          (src/hooks/usePageMeta.ts) overrides these per-route at
@@ -68,13 +76,19 @@
   <body>
     <!-- Apply the saved theme before React mounts so dark-mode users
          don't see a flash of the light palette during boot. Mirrors
-         the logic in src/hooks/useTheme.ts. -->
+         the logic in src/hooks/useTheme.ts. Also syncs the
+         <meta name="theme-color"> so the phone status bar matches
+         the surface from the very first paint. -->
     <script>
       (function () {
         try {
           var saved = localStorage.getItem("polln8_web_theme");
           var mode = saved === "light" || saved === "dark" ? saved : "dark";
           if (mode === "dark") document.documentElement.classList.add("dark");
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute("content", mode === "dark" ? "#050505" : "#FAFAF7");
+          }
         } catch (e) { /* localStorage blocked — ignore */ }
       })();
     </script>

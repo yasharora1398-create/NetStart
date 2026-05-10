@@ -945,3 +945,31 @@
     to   { transform: skewY(-2deg) scaleY(1.02); }
   }
 }
+
+/* ─── Mobile breakpoint overrides ─────────────────────────────────
+   On phone-sized viewports the desktop sidebar is replaced by the
+   <MobileBottomNav> (rendered in AppLayout). The sidebar still
+   mounts so its theme toggle wiring stays consistent across
+   breakpoints, but we hide it visually and zero out the global
+   --sidebar-width CSS var so pages stop reserving a 240px gutter
+   for it.
+
+   Body background is set explicitly so the area behind the
+   viewport (visible through Safari's pull-to-refresh stretch on
+   iOS) inherits the app's dark/light surface rather than flashing
+   the browser default white. */
+html, body {
+  background-color: hsl(var(--background));
+}
+@media (max-width: 767px) {
+  .glass-sidebar { display: none !important; }
+  :root { --sidebar-width: 0px !important; }
+  /* Bottom-pad the app's main scroll surface so the 4-tab bar
+     doesn't sit on top of the last row of page content. ~84px
+     covers the bar's own height plus a comfortable gap and any
+     iOS home-indicator safe area. */
+  main {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+  }
+}
+

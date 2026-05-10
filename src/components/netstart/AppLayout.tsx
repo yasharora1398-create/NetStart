@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { Footer } from "./Footer";
 
 type Props = {
@@ -15,11 +16,15 @@ type Props = {
 };
 
 /**
- * Common chrome for authenticated app pages: left sidebar + content
- * column that slides as the sidebar collapses + footer at the bottom.
+ * Common chrome for authenticated app pages: left sidebar (desktop)
+ * or bottom tab bar (mobile) + content column + footer.
+ *
+ * `min-h-dvh` uses the *dynamic* viewport unit so the layout stays
+ * pinned to the visible area as mobile browser chrome animates
+ * in/out, rather than leaving the white strip a static `100vh` would.
  */
 export const AppLayout = ({ children }: Props) => (
-  <div className="min-h-screen bg-background text-foreground">
+  <div className="min-h-dvh bg-background text-foreground">
     <Sidebar />
     <div
       className="transition-[padding] duration-300"
@@ -28,5 +33,6 @@ export const AppLayout = ({ children }: Props) => (
       <main className="pt-12 pb-24">{children}</main>
       <Footer />
     </div>
+    <MobileBottomNav />
   </div>
 );
