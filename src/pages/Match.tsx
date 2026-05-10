@@ -953,8 +953,23 @@ const LookerView = () => {
               <X className="h-6 w-6" strokeWidth={2.2} />
             </button>
 
-            <div className="w-full max-w-[520px] flex-shrink-0">
+            <div className="w-full max-w-[520px] flex-shrink-0 flex flex-col gap-3">
               <MatchProjectCard project={current} />
+              {/* Wide Previous button — same width as the card,
+                  sitting directly underneath. Restores the last
+                  decided project so a stray pass / approve doesn't
+                  lose a card. Disabled until there's something to
+                  go back to. */}
+              <button
+                type="button"
+                onClick={goBack}
+                disabled={!lastDecided}
+                aria-label="Previous card"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold/40 bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold/10 hover:border-gold/70 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold/40"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </button>
             </div>
 
             <button
