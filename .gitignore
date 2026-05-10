@@ -43,3 +43,9 @@ service-account*.json
 
 # Stray nested clone of the repo, not part of the codebase.
 /NetStart/
+
+# Expo CLI cache that lands here if expo commands are run from
+# the repo root. The mobile app lives in /mobile and ignores
+# its own .expo separately.
+.expo/
+.expo-shared/
