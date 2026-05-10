@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
@@ -45,12 +45,23 @@ const queryClient = new QueryClient();
 // `import.meta.env.PROD` is true under `vite build` (what Vercel
 // runs) and false under `vite dev` (localhost).
 const PROD = import.meta.env.PROD;
-const HomePage = PROD ? Waitlist : Index;
+const PublicHomePage = PROD ? Waitlist : Index;
 
-// Wraps an internal route's element. In prod, hard-redirects to the
-// waitlist; in dev, passes through unchanged.
-const Internal = ({ children }: { children: ReactNode }) =>
-  PROD ? <Navigate to="/" replace /> : <>{children}</>;
+// Logged-in users hitting "/" land straight in the app (their
+// MyNet dashboard) instead of seeing the marketing waitlist again.
+// Logged-out users still see Waitlist in prod / Index in dev.
+const HomePage = () => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) return <Navigate to="/mynet" replace />;
+  return <PublicHomePage />;
+};
+
+// Used to redirect every app route to the waitlist in prod. Now a
+// no-op pass-through since the app is publicly accessible — kept
+// as a wrapper so we can re-introduce gating later without
+// touching every <Route>.
+const Internal = ({ children }: { children: ReactNode }) => <>{children}</>;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
