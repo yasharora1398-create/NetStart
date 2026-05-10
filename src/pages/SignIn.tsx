@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Logo } from "@/components/netstart/Logo";
 import { useAuth } from "@/context/AuthContext";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { signInSchema, type SignInValues } from "@/lib/auth-schemas";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -52,6 +53,12 @@ const friendlySignInError = (
 };
 
 const SignIn = () => {
+  usePageMeta({
+    title: "Sign In to Polln8 | Find a Cofounder or a Startup",
+    description:
+      "Sign in to Polln8 to view your cofounder matches and startup matches, send pitches, and message your network of vetted founders and operators.",
+    path: "/signin",
+  });
   const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

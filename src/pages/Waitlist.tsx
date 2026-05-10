@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { useAuth } from "@/context/AuthContext";
 import { logPageView } from "@/lib/analytics";
 import WhySection from "@/components/marketing/WhySection";
@@ -29,6 +30,12 @@ import WhySection from "@/components/marketing/WhySection";
 type Persona = "founder" | "builder";
 
 const Waitlist = () => {
+  usePageMeta({
+    title: "Polln8 | Find a Cofounder or a Startup to Join",
+    description:
+      "Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining.",
+    path: "/",
+  });
   const { mode, toggle } = useTheme();
   const { user, signOut, isAdmin } = useAuth();
   const [persona, setPersona] = useState<Persona>("founder");
@@ -182,14 +189,14 @@ const Waitlist = () => {
                 <>
                   Find a startup
                   <br />
-                  <span className="text-primary italic">to join.</span>
+                  <span className="text-primary italic">to cofound.</span>
                 </>
               )}
             </h1>
             <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
               {persona === "founder"
-                ? "Post your venture, set the equity, and meet vetted operators ranked by AI against what you're building. Serious applicants only."
-                : "Show your shipping history, find a project worth joining, and meet founders with real ventures and real equity. Serious opportunities only."}
+                ? "Cofounder matchmaking for serious startups. Post your venture, set the equity, and meet vetted technical cofounders and founding engineers ranked by AI against what you're building. Quality candidates only."
+                : "Cofounder matchmaking for serious builders. Show your shipping history, find an early-stage startup worth joining as a cofounder or founding engineer, and meet founders with real ventures and real equity."}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
@@ -212,21 +219,23 @@ const Waitlist = () => {
         {/* PROBLEM -------------------------------------------------- */}
         <Section eyebrow="The status quo">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-[-0.025em] leading-[1.05] text-foreground mb-10">
-            The cofounder market is broken.
+            Finding a cofounder is broken.
           </h2>
           <div className="grid md:grid-cols-3 gap-8 md:gap-10 max-w-5xl">
             <Paragraph>
-              Most founders search on Reddit or YC's matcher. They review
-              loose concepts in exchange for full builds and 5% equity, talk
-              to engineers who stop responding after one call, and rotate
-              through dozens of platforms with no signal.
+              Most founders search for a technical cofounder on Reddit or
+              YC's matcher. They review loose concepts in exchange for full
+              builds and 5% equity, talk to engineers who stop responding
+              after one call, and rotate through dozens of cofounder dating
+              platforms with no signal.
             </Paragraph>
             <Paragraph>
-              The people you'd actually want to build with aren't on those
-              platforms. They just don't know where to look.
+              The quality candidates you'd actually want to build a startup
+              with aren't on those platforms. They just don't know where to
+              look.
             </Paragraph>
             <Paragraph>
-              Most founders quit before they meet their person. The ones
+              Most founders quit before they meet their cofounder. The ones
               who don't ship faster, raise easier, and last longer.
             </Paragraph>
           </div>
@@ -235,29 +244,29 @@ const Waitlist = () => {
         {/* HOW IT WORKS --------------------------------------------- */}
         <Section eyebrow="The mechanism">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-[-0.025em] leading-[1.05] text-foreground mb-12 md:mb-16">
-            How Polln8 works.
+            How cofounder matchmaking works on Polln8.
           </h2>
           <div className="grid md:grid-cols-3 gap-10 md:gap-14">
             <Pillar
               accent="01"
-              title="Founders post real ventures."
-              body="Stage, what's built, equity offered. No vague ideas."
+              title="Founders post real startups."
+              body="Stage, what's built, equity offered. No vague ideas, no spec work."
               details={[
-                "Stage of the company: idea, prototype, MVP, or revenue.",
+                "Stage of the startup: idea, prototype, MVP, or revenue.",
                 "What's already shipped: product links, repos, traction.",
-                "What you're looking for in a partner.",
+                "Whether you need a technical cofounder, founding engineer, or operator.",
                 "Equity offered, stated up front.",
               ]}
             />
             <Pillar
               accent="02"
               title="Builders show real work."
-              body="Shipping history, skills, what they're looking for."
+              body="Shipping history, skills, what they're looking to cofound."
               details={[
                 "Verified resume or LinkedIn at signup.",
                 "Shipping history with real product links, not buzzwords.",
                 "Skills weighted by what you've actually used.",
-                "Commitment level: full-time, evenings, weekends.",
+                "Commitment level: full-time cofounder, founding engineer, evenings, weekends.",
               ]}
             />
             <Pillar
@@ -292,37 +301,37 @@ const Waitlist = () => {
         {/* WHO IT'S FOR --------------------------------------------- */}
         <Section eyebrow="Who it's for">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-[-0.025em] leading-[1.05] text-foreground mb-12 md:mb-16">
-            Built for two sides.
+            Built for serious founders and builders.
           </h2>
           <div className="grid md:grid-cols-2 gap-8 md:gap-10">
             <RoleCard
               kind="Founders"
-              tagline="You have a venture. You've built the foundation. You need someone in the trenches with you."
+              tagline="You have a startup. You've built the foundation. You need a cofounder in the trenches with you."
               signals={[
                 "Has working product or clear traction",
                 "Ready to give meaningful equity",
-                "Committed to shipping",
+                "Looking for a technical cofounder or founding engineer",
               ]}
               example={{
                 headline:
-                  "Climate fintech, pre-seed, looking for a senior backend engineer.",
+                  "Climate fintech, pre-seed, looking for a technical cofounder.",
                 detail:
-                  "Funded by an angel from Stripe. Need someone to lead the verification rails for carbon credits. Offering 8 to 15% equity.",
+                  "Funded by an angel from Stripe. Need a senior backend engineer to lead the verification rails for carbon credits. Offering 8 to 15% equity.",
               }}
             />
             <RoleCard
               kind="Builders"
-              tagline="You have skill. You have a job. You're ready to join something real."
+              tagline="You have skill. You have a job. You're ready to cofound something real."
               signals={[
                 "Has shipping history",
                 "Wants equity, not just salary",
-                "Looking for a venture worth joining",
+                "Looking for a startup worth cofounding",
               ]}
               example={{
                 headline:
                   "Senior eng, ex-Stripe payments, four years on distributed systems.",
                 detail:
-                  "Strong in Rust and devtools. Wants to join a payments or infra startup with real customers. Open to full-time for the right equity.",
+                  "Strong in Rust and devtools. Wants to join a payments or infra startup as a founding engineer. Open to full-time for the right equity.",
               }}
             />
           </div>
@@ -341,10 +350,11 @@ const Waitlist = () => {
             />
             <div className="relative">
               <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-[-0.03em] leading-[1] text-foreground mb-5">
-                Find your person.
+                Find your cofounder.
               </h2>
               <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-10">
-                Polln8 launches August 2026. Get on the list before then.
+                Polln8 is cofounder matchmaking for early-stage startups.
+                Launching August 2026. Get on the list before then.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link

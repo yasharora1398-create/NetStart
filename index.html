@@ -4,26 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0F1614" />
-    <title>Polln8</title>
-    <meta name="description" content="A two-sided network for founders and operators. AI-ranked matches, verified credentials, decisive applications. Move from idea to launch faster." />
+
+    <!-- Title + description are tuned for the homepage. usePageMeta
+         (src/hooks/usePageMeta.ts) overrides these per-route at
+         runtime so /how, /signup, /terms etc. each get their own
+         title/description for SEO + browser-tab clarity. -->
+    <title>Polln8 | Find a Cofounder or a Startup to Join</title>
+    <meta name="description" content="Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining." />
+    <meta name="keywords" content="cofounder matchmaking, find a cofounder, find a startup to join, technical cofounder, startup cofounder, founding engineer, founding team, startup operators, startup jobs, early-stage startup, vetted startup talent, cofounder finder, cofounder dating, startup matchmaking, quality candidates, equity startup" />
     <meta name="author" content="Polln8" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
 
     <meta property="og:site_name" content="Polln8" />
-    <meta property="og:title" content="Polln8. Find cofounders who can actually build." />
-    <meta property="og:description" content="A two-sided network for founders and operators. AI-ranked matches, verified credentials, decisive applications." />
+    <meta property="og:title" content="Polln8 | Find a Cofounder or a Startup to Join" />
+    <meta property="og:description" content="Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://polln8.com" />
     <meta property="og:image" content="https://polln8.com/polln8-og.png" />
-    <meta property="og:image:alt" content="Polln8 logo" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Polln8 | Find a Cofounder or a Startup to Join" />
 
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Polln8. Find cofounders who can actually build." />
-    <meta name="twitter:description" content="A two-sided network for founders and operators. AI-ranked matches, verified credentials, decisive applications." />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Polln8 | Find a Cofounder or a Startup to Join" />
+    <meta name="twitter:description" content="Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and operators with early-stage startups worth joining." />
     <meta name="twitter:image" content="https://polln8.com/polln8-og.png" />
-    <meta name="twitter:image:alt" content="Polln8 logo" />
+    <meta name="twitter:image:alt" content="Polln8 | Find a Cofounder or a Startup to Join" />
 
     <link rel="icon" type="image/png" href="/polln8-logo.png" />
     <link rel="canonical" href="https://polln8.com" />
+
+    <!-- Organization schema gives Google knowledge-panel data:
+         brand name, logo, social links, sameAs URLs (add when live). -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Polln8",
+      "url": "https://polln8.com",
+      "logo": "https://polln8.com/polln8-logo.png",
+      "description": "Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining.",
+      "sameAs": []
+    }
+    </script>
+    <!-- WebSite schema lets Google show a sitelinks search box (when
+         we have search routes that accept ?q= queries). -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Polln8",
+      "url": "https://polln8.com"
+    }
+    </script>
 
     <!-- Privacy-friendly analytics. No cookies, no cross-site tracking. -->
     <!-- Tag the actual production domain inside Plausible before this fires. -->

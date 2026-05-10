@@ -9,6 +9,7 @@ import {
   StepChat,
 } from "@/components/mockups/Steps";
 import { Sidebar } from "@/components/netstart/Sidebar";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 // Sidebar in dev only; production /how is the public marketing
 // page linked from the waitlist and stays sidebar-less.
@@ -57,9 +58,9 @@ const STEPS: {
   {
     n: "01",
     title: "Sign up",
-    body: "Create your account in under a minute. Pick your path: founder or builder.",
+    body: "Create your account in under a minute. Pick your path: founder or cofounder.",
     detail:
-      "Founders post projects and look for the operators they need next to them. Builders fill out a candidate profile and get matched into projects. The two flows diverge from here.",
+      "Founders post real startups and look for the technical cofounders, founding engineers, or operators they need next to them. Builders fill out a candidate profile and get matched into early-stage startups worth joining. The two flows diverge from here.",
     visual: <StepSignup />,
   },
   {
@@ -67,7 +68,7 @@ const STEPS: {
     title: "Add credentials",
     body: "Drop your LinkedIn, upload a resume, or both.",
     detail:
-      "We require either to start. The more signal we have, the faster verification clears. Both is strongly recommended.",
+      "We require either to start. The more signal we have, the faster verification clears. Both is strongly recommended for quality candidates we surface to founders.",
     visual: <StepCredentials />,
   },
   {
@@ -75,28 +76,34 @@ const STEPS: {
     title: "Get verified",
     body: "A short manual review confirms shipped work. Usually under 24 hours.",
     detail:
-      "We check references, public projects, and the basics of the resume. Rejected? You'll get a reviewer note and a path to resubmit.",
+      "We check references, public projects, and the basics of the resume so every founder you meet on Polln8 is a vetted, real builder. Rejected? You'll get a reviewer note and a path to resubmit.",
     visual: <StepAccepted />,
   },
   {
     n: "04",
     title: "Match",
-    body: "Browse a deck ranked against your profile. Three actions per card.",
+    body: "Browse a deck of cofounder candidates ranked against your profile. Three actions per card.",
     detail:
-      "Connect, save, or pass. No likes, no maybes. AI ranks the deck against your skills, project, and intent.",
+      "Connect, save, or pass. No likes, no maybes. AI ranks the deck against your skills, your startup, and what you're looking to cofound.",
     visual: <StepMatch />,
   },
   {
     n: "05",
     title: "Build",
-    body: "Once you connect, you land in DMs. Pick up the thread and ship.",
+    body: "Once you connect, you land in DMs with your cofounder. Pick up the thread and ship.",
     detail:
-      "Accepted requests turn into mutual contacts. Pick up the conversation immediately and align on what's next.",
+      "Accepted requests turn into mutual contacts. Pick up the conversation immediately, align on equity and scope, and start building the startup.",
     visual: <StepChat />,
   },
 ];
 
 const HowItWorks = () => {
+  usePageMeta({
+    title: "How Polln8 Works | Find a Cofounder or a Startup to Join",
+    description:
+      "How Polln8 matches founders with vetted technical cofounders, and operators with early-stage startups worth joining. Verify, rank, connect in two clicks.",
+    path: "/how",
+  });
   // Land at the top of the page when the user navigates here from
   // the homepage's "See full flow" link. React Router preserves
   // scroll otherwise, which would dump them at the bottom.
@@ -120,11 +127,14 @@ const HowItWorks = () => {
               How it works
             </p>
             <h1 className="font-display text-4xl md:text-6xl tracking-[-0.04em] leading-[0.95] mb-6">
-              Five steps.<br />Signup to shipping.
+              Find a cofounder.<br />Find a startup to join.
             </h1>
             <p className="text-base text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-20 leading-relaxed">
-              From making an account to landing your first match, the
-              whole experience is built to be fast and decisive.
+              Five steps from signup to your first match. Polln8 verifies
+              startup builders, ranks them against what you're building or
+              what you'd want to join, and connects founders with vetted
+              technical cofounders or operators with early-stage startups
+              worth joining.
             </p>
           </div>
         </Reveal>

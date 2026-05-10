@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/netstart/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const SECTIONS: Array<{ title: string; body: string }> = [
   {
@@ -55,7 +56,14 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   },
 ];
 
-const Privacy = () => (
+const Privacy = () => {
+  usePageMeta({
+    title: "Privacy Policy | Polln8 Cofounder Matchmaking",
+    description:
+      "How Polln8 collects, uses, and protects data from founders and operators on our cofounder matchmaking platform. Plain-language privacy policy.",
+    path: "/privacy",
+  });
+  return (
   <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border/50">
       <div className="mx-auto max-w-3xl px-5 md:px-8 h-16 flex items-center justify-between">
@@ -114,6 +122,7 @@ const Privacy = () => (
     </main>
     <Footer />
   </div>
-);
+  );
+};
 
 export default Privacy;

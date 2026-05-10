@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/netstart/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const SECTIONS: Array<{ title: string; body: string }> = [
   {
@@ -55,7 +56,14 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   },
 ];
 
-const Terms = () => (
+const Terms = () => {
+  usePageMeta({
+    title: "Terms of Service | Polln8 Cofounder Matchmaking",
+    description:
+      "Terms governing use of Polln8's cofounder matchmaking platform. Account responsibilities, conduct rules, content policy, and how we handle removal from the network.",
+    path: "/terms",
+  });
+  return (
   <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border/50">
       <div className="mx-auto max-w-3xl px-5 md:px-8 h-16 flex items-center justify-between">
@@ -114,6 +122,7 @@ const Terms = () => (
     </main>
     <Footer />
   </div>
-);
+  );
+};
 
 export default Terms;

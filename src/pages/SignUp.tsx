@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Logo } from "@/components/netstart/Logo";
 import { useAuth } from "@/context/AuthContext";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { signUpSchema, type SignUpValues } from "@/lib/auth-schemas";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -56,6 +57,12 @@ const PERKS = [
 ];
 
 const SignUp = () => {
+  usePageMeta({
+    title: "Sign Up | Find a Cofounder or a Startup to Join",
+    description:
+      "Create a Polln8 account in a minute. Match with vetted technical cofounders and founding engineers, or find an early-stage startup worth joining. Free during early access.",
+    path: "/signup",
+  });
   const { signUp, user, loading, emailVerified } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,7 +76,7 @@ const SignUp = () => {
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: { name: "", email: "", password: "", role: undefined },
     // Validate on blur so users see field-level errors as they tab
     // through, not all at once on submit.
     mode: "onBlur",
@@ -106,6 +113,7 @@ const SignUp = () => {
       values.email,
       values.password,
       values.name,
+      values.role,
     );
     setSubmitting(false);
 
@@ -344,6 +352,62 @@ const SignUp = () => {
                         <p className="text-[11px] text-muted-foreground/80 mt-2">
                           Use 8+ characters with upper, lower, and a number.
                         </p>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                          What brings you here?
+                        </FormLabel>
+                        <FormControl>
+                          <div className="grid grid-cols-2 gap-3">
+                            {(
+                              [
+                                {
+                                  value: "founder",
+                                  label: "I'm a founder",
+                                  hint: "Building something. Need operators.",
+                                },
+                                {
+                                  value: "builder",
+                                  label: "I'm a builder",
+                                  hint: "Looking for a project to join.",
+                                },
+                              ] as const
+                            ).map((opt) => {
+                              const active = field.value === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => field.onChange(opt.value)}
+                                  className={`text-left rounded-sm border p-3 transition-colors ${
+                                    active
+                                      ? "border-gold bg-gold/5"
+                                      : "border-border bg-card hover:border-gold/40"
+                                  }`}
+                                >
+                                  <p
+                                    className={`font-display text-base mb-1 ${
+                                      active ? "text-gold" : "text-foreground"
+                                    }`}
+                                  >
+                                    {opt.label}
+                                  </p>
+                                  <p className="text-[11px] text-muted-foreground leading-snug">
+                                    {opt.hint}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
