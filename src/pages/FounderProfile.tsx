@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Briefcase,
   ExternalLink,
+  Globe,
   Linkedin,
   Loader2,
   MapPin,
@@ -198,18 +199,32 @@ const FounderProfile = () => {
                   ) : (
                     <span />
                   )}
-                  {founder.linkedinUrl && (
-                    <a
-                      href={founder.linkedinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
-                    >
-                      <Linkedin className="h-4 w-4" />
-                      LinkedIn
-                      <ExternalLink className="h-3 w-3 opacity-60" />
-                    </a>
-                  )}
+                  <div className="flex flex-wrap items-center gap-4">
+                    {founder.websiteUrl && (
+                      <a
+                        href={founder.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-gold hover:underline break-all"
+                      >
+                        <Globe className="h-4 w-4" />
+                        Website
+                        <ExternalLink className="h-3 w-3 opacity-60" />
+                      </a>
+                    )}
+                    {founder.linkedinUrl && (
+                      <a
+                        href={founder.linkedinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                        LinkedIn
+                        <ExternalLink className="h-3 w-3 opacity-60" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </header>
 

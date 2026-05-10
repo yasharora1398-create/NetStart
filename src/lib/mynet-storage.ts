@@ -1006,6 +1006,7 @@ export type PublicFounder = {
   linkedinUrl: string;
   avatarPath: string | null;
   isOpenToWork: boolean;
+  websiteUrl: string;
 };
 
 type PublicFounderRow = {
@@ -1019,6 +1020,7 @@ type PublicFounderRow = {
   linkedin_url: string;
   avatar_path: string | null;
   is_open_to_work: boolean;
+  website_url: string | null;
 };
 
 export const getPublicFounder = async (
@@ -1042,6 +1044,7 @@ export const getPublicFounder = async (
     linkedinUrl: r.linkedin_url ?? "",
     avatarPath: r.avatar_path ?? null,
     isOpenToWork: Boolean(r.is_open_to_work),
+    websiteUrl: r.website_url ?? "",
   };
 };
 
