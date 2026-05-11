@@ -1251,7 +1251,23 @@ export const listChatContacts = async (): Promise<
 export const setRole = async (
   role: "founder" | "builder",
 ): Promise<void> => {
-  const { error } = await getSupabase().auth.updateUser({
+  const supabase = getSupabase();
+  // updateUser throws "Auth session missing!" when the in-memory
+  // session is empty -- common after a long idle period where the
+  // JWT expired faster than the auto-refresh could fire. Try a
+  // refresh first; if that fails too, surface a readable error
+  // instead of Supabase's cryptic one.
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) {
+    const { data: refreshed, error: refreshError } =
+      await supabase.auth.refreshSession();
+    if (refreshError || !refreshed.session) {
+      throw new Error(
+        "Your session expired. Sign in again to switch roles.",
+      );
+    }
+  }
+  const { error } = await supabase.auth.updateUser({
     data: { role },
   });
   if (error) throw error;

@@ -275,6 +275,8 @@ function MyNetIcon() {
 }
 
 function MatchIcon() {
+  // Four-petal flower in place of the old crossed-arrows icon.
+  // The pollin8 brand mark for Match -- pollination over "fire."
   return (
     <svg
       viewBox="0 0 16 16"
@@ -284,8 +286,11 @@ function MatchIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M2.5 5 H10 L8.2 3.2 M2.5 5 L4.3 6.8" />
-      <path d="M13.5 11 H6 L7.8 12.8 M13.5 11 L11.7 9.2" />
+      <circle cx="8" cy="8" r="1.6" />
+      <path d="M8 1.6 C9.4 3 9.4 5 8 6.4 C6.6 5 6.6 3 8 1.6 Z" />
+      <path d="M14.4 8 C13 9.4 11 9.4 9.6 8 C11 6.6 13 6.6 14.4 8 Z" />
+      <path d="M8 14.4 C6.6 13 6.6 11 8 9.6 C9.4 11 9.4 13 8 14.4 Z" />
+      <path d="M1.6 8 C3 6.6 5 6.6 6.4 8 C5 9.4 3 9.4 1.6 8 Z" />
     </svg>
   );
 }

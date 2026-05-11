@@ -1,9 +1,9 @@
 import { NavLink as RRNavLink, useLocation } from "react-router-dom";
-import { Flame, Heart, MessageCircle, User } from "lucide-react";
+import { Flower2, Heart, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { to: "/", label: "Discover", icon: Flame },
+  { to: "/", label: "Discover", icon: Flower2 },
   { to: "/matches", label: "Matches", icon: Heart },
   { to: "/messages", label: "Chats", icon: MessageCircle },
   { to: "/profile", label: "Me", icon: User },

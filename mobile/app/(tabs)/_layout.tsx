@@ -16,7 +16,7 @@ import {
   Bookmark,
   ChevronDown,
   ChevronUp,
-  Flame,
+  Flower2,
   MessageCircle,
   User,
 } from "lucide-react-native";
@@ -407,7 +407,7 @@ export default function TabLayout() {
             : {
                 title: "Match",
                 tabBarIcon: ({ color, size }) => (
-                  <Flame size={size - 4} color={color} />
+                  <Flower2 size={size - 4} color={color} />
                 ),
               }
         }
@@ -419,7 +419,7 @@ export default function TabLayout() {
             ? {
                 title: "Browse",
                 tabBarIcon: ({ color, size }) => (
-                  <Flame size={size - 4} color={color} />
+                  <Flower2 size={size - 4} color={color} />
                 ),
               }
             : { href: null }

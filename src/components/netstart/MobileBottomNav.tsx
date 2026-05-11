@@ -18,8 +18,8 @@ import {
   Bookmark,
   ChevronLeft,
   ChevronRight,
+  Flower2,
   MessageCircle,
-  Target,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,7 @@ type Tab = {
 };
 
 const TABS: Tab[] = [
-  { to: "/match", label: "Match", icon: Target },
+  { to: "/match", label: "Match", icon: Flower2 },
   { to: "/saved", label: "Saved", icon: Bookmark },
   { to: "/chats", label: "Chat", icon: MessageCircle },
   { to: "/mynet", label: "MyNet", icon: User },

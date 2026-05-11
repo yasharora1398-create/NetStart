@@ -19,7 +19,7 @@ import {
   Briefcase,
   Compass,
   Download,
-  Flame,
+  Flower2,
   Home,
   MessageCircle,
   ShieldCheck,
@@ -49,7 +49,7 @@ type RailItem = {
 const ITEMS: RailItem[] = [
   { to: "/", label: "Home", icon: <Home className="size-4" />, end: true },
   { to: "/mynet", label: "MyNet", icon: <User className="size-4" /> },
-  { to: "/match", label: "Match", icon: <Flame className="size-4" /> },
+  { to: "/match", label: "Match", icon: <Flower2 className="size-4" /> },
   { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
   { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
   {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Bell,
   Briefcase,
-  Flame,
+  Flower2,
   MapPin,
   MessageCircle,
   Search,
@@ -112,7 +112,7 @@ export const AppShell = () => {
       {/* Bottom tab bar */}
       <nav className="absolute bottom-0 inset-x-0 bg-obsidian/95 backdrop-blur-xl border-t border-border/60 px-6 py-2.5 pb-5 flex items-center justify-between z-20">
         <TabIcon
-          icon={<Flame className="h-5 w-5" />}
+          icon={<Flower2 className="h-5 w-5" />}
           label="Match"
           active={tab === "match"}
           onClick={() => setTab("match")}

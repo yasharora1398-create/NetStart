@@ -17,7 +17,7 @@ import {
   Check,
   Compass,
   Download,
-  Flame,
+  Flower2,
   Hammer,
   MessageCircle,
   ShieldCheck,
@@ -855,7 +855,7 @@ const ExploreGrid = () => {
         },
     {
       to: "/match",
-      icon: <Flame className="h-5 w-5" />,
+      icon: <Flower2 className="h-5 w-5" />,
       title: "Browse the deck",
       body: "Swipe through founders and the projects they're building.",
       cta: "Open Match",
