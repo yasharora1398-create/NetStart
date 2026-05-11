@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
@@ -44,16 +44,13 @@ const queryClient = new QueryClient();
 // runs) and false under `vite dev` (localhost).
 const PROD = import.meta.env.PROD;
 
-// Logged-in users hitting "/" land straight in the app (their
-// MyNet dashboard). Logged-out users get the public marketing
-// homepage — the same in dev and prod now that the old Waitlist /
-// Index split is gone.
-const HomePage = () => {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  if (user) return <Navigate to="/mynet" replace />;
-  return <Home />;
-};
+// `/` always renders the marketing homepage, signed in or not.
+// We used to auto-redirect logged-in users to /mynet, but that
+// meant the Home link in the sidebar couldn't actually reach
+// the marketing page — clicking it would bounce straight back.
+// Sign-in flow lands users on /mynet directly, so the redirect
+// here was redundant anyway.
+const HomePage = () => Home();
 
 // Used to redirect every app route to the waitlist in prod. Now a
 // no-op pass-through since the app is publicly accessible — kept
