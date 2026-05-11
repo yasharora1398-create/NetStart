@@ -9,7 +9,7 @@
           "value": "(?i).*(Mobi|Android|iPhone|iPad|iPod).*"
         }
       ],
-      "destination": "/m/$1",
+      "destination": "/m/",
       "permanent": false
     },
     {
@@ -21,7 +21,7 @@
           "value": "(?i).*(Mobi|Android|iPhone|iPad|iPod).*"
         }
       ],
-      "destination": "/$1",
+      "destination": "/",
       "permanent": false
     }
   ],
@@ -30,3 +30,4 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+
