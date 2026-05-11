@@ -17,7 +17,6 @@ import SignUp from "./pages/SignUp.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import MyNet from "./pages/MyNet.tsx";
-import Talent from "./pages/Talent.tsx";
 import Admin from "./pages/Admin.tsx";
 import Chats from "./pages/Chats.tsx";
 import Match from "./pages/Match.tsx";
@@ -101,7 +100,6 @@ const App = () => (
                 can land users on the MyNetWizard. The page itself
                 already gates content behind auth via <AuthGate>. */}
             <Route path="/mynet" element={<MyNet />} />
-            <Route path="/talent" element={<Internal><Talent /></Internal>} />
             {/* /admin is public-routable so admin users can reach it
                 in production. The page itself gates on isAdmin and
                 redirects everyone else to "/". */}

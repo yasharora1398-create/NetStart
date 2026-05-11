@@ -90,11 +90,11 @@ const FounderProfile = () => {
       >
         <div className="container max-w-3xl">
           <Link
-            to="/talent"
+            to="/match"
             className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Browse projects
+            Back to Match
           </Link>
 
           {loadingData ? (
@@ -253,10 +253,9 @@ const FounderProfile = () => {
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4">
                     {projects.map((p) => (
-                      <Link
+                      <article
                         key={p.id}
-                        to="/talent"
-                        className="rounded-sm border border-border bg-card hover:border-gold/40 transition-colors p-5"
+                        className="rounded-sm border border-border bg-card p-5"
                       >
                         <h3 className="font-display text-xl leading-tight mb-2">
                           {p.title}
@@ -276,18 +275,10 @@ const FounderProfile = () => {
                             </span>
                           )}
                         </div>
-                      </Link>
+                      </article>
                     ))}
                   </div>
                 )}
-
-                <div className="mt-8 flex justify-center">
-                  <Link to="/talent">
-                    <Button variant="outlineGold" size="lg">
-                      Browse all open projects
-                    </Button>
-                  </Link>
-                </div>
               </section>
             </>
           )}

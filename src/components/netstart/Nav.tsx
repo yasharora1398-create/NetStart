@@ -93,17 +93,6 @@ export const Nav = () => {
       >
         MyNet
       </NavLink>
-      <NavLink
-        to="/talent"
-        onClick={closeMobile}
-        className={({ isActive }) =>
-          `transition-colors ${
-            isActive ? "text-gold" : "hover:text-foreground"
-          }`
-        }
-      >
-        Talent
-      </NavLink>
       {user && (
         <NavLink
           to="/match"

@@ -263,8 +263,8 @@ const EmptyState = () => (
     <Inbox className="size-5 text-muted-foreground" aria-hidden />
     <p className="text-sm font-medium text-foreground">No conversations</p>
     <p className="text-xs text-muted-foreground">
-      Send a message to a founder or operator from Match or Talent. The
-      thread will land here.
+      Send a message to a founder or operator from Match. The thread will
+      land here.
     </p>
   </div>
 );

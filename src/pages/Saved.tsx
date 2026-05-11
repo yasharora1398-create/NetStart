@@ -160,7 +160,7 @@ const BuilderSaved = () => {
     return (
       <EmptyCard
         title="No saved projects yet"
-        body="Open Match or Talents and tap the bookmark on any project to save it. Saved projects land here."
+        body="Open Match and tap the bookmark on any project to save it. Saved projects land here."
       />
     );
   }

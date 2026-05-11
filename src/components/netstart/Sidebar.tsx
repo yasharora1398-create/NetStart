@@ -32,9 +32,6 @@ const HOME_ITEMS: Item[] = [
 const APP_ITEMS: Item[] = [
   { to: "/mynet", label: "MyNet", icon: MyNetIcon },
   { to: "/match", label: "Match", icon: MatchIcon },
-  // Talents (the filterable browse view) is reachable via the
-  // search icon on Match. We removed it from the top-level nav so
-  // the IA matches mobile (Match deck + magnifying-glass).
   { to: "/saved", label: "Saved", icon: SavedIcon },
   { to: "/chats", label: "Chat", icon: ChatIcon },
   { to: "/applications", label: "Applications", icon: ApplicationsIcon },
@@ -277,21 +274,6 @@ function MatchIcon() {
   );
 }
 
-function TalentsIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 2.2 L9.3 6.7 L13.8 8 L9.3 9.3 L8 13.8 L6.7 9.3 L2.2 8 L6.7 6.7 Z" />
-      <path d="M13 2.2 L13.5 3.5 L14.8 4 L13.5 4.5 L13 5.8 L12.5 4.5 L11.2 4 L12.5 3.5 Z" />
-    </svg>
-  );
-}
 
 function ChatIcon() {
   return (

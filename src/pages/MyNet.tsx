@@ -652,7 +652,7 @@ const MyNet = () => {
 
                     {displayProfile.reviewStatus === "accepted" && (
                       <Link
-                        to="/talent"
+                        to="/match"
                         className="block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
                       >
                         <div className="flex items-center justify-between gap-4">
@@ -661,11 +661,11 @@ const MyNet = () => {
                               Find projects
                             </p>
                             <h3 className="font-display text-2xl mb-1">
-                              Browse open projects
+                              Open the Match deck
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                              Ranked by AI against your profile. Apply with one
-                              pitch.
+                              Swipe through open projects ranked against your
+                              profile.
                             </p>
                           </div>
                           <ArrowRight className="h-6 w-6 text-gold group-hover:translate-x-1 transition-transform flex-shrink-0" />

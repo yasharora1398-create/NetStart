@@ -217,13 +217,13 @@ export const OnboardingChecklist = ({
               You're live on NetStart.
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-              Time to find your match. Browse projects or run Find People on
-              one of yours.
+              Time to find your match. Swipe through projects in Match or run
+              Find People on one of yours.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <Link to="/talent">
+              <Link to="/match">
                 <Button variant="gold" size="sm">
-                  Browse projects
+                  Open Match
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
