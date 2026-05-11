@@ -31,6 +31,7 @@ import { emptyProfile, type Profile } from "@/lib/types";
 import { ReviewStatusOverlay } from "@/components/ReviewStatusOverlay";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { bumpUnread, useUnread } from "@/lib/unread";
 
 // Per-user key for "I've already seen the acceptance celebration".
@@ -182,6 +183,12 @@ export default function TabLayout() {
   const { theme, mode } = useTheme();
   const { user } = useAuth();
   const savedCount = useSavedCount();
+  // Safe-area bottom inset so the tab bar clears the iOS home
+  // indicator and Android navigation gesture area. Falls back to
+  // a comfortable 24px when there's no inset (Android with
+  // hardware buttons, older iPhones, browser viewports).
+  const insets = useSafeAreaInsets();
+  const tabBarBottom = Math.max(insets.bottom, 16);
   // Bottom tab bar collapse state. When collapsed the tab bar is
   // hidden via display:none and a small floating chevron appears
   // in the bottom-right corner to bring it back. When expanded the
@@ -352,7 +359,7 @@ export default function TabLayout() {
           position: "absolute",
           left: 16,
           right: 16,
-          bottom: 24,
+          bottom: tabBarBottom,
           height: 68,
           borderRadius: 22,
           backgroundColor: "transparent",
@@ -480,7 +487,8 @@ export default function TabLayout() {
           borderColor: theme.border,
           // Sit slightly above the tab bar's top edge when
           // expanded; drop to the bottom-right corner when not.
-          bottom: tabBarCollapsed ? 24 : 24 + 68 - 6,
+          // Tracks the same safe-area bottom inset as the bar.
+          bottom: tabBarCollapsed ? tabBarBottom : tabBarBottom + 68 - 6,
         },
       ]}
     >
