@@ -85,9 +85,10 @@ const SignUp = () => {
   // If an already-authed user lands on /signup, route them away.
   // - Unverified users go to /check-email so they finish verification
   //   before they can fill out the wizard with an unconfirmed address.
-  // - Verified users go to "/" (the homepage) - same policy as sign-in,
-  //   from there they can hit Edit MyNet whenever they're ready.
-  const fromState = (location.state as { from?: string } | null)?.from ?? "/";
+  // - Verified users go to /mynet (same policy as sign-in). Avoids the
+  //   bounce-back-to-home loop that hit users clicking homepage CTAs
+  //   when they were already signed in.
+  const fromState = (location.state as { from?: string } | null)?.from ?? "/mynet";
 
   useEffect(() => {
     if (loading || !user) return;

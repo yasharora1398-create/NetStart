@@ -77,14 +77,12 @@ const SignIn = () => {
     mode: "onBlur",
   });
 
-  // Sign-in always lands on the homepage, regardless of where the
-  // user was bounced from. Returning users are intentionally dropped
-  // on "/" so they can re-orient (and so the signed-in nav surfaces
-  // the Edit MyNet pill there). The location.state.from value is
-  // preserved on the "Create an account" link below for users who
-  // pivot to signup.
-  const redirectTo = "/";
-  const fromState = (location.state as { from?: string } | null)?.from ?? "/";
+  // Sign-in lands on /mynet so already-signed-in users who click the
+  // homepage Sign in CTA don't bounce back home. The location.state.from
+  // value is preserved on the "Create an account" link below for users
+  // who pivot to signup.
+  const redirectTo = "/mynet";
+  const fromState = (location.state as { from?: string } | null)?.from ?? "/mynet";
 
   useEffect(() => {
     if (!loading && user) navigate(redirectTo, { replace: true });
