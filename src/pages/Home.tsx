@@ -14,10 +14,7 @@ import {
   ArrowRight,
   Check,
   Hammer,
-  MessageCircle,
-  Shield,
   Sparkles,
-  Target,
   Telescope,
   X,
 } from "lucide-react";
@@ -26,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/netstart/Footer";
 import { IconRail } from "@/components/netstart/IconRail";
 import { FadeUp } from "@/components/netstart/FadeUp";
+import WhySection from "@/components/marketing/WhySection";
 import { useTheme } from "@/hooks/useTheme";
 
 const Home = () => {
@@ -41,7 +39,12 @@ const Home = () => {
       <main className="md:pl-20">
         <Hero />
         <Problem />
-        <Approach />
+        {/* Proof — three live mockup rows showing review,
+            ranked matches, and the chat request flow. Replaces
+            a static "what's different" cards row with something
+            users can actually look at. */}
+        <ProofIntro />
+        <WhySection />
         <RoleSplit />
         <SocialProof />
         <HowItWorks />
@@ -192,65 +195,30 @@ const Problem = () => {
 };
 
 // ───────────────────────────────────────────────────────────────
-// APPROACH — what Polln8 does differently
+// PROOF INTRO — header that precedes the live WhySection mockups.
+// The mockups themselves carry the visual proof; this is just
+// the lead-in so the section doesn't start abruptly.
 // ───────────────────────────────────────────────────────────────
-const Approach = () => {
-  const items = [
-    {
-      icon: <Shield className="h-5 w-5 text-gold" />,
-      title: "Vetted on both sides",
-      body: "Every profile — founder and builder — is reviewed by a human before it goes live. If we wouldn't introduce you to a friend, you don't get in.",
-    },
-    {
-      icon: <Target className="h-5 w-5 text-gold" />,
-      title: "Signal, not volume",
-      body: "We don't show you 200 matches. We show you the five people whose skills, commitment, and stage actually line up with what you're building.",
-    },
-    {
-      icon: <MessageCircle className="h-5 w-5 text-gold" />,
-      title: "Mutual interest only",
-      body: "Both sides have to say yes before chat opens. No cold DMs, no read receipts on a one-way pitch — every conversation starts on equal ground.",
-    },
-    {
-      icon: <Hammer className="h-5 w-5 text-gold" />,
-      title: "Project-first profiles",
-      body: "Founders show what they're building, not a generic bio. Builders show what they've shipped. You decide based on real work, not vibes.",
-    },
-  ];
-
-  return (
-    <section className="px-4 sm:px-8 py-24 md:py-32">
-      <div className="mx-auto max-w-5xl">
-        <FadeUp>
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-            How Polln8 is different
-          </p>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-12 max-w-3xl leading-[1.05]">
-            Built for people who want to start something, not collect contacts.
-          </h2>
-        </FadeUp>
-
-        <div className="grid gap-5 md:grid-cols-2">
-          {items.map((it, i) => (
-            <FadeUp key={it.title} delay={i * 80}>
-              <article className="h-full rounded-sm border border-gold-soft bg-card p-7 hover:border-gold/60 transition-colors">
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold/40 bg-gold/10">
-                  {it.icon}
-                </div>
-                <h3 className="font-display text-2xl mb-2 leading-tight">
-                  {it.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {it.body}
-                </p>
-              </article>
-            </FadeUp>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
+const ProofIntro = () => (
+  <section className="px-4 sm:px-8 pt-24 md:pt-32 pb-0">
+    <div className="mx-auto max-w-5xl">
+      <FadeUp>
+        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+          What you actually see
+        </p>
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-4 max-w-3xl leading-[1.05]">
+          Three screens that do most of the work.
+        </h2>
+        <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
+          A reviewer screen so every member gets vetted. A ranked deck so
+          you see signal, not feed-spam. A request that has to be accepted
+          before chat opens. The rest of the app exists to keep these three
+          clean.
+        </p>
+      </FadeUp>
+    </div>
+  </section>
+);
 
 // ───────────────────────────────────────────────────────────────
 // ROLE SPLIT — for founders / for builders

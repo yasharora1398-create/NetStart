@@ -14,7 +14,17 @@
  */
 import { type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, LogIn, Sparkles, UserPlus } from "lucide-react";
+import {
+  Bookmark,
+  Briefcase,
+  Compass,
+  Download,
+  Flame,
+  Home,
+  MessageCircle,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type RailItem = {
@@ -25,11 +35,36 @@ type RailItem = {
   end?: boolean;
 };
 
+// Mirrors the desktop Sidebar's nav structure. Logged-out users
+// who click an app route still hit it — the underlying page just
+// renders its own AuthGate, which is the same affordance the
+// Sidebar gives them.
 const ITEMS: RailItem[] = [
   { to: "/", label: "Home", icon: <Home className="size-4" />, end: true },
-  { to: "/how", label: "How it works", icon: <Sparkles className="size-4" /> },
-  { to: "/signin", label: "Sign in", icon: <LogIn className="size-4" /> },
-  { to: "/signup", label: "Sign up", icon: <UserPlus className="size-4" /> },
+  { to: "/mynet", label: "MyNet", icon: <User className="size-4" /> },
+  { to: "/match", label: "Match", icon: <Flame className="size-4" /> },
+  { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
+  { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
+  {
+    to: "/applications",
+    label: "Applications",
+    icon: <Briefcase className="size-4" />,
+  },
+  {
+    to: "/how",
+    label: "How it works",
+    icon: <Compass className="size-4" />,
+  },
+  {
+    to: "/standards",
+    label: "Standards",
+    icon: <ShieldCheck className="size-4" />,
+  },
+  {
+    to: "/download",
+    label: "Download",
+    icon: <Download className="size-4" />,
+  },
 ];
 
 export const IconRail = () => (
