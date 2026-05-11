@@ -1252,25 +1252,36 @@ export const setRole = async (
   role: "founder" | "builder",
 ): Promise<void> => {
   const supabase = getSupabase();
-  // updateUser throws "Auth session missing!" when the in-memory
-  // session is empty -- common after a long idle period where the
-  // JWT expired faster than the auto-refresh could fire. Try a
-  // refresh first; if that fails too, surface a readable error
-  // instead of Supabase's cryptic one.
-  const { data: sessionData } = await supabase.auth.getSession();
-  if (!sessionData.session) {
-    const { data: refreshed, error: refreshError } =
-      await supabase.auth.refreshSession();
-    if (refreshError || !refreshed.session) {
+
+  // updateUser is unusually sensitive to a stale in-memory session
+  // and will throw "Auth session missing!" even when the refresh
+  // token in storage is still valid. The cheapest reliable fix is
+  // to unconditionally refresh first -- that re-hydrates the local
+  // session from storage AND re-anchors the JWT clock on the server.
+  const { error: refreshError } = await supabase.auth.refreshSession();
+  if (refreshError) {
+    // Refresh fails when the user is genuinely signed out (no
+    // refresh token anywhere). Surface a readable message instead
+    // of Supabase's cryptic one.
+    throw new Error(
+      "Your session expired. Sign in again to switch roles.",
+    );
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: { role },
+  });
+  if (error) {
+    // Final safety net: even after refresh, the rare race where the
+    // session was wiped mid-call should not leak Supabase's raw
+    // error string into the toast.
+    if (error.message?.toLowerCase().includes("auth session")) {
       throw new Error(
         "Your session expired. Sign in again to switch roles.",
       );
     }
+    throw error;
   }
-  const { error } = await supabase.auth.updateUser({
-    data: { role },
-  });
-  if (error) throw error;
 };
 
 // ---- Account deletion ---------------------------------------------
