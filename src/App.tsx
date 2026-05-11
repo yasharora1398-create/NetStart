@@ -8,8 +8,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
-import Index from "./pages/Index.tsx";
-import Waitlist from "./pages/Waitlist.tsx";
+import Home from "./pages/Home.tsx";
 import Authenticated from "./pages/Authenticated.tsx";
 import CheckEmail from "./pages/CheckEmail.tsx";
 import SignIn from "./pages/SignIn.tsx";
@@ -44,16 +43,16 @@ const queryClient = new QueryClient();
 // `import.meta.env.PROD` is true under `vite build` (what Vercel
 // runs) and false under `vite dev` (localhost).
 const PROD = import.meta.env.PROD;
-const PublicHomePage = PROD ? Waitlist : Index;
 
 // Logged-in users hitting "/" land straight in the app (their
-// MyNet dashboard) instead of seeing the marketing waitlist again.
-// Logged-out users still see Waitlist in prod / Index in dev.
+// MyNet dashboard). Logged-out users get the public marketing
+// homepage — the same in dev and prod now that the old Waitlist /
+// Index split is gone.
 const HomePage = () => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user) return <Navigate to="/mynet" replace />;
-  return <PublicHomePage />;
+  return <Home />;
 };
 
 // Used to redirect every app route to the waitlist in prod. Now a
