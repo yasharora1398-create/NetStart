@@ -379,18 +379,18 @@ export default function TabLayout() {
           display: tabBarCollapsed ? "none" : "flex",
         },
         tabBarLabelStyle: {
-          // Tightened from fontSize:10 + letterSpacing:1.2 because
-          // "THREADS" / "BROWSE" were truncating on narrow phones.
-          // 9pt + 0.4 letter-spacing keeps the mono uppercase look
-          // without overflowing the per-tab cell width.
-          fontSize: 9,
+          // Aggressively tight: previous 10pt+1.2sp was clipping
+          // THREADS/BROWSE on narrow phones. Drop to 8pt, remove
+          // letter-spacing entirely, and ensure the label never wraps.
+          fontSize: 8,
           fontFamily: fonts.mono,
-          letterSpacing: 0.4,
+          letterSpacing: 0,
           textTransform: "uppercase",
           marginTop: 2,
+          includeFontPadding: false,
         },
         tabBarItemStyle: {
-          paddingHorizontal: 2,
+          paddingHorizontal: 0,
         },
       }}
     >

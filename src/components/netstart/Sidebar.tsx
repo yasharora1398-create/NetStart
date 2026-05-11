@@ -21,6 +21,11 @@ const COLLAPSED_KEY = "polln8.sidebar.collapsed";
 const EXPANDED_WIDTH = "248px";
 const COLLAPSED_WIDTH = "64px";
 
+// Hardcoded admin gate: the Admin section in the sidebar only shows
+// when this exact email is signed in. The Admin page itself has its
+// own isAdmin gate, so adding this purely for nav visibility.
+const ADMIN_EMAIL = "netstartapp@outlook.com";
+
 type IconType = React.ComponentType;
 
 type Item = { to: string; label: string; icon: IconType };
@@ -139,6 +144,17 @@ export const Sidebar = () => {
           <SideLink key={item.to} item={item} />
         ))}
       </div>
+
+      {/* Admin - only renders for the operator email. The Admin page
+          itself enforces isAdmin so a leaked link still gets bounced. */}
+      {(user?.email ?? "").toLowerCase() === ADMIN_EMAIL && (
+        <div className="gs-section">
+          <div className="gs-section-label">Admin</div>
+          <SideLink
+            item={{ to: "/admin", label: "Dashboard", icon: AdminIcon }}
+          />
+        </div>
+      )}
 
       {/* Account - Sign in/Sign up when logged out, Sign out when in. */}
       <div className="gs-section">
@@ -449,6 +465,22 @@ function SignUpIcon() {
       <path d="M2 13 c0 -2.2 1.8 -4 4 -4 s4 1.8 4 4" />
       <path d="M12.5 5 V9" />
       <path d="M10.5 7 H14.5" />
+    </svg>
+  );
+}
+
+function AdminIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10.5 4.5 a2 2 0 1 0 -2.8 2.8 l-4.2 4.2 v1.5 h1.5 l4.2 -4.2 a2 2 0 0 0 2.8 -2.8 z" />
+      <circle cx="9.5" cy="5.5" r="0.5" fill="currentColor" stroke="none" />
     </svg>
   );
 }

@@ -81,6 +81,12 @@ const formatDayShort = (day: string): string => {
 
 type Tab = "overview" | "review";
 
+// Operator email gets admin access even if the profiles.is_admin
+// row isn't set — covers fresh installs and ensures the nav icons
+// in the Sidebar / IconRail (gated on this same email) always lead
+// to a working dashboard.
+const ADMIN_EMAIL = "netstartapp@outlook.com";
+
 const Admin = () => {
   const { user, loading, isAdmin } = useAuth();
   const [tab, setTab] = useState<Tab>("overview");
@@ -93,7 +99,9 @@ const Admin = () => {
     );
   }
 
-  if (!user || !isAdmin) {
+  const isOperator =
+    (user?.email ?? "").toLowerCase() === ADMIN_EMAIL;
+  if (!user || (!isAdmin && !isOperator)) {
     return <Navigate to="/" replace />;
   }
 

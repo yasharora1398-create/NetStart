@@ -24,8 +24,15 @@ import {
   MessageCircle,
   ShieldCheck,
   User,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
+// Hardcoded admin gate: only the operator account at this address
+// sees the Admin icon. Anyone else clicking /admin still hits the
+// page's own isAdmin gate and gets redirected.
+const ADMIN_EMAIL = "netstartapp@outlook.com";
 
 type RailItem = {
   to: string;
@@ -67,12 +74,30 @@ const ITEMS: RailItem[] = [
   },
 ];
 
-export const IconRail = () => (
+export const IconRail = () => {
+  const { user } = useAuth();
+  const isAdminEmail =
+    (user?.email ?? "").toLowerCase() === ADMIN_EMAIL;
+  // Admin item appended at the end so the operator's eye lands on it
+  // last and the visual order of the public icons stays stable for
+  // every other visitor.
+  const items: RailItem[] = isAdminEmail
+    ? [
+        ...ITEMS,
+        {
+          to: "/admin",
+          label: "Admin",
+          icon: <Wrench className="size-4" />,
+        },
+      ]
+    : ITEMS;
+
+  return (
   <nav
     aria-label="Primary"
     className="fixed left-3 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2 md:flex"
   >
-    {ITEMS.map((item) => (
+    {items.map((item) => (
       <NavLink
         key={item.to}
         to={item.to}
@@ -104,4 +129,5 @@ export const IconRail = () => (
       </NavLink>
     ))}
   </nav>
-);
+  );
+};

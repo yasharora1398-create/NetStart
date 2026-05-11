@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "web:export": "expo export -p web --output-dir ../dist/m",
+    "web:export": "expo export -p web --output-dir ../dist/m && node scripts/patch-web-html.js",
     "lint": "expo lint"
   },
   "dependencies": {
