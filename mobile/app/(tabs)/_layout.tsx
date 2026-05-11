@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Tabs } from "expo-router";
 import {
   Dimensions,
   Platform,
+  Pressable,
   StyleSheet,
   View,
 } from "react-native";
@@ -13,6 +14,8 @@ import Animated, {
 } from "react-native-reanimated";
 import {
   Bookmark,
+  ChevronDown,
+  ChevronUp,
   Flame,
   MessageCircle,
   User,
@@ -33,6 +36,36 @@ import { bumpUnread, useUnread } from "@/lib/unread";
 // Per-user key for "I've already seen the acceptance celebration".
 // Once dismissed, the overlay won't pop again on subsequent launches.
 const ACCEPT_DISMISSED_PREFIX = "polln8.accept_dismissed.";
+
+// Per-device key for "the user has chosen to hide the bottom tab
+// bar". Persisted in AsyncStorage so it survives reloads on web and
+// native restarts on phone. Lives device-wide rather than per-user
+// because the bar's visibility is a personal-screen preference.
+const TABBAR_COLLAPSED_KEY = "polln8.tabbar.collapsed";
+
+const useTabBarCollapsed = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  // Hydrate once on mount. We swallow errors quietly — falling
+  // back to "expanded" is the safer default.
+  useEffect(() => {
+    AsyncStorage.getItem(TABBAR_COLLAPSED_KEY)
+      .then((v) => {
+        if (v === "1") setCollapsed(true);
+      })
+      .catch(() => {});
+  }, []);
+  const toggle = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      void AsyncStorage.setItem(
+        TABBAR_COLLAPSED_KEY,
+        next ? "1" : "0",
+      ).catch(() => {});
+      return next;
+    });
+  }, []);
+  return { collapsed, toggle };
+};
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const BAR_W = SCREEN_W - 32; // tab bar inner width (16 each side margin)
@@ -149,6 +182,13 @@ export default function TabLayout() {
   const { theme, mode } = useTheme();
   const { user } = useAuth();
   const savedCount = useSavedCount();
+  // Bottom tab bar collapse state. When collapsed the tab bar is
+  // hidden via display:none and a small floating chevron appears
+  // in the bottom-right corner to bring it back. When expanded the
+  // bar is visible and a small "minimize" chevron sits above its
+  // top-right edge.
+  const { collapsed: tabBarCollapsed, toggle: toggleTabBar } =
+    useTabBarCollapsed();
   // Builders browse projects; founders swipe candidates. We swap
   // which of Match/Browse is the visible primary tab based on the
   // role stamped on user_metadata at sign-up (or after a role switch).
@@ -326,6 +366,10 @@ export default function TabLayout() {
           shadowOffset: { width: 0, height: 8 },
           elevation: 12,
           overflow: Platform.OS === "ios" ? "visible" : "hidden",
+          // Setting display:none removes the bar from layout entirely
+          // when the user chooses to hide it. The chevron handle
+          // below stays mounted so they can bring the bar back.
+          display: tabBarCollapsed ? "none" : "flex",
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -416,6 +460,37 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+
+    {/* Tab-bar collapse handle. When the bar is expanded, the
+        handle sits as a small chevron just above the bar's
+        top-right edge (so it reads as part of the bar). When
+        collapsed, it floats in the bottom-right corner — the
+        only on-screen affordance to bring the bar back. */}
+    <Pressable
+      onPress={toggleTabBar}
+      hitSlop={10}
+      accessibilityRole="button"
+      accessibilityLabel={
+        tabBarCollapsed ? "Show tab bar" : "Hide tab bar"
+      }
+      style={[
+        styles.tabBarHandle,
+        {
+          backgroundColor: theme.bgElev,
+          borderColor: theme.border,
+          // Sit slightly above the tab bar's top edge when
+          // expanded; drop to the bottom-right corner when not.
+          bottom: tabBarCollapsed ? 24 : 24 + 68 - 6,
+        },
+      ]}
+    >
+      {tabBarCollapsed ? (
+        <ChevronUp size={16} color={theme.gold} />
+      ) : (
+        <ChevronDown size={16} color={theme.gold} />
+      )}
+    </Pressable>
+
     {showOverlay && (
       <ReviewStatusOverlay
         status={profile.reviewStatus}
@@ -428,3 +503,22 @@ export default function TabLayout() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBarHandle: {
+    position: "absolute",
+    right: 20,
+    width: 36,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    zIndex: 50,
+  },
+});

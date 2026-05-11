@@ -1,5 +1,32 @@
 {
+  "redirects": [
+    {
+      "source": "/((?!m/|_expo/|assets/|favicon|robots\\.txt|sitemap\\.xml).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(Mobi|Android|iPhone|iPad|iPod).*"
+        }
+      ],
+      "destination": "/m/$1",
+      "permanent": false
+    },
+    {
+      "source": "/m/(.*)",
+      "missing": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(Mobi|Android|iPhone|iPad|iPod).*"
+        }
+      ],
+      "destination": "/$1",
+      "permanent": false
+    }
+  ],
   "rewrites": [
+    { "source": "/m/(.*)", "destination": "/m/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
