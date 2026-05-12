@@ -17,9 +17,9 @@
          (src/hooks/usePageMeta.ts) overrides these per-route at
          runtime so /how, /signup, /terms etc. each get their own
          title/description for SEO + browser-tab clarity. -->
-    <title>Polln8| Cofounder matchmaking. Vetted. Mutual. No spam.</title>
-    <meta name="description" content="Polln8 is private matchmaking for cofounders. Vetted founders meet vetted operators. Every match is mutual. Sign up in five minutes; first matches in under 24 hours." />
-    <meta name="keywords" content="cofounder matchmaking, find a cofounder, find a startup to join, technical cofounder, founding engineer, founding team, startup operators, early-stage startup, vetted startup talent, cofounder finder, startup matchmaking, equity startup, polln8" />
+    <title>Polln8 | How to find a cofounder, technical cofounder, or startup to join</title>
+    <meta name="description" content="How to find a cofounder online: Polln8 matches founders with vetted technical cofounders, CTOs, and non-technical cofounders, and matches operators looking to join a startup as a cofounder or early employee. Equity-aligned, mutual matches only." />
+    <meta name="keywords" content="how to find a cofounder, how to find a technical cofounder, where to find a cofounder, find a cofounder online, looking for a technical cofounder, find a cto for my startup, find a non-technical cofounder, how to join a startup, join a startup as a cofounder, early employee startup jobs, startup jobs equity, become a startup cofounder, polln8" />
     <meta name="author" content="Polln8" />
     <meta name="application-name" content="Polln8" />
     <meta name="apple-mobile-web-app-title" content="Polln8" />
@@ -31,8 +31,8 @@
     <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
 
     <meta property="og:site_name" content="Polln8" />
-    <meta property="og:title" content="Polln8| Cofounder matchmaking. Vetted. Mutual." />
-    <meta property="og:description" content="Private matchmaking for cofounders. Vetted founders meet vetted operators. Every match is mutual. First matches in under 24 hours." />
+    <meta property="og:title" content="Polln8 | How to find a cofounder, technical cofounder, or startup to join" />
+    <meta property="og:description" content="Find a cofounder, a technical cofounder, a CTO, or a startup to join as an early cofounder or employee. Vetted profiles, mutual matches only." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://polln8.com" />
     <meta property="og:image" content="https://polln8.com/polln8-og.png" />
@@ -44,8 +44,8 @@
     <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Polln8| Cofounder matchmaking. Vetted. Mutual." />
-    <meta name="twitter:description" content="Private matchmaking for cofounders. Vetted founders meet vetted operators. Every match is mutual." />
+    <meta name="twitter:title" content="Polln8 | How to find a cofounder or join a startup" />
+    <meta name="twitter:description" content="Find a cofounder, a technical cofounder, a CTO, or a startup to join as an early cofounder or employee. Vetted profiles, mutual matches only." />
     <meta name="twitter:image" content="https://polln8.com/polln8-og.png" />
     <meta name="twitter:image:alt" content="Polln8 | Cofounder matchmaking. Vetted. Mutual." />
 
@@ -64,7 +64,8 @@
     <link rel="canonical" href="https://polln8.com" />
 
     <!-- Organization schema gives Google knowledge-panel data:
-         brand name, logo, social links, sameAs URLs (add when live). -->
+         brand name, logo, social links, sameAs URLs (add when live).
+         keywords is read by Google for topical relevance scoring. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -72,7 +73,8 @@
       "name": "Polln8",
       "url": "https://polln8.com",
       "logo": "https://polln8.com/polln8-logo.png",
-      "description": "Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining.",
+      "description": "Find a cofounder, a technical cofounder, a CTO, or a startup to join as an early cofounder or employee. Vetted profiles, mutual matches only.",
+      "keywords": "how to find a cofounder, how to find a technical cofounder, where to find a cofounder, find a cofounder online, looking for a technical cofounder, find a cto for my startup, find a non-technical cofounder, how to join a startup, join a startup as a cofounder, early employee startup jobs, startup jobs equity, become a startup cofounder",
       "sameAs": []
     }
     </script>
@@ -84,6 +86,116 @@
       "@type": "WebSite",
       "name": "Polln8",
       "url": "https://polln8.com"
+    }
+    </script>
+    <!-- FAQPage schema. Each Question is one of the target search
+         queries verbatim, so Google can match a user typing it into
+         the search box and surface us as a candidate answer (and
+         eligibly render the question/answer pair as a rich result).
+         The phrasing of the Name fields must stay identical to the
+         queries we want to rank for. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How to find a cofounder?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use Polln8. We're private matchmaking for cofounders: every profile is reviewed by a human, every match is mutual, and most users get their first matches in under 24 hours."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to find a technical cofounder?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Post what you're building on Polln8. We surface vetted technical operators (engineers, CTOs, founding engineers) whose skills and commitment actually match your project, not a list of names you have to cold-DM."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where to find a cofounder?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "On Polln8. Twitter DMs and YC's cofounder matcher are noisy. Polln8 is a private, vetted network that only shows you people who have been reviewed and who are actively looking."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to find a cofounder online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sign up at polln8.com, tell us who you are, and we review you in under 24 hours. Once you're in you can browse founders and operators, accept the ones who fit, and chat as soon as the other side accepts back."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "I'm looking for a technical cofounder. What's the fastest way?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Polln8 is built for this. Post your project once and we route it to vetted technical operators (engineers, CTOs, founding engineers) who are actively looking for a startup to join."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I find a CTO for my startup?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Post your project on Polln8. We match founders with operators who are CTO-level and looking for equity-aligned startups to join — not contractors, not freelancers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to find a non-technical cofounder?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Polln8 matches both sides. Builders can browse vetted non-technical founders with real go-to-market, sales, design, or operations chops who are looking for a technical partner."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to join a startup?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "On Polln8 you browse the projects vetted founders are actively building. See the stage, the equity they're offering, and exactly what they need — then request to chat. No job-board noise."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I join a startup as a cofounder?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Polln8 is built around cofounder-level joins: you swipe through founders looking for cofounders or founding engineers, with equity terms up front. Mutual interest before any commitment."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where can I find early employee startup jobs?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Polln8. Every project on Polln8 is a vetted early-stage startup actively looking for cofounder-tier or founding-employee-tier hires — not a 200-person company with an open req."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I find startup jobs with equity?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Browse Polln8. Every project lists what equity is on the table up front, so you only chat with founders whose terms you can actually accept."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I become a startup cofounder?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sign up on Polln8 as a builder. We vet your background, surface you to founders whose project fits your skills, and open a chat the moment both sides accept. No DMing strangers, no cold pitches."
+          }
+        }
+      ]
     }
     </script>
 
