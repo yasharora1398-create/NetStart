@@ -17,31 +17,50 @@
          (src/hooks/usePageMeta.ts) overrides these per-route at
          runtime so /how, /signup, /terms etc. each get their own
          title/description for SEO + browser-tab clarity. -->
-    <title>Polln8 | Find a Cofounder or a Startup to Join</title>
-    <meta name="description" content="Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining." />
-    <meta name="keywords" content="cofounder matchmaking, find a cofounder, find a startup to join, technical cofounder, startup cofounder, founding engineer, founding team, startup operators, startup jobs, early-stage startup, vetted startup talent, cofounder finder, cofounder dating, startup matchmaking, quality candidates, equity startup" />
+    <title>Polln8| Cofounder matchmaking. Vetted. Mutual. No spam.</title>
+    <meta name="description" content="Polln8 is private matchmaking for cofounders. Vetted founders meet vetted operators. Every match is mutual. Sign up in five minutes; first matches in under 24 hours." />
+    <meta name="keywords" content="cofounder matchmaking, find a cofounder, find a startup to join, technical cofounder, founding engineer, founding team, startup operators, early-stage startup, vetted startup talent, cofounder finder, startup matchmaking, equity startup, polln8" />
     <meta name="author" content="Polln8" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="application-name" content="Polln8" />
+    <meta name="apple-mobile-web-app-title" content="Polln8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
 
     <meta property="og:site_name" content="Polln8" />
-    <meta property="og:title" content="Polln8 | Find a Cofounder or a Startup to Join" />
-    <meta property="og:description" content="Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining." />
+    <meta property="og:title" content="Polln8| Cofounder matchmaking. Vetted. Mutual." />
+    <meta property="og:description" content="Private matchmaking for cofounders. Vetted founders meet vetted operators. Every match is mutual. First matches in under 24 hours." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://polln8.com" />
     <meta property="og:image" content="https://polln8.com/polln8-og.png" />
+    <meta property="og:image:secure_url" content="https://polln8.com/polln8-og.png" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Polln8 | Find a Cofounder or a Startup to Join" />
-
+    <meta property="og:image:alt" content="Polln8 | Cofounder matchmaking. Vetted. Mutual." />
     <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Polln8 | Find a Cofounder or a Startup to Join" />
-    <meta name="twitter:description" content="Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and operators with early-stage startups worth joining." />
+    <meta name="twitter:title" content="Polln8| Cofounder matchmaking. Vetted. Mutual." />
+    <meta name="twitter:description" content="Private matchmaking for cofounders. Vetted founders meet vetted operators. Every match is mutual." />
     <meta name="twitter:image" content="https://polln8.com/polln8-og.png" />
-    <meta name="twitter:image:alt" content="Polln8 | Find a Cofounder or a Startup to Join" />
+    <meta name="twitter:image:alt" content="Polln8 | Cofounder matchmaking. Vetted. Mutual." />
 
-    <link rel="icon" type="image/png" href="/polln8-logo.png" />
+    <!-- Favicons + touch icons. Multiple rel/sizes so every client
+         (Google search, Safari pinned tab, iOS home screen, Android
+         install prompt, legacy browsers asking for /favicon.ico) gets
+         a real polln8 icon and never falls back to a cached Lovable
+         default. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/polln8-logo.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/polln8-logo.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/polln8-logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/polln8-logo.png" color="#050505" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href="https://polln8.com" />
 
     <!-- Organization schema gives Google knowledge-panel data:
@@ -69,8 +88,7 @@
     </script>
 
     <!-- Privacy-friendly analytics. No cookies, no cross-site tracking. -->
-    <!-- Tag the actual production domain inside Plausible before this fires. -->
-    <script defer data-domain="polln8.vercel.app" src="https://plausible.io/js/script.js"></script>
+    <script defer data-domain="polln8.com" src="https://plausible.io/js/script.js"></script>
   </head>
 
   <body>
