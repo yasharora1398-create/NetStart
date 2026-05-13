@@ -1,4 +1,4 @@
-import { NavLink as RRNavLink, useLocation } from "react-router-dom";
+import { NavLink as RRNavLink, useLocation } from "@/lib/router-compat";
 import { Flower2, Heart, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 

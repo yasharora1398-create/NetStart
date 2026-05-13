@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Next.js build artefacts
+.next/
+out/
+next-env.d.ts
+
+# Mobile Expo web bundle is generated into public/m by `npm run build`
+# (npm --prefix mobile run web:export). Build artifact, not source.
+/public/m/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

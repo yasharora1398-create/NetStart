@@ -1,5 +1,5 @@
 import { LogOut, Settings as SettingsIcon, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import {
   DropdownMenu,
   DropdownMenuContent,

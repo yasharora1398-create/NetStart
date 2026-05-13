@@ -10,7 +10,7 @@
  * waitlist, prod /mynet, etc.).
  */
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink } from "@/lib/router-compat";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";

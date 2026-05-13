@@ -13,7 +13,7 @@
  * the home indicator on iOS without overlapping the page content.
  */
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "@/lib/router-compat";
 import {
   Bookmark,
   ChevronLeft,

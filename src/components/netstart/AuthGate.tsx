@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { Lock, Sparkles, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

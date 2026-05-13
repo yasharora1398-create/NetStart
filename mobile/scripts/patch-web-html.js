@@ -23,7 +23,7 @@ const htmlPath = path.resolve(
   __dirname,
   "..",
   "..",
-  "dist",
+  "public",
   "m",
   "index.html",
 );

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { BottomNav } from "./BottomNav";
 import { Logo } from "./Logo";
 import { StatusBar } from "./PhoneChrome";
