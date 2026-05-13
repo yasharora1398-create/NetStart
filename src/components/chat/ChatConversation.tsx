@@ -24,7 +24,7 @@ import {
   useState,
   type KeyboardEvent,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import {
   ArrowLeft,
   Check,

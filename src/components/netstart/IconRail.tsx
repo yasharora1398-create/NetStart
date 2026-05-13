@@ -13,7 +13,7 @@
  * the rail just gets in the way.
  */
 import { type ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "@/lib/router-compat";
 import {
   Bookmark,
   Briefcase,

@@ -1,13 +1,13 @@
 // Gemini text-embedding-004 (768-dim) embeddings.
 // Preferred path: Supabase Edge Function `embed` keeps the key server-side.
-// Fallback path: direct call from the browser using VITE_GEMINI_API_KEY
+// Fallback path: direct call from the browser using NEXT_PUBLIC_GEMINI_API_KEY
 // (visible in the bundle - acceptable for local dev, not for production).
 // Server-side embedding storage + cosine search lives in pg_vector.
 
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 
-const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) ?? "";
-const USE_EDGE = (import.meta.env.VITE_USE_EMBED_FUNCTION as string | undefined) === "1";
+const GEMINI_API_KEY = (process.env.NEXT_PUBLIC_GEMINI_API_KEY as string | undefined) ?? "";
+const USE_EDGE = (process.env.NEXT_PUBLIC_USE_EMBED_FUNCTION as string | undefined) === "1";
 const EMBEDDING_MODEL = "text-embedding-004";
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent`;
 const MAX_INPUT_CHARS = 8000;
