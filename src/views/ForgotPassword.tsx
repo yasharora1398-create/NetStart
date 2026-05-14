@@ -18,6 +18,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
+import { Turnstile } from "@/components/netstart/Turnstile";
+
+const CAPTCHA_REQUIRED = Boolean(
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+);
 
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
@@ -43,6 +48,12 @@ const ForgotPassword = () => {
     (location.state as { email?: string } | null)?.email ?? "";
   const [submitting, setSubmitting] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaNonce((n) => n + 1);
+  };
 
   const form = useForm<ForgotValues>({
     resolver: zodResolver(schema),
@@ -51,9 +62,17 @@ const ForgotPassword = () => {
   });
 
   const onSubmit = async (values: ForgotValues) => {
+    if (CAPTCHA_REQUIRED && !captchaToken) {
+      toast.error("Complete the human-check below before sending.");
+      return;
+    }
     setSubmitting(true);
-    const { error } = await requestPasswordReset(values.email);
+    const { error } = await requestPasswordReset(
+      values.email,
+      captchaToken ?? undefined,
+    );
     setSubmitting(false);
+    resetCaptcha();
     if (error) {
       toast.error(friendlyError(error.message));
       return;
@@ -149,12 +168,24 @@ const ForgotPassword = () => {
                       )}
                     />
                   </fieldset>
+                  {CAPTCHA_REQUIRED && (
+                    <div className="flex justify-center">
+                      <Turnstile
+                        key={captchaNonce}
+                        onVerify={(t) => setCaptchaToken(t)}
+                        onExpire={resetCaptcha}
+                        onError={resetCaptcha}
+                      />
+                    </div>
+                  )}
                   <Button
                     type="submit"
                     variant="gold"
                     size="lg"
                     className="w-full h-12 group"
-                    disabled={submitting}
+                    disabled={
+                      submitting || (CAPTCHA_REQUIRED && !captchaToken)
+                    }
                   >
                     {submitting ? (
                       <>

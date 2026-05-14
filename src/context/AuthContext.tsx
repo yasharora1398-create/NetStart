@@ -22,15 +22,23 @@ type AuthContextValue = {
   configured: boolean;
   isAdmin: boolean;
   emailVerified: boolean;
-  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signIn: (
+    email: string,
+    password: string,
+    captchaToken?: string,
+  ) => Promise<AuthResult>;
   signUp: (
     email: string,
     password: string,
     name: string,
     role: "founder" | "builder",
+    captchaToken?: string,
   ) => Promise<SignUpResult>;
   signOut: (scope?: "local" | "global") => Promise<void>;
-  requestPasswordReset: (email: string) => Promise<AuthResult>;
+  requestPasswordReset: (
+    email: string,
+    captchaToken?: string,
+  ) => Promise<AuthResult>;
   updatePassword: (newPassword: string) => Promise<AuthResult>;
   updateEmail: (newEmail: string) => Promise<AuthResult>;
   resendVerification: (email: string) => Promise<AuthResult>;
@@ -99,11 +107,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [session?.user?.id]);
 
-  const signIn: AuthContextValue["signIn"] = async (email, password) => {
+  const signIn: AuthContextValue["signIn"] = async (
+    email,
+    password,
+    captchaToken,
+  ) => {
     if (!isSupabaseConfigured) return notConfigured();
     const { error } = await getSupabase().auth.signInWithPassword({
       email: normalizeEmail(email),
       password,
+      options: captchaToken ? { captchaToken } : undefined,
     });
     return { error };
   };
@@ -113,6 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password,
     name,
     role,
+    captchaToken,
   ) => {
     if (!isSupabaseConfigured) return notConfiguredSignUp();
     // After the user clicks the verification link in the email, send
@@ -128,6 +142,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       options: {
         data: { name: name.trim(), role },
         emailRedirectTo,
+        // Supabase verifies this against Cloudflare's API using the
+        // secret key configured in Auth -> CAPTCHA settings. If
+        // CAPTCHA is enabled there but token is missing or invalid,
+        // signUp rejects with a captcha-related error.
+        captchaToken,
       },
     });
     if (error) return { error, duplicate: false };
@@ -148,12 +167,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const requestPasswordReset: AuthContextValue["requestPasswordReset"] = async (
     email,
+    captchaToken,
   ) => {
     if (!isSupabaseConfigured) return notConfigured();
     const redirectTo = `${window.location.origin}/reset-password`;
     const { error } = await getSupabase().auth.resetPasswordForEmail(
       normalizeEmail(email),
-      { redirectTo },
+      captchaToken ? { redirectTo, captchaToken } : { redirectTo },
     );
     return { error };
   };

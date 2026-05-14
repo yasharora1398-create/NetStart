@@ -29,6 +29,14 @@ import { useAuth } from "@/context/AuthContext";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { signUpSchema, type SignUpValues } from "@/lib/auth-schemas";
 import { trackSignupCompleted } from "@/lib/analytics";
+import { Turnstile } from "@/components/netstart/Turnstile";
+
+// Whether to render the Turnstile widget at all. If the site-key env
+// var is absent (local dev without it set) we skip the widget so
+// devs aren't blocked. Production builds always have the key set.
+const CAPTCHA_REQUIRED = Boolean(
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+);
 import heroBg from "@/assets/hero-bg.jpg";
 
 // Map every Supabase signup error we've seen in production to a
@@ -74,6 +82,17 @@ const SignUp = () => {
   // already has an account (or its enumeration-protection signature
   // says so). More discoverable than a transient toast.
   const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
+  // Turnstile token (Cloudflare CAPTCHA). Cleared after each submit
+  // because Turnstile tokens are single-use; if Supabase rejects the
+  // signup the user has to re-solve before retrying.
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // Bump to force-remount Turnstile on token reset (the widget
+  // doesn't expose a clean "issue new token" hook).
+  const [captchaNonce, setCaptchaNonce] = useState(0);
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaNonce((n) => n + 1);
+  };
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -109,6 +128,10 @@ const SignUp = () => {
   if (loading || user) return null;
 
   const onSubmit = async (values: SignUpValues) => {
+    if (CAPTCHA_REQUIRED && !captchaToken) {
+      toast.error("Complete the human-check below before submitting.");
+      return;
+    }
     setDuplicateEmail(null);
     setSubmitting(true);
     const { error, duplicate } = await signUp(
@@ -116,8 +139,12 @@ const SignUp = () => {
       values.password,
       values.name,
       values.role,
+      captchaToken ?? undefined,
     );
     setSubmitting(false);
+    // Always burn the token after a submit attempt -- Turnstile
+    // tokens are single-use either way.
+    resetCaptcha();
 
     if (error) {
       toast.error(friendlySignUpError(error));
@@ -419,12 +446,30 @@ const SignUp = () => {
                   />
                 </fieldset>
 
+                {/* Cloudflare Turnstile. In "Managed" mode this is
+                    usually invisible to humans; bots get challenged.
+                    The token is required to submit; resetCaptcha()
+                    runs after every submit attempt so a rejected
+                    signup can get a fresh token without page reload. */}
+                {CAPTCHA_REQUIRED && (
+                  <div className="flex justify-center">
+                    <Turnstile
+                      key={captchaNonce}
+                      onVerify={(t) => setCaptchaToken(t)}
+                      onExpire={resetCaptcha}
+                      onError={resetCaptcha}
+                    />
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   variant="gold"
                   size="lg"
                   className="w-full h-12 group"
-                  disabled={submitting}
+                  disabled={
+                    submitting || (CAPTCHA_REQUIRED && !captchaToken)
+                  }
                 >
                   {submitting ? (
                     <>

@@ -27,7 +27,12 @@ import { Logo } from "@/components/netstart/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { signInSchema, type SignInValues } from "@/lib/auth-schemas";
+import { Turnstile } from "@/components/netstart/Turnstile";
 import heroBg from "@/assets/hero-bg.jpg";
+
+const CAPTCHA_REQUIRED = Boolean(
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+);
 
 // Map every Supabase signin error we've seen to a human-readable line.
 // Falls through to the SDK message for anything new.
@@ -70,6 +75,13 @@ const SignIn = () => {
   const [needsConfirmation, setNeedsConfirmation] = useState<string | null>(
     null,
   );
+  // Turnstile token. Required when CAPTCHA env var is set.
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaNonce((n) => n + 1);
+  };
 
   const form = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
@@ -92,10 +104,19 @@ const SignIn = () => {
   if (loading || user) return null;
 
   const onSubmit = async (values: SignInValues) => {
+    if (CAPTCHA_REQUIRED && !captchaToken) {
+      toast.error("Complete the human-check below before signing in.");
+      return;
+    }
     setNeedsConfirmation(null);
     setSubmitting(true);
-    const { error } = await signIn(values.email, values.password);
+    const { error } = await signIn(
+      values.email,
+      values.password,
+      captchaToken ?? undefined,
+    );
     setSubmitting(false);
+    resetCaptcha();
 
     if (error) {
       const friendly = friendlySignInError(error);
@@ -295,12 +316,25 @@ const SignIn = () => {
                   />
                 </fieldset>
 
+                {CAPTCHA_REQUIRED && (
+                  <div className="flex justify-center">
+                    <Turnstile
+                      key={captchaNonce}
+                      onVerify={(t) => setCaptchaToken(t)}
+                      onExpire={resetCaptcha}
+                      onError={resetCaptcha}
+                    />
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   variant="gold"
                   size="lg"
                   className="w-full h-12 group"
-                  disabled={submitting}
+                  disabled={
+                    submitting || (CAPTCHA_REQUIRED && !captchaToken)
+                  }
                 >
                   {submitting ? (
                     <>
