@@ -10,8 +10,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "@/lib/router-compat";
 import {
   AlertCircle,
-  MessageCircle,
-  PanelLeftClose,
   PanelLeftOpen,
   RefreshCw,
 } from "lucide-react";
@@ -20,6 +18,7 @@ import { Button } from "@/components/ui/button";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { useAuth } from "@/context/AuthContext";
 import { useReviewStatus } from "@/hooks/useReviewStatus";
 import {
@@ -278,15 +277,16 @@ const Chats = () => {
 };
 
 const Placeholder = () => (
-  <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
-    <MessageCircle className="size-6 text-muted-foreground" aria-hidden />
-    <p className="font-display text-base text-foreground">
-      Select a conversation
-    </p>
-    <p className="max-w-sm text-sm text-muted-foreground">
-      Pick a thread on the left to read it, or open someone's profile to
-      start a new one.
-    </p>
+  // Uses the same hummingbird-hawk-moth empty-state language as
+  // Match / Saved / Applications. The "threads" variant draws the
+  // top-down envelope-on-a-desk scene with the moth rising out --
+  // perfect cue for "pick a thread to open it."
+  <div className="flex h-full items-center justify-center px-4">
+    <MothEmptyState
+      variant="threads"
+      title="Select a conversation"
+      sub="Pick a thread on the left to read it, or open someone's profile to start a new one."
+    />
   </div>
 );
 

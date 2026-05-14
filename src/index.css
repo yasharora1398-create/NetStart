@@ -481,14 +481,17 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 22px;
-    height: 22px;
-    border-radius: 7px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     border: 0;
     background: rgba(0, 0, 0, 0.05);
     color: #6b6b6b;
     cursor: pointer;
-    z-index: 2;
+    /* Sit above the brand Link below it. The brand Link has z-index:1
+       and stretches the full row width; without a higher z-index the
+       chevron clicks were bleeding through and navigating to "/". */
+    z-index: 5;
     display: grid;
     place-items: center;
     transition: background 140ms ease, color 140ms ease;

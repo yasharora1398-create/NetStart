@@ -84,10 +84,19 @@ export const Sidebar = () => {
       aria-label="Sidebar"
     >
       {/* Collapse toggle - small chevron at the top-right of the
-          sidebar. Aria label flips with state. */}
+          sidebar. Aria label flips with state. stopPropagation +
+          preventDefault on the mouse event so a misfire near the
+          underlying brand Link can't bubble up and trigger a
+          navigation to "/" -- which is what previously happened
+          when users clicked the chevron from /how. */}
       <button
         type="button"
-        onClick={() => setCollapsed((c) => !c)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setCollapsed((c) => !c);
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
         className="gs-toggle"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         aria-expanded={!collapsed}

@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/netstart/Footer";
 import { IconRail } from "@/components/netstart/IconRail";
+import { HomeAuthStrip } from "@/components/netstart/HomeAuthStrip";
 import { FadeUp } from "@/components/netstart/FadeUp";
 import WhySection from "@/components/marketing/WhySection";
 import { useTheme } from "@/hooks/useTheme";
@@ -45,6 +46,7 @@ const Home = () => {
   return (
     <div className="min-h-dvh bg-background text-foreground overflow-x-clip">
       <IconRail />
+      <HomeAuthStrip />
 
       <main className="md:pl-20">
         <Hero />
