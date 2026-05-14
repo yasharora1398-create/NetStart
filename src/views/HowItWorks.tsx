@@ -11,9 +11,9 @@ import {
 import { Sidebar } from "@/components/netstart/Sidebar";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
-// Sidebar in dev only; production /how is the public marketing
-// page linked from the waitlist and stays sidebar-less.
-const SHOW_SIDEBAR = process.env.NODE_ENV !== "production";
+// Sidebar shows everywhere now; /how is treated as an internal
+// product page rather than a sidebar-less marketing surface.
+const SHOW_SIDEBAR = true;
 
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);

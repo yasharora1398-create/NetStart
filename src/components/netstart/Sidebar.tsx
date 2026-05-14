@@ -114,75 +114,80 @@ export const Sidebar = () => {
         </div>
       </Link>
 
-      {/* Home - its own subsection so the home jump is a first-class
-          item rather than relying on the brand mark alone. */}
-      <div className="gs-section">
-        <div className="gs-section-label">Home</div>
-        {HOME_ITEMS.map((item) => (
-          <SideLink key={item.to} item={item} end />
-        ))}
-      </div>
-
-      {/* App - MyNet gets a name pill so the user sees whose net it
-          is at a glance. Falls back to the email local-part when no
-          name was set at signup. */}
-      <div className="gs-section">
-        <div className="gs-section-label">App</div>
-        {APP_ITEMS.map((item) => {
-          const pill =
-            item.to === "/mynet" && user
-              ? userDisplayName(user)
-              : undefined;
-          return <SideLink key={item.to} item={item} pill={pill} />;
-        })}
-      </div>
-
-      {/* About */}
-      <div className="gs-section">
-        <div className="gs-section-label">About</div>
-        {ABOUT_ITEMS.map((item) => (
-          <SideLink key={item.to} item={item} />
-        ))}
-      </div>
-
-      {/* Admin - only renders for the operator email. The Admin page
-          itself enforces isAdmin so a leaked link still gets bounced. */}
-      {(user?.email ?? "").toLowerCase() === ADMIN_EMAIL && (
+      {/* Scrollable middle section. Brand row stays pinned at top,
+          theme toggle stays pinned at bottom; everything between
+          scrolls when the sections collectively exceed the
+          available height (small viewports, lots of nav items, the
+          Admin section added for operator users, etc.). */}
+      <div className="gs-scroll">
+        {/* Home - its own subsection so the home jump is a first-class
+            item rather than relying on the brand mark alone. */}
         <div className="gs-section">
-          <div className="gs-section-label">Admin</div>
-          <SideLink
-            item={{ to: "/admin", label: "Dashboard", icon: AdminIcon }}
-          />
+          <div className="gs-section-label">Home</div>
+          {HOME_ITEMS.map((item) => (
+            <SideLink key={item.to} item={item} end />
+          ))}
         </div>
-      )}
 
-      {/* Account - Sign in/Sign up when logged out, Sign out when in. */}
-      <div className="gs-section">
-        <div className="gs-section-label">Account</div>
-        {user ? (
-          <button
-            type="button"
-            onClick={() => void handleSignOut()}
-            className="gs-item"
-          >
-            <span className="gs-ico" aria-hidden="true">
-              <SignOutIcon />
-            </span>
-            <span>Sign out</span>
-          </button>
-        ) : (
-          <>
+        {/* App - MyNet gets a name pill so the user sees whose net it
+            is at a glance. Falls back to the email local-part when no
+            name was set at signup. */}
+        <div className="gs-section">
+          <div className="gs-section-label">App</div>
+          {APP_ITEMS.map((item) => {
+            const pill =
+              item.to === "/mynet" && user
+                ? userDisplayName(user)
+                : undefined;
+            return <SideLink key={item.to} item={item} pill={pill} />;
+          })}
+        </div>
+
+        {/* About */}
+        <div className="gs-section">
+          <div className="gs-section-label">About</div>
+          {ABOUT_ITEMS.map((item) => (
+            <SideLink key={item.to} item={item} />
+          ))}
+        </div>
+
+        {/* Admin - only renders for the operator email. The Admin page
+            itself enforces isAdmin so a leaked link still gets bounced. */}
+        {(user?.email ?? "").toLowerCase() === ADMIN_EMAIL && (
+          <div className="gs-section">
+            <div className="gs-section-label">Admin</div>
             <SideLink
-              item={{ to: "/signin", label: "Sign in", icon: SignInIcon }}
+              item={{ to: "/admin", label: "Dashboard", icon: AdminIcon }}
             />
-            <SideLink
-              item={{ to: "/signup", label: "Sign up", icon: SignUpIcon }}
-            />
-          </>
+          </div>
         )}
-      </div>
 
-      <div className="gs-spacer" />
+        {/* Account - Sign in/Sign up when logged out, Sign out when in. */}
+        <div className="gs-section">
+          <div className="gs-section-label">Account</div>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => void handleSignOut()}
+              className="gs-item"
+            >
+              <span className="gs-ico" aria-hidden="true">
+                <SignOutIcon />
+              </span>
+              <span>Sign out</span>
+            </button>
+          ) : (
+            <>
+              <SideLink
+                item={{ to: "/signin", label: "Sign in", icon: SignInIcon }}
+              />
+              <SideLink
+                item={{ to: "/signup", label: "Sign up", icon: SignUpIcon }}
+              />
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Theme toggle - wired to global useTheme so it flips the
           .dark class on <html> and persists to localStorage. */}
