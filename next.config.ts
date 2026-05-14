@@ -29,6 +29,26 @@ const config: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // The Expo mobile bundle in public/m/ is a single-page app: every
+  // URL under /m/* needs to serve /m/index.html so the in-bundle
+  // Expo Router can take over and resolve the deep link client-side.
+  // Without this, a request to /m/ (or /m/match, /m/chats, etc.)
+  // hits Next.js's static handler which doesn't auto-serve a
+  // directory's index.html and 404s. This rewrite was previously
+  // declared in vercel.json under the Vite setup; ported here so
+  // Next.js can keep the same behavior.
+  async rewrites() {
+    return [
+      { source: "/m", destination: "/m/index.html" },
+      { source: "/m/", destination: "/m/index.html" },
+      // Inner SPA routes (everything after /m/) also funnel into the
+      // single index.html. Static asset paths (_expo/, assets/) are
+      // matched against the filesystem first by Next.js, so this
+      // catch-all only catches the SPA-routed URLs.
+      { source: "/m/:path*", destination: "/m/index.html" },
+    ];
+  },
+
   async redirects() {
     return [
       // Phone-shaped UAs hitting the main site get pushed into /m/
