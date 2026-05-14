@@ -183,16 +183,25 @@ const OverviewTab = () => {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([getAnalytics(), listAllSignups()])
-      .then(([a, s]) => {
+    // Promise.allSettled so one failing query doesn't blank the whole
+    // tab. Supabase errors aren't Error instances, so we read .message
+    // off the rejected reason instead of relying on `instanceof Error`
+    // (which silently fell back to a generic "Failed to load.").
+    Promise.allSettled([getAnalytics(), listAllSignups()])
+      .then(([analyticsResult, signupsResult]) => {
         if (cancelled) return;
-        setCounts(a.counts);
-        setDaily(a.daily);
-        setSignups(s);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          toast.error(err instanceof Error ? err.message : "Failed to load.");
+        if (analyticsResult.status === "fulfilled") {
+          setCounts(analyticsResult.value.counts);
+          setDaily(analyticsResult.value.daily);
+        } else {
+          const r = analyticsResult.reason as { message?: string } | undefined;
+          toast.error(`Analytics: ${r?.message ?? "load failed"}`);
+        }
+        if (signupsResult.status === "fulfilled") {
+          setSignups(signupsResult.value);
+        } else {
+          const r = signupsResult.reason as { message?: string } | undefined;
+          toast.error(`Signups: ${r?.message ?? "load failed"}`);
         }
       })
       .finally(() => {
@@ -386,9 +395,12 @@ const ReviewTab = () => {
       .then((data) => {
         if (!cancelled) setSubmissions(data);
       })
-      .catch((err) => {
+      .catch((err: { message?: string } | undefined) => {
         if (!cancelled) {
-          toast.error(err instanceof Error ? err.message : "Failed to load.");
+          // Surface the real Supabase / network error instead of the
+          // old generic "Failed to load." which silently swallowed
+          // RLS denials and session-expired cases.
+          toast.error(`Review queue: ${err?.message ?? "load failed"}`);
         }
       })
       .finally(() => {
