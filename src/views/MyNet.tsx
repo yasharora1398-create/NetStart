@@ -17,6 +17,8 @@ import { toast } from "sonner";
 
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { OnboardingTour } from "@/components/netstart/OnboardingTour";
+import { trackMynetSubmitted } from "@/lib/analytics";
 import { Sidebar } from "@/components/netstart/Sidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -278,11 +280,22 @@ const MyNet = () => {
       await submitProfile();
       const fresh = await getProfile(uid);
       setProfile(fresh);
+      const wasFirstSubmit = profile.reviewStatus === "draft";
       toast.success(
         fresh.reviewStatus === "pending"
           ? "Submitted for review."
           : "Profile updated.",
       );
+      // Funnel event: only fire on the first-time submit (when the
+      // profile was previously in draft state). Resubmissions after
+      // rejection or edits to an accepted profile shouldn't pollute
+      // the conversion metric.
+      if (wasFirstSubmit && fresh.reviewStatus === "pending") {
+        const role =
+          (user?.user_metadata?.role as "founder" | "builder" | undefined) ??
+          "builder";
+        trackMynetSubmitted(role);
+      }
     } catch (err) {
       toast.error(errorMessage(err));
       throw err;
@@ -868,6 +881,11 @@ const MyNet = () => {
       </div>
 
       {!loading && !user && <AuthGate />}
+
+      {/* First-visit 3-step coach-mark overlay. Keyed per-user via
+          localStorage so it pops exactly once per account. Skips
+          itself on logged-out / hydrating states. */}
+      {user && <OnboardingTour userId={user.id} />}
 
       <Footer />
 

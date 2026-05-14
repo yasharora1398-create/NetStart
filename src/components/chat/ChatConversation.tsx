@@ -70,6 +70,7 @@ import {
 } from "@/lib/mynet-storage";
 import type { Candidate } from "@/lib/mynet-types";
 import { markThreadUnread } from "@/lib/threadUnread";
+import { ReportUserButton } from "@/components/netstart/ReportUserButton";
 import { dayKey, formatDayDivider, formatTime } from "./ChatTime";
 
 const initials = (name: string): string => {
@@ -653,6 +654,13 @@ const Header = ({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      {/* Report button sits outside the menu so it stays one click
+          away. The reported user never learns who filed; admin
+          handles the review queue. */}
+      <ReportUserButton
+        reportedUserId={contactId}
+        reportedName={profile?.fullName}
+      />
     </div>
   </header>
 );

@@ -36,6 +36,64 @@ const todayLocal = (): string => {
   return `${y}-${m}-${day}`;
 };
 
+// ───────────────────────────────────────────────────────────────
+// Plausible custom events (funnel tracking).
+//
+// Plausible exposes window.plausible() once the script in
+// app/layout.tsx loads. Calling it pushes a named event to the
+// configured site, which appears in the Plausible dashboard under
+// "Goals" -> "Custom events." Set those goals up before the events
+// have reporting value:
+//
+//   - signup_completed         (verified email + first MyNet visit)
+//   - mynet_submitted          (sent profile for review)
+//   - first_match_action       (first save/pass after acceptance)
+//   - first_chat_request_sent  (first time a user kicks off a chat)
+//
+// All calls silently no-op on the server (window undefined) and on
+// the client when Plausible hasn't loaded yet (ad blocker, dev
+// without the script, etc.). Analytics must never throw and brick a
+// user flow, so the wrapper catches everything.
+// ───────────────────────────────────────────────────────────────
+type PlausibleProps = Record<string, string | number | boolean | null>;
+
+declare global {
+  interface Window {
+    plausible?: (
+      eventName: string,
+      options?: { props?: PlausibleProps; callback?: () => void },
+    ) => void;
+  }
+}
+
+export const track = (
+  eventName: string,
+  props?: PlausibleProps,
+): void => {
+  try {
+    if (typeof window === "undefined") return;
+    if (typeof window.plausible !== "function") return;
+    window.plausible(eventName, props ? { props } : undefined);
+  } catch {
+    // never let analytics break the surrounding flow
+  }
+};
+
+export const trackSignupCompleted = (role: "founder" | "builder"): void =>
+  track("signup_completed", { role });
+
+export const trackMynetSubmitted = (role: "founder" | "builder"): void =>
+  track("mynet_submitted", { role });
+
+export const trackFirstMatchAction = (
+  action: "save" | "pass" | "open",
+): void => track("first_match_action", { action });
+
+export const trackFirstChatRequestSent = (): void =>
+  track("first_chat_request_sent");
+
+// ───────────────────────────────────────────────────────────────
+
 let inFlight: Promise<void> | null = null;
 
 // Log a single page view for the current device + today. Subsequent

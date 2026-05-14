@@ -259,12 +259,17 @@ const StateBadge = ({
 };
 
 const EmptyState = () => (
-  <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-    <Inbox className="size-5 text-muted-foreground" aria-hidden />
-    <p className="text-sm font-medium text-foreground">No conversations</p>
-    <p className="text-xs text-muted-foreground">
-      Send a message to a founder or operator from Match. The thread will
-      land here.
+  <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+    <Inbox className="size-6 text-muted-foreground" aria-hidden />
+    <p className="text-sm font-medium text-foreground">
+      No conversations yet
+    </p>
+    <p className="text-xs leading-relaxed text-muted-foreground max-w-xs">
+      Threads start when both sides accept a chat request. Head to{" "}
+      <a href="/match" className="text-gold hover:underline">
+        Match
+      </a>{" "}
+      to find someone to talk to, or wait for an inbound request to land here.
     </p>
   </div>
 );

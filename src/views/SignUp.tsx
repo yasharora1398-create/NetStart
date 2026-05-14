@@ -28,6 +28,7 @@ import { Logo } from "@/components/netstart/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { signUpSchema, type SignUpValues } from "@/lib/auth-schemas";
+import { trackSignupCompleted } from "@/lib/analytics";
 import heroBg from "@/assets/hero-bg.jpg";
 
 // Map every Supabase signup error we've seen in production to a
@@ -133,6 +134,10 @@ const SignUp = () => {
       });
       return;
     }
+
+    // Funnel event: top of the conversion funnel. Email isn't
+    // verified yet, but the signup form was submitted successfully.
+    trackSignupCompleted(values.role);
 
     navigate("/check-email", {
       replace: true,
