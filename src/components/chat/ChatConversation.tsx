@@ -140,6 +140,15 @@ export const ChatConversation = ({
 
   // Reset UI when contact changes so the previous thread doesn't
   // flash through.
+  //
+  // CRITICAL: deps are [contactId] only, NOT [contactId, initialProfile].
+  // The parent passes a freshly-allocated initialProfile object literal
+  // on every render (see Chats.tsx). Including it in deps caused this
+  // effect to re-fire after every send (handleSend -> onThreadsChanged
+  // -> parent setThreads -> parent re-render -> new initialProfile
+  // reference -> effect fires -> setMessages([]) wipes the optimistic
+  // message and the user saw a blank thread instead of the message
+  // they just sent.
   useEffect(() => {
     setProfile(initialProfile);
     setMessages([]);
@@ -154,7 +163,8 @@ export const ChatConversation = ({
     setSearchQuery("");
     setLoading(true);
     stickToBottomRef.current = true;
-  }, [contactId, initialProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactId]);
 
   // Filtered view of the messages for the open thread. When the
   // search bar is empty (or closed), the full list passes through.

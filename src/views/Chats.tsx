@@ -41,11 +41,54 @@ const Chats = () => {
     Boolean(user) && reviewStatus !== null && reviewStatus !== "accepted";
   const { id: routeContactId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [threads, setThreads] = useState<ChatThreadSummary[]>([]);
-  const [profiles, setProfiles] = useState<Map<string, { fullName: string; avatarPath: string | null }>>(
-    () => new Map(),
+  // Hydrate from localStorage on mount so the thread list shows up
+  // immediately on subsequent visits instead of waiting on the two
+  // sequential Supabase RPCs (list_chat_threads + get_candidates_by_ids).
+  // Stale-while-revalidate: cached state renders first, fresh data
+  // overwrites it when the network calls land.
+  const cacheKeyFor = (uid: string | undefined, suffix: string) =>
+    uid ? `polln8.chats.${suffix}.${uid}` : null;
+  const readCachedThreads = (uid: string | undefined): ChatThreadSummary[] => {
+    if (typeof window === "undefined") return [];
+    const key = cacheKeyFor(uid, "threads");
+    if (!key) return [];
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as ChatThreadSummary[]) : [];
+    } catch {
+      return [];
+    }
+  };
+  const readCachedProfiles = (
+    uid: string | undefined,
+  ): Map<string, { fullName: string; avatarPath: string | null }> => {
+    if (typeof window === "undefined") return new Map();
+    const key = cacheKeyFor(uid, "profiles");
+    if (!key) return new Map();
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return new Map();
+      const obj = JSON.parse(raw) as Record<
+        string,
+        { fullName: string; avatarPath: string | null }
+      >;
+      return new Map(Object.entries(obj));
+    } catch {
+      return new Map();
+    }
+  };
+
+  const [threads, setThreads] = useState<ChatThreadSummary[]>(() =>
+    readCachedThreads(user?.id),
   );
-  const [loadingThreads, setLoadingThreads] = useState(true);
+  const [profiles, setProfiles] = useState<
+    Map<string, { fullName: string; avatarPath: string | null }>
+  >(() => readCachedProfiles(user?.id));
+  // Only show the spinner on the very first visit (no cache present);
+  // refreshes happen in the background while existing rows stay visible.
+  const [loadingThreads, setLoadingThreads] = useState<boolean>(() => {
+    return readCachedThreads(user?.id).length === 0;
+  });
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -71,11 +114,20 @@ const Chats = () => {
 
   const loadThreads = useCallback(async () => {
     if (!user) return;
-    setLoadingThreads(true);
+    // Only flip the spinner if we have nothing to show. With a cache
+    // hit the existing rows stay on screen while the refresh runs.
+    if (threads.length === 0) setLoadingThreads(true);
     setLoadError(null);
     try {
       const ts = await listChatThreads();
       setThreads(ts);
+      // Persist for next mount so the user gets an instant render.
+      try {
+        const key = cacheKeyFor(user.id, "threads");
+        if (key) window.localStorage.setItem(key, JSON.stringify(ts));
+      } catch {
+        // ignore (private mode)
+      }
       const ids = ts.map((t) => t.contactId);
       if (ids.length > 0) {
         try {
@@ -88,6 +140,16 @@ const Chats = () => {
             });
           }
           setProfiles(next);
+          try {
+            const key = cacheKeyFor(user.id, "profiles");
+            if (key)
+              window.localStorage.setItem(
+                key,
+                JSON.stringify(Object.fromEntries(next)),
+              );
+          } catch {
+            // ignore
+          }
         } catch (err) {
           // Profile fetch failed — rows still render with raw names.
           // Logged so we can see it in the dev console.
