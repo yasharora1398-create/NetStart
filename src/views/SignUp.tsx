@@ -38,6 +38,7 @@ const CAPTCHA_REQUIRED = Boolean(
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
 );
 import heroBg from "@/assets/hero-bg.jpg";
+import { assetUrl } from "@/lib/asset-url";
 
 // Map every Supabase signup error we've seen in production to a
 // human-readable line. Keeps the actual SDK message as fallback so
@@ -187,7 +188,7 @@ const SignUp = () => {
         <div
           className="absolute inset-0 -z-10 opacity-50"
           style={{
-            backgroundImage: `url(${heroBg})`,
+            backgroundImage: `url(${assetUrl(heroBg)})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",

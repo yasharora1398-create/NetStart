@@ -17,6 +17,7 @@
  * desaturate) so it reads against the dark card.
  */
 import mothImage from "@/assets/moth.png";
+import { assetUrl } from "@/lib/asset-url";
 
 export type MothVariant =
   | "blank"
@@ -369,7 +370,7 @@ export const MothEmptyState = ({
       >
         <v.Scene {...palette} />
         <img
-          src={mothImage}
+          src={assetUrl(mothImage)}
           alt=""
           aria-hidden
           draggable={false}

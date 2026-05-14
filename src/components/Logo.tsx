@@ -1,4 +1,5 @@
 import mascot from "@/assets/netstart-mascot.png";
+import { assetUrl } from "@/lib/asset-url";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -15,7 +16,7 @@ export const Logo = ({ size = "md", showWordmark = true }: LogoProps) => {
   return (
     <div className="flex items-center gap-2">
       <img
-        src={mascot}
+        src={assetUrl(mascot)}
         alt="NetStart mascot"
         className={`${dims.img} animate-bounce-soft drop-shadow-[0_2px_0_rgba(72,107,155,0.5)]`}
         width={48}

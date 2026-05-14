@@ -8,6 +8,15 @@
 import builder1 from "@/assets/builder-1.jpg";
 import builder2 from "@/assets/builder-2.jpg";
 import builder3 from "@/assets/builder-3.jpg";
+import { assetUrl } from "@/lib/asset-url";
+
+// Next.js returns StaticImageData objects from static image imports
+// while Vite returned plain URL strings. Normalize at the top of the
+// module so downstream code (which threads these through as
+// `string | undefined`) keeps working.
+const builder1Url = assetUrl(builder1);
+const builder2Url = assetUrl(builder2);
+const builder3Url = assetUrl(builder3);
 
 // Shared design tokens - now theme-aware. Each token maps to a global
 // CSS variable so the mockups swap colors automatically when the
@@ -544,7 +553,7 @@ export const StepMatch = ({
   const photos: [string | undefined, string | undefined, string | undefined] =
     anonymous
       ? [undefined, undefined, undefined]
-      : (portraits ?? [builder1, builder2, builder3]);
+      : (portraits ?? [builder1Url, builder2Url, builder3Url]);
   const [front, back1, back2] = photos;
   return (
     <div

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import treeSrc from "@/assets/netstart-tree-486b9b.png";
 import textSrc from "@/assets/netstart-text-only.png";
+import { assetUrl } from "@/lib/asset-url";
 
 const DURATION = 3.0;
 
@@ -213,7 +214,7 @@ const LogoLockup = ({ t }: { t: number }) => {
         }}
       >
         <img
-          src={treeSrc}
+          src={assetUrl(treeSrc)}
           alt=""
           style={{ width: "100%", height: "100%", display: "block" }}
         />
@@ -249,7 +250,7 @@ const LogoLockup = ({ t }: { t: number }) => {
             }}
           >
             <img
-              src={textSrc}
+              src={assetUrl(textSrc)}
               alt="NetStart"
               style={{ width: "100%", height: "100%", display: "block" }}
             />

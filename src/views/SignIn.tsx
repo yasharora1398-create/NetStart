@@ -29,6 +29,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { signInSchema, type SignInValues } from "@/lib/auth-schemas";
 import { Turnstile } from "@/components/netstart/Turnstile";
 import heroBg from "@/assets/hero-bg.jpg";
+import { assetUrl } from "@/lib/asset-url";
 
 const CAPTCHA_REQUIRED = Boolean(
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
@@ -144,7 +145,7 @@ const SignIn = () => {
         <div
           className="absolute inset-0 -z-10 opacity-50"
           style={{
-            backgroundImage: `url(${heroBg})`,
+            backgroundImage: `url(${assetUrl(heroBg)})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",

@@ -169,24 +169,22 @@ const Chats = () => {
         setupTitle="Finish setting up MyNet to chat."
         setupBody="Chat unlocks once your MyNet profile is set up. It only takes a minute."
       >
-        {/* Desktop wraps the panes in a rounded card with side
-            padding. Mobile goes full-bleed so the surface feels
-            like a native chat screen instead of a browser tile.
-            Negative margins on mobile escape AppLayout's <main>
-            pt-12 / px-* so the list and conversation reach the
-            screen edges. */}
-        {/* Wrapper stretches edge-to-edge inside the sidebar-padded
-            <main>. Previously it was capped at md:max-w-6xl which
-            made the chat area look "crammed" on wide displays; now
-            we let it fill the column the sidebar leaves us, with
-            modest side padding for breathing room. */}
-        <div className="-mx-4 -mt-12 md:m-0 md:px-4 lg:px-6">
-          <div className="md:mx-auto md:w-full">
+        {/* Full-bleed chat surface. Negative margins escape every
+            ancestor that adds padding (AppLayout's <main> pt-12 +
+            px-*, the inner container, etc.) so the conversation
+            and thread list reach the literal edges of what the
+            sidebar leaves us -- no floating "rectangle in the
+            middle of the page" feel. The dropped border / radius /
+            shadow on md+ is the rest of that change: bordered
+            cards look like containers, edge-to-edge feels like a
+            real app. */}
+        <div className="-mx-4 -mt-12 md:m-0">
+          <div className="w-full">
             <div
               className={cn(
                 "grid overflow-hidden bg-card/40 transition-[grid-template-columns] duration-300 ease-out",
                 "h-[calc(100dvh-84px)] min-h-[420px]",
-                "md:rounded-2xl md:border md:border-border md:shadow-sm md:min-h-[520px] md:h-[calc(100vh-7rem)]",
+                "md:min-h-[520px] md:h-[calc(100vh-3rem)]",
                 // One column on mobile (panes swap via display). On
                 // md+ two columns when expanded; one column when the
                 // contacts list is collapsed so the conversation
