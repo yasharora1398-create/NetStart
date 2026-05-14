@@ -218,7 +218,7 @@ const ThreadRow = ({
                   : "font-medium text-foreground",
               )}
             >
-              {item.fullName || "Unnamed"}
+              {item.fullName || "(Deleted user)"}
             </span>
             <span className="shrink-0 text-[11px] text-muted-foreground">
               {formatRelative(item.lastAt)}

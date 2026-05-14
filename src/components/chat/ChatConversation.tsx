@@ -595,7 +595,7 @@ const Header = ({
         to={`/u/${contactId}`}
         className="block truncate text-sm font-medium text-foreground hover:underline"
       >
-        {profile?.fullName || "Loading..."}
+        {profile?.fullName || (profile === null ? "(Deleted user)" : "Loading...")}
       </Link>
       {profile?.headline ? (
         <p className="truncate text-xs text-muted-foreground">
