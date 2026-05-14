@@ -41,7 +41,7 @@ const WhyCard = ({ item, index, scrollRoot }: CardProps) => {
   return (
     <div
       ref={ref}
-      className={`relative overflow-hidden rounded-3xl border-2 border-foreground/15 bg-card/80 p-6 backdrop-blur-xl transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+      className={`relative overflow-hidden rounded-3xl border-2 border-foreground/15 bg-card/80 p-6 backdrop-blur-xl transition-all duration-700 ease-out ${
         inView
           ? "opacity-100 translate-y-0 blur-0"
           : "opacity-0 translate-y-10 [filter:blur(8px)]"
@@ -79,7 +79,7 @@ export const WhySection = ({ scrollRoot }: WhySectionProps) => {
     <section className="mt-10">
       <div
         ref={ref}
-        className={`mb-6 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`mb-6 transition-all duration-700 ease-out ${
           inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >

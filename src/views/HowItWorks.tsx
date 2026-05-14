@@ -117,7 +117,7 @@ const HowItWorks = () => {
     >
       {SHOW_SIDEBAR && <Sidebar />}
       <div
-        className={SHOW_SIDEBAR ? "transition-[padding] duration-[220ms] ease-out" : ""}
+        className={SHOW_SIDEBAR ? "transition-[padding] duration-200 ease-out" : ""}
         style={SHOW_SIDEBAR ? { paddingLeft: "var(--sidebar-width, 0px)" } : undefined}
       >
       <div className="mx-auto w-full max-w-5xl px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">

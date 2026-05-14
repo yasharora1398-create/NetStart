@@ -476,7 +476,7 @@ const MyNet = () => {
       <div className="min-h-dvh bg-background text-foreground">
         <Sidebar />
         <div
-          className="transition-[padding] duration-[220ms] ease-out"
+          className="transition-[padding] duration-200 ease-out"
           style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
         >
           <main className="pt-12 pb-24">

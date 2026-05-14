@@ -509,7 +509,7 @@ const Pillar = ({
     </p>
     <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-hover:grid-rows-[1fr]">
       <div className="overflow-hidden">
-        <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:delay-[180ms]">
+        <ul className="space-y-2 border-l border-primary/30 pl-4 mt-5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:delay-200">
           {details.map((d) => (
             <li
               key={d}
@@ -556,7 +556,7 @@ const RoleCard = ({
 
     <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-hover:grid-rows-[1fr]">
       <div className="overflow-hidden">
-        <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:delay-[200ms]">
+        <div className="mt-6 pt-5 border-t border-primary/30 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:delay-200">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary mb-2">
             Example
           </p>
