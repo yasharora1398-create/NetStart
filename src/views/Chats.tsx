@@ -8,7 +8,13 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "@/lib/router-compat";
-import { AlertCircle, MessageCircle, RefreshCw } from "lucide-react";
+import {
+  AlertCircle,
+  MessageCircle,
+  PanelLeftClose,
+  PanelLeftOpen,
+  RefreshCw,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -43,6 +49,26 @@ const Chats = () => {
   const [loadingThreads, setLoadingThreads] = useState(true);
 
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Collapse-the-contacts state. Persisted per-device in localStorage
+  // so re-opening Chats remembers the user's last preference. Only
+  // applies on md+; on mobile the panes already swap via grid.
+  const COLLAPSE_KEY = "polln8.chats.list_collapsed";
+  const [listCollapsed, setListCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(COLLAPSE_KEY) === "1";
+  });
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(COLLAPSE_KEY, listCollapsed ? "1" : "0");
+    } catch {
+      // ignore (private mode)
+    }
+  }, [listCollapsed]);
+  const toggleList = useCallback(
+    () => setListCollapsed((c) => !c),
+    [],
+  );
 
   const loadThreads = useCallback(async () => {
     if (!user) return;
@@ -150,23 +176,36 @@ const Chats = () => {
             Negative margins on mobile escape AppLayout's <main>
             pt-12 / px-* so the list and conversation reach the
             screen edges. */}
-        <div className="-mx-4 -mt-12 md:m-0 md:px-4 lg:px-8">
-          <div className="md:mx-auto md:max-w-6xl">
+        {/* Wrapper stretches edge-to-edge inside the sidebar-padded
+            <main>. Previously it was capped at md:max-w-6xl which
+            made the chat area look "crammed" on wide displays; now
+            we let it fill the column the sidebar leaves us, with
+            modest side padding for breathing room. */}
+        <div className="-mx-4 -mt-12 md:m-0 md:px-4 lg:px-6">
+          <div className="md:mx-auto md:w-full">
             <div
               className={cn(
-                "grid overflow-hidden bg-card/40",
+                "grid overflow-hidden bg-card/40 transition-[grid-template-columns] duration-300 ease-out",
                 "h-[calc(100dvh-84px)] min-h-[420px]",
-                "md:rounded-2xl md:border md:border-border md:shadow-sm md:min-h-[520px] md:h-[calc(100vh-9rem)]",
-                // One column on mobile, two on md+. On mobile we hide
-                // whichever pane isn't relevant (list when a thread
-                // is open, pane when not).
-                "md:grid-cols-[320px_1fr]",
+                "md:rounded-2xl md:border md:border-border md:shadow-sm md:min-h-[520px] md:h-[calc(100vh-7rem)]",
+                // One column on mobile (panes swap via display). On
+                // md+ two columns when expanded; one column when the
+                // contacts list is collapsed so the conversation
+                // takes the full width.
+                listCollapsed
+                  ? "md:grid-cols-[1fr]"
+                  : "md:grid-cols-[320px_1fr]",
               )}
             >
               <div
                 className={cn(
-                  "min-h-0",
-                  selected ? "hidden md:flex md:flex-col" : "flex flex-col",
+                  "min-h-0 flex-col",
+                  selected ? "hidden md:flex" : "flex md:flex",
+                  // When the operator collapsed the list on desktop,
+                  // hide the pane entirely so the conversation takes
+                  // the full width. Mobile rules still control visibility
+                  // based on whether a thread is selected.
+                  listCollapsed && "md:hidden",
                 )}
               >
                 <ChatThreadList
@@ -175,14 +214,32 @@ const Chats = () => {
                   currentUserId={user?.id ?? null}
                   loading={loadingThreads}
                   onSelect={(id) => navigate(`/chats/${id}`)}
+                  /* The header in the list itself gets a collapse
+                     button so users on desktop have a familiar
+                     "tuck this panel away" affordance. */
+                  onCollapse={toggleList}
                 />
               </div>
               <div
                 className={cn(
-                  "min-h-0",
+                  "relative min-h-0",
                   selected ? "flex flex-col" : "hidden md:flex md:flex-col",
                 )}
               >
+                {/* Re-show-contacts button. Floats over the chat
+                    conversation header on desktop when the list is
+                    hidden. On mobile this button doesn't render
+                    because the list-swap is handled by route state. */}
+                {listCollapsed && (
+                  <button
+                    type="button"
+                    onClick={toggleList}
+                    aria-label="Show contacts"
+                    className="hidden md:inline-flex absolute left-3 top-3 z-10 h-8 w-8 items-center justify-center rounded-sm border border-border bg-card/90 text-muted-foreground hover:text-foreground hover:bg-card transition-colors backdrop-blur"
+                  >
+                    <PanelLeftOpen className="h-4 w-4" />
+                  </button>
+                )}
                 {selected && user ? (
                   <ChatConversation
                     key={selected.contactId}

@@ -8,7 +8,7 @@
  * top — handy once a user has more than ~10 threads.
  */
 import { useMemo, useState } from "react";
-import { Search, Inbox } from "lucide-react";
+import { PanelLeftClose, Search, Inbox } from "lucide-react";
 
 import type { ChatThreadSummary } from "@/lib/mynet-storage";
 import type { Candidate } from "@/lib/mynet-types";
@@ -44,6 +44,9 @@ type Props = {
   currentUserId: string | null;
   loading: boolean;
   onSelect: (contactId: string) => void;
+  /** When present, renders a "tuck me away" button next to the search
+   *  input that the parent can use to hide this pane on desktop. */
+  onCollapse?: () => void;
 };
 
 export const ChatThreadList = ({
@@ -52,6 +55,7 @@ export const ChatThreadList = ({
   currentUserId,
   loading,
   onSelect,
+  onCollapse,
 }: Props) => {
   const [query, setQuery] = useState("");
   // Read the unread-flag set so any change in another component
@@ -88,9 +92,23 @@ export const ChatThreadList = ({
         <h2 className="font-display text-base text-foreground">
           Conversations
         </h2>
-        <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
-          {items.length}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
+            {items.length}
+          </span>
+          {/* Collapse pane button. Hidden when no handler is passed,
+              so existing callers (mobile) get the old layout. */}
+          {onCollapse && (
+            <button
+              type="button"
+              onClick={onCollapse}
+              aria-label="Collapse contacts"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
       {/* Search input — desktop only. The native app has no
           per-thread search in the list, so mobile drops it too. */}
