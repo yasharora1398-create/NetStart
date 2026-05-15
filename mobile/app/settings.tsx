@@ -3,6 +3,7 @@ import { Stack, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -77,6 +78,27 @@ export default function SettingsScreen() {
   };
 
   const handleSignOutAll = () => {
+    const proceed = async () => {
+      setSigningOutAll(true);
+      try {
+        await signOut("global");
+      } finally {
+        setSigningOutAll(false);
+      }
+    };
+    // react-native-web's Alert.alert polyfill drops the button list
+    // and never fires onPress -- so on web we fall back to a native
+    // window.confirm() to actually run the sign-out callback.
+    if (Platform.OS === "web") {
+      const ok =
+        typeof window !== "undefined" &&
+        typeof window.confirm === "function" &&
+        window.confirm(
+          "Sign out everywhere?\n\nYou'll be signed out of every device.",
+        );
+      if (ok) void proceed();
+      return;
+    }
     Alert.alert(
       "Sign out everywhere?",
       "You'll be signed out of every device.",
@@ -85,14 +107,7 @@ export default function SettingsScreen() {
         {
           text: "Sign out everywhere",
           style: "destructive",
-          onPress: async () => {
-            setSigningOutAll(true);
-            try {
-              await signOut("global");
-            } finally {
-              setSigningOutAll(false);
-            }
-          },
+          onPress: () => void proceed(),
         },
       ],
     );
