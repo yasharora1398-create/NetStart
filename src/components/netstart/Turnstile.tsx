@@ -21,7 +21,8 @@
  * console — the form falls back to no-CAPTCHA, which Supabase will
  * reject only if "Enable CAPTCHA protection" is also on in Supabase.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 declare global {
   interface Window {
@@ -82,6 +83,12 @@ type Props = {
   theme?: "light" | "dark" | "auto";
 };
 
+// Cloudflare's "Managed" Turnstile widget renders at 300x65 px. We
+// reserve the same footprint with a skeleton so the form doesn't
+// reflow when the script finishes loading + the real widget swaps in.
+const WIDGET_WIDTH = 300;
+const WIDGET_HEIGHT = 65;
+
 export const Turnstile = ({
   onVerify,
   onExpire,
@@ -90,6 +97,10 @@ export const Turnstile = ({
 }: Props) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
+  // Flips to true the moment turnstile.render() resolves so we can
+  // hide the skeleton overlay. Until then the user sees a static
+  // "Verifying..." placeholder that occupies the widget's footprint.
+  const [widgetReady, setWidgetReady] = useState(false);
 
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -120,6 +131,11 @@ export const Turnstile = ({
         "error-callback": () => onError?.(),
         theme,
       });
+      // Brief delay so the widget DOM has visibly populated before
+      // we drop the skeleton -- otherwise there's a 1-frame gap.
+      window.setTimeout(() => {
+        if (mounted) setWidgetReady(true);
+      }, 80);
     });
 
     return () => {
@@ -139,5 +155,25 @@ export const Turnstile = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={containerRef} />;
+  // Outer wrapper holds the reserved space; the skeleton overlay
+  // sits on top until widgetReady flips. The Turnstile script
+  // injects an <iframe> into containerRef.current; that iframe
+  // becomes visible as soon as we hide the skeleton on top of it.
+  return (
+    <div
+      className="relative"
+      style={{ width: WIDGET_WIDTH, height: WIDGET_HEIGHT }}
+    >
+      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      {!widgetReady && (
+        <div
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center gap-2 rounded-md border border-border bg-card/70 backdrop-blur text-xs text-muted-foreground"
+        >
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <span>Checking you're human…</span>
+        </div>
+      )}
+    </div>
+  );
 };
