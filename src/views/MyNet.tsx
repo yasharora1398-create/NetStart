@@ -280,17 +280,22 @@ const MyNet = () => {
       await submitProfile();
       const fresh = await getProfile(uid);
       setProfile(fresh);
-      const wasFirstSubmit = profile.reviewStatus === "draft";
+      // Fire mynet_submitted whenever the profile transitions INTO
+      // the pending state from a non-pending one. Covers:
+      //   - first-time submit (draft -> pending)
+      //   - resubmission after admin rejection (rejected -> pending)
+      // Edits to an already-accepted profile (accepted -> accepted)
+      // don't fire so the funnel reads "actual reviewable submissions"
+      // rather than "any time the user clicks Save."
+      const previousStatus = profile.reviewStatus;
+      const transitionedIntoPending =
+        fresh.reviewStatus === "pending" && previousStatus !== "pending";
       toast.success(
         fresh.reviewStatus === "pending"
           ? "Submitted for review."
           : "Profile updated.",
       );
-      // Funnel event: only fire on the first-time submit (when the
-      // profile was previously in draft state). Resubmissions after
-      // rejection or edits to an accepted profile shouldn't pollute
-      // the conversion metric.
-      if (wasFirstSubmit && fresh.reviewStatus === "pending") {
+      if (transitionedIntoPending) {
         const role =
           (user?.user_metadata?.role as "founder" | "builder" | undefined) ??
           "builder";

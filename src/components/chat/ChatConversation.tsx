@@ -209,50 +209,83 @@ export const ChatConversation = ({
   // Counterparty profile — we don't know if the contact is a builder
   // or founder, so try the founder RPC first (cheap; returns null
   // fast when not a founder), then fall back to the candidate row.
+  // Extracted so the realtime subscription below can re-fire it when
+  // the counterparty edits their MyNet profile mid-conversation.
+  const loadProfile = useCallback(async () => {
+    try {
+      const f = await getPublicFounder(contactId).catch(() => null);
+      if (f) {
+        setProfile({
+          fullName: f.fullName,
+          headline: f.headline,
+          avatarPath: f.avatarPath,
+          linkedinUrl: f.linkedinUrl,
+        });
+        return;
+      }
+      const sb = getSupabase();
+      const { data } = await sb.rpc("get_candidates_by_ids", {
+        ids: [contactId],
+      });
+      const row = (data ?? [])[0] as
+        | {
+            full_name: string;
+            headline: string;
+            avatar_path: string | null;
+            linkedin_url: string;
+          }
+        | undefined;
+      if (row) {
+        setProfile({
+          fullName: row.full_name ?? "",
+          headline: row.headline ?? "",
+          avatarPath: row.avatar_path ?? null,
+          linkedinUrl: row.linkedin_url ?? "",
+        });
+      }
+    } catch {
+      // silent — the initialProfile (from the thread list) carries us
+    }
+  }, [contactId]);
+
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      try {
-        const f = await getPublicFounder(contactId).catch(() => null);
-        if (cancelled) return;
-        if (f) {
-          setProfile({
-            fullName: f.fullName,
-            headline: f.headline,
-            avatarPath: f.avatarPath,
-            linkedinUrl: f.linkedinUrl,
-          });
-          return;
-        }
-        const sb = getSupabase();
-        const { data } = await sb.rpc("get_candidates_by_ids", {
-          ids: [contactId],
-        });
-        if (cancelled) return;
-        const row = (data ?? [])[0] as
-          | {
-              full_name: string;
-              headline: string;
-              avatar_path: string | null;
-              linkedin_url: string;
-            }
-          | undefined;
-        if (row) {
-          setProfile({
-            fullName: row.full_name ?? "",
-            headline: row.headline ?? "",
-            avatarPath: row.avatar_path ?? null,
-            linkedinUrl: row.linkedin_url ?? "",
-          });
-        }
-      } catch {
-        // silent — the initialProfile (from the thread list) carries us
-      }
+      if (cancelled) return;
+      await loadProfile();
     })();
     return () => {
       cancelled = true;
     };
-  }, [contactId]);
+  }, [contactId, loadProfile]);
+
+  // Realtime: re-fetch the counterparty profile when their MyNet
+  // row changes. Without this, edits the other side makes during
+  // the conversation (name, headline, avatar) only become visible
+  // on a manual refresh. Requires `profiles` to be in the
+  // supabase_realtime publication; the subscription is a no-op
+  // otherwise so this is safe to add either way.
+  useEffect(() => {
+    const sb = getSupabase();
+    const channel = sb
+      .channel(`profile:${contactId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `user_id=eq.${contactId}`,
+        },
+        () => {
+          void loadProfile();
+        },
+      )
+      .subscribe();
+    return () => {
+      void sb.removeChannel(channel);
+    };
+  }, [contactId, loadProfile]);
 
   // Realtime subscription. Listens to INSERT and UPDATE on
   // chat_messages for any row where (sender, recipient) is one of the
@@ -284,7 +317,28 @@ export const ChatConversation = ({
           };
           if (!isThisThread(row)) return;
           setMessages((prev) => {
-            if (prev.some((m) => m.id === row.id)) return prev;
+            const idx = prev.findIndex((m) => m.id === row.id);
+            // If the message is already in the list (we got there
+            // via an optimistic insert from handleSend), replace it
+            // with the server version so we pick up the authoritative
+            // createdAt / delivered_at / read_at. Earlier code returned
+            // prev unchanged here, which left the optimistic
+            // wall-clock createdAt in place forever -- a slow / skewed
+            // client clock could push the message out of order in
+            // the rendered thread until refresh.
+            if (idx >= 0) {
+              const next = prev.slice();
+              next[idx] = {
+                id: row.id,
+                senderId: row.sender_id,
+                recipientId: row.recipient_id,
+                body: row.body,
+                createdAt: row.created_at,
+                deliveredAt: row.delivered_at,
+                readAt: row.read_at,
+              };
+              return next;
+            }
             return [
               ...prev,
               {

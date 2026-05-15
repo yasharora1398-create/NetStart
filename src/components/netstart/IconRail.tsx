@@ -75,8 +75,13 @@ const ITEMS: RailItem[] = [
 ];
 
 export const IconRail = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  // Only treat the admin email as "the operator" once auth has
+  // finished loading. Otherwise the admin icon pops in noticeably
+  // ~200ms after the page paints, as the AuthContext rehydrates
+  // the session from storage.
   const isAdminEmail =
+    !loading &&
     (user?.email ?? "").toLowerCase() === ADMIN_EMAIL;
   // Admin item appended at the end so the operator's eye lands on it
   // last and the visual order of the public icons stays stable for

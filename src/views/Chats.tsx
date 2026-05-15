@@ -26,6 +26,7 @@ import {
   listChatThreads,
   type ChatThreadSummary,
 } from "@/lib/mynet-storage";
+import { getSupabase } from "@/lib/supabase";
 import {
   ChatThreadList,
   mergeThreadProfiles,
@@ -92,10 +93,34 @@ const Chats = () => {
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Collapse-the-contacts state. Persisted per-device in localStorage
-  // so re-opening Chats remembers the user's last preference. Only
-  // applies on md+; on mobile the panes already swap via grid.
-  const COLLAPSE_KEY = "polln8.chats.list_collapsed";
+  // Auth-hydration race: on a hard page reload, `user` is null for
+  // ~200ms while AuthContext loads the session from storage. The
+  // useState initializers above ran with user.id === undefined, so
+  // the cache lookup returned empty and the user saw a spinner anyway.
+  // This effect re-runs the cache lookup the moment the user becomes
+  // known, so a returning visitor sees their threads instantly.
+  useEffect(() => {
+    if (!user?.id) return;
+    if (threads.length > 0) return; // already populated (either from
+                                    // the initial cache hit when user
+                                    // was known, or from a fresh load)
+    const cached = readCachedThreads(user.id);
+    const cachedProfiles = readCachedProfiles(user.id);
+    if (cached.length > 0) {
+      setThreads(cached);
+      setProfiles(cachedProfiles);
+      setLoadingThreads(false);
+    }
+    // The full network refresh still runs via the loadThreads
+    // effect below; this only patches the empty-while-loading window.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Collapse-the-contacts state. Per-user key so two people sharing
+  // a laptop don't share collapse preferences (was global before).
+  const COLLAPSE_KEY = user?.id
+    ? `polln8.chats.list_collapsed.${user.id}`
+    : "polln8.chats.list_collapsed";
   const [listCollapsed, setListCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(COLLAPSE_KEY) === "1";
@@ -175,6 +200,54 @@ const Chats = () => {
   useEffect(() => {
     void loadThreads();
   }, [loadThreads]);
+
+  // Realtime: re-run loadThreads whenever a chat_messages row for me
+  // (sender or recipient) is inserted or updated. Without this, the
+  // thread list only refreshed on initial mount + manual reload, so
+  // an incoming message while you were staring at the contacts list
+  // didn't bump the row, didn't update the preview, didn't show an
+  // unread badge until you clicked away and back.
+  //
+  // Debounced so a burst of messages from one sender doesn't fire
+  // listChatThreads dozens of times -- one trailing refresh is enough.
+  useEffect(() => {
+    const uid = user?.id;
+    if (!uid) return;
+    const sb = getSupabase();
+    let refreshTimer: number | null = null;
+    const queueRefresh = () => {
+      if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = null;
+        void loadThreads();
+      }, 350);
+    };
+    const involvesMe = (row: { sender_id: string | null; recipient_id: string | null }) =>
+      row.sender_id === uid || row.recipient_id === uid;
+    const channel = sb
+      .channel(`chats-list:${uid}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages" },
+        (payload) => {
+          if (involvesMe(payload.new as { sender_id: string | null; recipient_id: string | null }))
+            queueRefresh();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "chat_messages" },
+        (payload) => {
+          if (involvesMe(payload.new as { sender_id: string | null; recipient_id: string | null }))
+            queueRefresh();
+        },
+      )
+      .subscribe();
+    return () => {
+      if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+      void sb.removeChannel(channel);
+    };
+  }, [user?.id, loadThreads]);
 
   // If the route id isn't already in the threads list (e.g. user
   // landed via a deep link or just clicked Message on a profile), we

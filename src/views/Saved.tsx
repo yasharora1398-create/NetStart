@@ -44,6 +44,7 @@ import {
 } from "@/lib/savedProjects";
 import type { Candidate, PublicProject } from "@/lib/mynet-types";
 import { cn } from "@/lib/utils";
+import { readCache, writeCache } from "@/lib/cache";
 
 type Role = "founder" | "builder";
 
@@ -64,14 +65,31 @@ const readMetadataRole = (
   return r === "founder" || r === "builder" ? r : null;
 };
 
+const SAVED_CANDIDATES_CACHE_KEY = "polln8.saved.candidates";
+
 const Saved = () => {
   const { user, loading } = useAuth();
   const reviewStatus = useReviewStatus();
   const needsSetup =
     Boolean(user) && reviewStatus !== null && reviewStatus !== "accepted";
-  const [savedCandidates, setSavedCandidates] = useState<Candidate[]>([]);
+  // Per-user localStorage cache so returning to /saved is instant.
+  const cacheKey = user?.id
+    ? `${SAVED_CANDIDATES_CACHE_KEY}.${user.id}`
+    : null;
+  const [savedCandidates, setSavedCandidates] = useState<Candidate[]>(() =>
+    cacheKey ? readCache<Candidate[]>(cacheKey) ?? [] : [],
+  );
   const [hasProjects, setHasProjects] = useState(false);
   const [loadingFounder, setLoadingFounder] = useState(false);
+
+  // Re-hydrate from cache when user.id becomes known (auth was still
+  // loading on first render).
+  useEffect(() => {
+    if (!cacheKey || savedCandidates.length > 0) return;
+    const cached = readCache<Candidate[]>(cacheKey);
+    if (cached && cached.length > 0) setSavedCandidates(cached);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const role: Role = useMemo(
     () => readMetadataRole(user) ?? (hasProjects ? "founder" : "builder"),
@@ -95,7 +113,10 @@ const Saved = () => {
           return;
         }
         const cands = await getCandidatesByIds(Array.from(ids));
-        if (!cancelled) setSavedCandidates(cands);
+        if (!cancelled) {
+          setSavedCandidates(cands);
+          if (cacheKey) writeCache(cacheKey, cands);
+        }
       } catch {
         // soft-fail; empty state will render
       } finally {

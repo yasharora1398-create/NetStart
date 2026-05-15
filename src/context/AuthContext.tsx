@@ -2,6 +2,10 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User, AuthError } from "@supabase/supabase-js";
 import { getSupabase, isSupabaseConfigured, MISSING_CONFIG_MESSAGE } from "@/lib/supabase";
 import { isAdminUser } from "@/lib/mynet-storage";
+import {
+  normalizeAuthError,
+  refreshSessionOrThrow,
+} from "@/lib/auth-session";
 import { setSavedProjectsUser } from "@/lib/savedProjects";
 import { setThreadUnreadUser } from "@/lib/threadUnread";
 
@@ -182,18 +186,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     newPassword,
   ) => {
     if (!isSupabaseConfigured) return notConfigured();
-    const { error } = await getSupabase().auth.updateUser({
+    const supabase = getSupabase();
+    try {
+      // Idle-tab guard: refresh before updateUser, same defensive
+      // pattern as setRole. See src/lib/auth-session.ts.
+      await refreshSessionOrThrow(supabase, "change your password");
+    } catch (err) {
+      return { error: err as Error };
+    }
+    const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
-    return { error };
+    if (error) {
+      return { error: normalizeAuthError(error, "change your password") };
+    }
+    return { error: null };
   };
 
   const updateEmail: AuthContextValue["updateEmail"] = async (newEmail) => {
     if (!isSupabaseConfigured) return notConfigured();
-    const { error } = await getSupabase().auth.updateUser({
+    const supabase = getSupabase();
+    try {
+      await refreshSessionOrThrow(supabase, "change your email");
+    } catch (err) {
+      return { error: err as Error };
+    }
+    const { error } = await supabase.auth.updateUser({
       email: normalizeEmail(newEmail),
     });
-    return { error };
+    if (error) {
+      return { error: normalizeAuthError(error, "change your email") };
+    }
+    return { error: null };
   };
 
   const resendVerification: AuthContextValue["resendVerification"] = async (

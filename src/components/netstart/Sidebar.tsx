@@ -53,12 +53,31 @@ export const Sidebar = () => {
   const { user } = useAuth();
   const confirmSignOut = useConfirmSignOut();
 
+  // Per-user collapse key so two people sharing the same laptop don't
+  // share collapse preferences. Falls back to the legacy global key
+  // when logged out (so the unauth marketing surfaces still get a
+  // reasonable initial state).
+  const collapseKey = user?.id
+    ? `${COLLAPSED_KEY}.${user.id}`
+    : COLLAPSED_KEY;
+
   // Persist collapse state across sessions; default to expanded so a
   // first-time visitor sees the full nav.
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(COLLAPSED_KEY) === "1";
+    return window.localStorage.getItem(collapseKey) === "1";
   });
+
+  // When the user actually loads in (auth hydrates from null to
+  // signed-in), re-read the per-user key in case it differs from
+  // the initial global lookup.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!user?.id) return;
+    const userKey = `${COLLAPSED_KEY}.${user.id}`;
+    const stored = window.localStorage.getItem(userKey);
+    if (stored !== null) setCollapsed(stored === "1");
+  }, [user?.id]);
 
   // Drives the global --sidebar-width CSS variable that pages pad
   // past via `var(--sidebar-width, 0px)`. Animating the variable
@@ -68,11 +87,11 @@ export const Sidebar = () => {
       "--sidebar-width",
       collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
     );
-    window.localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
+    window.localStorage.setItem(collapseKey, collapsed ? "1" : "0");
     return () => {
       document.documentElement.style.removeProperty("--sidebar-width");
     };
-  }, [collapsed]);
+  }, [collapsed, collapseKey]);
 
   // Routed through the app-wide confirmation dialog so a single
   // misclick on the avatar menu doesn't drop the session.

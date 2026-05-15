@@ -38,6 +38,7 @@ import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { MobileSwipeCard } from "@/components/netstart/MobileSwipeCard";
 import { BottomSheet } from "@/components/netstart/BottomSheet";
 import { cn } from "@/lib/utils";
+import { readCache, writeCache } from "@/lib/cache";
 import { useAuth } from "@/context/AuthContext";
 import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
 import {
@@ -169,9 +170,16 @@ const Match = () => {
 
 // ============= Builder view: swipe through lookers ===================
 
+const MATCH_CANDIDATES_CACHE_KEY = "polln8.match.candidates";
+
 const BuilderView = () => {
   const { user } = useAuth();
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  // Hydrate from localStorage so revisiting /match shows the deck
+  // instantly; the network fetch below overwrites with fresh data.
+  const [candidates, setCandidates] = useState<Candidate[]>(
+    () => readCache<Candidate[]>(MATCH_CANDIDATES_CACHE_KEY) ?? [],
+  );
+  // Don't show the spinner if we already have cached cards to render.
   const [loadingData, setLoadingData] = useState(false);
   const [query, setQuery] = useState("");
   const [skillFilter, setSkillFilter] = useState("");
@@ -189,13 +197,21 @@ const BuilderView = () => {
   const [hasMultipleProjects, setHasMultipleProjects] = useState(false);
 
   useEffect(() => {
-    setLoadingData(true);
+    // Only show the spinner on first-ever load (no cache); refreshes
+    // happen quietly under the existing rendered cards.
+    if (candidates.length === 0) setLoadingData(true);
     listOpenCandidates()
-      .then((list) => setCandidates(list))
+      .then((list) => {
+        setCandidates(list);
+        writeCache(MATCH_CANDIDATES_CACHE_KEY, list);
+      })
       .catch((err) =>
         toast.error(err instanceof Error ? err.message : "Failed to load."),
       )
       .finally(() => setLoadingData(false));
+    // candidates.length not in deps -- we only want this effect on
+    // mount, not every time setCandidates fires.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -727,8 +743,12 @@ const CandidateActions = ({
 
 // ============= Looker view: arrows through builders ==================
 
+const MATCH_PROJECTS_CACHE_KEY = "polln8.match.projects";
+
 const LookerView = () => {
-  const [projects, setProjects] = useState<PublicProject[]>([]);
+  const [projects, setProjects] = useState<PublicProject[]>(
+    () => readCache<PublicProject[]>(MATCH_PROJECTS_CACHE_KEY) ?? [],
+  );
   const [loadingData, setLoadingData] = useState(false);
   const [query, setQuery] = useState("");
   const [skillFilter, setSkillFilter] = useState("");
@@ -755,13 +775,17 @@ const LookerView = () => {
   }, [fullscreen]);
 
   useEffect(() => {
-    setLoadingData(true);
+    if (projects.length === 0) setLoadingData(true);
     listPublishedProjects()
-      .then((list) => setProjects(list))
+      .then((list) => {
+        setProjects(list);
+        writeCache(MATCH_PROJECTS_CACHE_KEY, list);
+      })
       .catch((err) =>
         toast.error(err instanceof Error ? err.message : "Failed to load."),
       )
       .finally(() => setLoadingData(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
