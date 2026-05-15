@@ -259,37 +259,18 @@ export const ChatConversation = ({
     };
   }, [contactId, loadProfile]);
 
-  // Realtime: re-fetch the counterparty profile when their MyNet
-  // row changes. Without this, edits the other side makes during
-  // the conversation (name, headline, avatar) only become visible
-  // on a manual refresh. Requires `profiles` to be in the
-  // supabase_realtime publication; the subscription is a no-op
-  // otherwise so this is safe to add either way.
-  useEffect(() => {
-    const sb = getSupabase();
-    const channel = sb
-      .channel(`profile:${contactId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "profiles",
-          filter: `user_id=eq.${contactId}`,
-        },
-        () => {
-          void loadProfile();
-        },
-      )
-      .subscribe();
-    return () => {
-      void sb.removeChannel(channel);
-    };
-  }, [contactId, loadProfile]);
-
-  // Realtime subscription. Listens to INSERT and UPDATE on
-  // chat_messages for any row where (sender, recipient) is one of the
-  // two ordered pairs that involve me + contactId.
+  // Realtime: ONE channel for the open conversation. Subscribes to:
+  //   - chat_messages INSERT (new sends) for either side of this pair
+  //   - chat_messages UPDATE (delivered/read receipts) for the same
+  //   - profiles UPDATE for the counterparty (name / headline /
+  //     avatar edits during the chat)
+  //
+  // Originally these were three separate channels. Supabase's free
+  // Realtime tier caps at 200 concurrent connections per project,
+  // and each open chat was claiming three of them. Consolidating
+  // into one channel triples the headroom (200 -> 600 concurrent
+  // chats before the ceiling hits) and is identical functionally
+  // because postgres_changes filters happen server-side per .on().
   useEffect(() => {
     if (!currentUserId) return;
     const sb = getSupabase();
@@ -387,12 +368,27 @@ export const ChatConversation = ({
           );
         },
       )
+      // Counterparty profile edits piggyback on the same channel so
+      // we don't spend another realtime connection on it. No-op if
+      // `profiles` isn't in the supabase_realtime publication.
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `user_id=eq.${contactId}`,
+        },
+        () => {
+          void loadProfile();
+        },
+      )
       .subscribe();
 
     return () => {
       void sb.removeChannel(channel);
     };
-  }, [contactId, currentUserId, onThreadsChanged]);
+  }, [contactId, currentUserId, loadProfile, onThreadsChanged]);
 
   // Auto-scroll to bottom when messages change — but only if the
   // user was already near the bottom (don't yank them down while
