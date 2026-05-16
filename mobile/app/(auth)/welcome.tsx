@@ -72,6 +72,9 @@ export default function Welcome() {
       <View style={styles.spacer} />
 
       <View style={styles.ctaBlock}>
+        {/* Single CTA — Get started is the whole entry point on this
+            screen. Sign-in lives one click deeper inside the sign-up
+            flow so the welcome surface stays uncluttered. */}
         <Link href="/(auth)/sign-up" asChild>
           <Pressable
             style={({ pressed }) => [
@@ -82,13 +85,6 @@ export default function Welcome() {
             <Text style={styles.primaryBtnText}>Get started</Text>
           </Pressable>
         </Link>
-
-        <View style={styles.signInRow}>
-          <Text style={styles.signInLead}>Already have an account? </Text>
-          <Link href="/(auth)/sign-in" style={styles.signInLink}>
-            Sign in
-          </Link>
-        </View>
       </View>
 
       <View style={styles.bottomSpacer} />
@@ -106,7 +102,6 @@ const makeStyles = () => {
   const headlineFont = 30 * k;
   const bodyFont = 15 * k;
   const ctaFont = 16 * k;
-  const signInFont = 14 * k;
   const wordmarkFont = 22 * k;
   const mothSize = 340 * k;
 
@@ -176,40 +171,28 @@ const makeStyles = () => {
     ctaBlock: {
       paddingHorizontal: 24,
       paddingBottom: 4,
-      gap: 18,
     },
     primaryBtn: {
-      height: 56,
-      borderRadius: 12,
+      height: 64,
+      borderRadius: 14,
       backgroundColor: PALETTE.accent,
       alignItems: "center",
       justifyContent: "center",
+      // Soft drop shadow so the bigger button reads as the
+      // single confident CTA on the screen.
+      shadowColor: PALETTE.accent,
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 6,
     },
     primaryBtnText: {
       color: PALETTE.onAccent,
       fontFamily: fonts.body,
-      fontSize: ctaFont,
-      fontWeight: "600",
-      letterSpacing: -ctaFont * 0.01,
+      fontSize: ctaFont + 2,
+      fontWeight: "700",
+      letterSpacing: -(ctaFont + 2) * 0.01,
     },
-    signInRow: {
-      flexDirection: "row",
-      justifyContent: "center",
-      alignItems: "baseline",
-    },
-    signInLead: {
-      color: PALETTE.quiet,
-      fontFamily: fonts.body,
-      fontSize: signInFont,
-      letterSpacing: -signInFont * 0.005,
-    },
-    signInLink: {
-      color: PALETTE.accent,
-      fontFamily: fonts.body,
-      fontSize: signInFont,
-      fontWeight: "500",
-      letterSpacing: -signInFont * 0.005,
-    },
-    bottomSpacer: { height: 24 },
+    bottomSpacer: { height: 32 },
   });
 };
