@@ -1059,32 +1059,32 @@
      bold body copy, full-width Get started, sign-in link. No
      animations — the layout reads the same on every visit. */
 
-  /* Layout follows the "Polln8 Welcome (Centered)" design handoff:
-     a 390x844 reference artboard, centered on the page. Spectral
-     serif for the two headlines, Inter for everything else; both
-     loaded via next/font/google on the Welcome view and exposed
-     here as the --welcome-serif and --welcome-sans CSS variables. */
+  /* Welcome screen colors are LOCKED to the design hand-off palette
+     and ignore the site's light/dark mode. Hex values come straight
+     from screens.jsx in the design bundle:
+       bg     #FAFAF7
+       ink    #0F1410
+       muted  #4A4D52
+       quiet  #6B6E73
+       accent #1F5F3E (button + Sign-in link) */
 
   .welcome-stage {
     min-height: 100svh;
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background: #FAFAF7;
+    color: #0F1410;
     display: flex;
     align-items: stretch;
     justify-content: center;
     overflow: hidden;
   }
 
-  /* The "frame" replicates the 390px design column. On phone widths
-     it fills the viewport; on larger screens it stays centered at
-     the design width so the same proportions hold. */
   .welcome-frame {
     width: 100%;
     max-width: 390px;
     min-height: 100svh;
     display: flex;
     flex-direction: column;
-    color: hsl(var(--foreground));
+    color: #0F1410;
   }
 
   .welcome-spacer { flex: 1; }
@@ -1100,7 +1100,7 @@
     font-weight: 600;
     font-size: 22px;
     letter-spacing: -0.025em;
-    color: hsl(var(--foreground));
+    color: #0F1410;
   }
 
   .welcome-center {
@@ -1115,7 +1115,7 @@
     font-size: 72px;
     line-height: 1;
     letter-spacing: -0.045em;
-    color: hsl(var(--foreground));
+    color: #0F1410;
   }
 
   .welcome-moth-row {
@@ -1130,6 +1130,9 @@
     transform: rotate(49deg);
     pointer-events: none;
     user-select: none;
+    /* Force the native silhouette — never inverted, even when the
+       site sits inside a .dark wrapper. */
+    filter: none !important;
   }
 
   .welcome-copy {
@@ -1143,7 +1146,7 @@
     font-size: 28px;
     line-height: 1.1;
     letter-spacing: -0.015em;
-    color: hsl(var(--foreground));
+    color: #0F1410;
   }
   .welcome-body {
     margin: 0 auto;
@@ -1152,7 +1155,7 @@
     font-size: 15px;
     line-height: 1.55;
     letter-spacing: -0.005em;
-    color: hsl(var(--muted-foreground));
+    color: #4A4D52;
   }
 
   .welcome-actions {
@@ -1166,8 +1169,8 @@
   .welcome-primary {
     height: 56px;
     border-radius: 12px;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background: #1F5F3E;
+    color: #FAFAF7;
     font-family: "Inter", system-ui, sans-serif;
     font-weight: 600;
     font-size: 16px;
@@ -1186,12 +1189,12 @@
     text-align: center;
     font-family: "Inter", system-ui, sans-serif;
     font-size: 14px;
-    color: hsl(var(--muted-foreground));
+    color: #6B6E73;
     font-weight: 400;
     letter-spacing: -0.005em;
   }
   .welcome-signin a {
-    color: hsl(var(--primary));
+    color: #1F5F3E;
     font-weight: 500;
     text-decoration: none;
   }
@@ -1199,6 +1202,23 @@
     text-decoration: underline;
     text-underline-offset: 3px;
   }
+
+  /* Hard guard: even if the document has the .dark class applied
+     (sidebar toggle, OS dark mode), the welcome stage stays light. */
+  .dark .welcome-stage,
+  .dark .welcome-frame,
+  .dark .welcome-wordmark,
+  .dark .welcome-title,
+  .dark .welcome-headline {
+    color: #0F1410;
+  }
+  .dark .welcome-stage { background: #FAFAF7; }
+  .dark .welcome-body  { color: #4A4D52; }
+  .dark .welcome-signin { color: #6B6E73; }
+  .dark .welcome-signin a,
+  .dark .welcome-primary { background-color: #1F5F3E; }
+  .dark .welcome-signin a { background: transparent; color: #1F5F3E; }
+  .dark .welcome-primary { color: #FAFAF7; }
 }
 
 /* Reduced-motion respect. Anyone who's set

@@ -37,11 +37,14 @@ const Welcome = () => {
           <h1 className="welcome-title">Welcome</h1>
 
           <div className="welcome-moth-row" aria-hidden>
+            {/* No dark-mode filter — the welcome screen is always
+                rendered in the light palette from the design hand-off,
+                regardless of the user's site-wide theme. */}
             <img
               src={assetUrl(mothImage)}
               alt=""
               draggable={false}
-              className="welcome-moth dark:invert dark:brightness-90 dark:saturate-50 dark:hue-rotate-180"
+              className="welcome-moth"
             />
           </div>
 

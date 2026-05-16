@@ -27,17 +27,23 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { fonts } from "@/lib/theme";
-import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 const MOTH_SOURCE = require("@/assets/images/moth.png");
 
-export default function Welcome() {
-  const { theme, mode } = useTheme();
-  const styles = useMemo(() => makeStyles(theme), [theme]);
+// Welcome is ALWAYS rendered in the light palette from the design
+// hand-off. We deliberately do not call useTheme() here — the screen
+// stays the same whether the app's elsewhere in light or dark mode.
+const PALETTE = {
+  bg: "#FAFAF7",
+  ink: "#0F1410",
+  muted: "#4A4D52",
+  quiet: "#6B6E73",
+  accent: "#1F5F3E",
+  onAccent: "#FAFAF7",
+} as const;
 
-  // Dark silhouette PNG → tint to foreground in dark mode so it
-  // reads against the near-black background.
-  const mothTint = mode === "dark" ? theme.text : undefined;
+export default function Welcome() {
+  const styles = useMemo(() => makeStyles(), []);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -50,11 +56,9 @@ export default function Welcome() {
       </View>
 
       <View style={styles.mothRow} pointerEvents="none">
-        <Image
-          source={MOTH_SOURCE}
-          style={[styles.moth, mothTint ? { tintColor: mothTint } : null]}
-          resizeMode="contain"
-        />
+        {/* Render the moth at its native dark silhouette — no tint,
+            regardless of the app's theme mode. */}
+        <Image source={MOTH_SOURCE} style={styles.moth} resizeMode="contain" />
       </View>
 
       <View style={styles.copyBlock}>
@@ -92,7 +96,7 @@ export default function Welcome() {
   );
 }
 
-const makeStyles = (theme: ThemePalette) => {
+const makeStyles = () => {
   // Reference artboard: 390x844. Font + moth sizes scale off
   // screen width so the design reads the same on any phone.
   const w = Dimensions.get("window").width;
@@ -109,7 +113,7 @@ const makeStyles = (theme: ThemePalette) => {
   return StyleSheet.create({
     safe: {
       flex: 1,
-      backgroundColor: theme.bg,
+      backgroundColor: PALETTE.bg,
     },
     wordmarkRow: {
       paddingTop: 24,
@@ -117,7 +121,7 @@ const makeStyles = (theme: ThemePalette) => {
       alignItems: "center",
     },
     wordmark: {
-      color: theme.text,
+      color: PALETTE.ink,
       fontFamily: fonts.body,
       fontSize: wordmarkFont,
       fontWeight: "600",
@@ -128,7 +132,7 @@ const makeStyles = (theme: ThemePalette) => {
       alignItems: "center",
     },
     title: {
-      color: theme.text,
+      color: PALETTE.ink,
       fontFamily: fonts.display,
       fontSize: titleFont,
       lineHeight: titleFont,
@@ -150,7 +154,7 @@ const makeStyles = (theme: ThemePalette) => {
       alignItems: "center",
     },
     headline: {
-      color: theme.text,
+      color: PALETTE.ink,
       fontFamily: fonts.displayMedium,
       fontSize: headlineFont,
       lineHeight: headlineFont * 1.1,
@@ -160,7 +164,7 @@ const makeStyles = (theme: ThemePalette) => {
       textAlign: "center",
     },
     body: {
-      color: theme.textMuted,
+      color: PALETTE.muted,
       fontFamily: fonts.body,
       fontSize: bodyFont,
       lineHeight: bodyFont * 1.55,
@@ -177,12 +181,12 @@ const makeStyles = (theme: ThemePalette) => {
     primaryBtn: {
       height: 56,
       borderRadius: 12,
-      backgroundColor: theme.gold,
+      backgroundColor: PALETTE.accent,
       alignItems: "center",
       justifyContent: "center",
     },
     primaryBtnText: {
-      color: theme.bg,
+      color: PALETTE.onAccent,
       fontFamily: fonts.body,
       fontSize: ctaFont,
       fontWeight: "600",
@@ -194,13 +198,13 @@ const makeStyles = (theme: ThemePalette) => {
       alignItems: "baseline",
     },
     signInLead: {
-      color: theme.textDim,
+      color: PALETTE.quiet,
       fontFamily: fonts.body,
       fontSize: signInFont,
       letterSpacing: -signInFont * 0.005,
     },
     signInLink: {
-      color: theme.gold,
+      color: PALETTE.accent,
       fontFamily: fonts.body,
       fontSize: signInFont,
       fontWeight: "500",
