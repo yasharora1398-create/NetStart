@@ -1,6 +1,15 @@
-"use client";
-// Homepage. Wraps the existing Home page component (heavy client
-// state: useTheme, FadeUp, magnetic CTAs, tilt cards, etc.) so we
-// don't have to refactor it into server-renderable shape right now.
-// Optimization for server-rendering the marketing hero can come later.
-export { default } from "@/views/Home";
+// Homepage. Server component so we can export per-route metadata; the
+// underlying Home view is a client component (heavy interaction state).
+import type { Metadata } from "next";
+import Home from "@/views/Home";
+
+export const metadata: Metadata = {
+  title: { absolute: "Polln8 | Where cofounders find each other" },
+  description:
+    "Find your cofounder faster. Polln8 matches certified founders and partners through a quality, skill discovery platform built to accelerate early-stage startups.",
+  alternates: { canonical: "https://polln8.com/" },
+};
+
+export default function Page() {
+  return <Home />;
+}

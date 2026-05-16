@@ -1,3 +1,4 @@
+"use client";
 /**
  * Admin dashboard - gated by useAuth().isAdmin.
  *

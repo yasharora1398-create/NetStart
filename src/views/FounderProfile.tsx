@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
 import {

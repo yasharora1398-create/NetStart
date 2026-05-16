@@ -1,3 +1,14 @@
-"use client";
-// Chat list (no thread selected).
-export { default } from "@/views/Chats";
+import type { Metadata } from "next";
+import Chats from "@/views/Chats";
+
+export const metadata: Metadata = {
+  title: "Chats",
+  description:
+    "Connect with your cofounder candidates. Polln8's built-in messaging keeps your startup conversations organized with request controls that ensure every chat is mutual and intentional.",
+  alternates: { canonical: "https://polln8.com/chats" },
+  robots: { index: false, follow: false },
+};
+
+export default function Page() {
+  return <Chats />;
+}

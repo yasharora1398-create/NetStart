@@ -1,3 +1,4 @@
+"use client";
 /**
  * Applications page. Wraps the existing ApplicationsPanel inside the
  * standard AppLayout so it has its own first-class route. Both

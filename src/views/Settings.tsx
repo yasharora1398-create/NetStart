@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import { Loader2, LogOut, Mail, Save, ShieldCheck, Trash2 } from "lucide-react";

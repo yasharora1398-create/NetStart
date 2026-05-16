@@ -1,3 +1,4 @@
+"use client";
 /**
  * Saved page. Role-aware:
  *

@@ -1,3 +1,14 @@
-"use client";
-// Post-signup hint to check inbox.
-export { default } from "@/views/CheckEmail";
+import type { Metadata } from "next";
+import CheckEmail from "@/views/CheckEmail";
+
+export const metadata: Metadata = {
+  title: "Check your email",
+  description:
+    "Almost there. Confirm your email to unlock your Polln8 account and start finding the cofounder or early hire your startup needs to get off the ground.",
+  alternates: { canonical: "https://polln8.com/check-email" },
+  robots: { index: false, follow: false },
+};
+
+export default function Page() {
+  return <CheckEmail />;
+}

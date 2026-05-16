@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";

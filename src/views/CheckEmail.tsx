@@ -1,3 +1,4 @@
+"use client";
 /**
  * Post-signup landing - shown after a user submits the SignUp form.
  * Replaces the old toast with a dedicated page that:

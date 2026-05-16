@@ -1,3 +1,4 @@
+"use client";
 /**
  * Public marketing homepage. The product is hidden from a fresh
  * visitor in two ways elsewhere. Most of the app is auth-gated,

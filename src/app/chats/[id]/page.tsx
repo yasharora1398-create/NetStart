@@ -1,4 +1,13 @@
-"use client";
-// Chats with a specific thread pre-selected. Same Chats component
-// as the no-id case at /chats; useParams provides the id at runtime.
-export { default } from "@/views/Chats";
+import type { Metadata } from "next";
+import Chats from "@/views/Chats";
+
+export const metadata: Metadata = {
+  title: "Chats",
+  description:
+    "Connect with your cofounder candidates. Polln8's built-in messaging keeps your startup conversations organized with request controls that ensure every chat is mutual and intentional.",
+  robots: { index: false, follow: false },
+};
+
+export default function Page() {
+  return <Chats />;
+}

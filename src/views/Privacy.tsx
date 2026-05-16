@@ -1,3 +1,4 @@
+"use client";
 import { Link } from "@/lib/router-compat";
 import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/netstart/Footer";

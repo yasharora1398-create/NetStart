@@ -1,3 +1,13 @@
-"use client";
-// Sign up wizard. Client-only.
-export { default } from "@/views/SignUp";
+import type { Metadata } from "next";
+import SignUp from "@/views/SignUp";
+
+export const metadata: Metadata = {
+  title: "Sign up",
+  description:
+    "Join the network built for serious individuals. Create your Polln8 profile as a founder or builder/partner and start matching with verified startup talent ready to move fast.",
+  alternates: { canonical: "https://polln8.com/signup" },
+};
+
+export default function Page() {
+  return <SignUp />;
+}

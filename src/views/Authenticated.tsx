@@ -1,3 +1,4 @@
+"use client";
 /**
  * Hidden post-verification landing — reached only by Supabase
  * redirecting here after a confirmation link is clicked. Supabase

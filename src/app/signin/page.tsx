@@ -1,3 +1,13 @@
-"use client";
-// Sign in form. Heavy client state (react-hook-form, auth).
-export { default } from "@/views/SignIn";
+import type { Metadata } from "next";
+import SignIn from "@/views/SignIn";
+
+export const metadata: Metadata = {
+  title: "Sign in",
+  description:
+    "Log back into your cofounder search. Access your matches, active projects, and founder conversations. Your next startup partner could be one message away.",
+  alternates: { canonical: "https://polln8.com/signin" },
+};
+
+export default function Page() {
+  return <SignIn />;
+}

@@ -27,7 +27,7 @@ import Providers from "./providers";
 const SITE_URL = "https://polln8.com";
 const SITE_TITLE = "Polln8 | Where cofounders find each other";
 const SITE_DESCRIPTION =
-  "Polln8 is the private network where founders find their cofounder and operators find a startup worth joining. Everyone is vetted before you meet them.";
+  "Find your cofounder faster. Polln8 matches certified founders and partners through a quality, skill discovery platform built to accelerate early-stage startups.";
 const OG_IMAGE = `${SITE_URL}/polln8-og.png`;
 
 // This app is heavily client-side (auth, real-time chat, swipe deck,

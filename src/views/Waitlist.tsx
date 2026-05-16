@@ -1,3 +1,4 @@
+"use client";
 /**
  * Polln8 marketing waitlist landing - served at "/" in production
  * (Vercel) only. On localhost the original Index page renders instead

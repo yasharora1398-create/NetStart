@@ -1,3 +1,14 @@
-"use client";
-// Swipe deck. Heavy real-time + client state.
-export { default } from "@/views/Match";
+import type { Metadata } from "next";
+import Match from "@/views/Match";
+
+export const metadata: Metadata = {
+  title: "Match",
+  description:
+    "Swipe through vetted startup talent. Founders discover skilled builders ranked against their project. Builders explore real cofounder opportunities filtered by skill, location, and commitment level.",
+  alternates: { canonical: "https://polln8.com/match" },
+  robots: { index: false, follow: false },
+};
+
+export default function Page() {
+  return <Match />;
+}

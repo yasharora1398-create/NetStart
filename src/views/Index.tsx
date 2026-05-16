@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight, BadgeCheck, Check, Sparkles, Zap } from "lucide-react";

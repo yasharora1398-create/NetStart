@@ -1,3 +1,4 @@
+"use client";
 /**
  * Chats — full-bleed two-column layout. Left rail: thread list with
  * search. Right pane: active conversation with realtime updates.
