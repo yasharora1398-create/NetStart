@@ -41,7 +41,17 @@ const config: NextConfig = {
     return [
       { source: "/m", destination: "/m/index.html" },
       { source: "/m/", destination: "/m/index.html" },
-      // Inner SPA routes (everything after /m/) also funnel into the
+      // Expo's web export hard-codes the bundle path as
+      // `<script src="/_expo/static/js/web/entry-X.js">` but the
+      // file actually lives at public/m/_expo/.... Next.js's static
+      // handler looks in public/ at the root and 404s. This rewrite
+      // maps the absolute path back into /m/ so the bundle is
+      // served and the React Native app actually mounts.
+      // (Asset images use /assets/node_modules/... which is already
+      // excluded by the desktop->/m/ redirect rule and the file
+      // resolution catches them under public/m/assets/.)
+      { source: "/_expo/:path*", destination: "/m/_expo/:path*" },
+      // Inner SPA routes (everything after /m/) funnel into the
       // single index.html. Static asset paths (_expo/, assets/) are
       // matched against the filesystem first by Next.js, so this
       // catch-all only catches the SPA-routed URLs.
