@@ -187,7 +187,7 @@ export const MyNetDashboard = ({
           default while editing, or a "tell us about you" prompt
           when read-only. */}
       <Section
-        title="How operators find you"
+        title="How builders find you"
         eyebrow="02"
         icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
       >
@@ -265,7 +265,7 @@ export const MyNetDashboard = ({
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
               {isPending
                 ? "We're reviewing your credentials. The moment you're in, this section unlocks."
-                : "Add what you're building so operators can find and apply to your venture."}
+                : "Add what you're building so builders can find and apply to your venture."}
             </p>
             {!isPending && (
               <span className="inline-flex items-center gap-2 text-sm text-gold group-hover:gap-3 transition-all">

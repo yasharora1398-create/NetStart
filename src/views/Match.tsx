@@ -143,12 +143,12 @@ const Match = () => {
             </div>
             <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-3 md:mb-4">
               {userMode === "builder"
-                ? "Find your operator."
+                ? "Find your builder."
                 : "Find a project."}
             </h1>
             <p className="text-muted-foreground max-w-xl text-sm md:text-base">
               {userMode === "builder"
-                ? "Vetted operators, one at a time. Accept the ones you want to talk to and pass the rest."
+                ? "Vetted builders, one at a time. Accept the ones you want to talk to and pass the rest."
                 : "Founders building right now. Browse one by one and apply when something fits."}
             </p>
           </header>
@@ -382,7 +382,7 @@ const BuilderView = () => {
           sub={
             hasFilters
               ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
-              : "You've worked through every looker that's open right now. New ones will land here as they sign up."
+              : "You've worked through every builder that's open right now. New ones will land here as they sign up."
           }
         />
       ) : (

@@ -964,17 +964,53 @@
     50% { opacity: 0; }
   }
 
-  /* Hawk-moth mascot animations - used wherever the moth is shown. */
+  /* Hawk-moth mascot animations - used wherever the moth is shown.
+     The hover oscillation lifts the silhouette ~3px and rocks it
+     gently so the empty states never feel inert. The wing-flap
+     classes are used by the marketing card mockups for a faster,
+     wing-beat-style motion when the moth is mid-action. */
   .moth-hover {
     animation: moth-hover 4.6s ease-in-out infinite;
     transform-origin: center 70%;
+    /* The rotate(...) the JSX sets via inline-style is layered on top
+       of this hover transform thanks to multiple-transform composition;
+       we rely on CSS @keyframes only changing translate/scale here. */
   }
+  /* The inline transform set by MothEmptyState (rotate(...)) is the
+     base; the .moth-hover keyframes overwrite that via the animation.
+     To keep both, the keyframes use translate only and we read the
+     inline rotation in JSX via CSS custom-property below. */
   @keyframes moth-hover {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    25%      { transform: translateY(-3px) rotate(-1.2deg); }
-    50%      { transform: translateY(0) rotate(0deg); }
-    75%      { transform: translateY(-3px) rotate(1.2deg); }
+    0%, 100% { transform: translateY(0) rotate(var(--moth-rot, 0deg)); }
+    25%      { transform: translateY(-3px) rotate(calc(var(--moth-rot, 0deg) - 1.2deg)); }
+    50%      { transform: translateY(0) rotate(var(--moth-rot, 0deg)); }
+    75%      { transform: translateY(-3px) rotate(calc(var(--moth-rot, 0deg) + 1.2deg)); }
   }
+  /* Empty-state container fade-in. The whole illustration block
+     emerges with a soft blur-clear + lift so the moment a list goes
+     empty doesn't feel like a hard cut. */
+  .moth-emerge {
+    animation: moth-emerge 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes moth-emerge {
+    0%   { opacity: 0; transform: translateY(8px); filter: blur(6px); }
+    100% { opacity: 1; transform: translateY(0);    filter: blur(0); }
+  }
+
+  /* Subtle "breath" pulse on the accent shapes inside each empty-state
+     scene (the bookmark, the magnifier lens, the bell clapper, etc.).
+     Slow, low-amplitude opacity oscillation so the scene stays alive
+     without distracting from the moth's hover. */
+  .moth-breathe {
+    animation: moth-breathe 5.2s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes moth-breathe {
+    0%, 100% { opacity: 1;    transform: scale(1); }
+    50%      { opacity: 0.78; transform: scale(1.03); }
+  }
+
   .wing-flap-l {
     animation: wing-flap-l 0.18s ease-in-out infinite alternate;
     transform-origin: 100% 50%;
@@ -990,6 +1026,51 @@
   @keyframes wing-flap-r {
     from { transform: skewY(2deg)  scaleY(0.96); }
     to   { transform: skewY(-2deg) scaleY(1.02); }
+  }
+
+  /* Smooth-press: small scale-down on active state for buttons / cards
+     that should feel reactive without changing layout. Use on
+     interactive surfaces (Apply, Save, swipe deck, etc.). */
+  .smooth-press {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .smooth-press:active {
+    transform: scale(0.97);
+  }
+
+  /* Tab / panel content crossfade. Pair with key={tabId} so React
+     unmounts/mounts on change, triggering the fade. */
+  .tab-fade {
+    animation: tab-fade 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes tab-fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Reduced-motion respect. Anyone who's set
+   "prefers-reduced-motion: reduce" gets one-frame versions of every
+   moth/empty-state/keyframe animation. The illustrations themselves
+   are static; only the gentle oscillations turn off. */
+@media (prefers-reduced-motion: reduce) {
+  .moth-hover,
+  .moth-emerge,
+  .moth-breathe,
+  .smooth-press,
+  .tab-fade,
+  .rc-ring,
+  .rc-pulse,
+  .rq-pulse-cta {
+    animation: none !important;
+  }
+  .moth-emerge {
+    /* still ensure the empty-state is visible — just no entrance */
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
   }
 }
 

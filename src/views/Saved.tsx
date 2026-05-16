@@ -28,6 +28,10 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import {
+  MothEmptyState,
+  type MothVariant,
+} from "@/components/netstart/MothEmptyState";
 import { useReviewStatus } from "@/hooks/useReviewStatus";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -154,7 +158,7 @@ const Saved = () => {
             <p className="max-w-xl text-muted-foreground">
               {role === "builder"
                 ? "Projects you bookmarked. Star one to mark it as your current focus."
-                : "Operators you saved across your projects. Tap any to revisit."}
+                : "Builders you saved across your projects. Tap any to revisit."}
             </p>
           </header>
 
@@ -181,7 +185,8 @@ const BuilderSaved = () => {
   if (projects.length === 0) {
     return (
       <EmptyCard
-        title="No saved projects yet"
+        variant="saves"
+        title="No saved projects yet."
         body="Open Match and tap the bookmark on any project to save it. Saved projects land here."
       />
     );
@@ -321,15 +326,16 @@ const FounderSaved = ({
   if (loading && candidates.length === 0) {
     return (
       <div className="rounded-sm border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-        Loading saved operators...
+        Loading saved builders...
       </div>
     );
   }
   if (candidates.length === 0) {
     return (
       <EmptyCard
-        title="No saves yet"
-        body="Use Match to swipe-save operators you want to revisit. They'll show up here grouped by project."
+        variant="saves"
+        title="No saves yet."
+        body="Use Match to swipe-save builders you want to revisit. They'll show up here grouped by project."
       />
     );
   }
@@ -425,10 +431,17 @@ const Pill = ({
   </span>
 );
 
-const EmptyCard = ({ title, body }: { title: string; body: string }) => (
-  <div className="rounded-sm border border-border bg-card p-10 text-center">
-    <h3 className="mb-2 font-display text-xl text-foreground">{title}</h3>
-    <p className="mx-auto max-w-md text-sm text-muted-foreground">{body}</p>
+const EmptyCard = ({
+  variant,
+  title,
+  body,
+}: {
+  variant: MothVariant;
+  title: string;
+  body: string;
+}) => (
+  <div className="rounded-sm border border-border bg-card">
+    <MothEmptyState variant={variant} title={title} sub={body} />
   </div>
 );
 

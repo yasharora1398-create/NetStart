@@ -406,7 +406,7 @@ const SignUp = () => {
                                 {
                                   value: "founder",
                                   label: "I'm a founder",
-                                  hint: "Building something. Need operators.",
+                                  hint: "Building something. Need builders.",
                                 },
                                 {
                                   value: "builder",

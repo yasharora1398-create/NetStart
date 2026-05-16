@@ -55,7 +55,7 @@ const Index = () => {
   usePageMeta({
     title: "Polln8 | Find a Cofounder or a Startup to Join",
     description:
-      "Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches operators with early-stage startups worth joining.",
+      "Find a cofounder, or find a startup to join. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
     path: "/",
   });
   const { user } = useAuth();
@@ -82,7 +82,7 @@ const Index = () => {
               <span className="italic text-primary"> build.</span>
             </h1>
             <p className="text-base md:text-lg max-w-md mb-8 leading-relaxed text-muted-foreground">
-              Vetted founders and operators. Matches ranked by AI. Connect, pass,
+              Vetted founders and builders. Matches ranked by AI. Connect, pass,
               or save. No maybes.
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -152,7 +152,7 @@ const Index = () => {
                     Apply to join
                   </p>
                   <h2 className="font-display text-3xl md:text-5xl tracking-[-0.025em] leading-[1] mb-3 text-foreground font-bold">
-                    Operators,
+                    Builders,
                     <br />
                     <span className="italic text-muted-foreground">
                       not talkers.
@@ -1298,7 +1298,7 @@ const REQUEST_PROFILE = {
   pills: ["Full-time", "SF", "Founder"],
   skills: ["Product", "Sales", "Fundraising"],
   headline:
-    "Building a B2B platform for restaurant operators. $40K MRR, looking for a technical cofounder to lead engineering.",
+    "Building a B2B platform for restaurant builders. $40K MRR, looking for a technical cofounder to lead engineering.",
 };
 const REQUEST_PITCH =
   "I've shipped two B2B products in restaurant tech. Saw your MRR growth - I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";

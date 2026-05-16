@@ -210,7 +210,7 @@ export const CandidateCard = ({
               For founders
             </p>
             <h2 className="font-display text-2xl md:text-3xl">
-              How operators find you
+              How builders find you
             </h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-lg">
               Toggle on to be discoverable. Founders running Find People will see

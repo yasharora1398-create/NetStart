@@ -410,7 +410,7 @@ const Hero = () => {
 
         <FadeUp delay={520}>
           <p className="max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed mb-10">
-            Polln8 matches vetted founders with technical operators serious
+            Polln8 matches vetted founders with technical builders serious
             enough to build alongside them. Every profile is reviewed. Every
             chat is mutual. No swipe-spam, no ghosting. Just the five people
             you'd actually want to talk to this week.
@@ -581,7 +581,7 @@ const RoleSplit = () => {
                 Stop pitching strangers.
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                Post what you're building once. We surface operators whose
+                Post what you're building once. We surface builders whose
                 skills and commitment actually match. Not a thousand "ML
                 enthusiasts" with side projects.
               </p>

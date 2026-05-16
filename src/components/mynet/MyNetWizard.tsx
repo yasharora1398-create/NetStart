@@ -385,7 +385,7 @@ export const MyNetWizard = ({
           title="Drop your credentials."
           subtitle={
             preselectedRole === "founder"
-              ? "LinkedIn helps operators verify you when they consider applying."
+              ? "LinkedIn helps builders verify you when they consider applying."
               : "LinkedIn or a resume helps us verify you. We strongly recommend both, but either one will do."
           }
         >
@@ -530,7 +530,7 @@ export const MyNetWizard = ({
               icon={<Hammer className="h-6 w-6" />}
               tag="I'm a founder"
               title="I have a project."
-              body="You're building a venture and you need a builder, operator, or co-founder next to you. We'll set up the project."
+              body="You're building a venture and you need a builder, builder, or co-founder next to you. We'll set up the project."
               onClick={() => setStage("building")}
             />
             <ModeCard
@@ -660,7 +660,7 @@ export const MyNetWizard = ({
         <StepShell
           eyebrow="Step 03 of 03"
           title="Tell us what you're building."
-          subtitle="Set up your project so the right operators can find it."
+          subtitle="Set up your project so the right builders can find it."
           onBack={() => setStage("mode")}
         >
           <div className="space-y-6 mb-10">

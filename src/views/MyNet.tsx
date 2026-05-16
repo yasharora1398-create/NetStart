@@ -635,7 +635,7 @@ const MyNet = () => {
                 </h1>
                 <p className="text-muted-foreground max-w-xl">
                   Manage your credentials, run searches by project, and save the
-                  operators worth talking to.
+                  builders worth talking to.
                 </p>
               </header>
 

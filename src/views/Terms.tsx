@@ -8,7 +8,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "1. The deal",
     body:
-      "Polln8 is a platform that connects founders with operators willing to join their projects. By creating an account you agree to use Polln8 honestly: real identity, real work history, real intent. Misrepresentation is grounds for removal.",
+      "Polln8 is a platform that connects founders with builders willing to join their projects. By creating an account you agree to use Polln8 honestly: real identity, real work history, real intent. Misrepresentation is grounds for removal.",
   },
   {
     title: "2. Eligibility",

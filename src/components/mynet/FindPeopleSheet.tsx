@@ -14,6 +14,8 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import {
   Sheet,
   SheetContent,
@@ -139,7 +141,7 @@ export const FindPeopleSheet = ({
               </SheetTitle>
               <SheetDescription className="text-left text-sm text-muted-foreground">
                 {project && !hasAnyCriteria(project.criteria)
-                  ? "No criteria set. Showing every operator open to work."
+                  ? "No criteria set. Showing every builder open to work."
                   : "Tap a candidate for the full profile."}
               </SheetDescription>
             </SheetHeader>
@@ -152,19 +154,19 @@ export const FindPeopleSheet = ({
               )}
 
               {!loading && ranked.length === 0 && (
-                <div className="text-center py-12 px-4">
-                  <Sparkles className="h-5 w-5 text-gold mx-auto mb-3" />
-                  <h3 className="font-display text-lg mb-2">
-                    {candidates.length === 0
-                      ? "No candidates yet"
-                      : "Nothing matches"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                    {candidates.length === 0
-                      ? "Be early. Once accepted operators flip Open to work, they'll show up here ranked against your project."
-                      : "Loosen the criteria on this project and try again."}
-                  </p>
-                </div>
+                candidates.length === 0 ? (
+                  <MothEmptyState
+                    variant="platform"
+                    title="No candidates yet."
+                    sub="Be early. Once accepted builders flip Open to work, they'll show up here ranked against your project."
+                  />
+                ) : (
+                  <MothEmptyState
+                    variant="filters"
+                    title="Nothing matches."
+                    sub="Loosen the criteria on this project and try again."
+                  />
+                )
               )}
 
               {!loading &&

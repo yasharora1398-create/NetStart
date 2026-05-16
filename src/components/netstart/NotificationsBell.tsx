@@ -5,10 +5,11 @@ import {
   Check,
   CheckCircle2,
   Handshake,
-  Inbox,
   Loader2,
   XCircle,
 } from "lucide-react";
+
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { toast } from "sonner";
 import {
   Popover,
@@ -173,10 +174,12 @@ export const NotificationsBell = () => {
               <Loader2 className="h-5 w-5 text-gold animate-spin" />
             </div>
           ) : items.length === 0 ? (
-            <div className="py-10 text-center">
-              <Inbox className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No notifications</p>
-            </div>
+            <MothEmptyState
+              variant="notifications"
+              compact
+              title="No notifications."
+              sub="New requests, accepts, and messages will land here."
+            />
           ) : (
             <ul className="divide-y divide-border">
               {items.map((n) => {

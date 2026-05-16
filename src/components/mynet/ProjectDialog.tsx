@@ -123,7 +123,7 @@ export const ProjectDialog = ({
             {editing ? "Edit project" : "New project"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Define what you're building and the kind of operator you want next to you.
+            Define what you're building and the kind of builder you want next to you.
           </DialogDescription>
         </DialogHeader>
 

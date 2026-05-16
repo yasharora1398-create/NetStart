@@ -95,13 +95,13 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
               {pending === "founder" ? (
                 <>
                   You'll see the founder dashboard: post projects, review
-                  applications, and search for operators. Your builder profile
+                  applications, and search for builders. Your builder profile
                   (headline, bio, skills, resume) stays exactly where you left
                   it — switching back later restores all of it untouched.
                 </>
               ) : (
                 <>
-                  You'll go back to being matched as an operator. Your existing
+                  You'll go back to being matched as an builder. Your existing
                   projects stay where they are (still published unless you
                   unpublish them); switching to Founder later puts you right
                   back on top of them.

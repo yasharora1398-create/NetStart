@@ -8,7 +8,9 @@
  * top — handy once a user has more than ~10 threads.
  */
 import { useMemo, useState } from "react";
-import { PanelLeftClose, Search, Inbox } from "lucide-react";
+import { PanelLeftClose, Search } from "lucide-react";
+
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 
 import type { ChatThreadSummary } from "@/lib/mynet-storage";
 import type { Candidate } from "@/lib/mynet-types";
@@ -134,9 +136,12 @@ export const ChatThreadList = ({
       ) : items.length === 0 ? (
         <EmptyState />
       ) : filtered.length === 0 ? (
-        <div className="px-4 py-8 text-center text-xs text-muted-foreground">
-          No matches.
-        </div>
+        <MothEmptyState
+          variant="filters"
+          compact
+          title="No matches."
+          sub="Nothing in your threads matches that. Try fewer words."
+        />
       ) : (
         <ScrollArea className="flex-1">
           <ul className="py-1">
@@ -277,19 +282,11 @@ const StateBadge = ({
 };
 
 const EmptyState = () => (
-  <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-    <Inbox className="size-6 text-muted-foreground" aria-hidden />
-    <p className="text-sm font-medium text-foreground">
-      No conversations yet
-    </p>
-    <p className="text-xs leading-relaxed text-muted-foreground max-w-xs">
-      Threads start when both sides accept a chat request. Head to{" "}
-      <a href="/match" className="text-gold hover:underline">
-        Match
-      </a>{" "}
-      to find someone to talk to, or wait for an inbound request to land here.
-    </p>
-  </div>
+  <MothEmptyState
+    variant="threads"
+    title="No conversations yet."
+    sub="Threads start when both sides accept a chat request. Open Match to find someone, or wait for an inbound request."
+  />
 );
 
 // Helper for the page to merge thread metadata with profile data

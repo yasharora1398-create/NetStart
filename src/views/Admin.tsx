@@ -48,6 +48,7 @@ import {
   type ViewCounts,
 } from "@/lib/admin-storage";
 import { getResumeSignedUrl, reviewProfile } from "@/lib/mynet-storage";
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 
 // ────────────────────────────────────────────────────────────────
 // Helpers
@@ -289,9 +290,11 @@ const OverviewTab = () => {
         </div>
         <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden">
           {signups.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-muted-foreground">
-              No signups yet.
-            </p>
+            <MothEmptyState
+              variant="queue"
+              title="No signups yet."
+              sub="New accounts will appear here as people register."
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -483,10 +486,12 @@ const ReviewTab = () => {
       </div>
 
       {submissions.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm px-6 py-16 text-center">
-          <p className="text-muted-foreground">
-            No pending submissions. The queue is clear.
-          </p>
+        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm">
+          <MothEmptyState
+            variant="queue"
+            title="Queue is clear."
+            sub="No pending submissions right now. New ones land here as people finish MyNet."
+          />
         </div>
       ) : (
         <ul className="space-y-3">

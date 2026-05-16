@@ -3,15 +3,17 @@ import {
   Check,
   ExternalLink,
   Handshake,
-  Inbox,
   Linkedin,
   Loader2,
-  Send,
   Undo2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  MothEmptyState,
+  type MothVariant,
+} from "@/components/netstart/MothEmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getAvatarUrl,
@@ -201,7 +203,7 @@ export const ApplicationsPanel = ({
               </div>
             ) : totalIncoming === 0 ? (
               <EmptyState
-                icon={Inbox}
+                variant="queue"
                 title="No applications yet."
                 body="Publish a project to start getting applicants."
               />
@@ -339,7 +341,7 @@ export const ApplicationsPanel = ({
               </div>
             ) : outgoing.length === 0 ? (
               <EmptyState
-                icon={Send}
+                variant="apps"
                 title="You haven't applied yet."
                 body="Project browsing is opening soon. You'll be able to send a pitch from here once it's live."
               />
@@ -408,17 +410,15 @@ export const ApplicationsPanel = ({
 };
 
 const EmptyState = ({
-  icon: Icon,
+  variant,
   title,
   body,
 }: {
-  icon: typeof Inbox;
+  variant: MothVariant;
   title: string;
   body: string;
 }) => (
-  <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
-    <Icon className="h-5 w-5 text-gold mx-auto mb-3" />
-    <h3 className="font-display text-xl mb-2">{title}</h3>
-    <p className="text-sm text-muted-foreground">{body}</p>
+  <div className="rounded-sm border border-dashed border-border bg-card/40">
+    <MothEmptyState variant={variant} title={title} sub={body} />
   </div>
 );

@@ -10,13 +10,13 @@ import {
   Loader2,
   MapPin,
   MessageCircle,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/netstart/Nav";
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -103,11 +103,13 @@ const FounderProfile = () => {
               <Loader2 className="h-5 w-5 text-gold animate-spin" />
             </div>
           ) : !founder ? (
-            <div className="rounded-sm border border-dashed border-border bg-card/40 p-12 text-center">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-gold mb-3">
-                Not found
-              </p>
-              <h2 className="font-display text-2xl">No such profile.</h2>
+            <div className="rounded-sm border border-dashed border-border bg-card/40">
+              <MothEmptyState
+                variant="lost"
+                ctx="Not found"
+                title="No such profile."
+                sub="The trail goes cold here. The person you're looking for may have left the platform."
+              />
             </div>
           ) : (
             <>
@@ -245,11 +247,12 @@ const FounderProfile = () => {
                 </div>
 
                 {projects.length === 0 ? (
-                  <div className="rounded-sm border border-dashed border-border bg-card/40 p-10 text-center">
-                    <Sparkles className="h-5 w-5 text-gold mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">
-                      No published projects yet.
-                    </p>
+                  <div className="rounded-sm border border-dashed border-border bg-card/40">
+                    <MothEmptyState
+                      variant="blank"
+                      title="No published projects yet."
+                      sub="When this founder publishes a project, it'll appear here."
+                    />
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4">

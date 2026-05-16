@@ -53,7 +53,7 @@ const DownloadPage = () => (
             Download
           </p>
           <h1 className="font-display text-5xl md:text-7xl lg:text-[6rem] tracking-[-0.04em] leading-[0.92] mb-8 max-w-3xl">
-            Operators,<br />
+            Builders,<br />
             <span className="text-primary">not talkers.</span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-xl mb-12 leading-relaxed">

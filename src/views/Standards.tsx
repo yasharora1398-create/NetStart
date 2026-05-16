@@ -10,7 +10,7 @@ const PRINCIPLES = [
     body: "Every member is reviewed for shipped work, references, and a track record of execution. We don't grow off engagement metrics or referral chains. The network shrinks if it has to.",
     detail: [
       "Resume or LinkedIn required at signup.",
-      "Manual review by the operator team before access.",
+      "Manual review by the Polln8 team before access.",
       "Resubmissions and audits whenever the signal drops.",
     ],
   },
@@ -29,7 +29,7 @@ const PRINCIPLES = [
     detail: [
       "Three actions per profile and that's it.",
       "Apply once with a real pitch, not a template.",
-      "Founders accept or reject; operators get a clear answer.",
+      "Founders accept or reject; builders get a clear answer.",
     ],
   },
 ];

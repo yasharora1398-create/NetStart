@@ -41,6 +41,7 @@ import {
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -575,18 +576,19 @@ export const ChatConversation = ({
             Loading...
           </div>
         ) : visibleMessages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
-            <p className="text-sm font-medium text-foreground">
-              {searchOpen && searchQuery.trim()
-                ? "No matches."
-                : "No messages yet."}
-            </p>
-            <p className="max-w-sm text-xs text-muted-foreground">
-              {searchOpen && searchQuery.trim()
-                ? "Nothing in this thread matches that. Try fewer words."
-                : "Say hi. Your first message creates the thread."}
-            </p>
-          </div>
+          searchOpen && searchQuery.trim() ? (
+            <MothEmptyState
+              variant="filters"
+              title="No matches."
+              sub="Nothing in this thread matches that. Try fewer words."
+            />
+          ) : (
+            <MothEmptyState
+              variant="threads"
+              title="No messages yet."
+              sub="Say hi. Your first message creates the thread."
+            />
+          )
         ) : (
           <MessageList
             messages={visibleMessages}

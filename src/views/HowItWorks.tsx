@@ -61,7 +61,7 @@ const STEPS: {
     title: "Sign up",
     body: "Create your account in under a minute. Pick your path: founder or cofounder.",
     detail:
-      "Founders post real startups and look for the technical cofounders, founding engineers, or operators they need next to them. Builders fill out a candidate profile and get matched into early-stage startups worth joining. The two flows diverge from here.",
+      "Founders post real startups and look for the technical cofounders, founding engineers, or builders they need next to them. Builders fill out a candidate profile and get matched into early-stage startups worth joining. The two flows diverge from here.",
     visual: <StepSignup />,
   },
   {
@@ -102,7 +102,7 @@ const HowItWorks = () => {
   usePageMeta({
     title: "How Polln8 Works | Find a Cofounder or a Startup to Join",
     description:
-      "How Polln8 matches founders with vetted technical cofounders, and operators with early-stage startups worth joining. Verify, rank, connect in two clicks.",
+      "How Polln8 matches founders with vetted technical cofounders, and builders with early-stage startups worth joining. Verify, rank, connect in two clicks.",
     path: "/how",
   });
   // Land at the top of the page when the user navigates here from
@@ -134,7 +134,7 @@ const HowItWorks = () => {
               Five steps from signup to your first match. Polln8 verifies
               startup builders, ranks them against what you're building or
               what you'd want to join, and connects founders with vetted
-              technical cofounders or operators with early-stage startups
+              technical cofounders or builders with early-stage startups
               worth joining.
             </p>
           </div>
