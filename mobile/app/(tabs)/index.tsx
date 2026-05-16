@@ -270,7 +270,7 @@ export default function MatchScreen() {
           <MothEmptyState
             variant="blank"
             title="No projects yet."
-            sub="Create a project on the web to unlock matching. Match ranks operators against your project's criteria."
+            sub="Create a project on the web to unlock matching. Match ranks builders against your project's criteria."
           />
         ) : loading ? (
           <View style={styles.center}>
@@ -279,7 +279,7 @@ export default function MatchScreen() {
         ) : remaining === 0 ? (
           <MothEmptyState
             variant="caught"
-            sub="No more candidates ranked against this project. Lower the criteria or wait for new operators to join."
+            sub="No more candidates ranked against this project. Lower the criteria or wait for new builders to join."
           />
         ) : (
           <View style={styles.deckInner}>

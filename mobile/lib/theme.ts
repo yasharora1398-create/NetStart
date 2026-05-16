@@ -1,4 +1,4 @@
-// Vettd — single-accent forest green on warm off-white. This is the
+// Polln8 — single-accent forest green on warm off-white. This is the
 // LIGHT theme used by screens that haven't migrated to `useTheme()`
 // yet. Token names match the previous theme so unchanged components
 // reskin automatically — `gold` now means forest green, `marigold`

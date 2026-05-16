@@ -39,16 +39,32 @@ export default function SignUp() {
       return;
     }
     setSubmitting(true);
-    const { error } = await signUp(email.trim(), password, name.trim(), role);
+    const { error, duplicate } = await signUp(
+      email.trim(),
+      password,
+      name.trim(),
+      role,
+    );
     setSubmitting(false);
     if (error) {
       Alert.alert("Sign up failed", error.message);
-    } else {
-      Alert.alert(
-        "Check your email",
-        "We sent a verification link. Confirm to finish signing up.",
-      );
+      return;
     }
+    if (duplicate) {
+      // Supabase's email-enumeration protection returns success
+      // with no identities when the email already exists. It does
+      // NOT send a confirmation email in that case, so we can't
+      // promise one to the user. Route them to sign in instead.
+      Alert.alert(
+        "Email already registered",
+        "An account with this email already exists. Sign in instead.",
+      );
+      return;
+    }
+    Alert.alert(
+      "Check your email",
+      "We sent a verification link. Confirm to finish signing up.",
+    );
   };
 
   return (
@@ -59,9 +75,9 @@ export default function SignUp() {
       >
         <View style={styles.container}>
           <Text style={styles.eyebrow}>Create account</Text>
-          <Text style={styles.h1}>Join Vettd.</Text>
+          <Text style={styles.h1}>Join Polln8.</Text>
           <Text style={styles.body}>
-            Founders and operators who actually ship.
+            Founders and builders who actually ship.
           </Text>
 
           <View style={styles.field}>

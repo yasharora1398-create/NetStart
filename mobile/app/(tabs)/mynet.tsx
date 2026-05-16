@@ -105,10 +105,10 @@ export default function MyNetScreen() {
       next === "founder" ? "Switch to Founder?" : "Switch to Builder?";
     const body =
       next === "founder"
-        ? "You'll see operators in Match instead of projects. Builders apply to your projects, and you'll need at least one project posted to start matching."
+        ? "You'll see builders in Match instead of projects. Builders apply to your projects, and you'll need at least one project posted to start matching."
         : projects.length > 0
           ? `You have ${projects.length} project${projects.length === 1 ? "" : "s"} that will stay saved, but Match will switch to showing founders looking for builders. Switch back anytime.`
-          : "You'll see founders posting projects in Match instead of operators. Switch back anytime.";
+          : "You'll see founders posting projects in Match instead of builders. Switch back anytime.";
     Alert.alert(title, body, [
       { text: "Cancel", style: "cancel" },
       {
@@ -266,7 +266,7 @@ export default function MyNetScreen() {
               <Text style={styles.onboardBody}>
                 Tell builders what you're building, the skills you need, and the
                 commitment level. Takes about a minute. Once it's live,
-                operators can apply.
+                builders can apply.
               </Text>
               <View style={styles.onboardCta}>
                 <Text style={styles.onboardCtaText}>Create project</Text>

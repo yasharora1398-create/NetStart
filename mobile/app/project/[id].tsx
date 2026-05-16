@@ -453,7 +453,7 @@ export default function ProjectDetailScreen() {
             <MothEmptyState
               variant="saves"
               title="No saved candidates yet."
-              sub="Use the Match tab to start saving operators against this project."
+              sub="Use the Match tab to start saving builders against this project."
             />
           ) : (
             <FlatList

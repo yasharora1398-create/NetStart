@@ -612,7 +612,7 @@ const M1WelcomeBubble = ({
       ]}
     >
       <Text style={styles.welcomeBubbleText}>
-        Welcome to Vettd.{"\n"}Want a quick tour?
+        Welcome to Polln8.{"\n"}Want a quick tour?
       </Text>
       <View style={styles.btnRow}>
         <Pressable

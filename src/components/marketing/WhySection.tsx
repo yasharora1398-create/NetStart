@@ -78,7 +78,7 @@ const Reveal = ({
 // (`hidden lg:flex`); text-only on small screens.
 //
 // `persona` flips rows 2 and 3 to a founder POV: Matches deck shows
-// operators looking to join startups, Request mockup targets an
+// builders looking to join startups, Request mockup targets an
 // operator and the pitch reads as the founder writing to them.
 // Defaults to "builder" (the original deck content).
 const WhySection = ({ persona = "builder" }: { persona?: Persona }) => {
@@ -632,11 +632,11 @@ const RAVI: ProfileEntry = {
     "Solo founder. AI scheduling for outpatient clinics, $8K MRR after 4 months. Looking for a design partner to own the product surface.",
 };
 
-// Founder-side cards: people looking to JOIN startups (operators).
+// Founder-side cards: people looking to JOIN startups (builders).
 const LIAM: ProfileEntry = {
   id: "liam",
   name: "Liam P.",
-  pills: ["Full-time", "NYC", "Operator"],
+  pills: ["Full-time", "NYC", "Builder"],
   skills: ["Backend", "Distributed Sys", "Rust"],
   headline:
     "Senior backend engineer, ex-Stripe payments. Looking to join a venture with real customers and meaningful equity.",
@@ -644,7 +644,7 @@ const LIAM: ProfileEntry = {
 const ZARA: ProfileEntry = {
   id: "zara",
   name: "Zara R.",
-  pills: ["30 hrs/week", "Remote", "Operator"],
+  pills: ["30 hrs/week", "Remote", "Builder"],
   skills: ["Frontend", "Design", "Product"],
   headline:
     "Product designer with two YC launches. Looking to own the product surface for a small team that's already shipping.",
@@ -652,7 +652,7 @@ const ZARA: ProfileEntry = {
 
 // Info-sheet content shown when the secondary card is right-swiped.
 // Builder POV: Maya (founder) shows her shipped projects.
-// Founder POV: Zara (operator) shows her recent shipped work.
+// Founder POV: Zara (builder) shows her recent shipped work.
 type DeckInfoSheet = {
   name: string;
   role: string;
@@ -683,7 +683,7 @@ const MAYA_INFO: DeckInfoSheet = {
 };
 const ZARA_INFO: DeckInfoSheet = {
   name: "Zara R.",
-  role: "Operator · Remote · 30 hrs/week",
+  role: "Builder · Remote · 30 hrs/week",
   sectionLabel: "Recently shipped",
   rows: [
     {
@@ -706,7 +706,7 @@ const ZARA_INFO: DeckInfoSheet = {
 const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
   const isFounder = persona === "founder";
   // Builder POV (original): cards are founders posting projects.
-  // Founder POV: cards are operators looking to join startups.
+  // Founder POV: cards are builders looking to join startups.
   const primary = isFounder ? LIAM : RAVI;
   const secondary = isFounder ? ZARA : MAYA;
   const info = isFounder ? ZARA_INFO : MAYA_INFO;
@@ -1296,7 +1296,7 @@ const REQUEST_PROFILE_FOUNDER = {
   monogram: "TP",
   name: "Taylor P.",
   firstName: "Taylor",
-  pills: ["Full-time", "Remote", "Operator"],
+  pills: ["Full-time", "Remote", "Builder"],
   skills: ["Backend", "Devtools", "Postgres"],
   headline:
     "Senior engineer, ex-Stripe payments and Linear. Looking for a venture with real users and meaningful equity.",

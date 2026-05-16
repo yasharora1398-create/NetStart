@@ -19,12 +19,19 @@ type AuthValue = {
   loading: boolean;
   emailVerified: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  // signUp surfaces `duplicate: true` when the email is already on
+  // file. Supabase's email-enumeration protection returns success
+  // (no error) with an empty `user.identities` array in that case,
+  // so we map it explicitly here so the UI can show a real "already
+  // registered" message instead of the generic "check your inbox"
+  // (which wouldn't be true — Supabase doesn't send a confirmation
+  // email to an already-existing account).
   signUp: (
     email: string,
     password: string,
     name: string,
     role: "founder" | "builder",
-  ) => Promise<{ error: Error | null }>;
+  ) => Promise<{ error: Error | null; duplicate: boolean }>;
   signOut: (scope?: "local" | "global") => Promise<void>;
   requestPasswordReset: (
     email: string,
@@ -96,7 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // the mobile app and sign in normally. Mobile-native deep linking
     // can be added later once we have a real bundle id + universal
     // links configured.
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -104,7 +111,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         emailRedirectTo: "https://polln8.com/authenticated",
       },
     });
-    return { error };
+    if (error) return { error, duplicate: false };
+    // Email-enumeration protection signature: success with no
+    // identities attached. Surface as duplicate so the UI doesn't
+    // promise an email that Supabase won't actually send.
+    const duplicate =
+      Boolean(data?.user) && (data.user.identities?.length ?? 0) === 0;
+    return { error: null, duplicate };
   };
 
   const requestPasswordReset: AuthValue["requestPasswordReset"] = async (

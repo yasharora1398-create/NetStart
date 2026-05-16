@@ -1,5 +1,5 @@
 /**
- * Vettd theme system — forest-green accent on warm off-white (light)
+ * Polln8 theme system — forest-green accent on warm off-white (light)
  * and deep cool grey-green (dark). The palette follows a single-accent
  * model: the green is reserved for CTAs, focus rings, links, and brand
  * moments; everything else is neutral.

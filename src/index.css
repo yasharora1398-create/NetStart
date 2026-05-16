@@ -10,7 +10,7 @@
 
 @layer base {
   :root {
-    /* Vettd - single-accent forest green on warm off-white.
+    /* Polln8 - single-accent forest green on warm off-white.
        Token names are kept for compatibility - `--gold` now means
        forest green, `--accent` means the soft green-tinted bg, etc. */
 
@@ -762,7 +762,7 @@
   }
 
   /* Dark mode overrides - keeps the same frosted geometry but flips
-     the surface, text, and rim colors to the Vettd dark palette. */
+     the surface, text, and rim colors to the Polln8 dark palette. */
   .dark .glass-sidebar {
     background:
       linear-gradient(180deg,

@@ -43,7 +43,7 @@ export default function SignIn() {
         style={styles.flex}
       >
         <View style={styles.container}>
-          <Text style={styles.eyebrow}>Vettd</Text>
+          <Text style={styles.eyebrow}>Polln8</Text>
           <Text style={styles.h1}>Welcome back.</Text>
           <Text style={styles.body}>Sign in to continue.</Text>
 

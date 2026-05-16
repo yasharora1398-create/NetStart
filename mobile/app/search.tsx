@@ -277,7 +277,7 @@ export default function SearchScreen() {
                 sub={
                   hasFilters
                     ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
-                    : "Operators are still finishing their profiles. Check back soon."
+                    : "Builders are still finishing their profiles. Check back soon."
                 }
               />
             }
