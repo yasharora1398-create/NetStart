@@ -274,25 +274,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Spectral (serif) + Inter (sans) are referenced by the
-            /welcome screen design. Loaded via a runtime stylesheet so
-            we don't depend on Google being reachable at build time
-            (it isn't on every dev network). preconnect first so the
-            handshake is warm before the CSS request goes out. */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;700&display=swap"
-        />
-
         {/* JSON-LD structured data. Three separate blobs so each shows
             up as its own entity in Google's parser instead of a single
             graph (FAQPage especially needs to be standalone to be

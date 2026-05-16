@@ -26,7 +26,6 @@ import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import { PrivacyBanner } from "@/components/netstart/PrivacyBanner";
-import { SignedOutRedirect } from "@/components/netstart/SignedOutRedirect";
 import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -37,7 +36,6 @@ export default function Providers({ children }: { children: ReactNode }) {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <SignedOutRedirect />
           <SignOutConfirmProvider>
             <SidebarProvider>
               <EmailVerifyBanner />
