@@ -33,6 +33,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 import {
   ArrowLeft,
+  Bell,
+  BellOff,
   Check,
   CheckCheck,
   CornerUpLeft,
@@ -49,6 +51,7 @@ import {
 import {
   getAvatarUrl,
   getCandidatesByIds,
+  getChatMute,
   listChatThread,
   markMessagesRead,
   sendChatMessage,
@@ -57,6 +60,7 @@ import {
   declineChatThread,
   deleteChatThread,
   getChatThreadState,
+  setChatMute,
   type ChatThreadState,
   type ChatMessage,
 } from "@/lib/api";
@@ -247,6 +251,12 @@ export default function ChatScreen() {
   // future enhancement; for now Delete just hides the bubble on this
   // device so testing feels right.
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  // Per-contact mute. When true, the chat_message trigger skips
+  // the notification insert for the recipient, so no email/push
+  // fires. Loaded once when the screen mounts.
+  const [muted, setMuted] = useState(false);
+  const [mutingBusy, setMutingBusy] = useState(false);
+
   // Header overflow menu: Mark unread / Search / Delete chat. Mirrors
   // the web's chat-header dropdown.
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
@@ -302,6 +312,22 @@ export default function ChatScreen() {
       cancelled = true;
     };
   }, [otherId, isFake]);
+
+  // Pull the per-contact mute flag once the screen has a real user
+  // and contact id. Used by the header overflow menu so the right
+  // Mute / Unmute label shows immediately.
+  useEffect(() => {
+    if (!otherId || !user || isFake) return;
+    let cancelled = false;
+    void getChatMute(otherId)
+      .then((v) => {
+        if (!cancelled) setMuted(v);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [otherId, user, isFake]);
 
   // Load the message thread + subscribe to realtime so new messages
   // and status updates (delivered/read) flow in live.
@@ -578,6 +604,28 @@ export default function ChatScreen() {
     // Pop back so the dot is visible in the threads list. Same
     // affordance as web (close the chat after marking).
     router.back();
+  };
+
+  const handleToggleMute = async () => {
+    setHeaderMenuOpen(false);
+    if (isFake || mutingBusy) return;
+    setMutingBusy(true);
+    const next = !muted;
+    try {
+      await setChatMute(otherId, next);
+      setMuted(next);
+      Alert.alert(
+        next ? "Muted" : "Unmuted",
+        next
+          ? "You won't get emails when this contact sends a message."
+          : "Notifications are back on for this contact.",
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Couldn't update mute.";
+      Alert.alert("Couldn't update", msg);
+    } finally {
+      setMutingBusy(false);
+    }
   };
 
   // Long-press menu handlers --------------------------------------
@@ -1054,6 +1102,25 @@ export default function ChatScreen() {
             >
               <Mail size={16} color={theme.text} strokeWidth={2} />
               <Text style={styles.menuItemText}>Mark as unread</Text>
+            </Pressable>
+            <View style={styles.menuDivider} />
+            <Pressable
+              onPress={() => void handleToggleMute()}
+              disabled={mutingBusy}
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.bgAlt },
+                mutingBusy && { opacity: 0.6 },
+              ]}
+            >
+              {muted ? (
+                <Bell size={16} color={theme.text} strokeWidth={2} />
+              ) : (
+                <BellOff size={16} color={theme.text} strokeWidth={2} />
+              )}
+              <Text style={styles.menuItemText}>
+                {muted ? "Unmute notifications" : "Mute notifications"}
+              </Text>
             </Pressable>
             <View style={styles.menuDivider} />
             <Pressable

@@ -1,24 +1,20 @@
 // Supabase Edge Function: notify-email
 //
-// Listens to inserts on public.notifications via a database webhook and
-// sends the recipient an email through Resend. The in-app bell still
-// works without this function. Deploy this to send real email too.
+// Listens to inserts on public.notifications (via the 0023 DB
+// trigger) and sends the recipient a Polln8-branded email through
+// Resend. Templates are type-aware — chat messages, chat requests,
+// applications, and profile-review outcomes each get a tailored
+// layout. The in-app bell still works without this function;
+// deploying this layer is what turns notifications into email.
 //
 // Deploy:
 //   supabase functions deploy notify-email --no-verify-jwt
 //
-// Set secrets:
+// Required secrets:
 //   supabase secrets set RESEND_API_KEY=re_...
 //   supabase secrets set RESEND_FROM="Polln8 <noreply@polln8.com>"
 //   supabase secrets set APP_BASE_URL="https://polln8.com"
-//
-// Then in Supabase Dashboard create a Database Webhook:
-//   Table: public.notifications
-//   Events: INSERT
-//   URL: https://<project-ref>.supabase.co/functions/v1/notify-email
-//   HTTP method: POST
-//   Add a secret header so only this hook can trigger:
-//     X-Webhook-Secret: (set WEBHOOK_SECRET via supabase secrets set)
+//   supabase secrets set WEBHOOK_SECRET=<random hex>   (matches DB trigger)
 
 // deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
@@ -26,7 +22,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const RESEND_FROM = Deno.env.get("RESEND_FROM") ?? "Polln8 <noreply@polln8.com>";
-const APP_BASE_URL = Deno.env.get("APP_BASE_URL") ?? "https://polln8.com";
+const APP_BASE_URL = (Deno.env.get("APP_BASE_URL") ?? "https://polln8.com")
+  .replace(/\/$/, "");
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET");
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -35,6 +32,20 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
+
+// Polln8 palette — matches the app design hand-off so the email
+// reads as the same brand surface.
+const C = {
+  bg: "#FAFAF7",
+  surface: "#FFFFFF",
+  ink: "#0F1410",
+  muted: "#4A4D52",
+  quiet: "#6B6E73",
+  border: "#E8E6DF",
+  accent: "#1F5F3E",
+  accentBg: "#E8F0EA",
+  onAccent: "#FAFAF7",
+};
 
 serve(async (req) => {
   if (WEBHOOK_SECRET) {
@@ -55,12 +66,15 @@ serve(async (req) => {
 
   const row = payload.record ?? payload.new ?? payload;
   const userId: string | undefined = row?.user_id;
-  const title: string = row?.title ?? "NetStart update";
+  const type: string = row?.type ?? "notification";
+  const title: string = row?.title ?? "Polln8 update";
   const body: string = row?.body ?? "";
   const link: string | null = row?.link ?? null;
+  const fromUserId: string | null = row?.from_user_id ?? null;
 
   if (!userId) return new Response("Missing user_id", { status: 400 });
 
+  // Recipient email + display name (used in greeting).
   const { data: userResp, error: userErr } = await admin.auth.admin.getUserById(
     userId,
   );
@@ -68,27 +82,44 @@ serve(async (req) => {
     return new Response("Recipient lookup failed", { status: 200 });
   }
   const to = userResp.user.email;
+  const recipientName = firstName(
+    (userResp.user.user_metadata as { name?: string } | undefined)?.name ??
+      userResp.user.email.split("@")[0],
+  );
+
+  // Optional: sender name + first name (for chat_message / chat_request).
+  // We pull from profiles so the email greeting reads as the friendly
+  // first name even if the notification title was already personalized.
+  let senderName: string | null = null;
+  let senderFirstName: string | null = null;
+  if (fromUserId) {
+    const { data: senderProfile } = await admin
+      .from("profiles")
+      .select("full_name")
+      .eq("user_id", fromUserId)
+      .maybeSingle();
+    if (senderProfile?.full_name) {
+      senderName = senderProfile.full_name;
+      senderFirstName = firstName(senderProfile.full_name);
+    }
+  }
+
   const linkUrl = link
-    ? `${APP_BASE_URL.replace(/\/$/, "")}${link.startsWith("/") ? link : `/${link}`}`
+    ? `${APP_BASE_URL}${link.startsWith("/") ? link : `/${link}`}`
     : APP_BASE_URL;
 
-  const html = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:#0a0a0a;color:#e6e6e6;padding:24px;">
-      <div style="max-width:520px;margin:0 auto;border:1px solid #2a2a2a;border-radius:4px;overflow:hidden;background:#111;">
-        <div style="padding:24px 28px;border-bottom:1px solid #2a2a2a;">
-          <p style="margin:0 0 8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:0.25em;color:#c8a45c;text-transform:uppercase;">Polln8</p>
-          <h1 style="margin:0;font-size:22px;line-height:1.2;color:#fff;">${escapeHtml(title)}</h1>
-        </div>
-        <div style="padding:24px 28px;font-size:14px;line-height:1.6;white-space:pre-line;color:#bdbdbd;">${escapeHtml(body)}</div>
-        <div style="padding:0 28px 28px;">
-          <a href="${linkUrl}" style="display:inline-block;background:#c8a45c;color:#0a0a0a;padding:10px 18px;border-radius:2px;font-weight:600;text-decoration:none;font-size:13px;">Open Polln8</a>
-        </div>
-        <div style="padding:16px 28px;border-top:1px solid #2a2a2a;font-size:11px;color:#666;">
-          You're getting this because you have a Polln8 account. Manage your account at <a href="${APP_BASE_URL.replace(/\/$/, "")}/settings" style="color:#888;">Settings</a>.
-        </div>
-      </div>
-    </div>
-  `;
+  const ctx: TemplateCtx = {
+    type,
+    title,
+    body,
+    linkUrl,
+    recipientName,
+    senderName,
+    senderFirstName,
+    fromUserId,
+  };
+
+  const { subject, html, text } = render(ctx);
 
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -99,8 +130,9 @@ serve(async (req) => {
     body: JSON.stringify({
       from: RESEND_FROM,
       to,
-      subject: title,
+      subject,
       html,
+      text,
     }),
   });
 
@@ -111,6 +143,251 @@ serve(async (req) => {
   }
   return new Response("ok", { status: 200 });
 });
+
+// ──────────────────────────────────────────────────────────────────────
+// Templating
+// ──────────────────────────────────────────────────────────────────────
+
+type TemplateCtx = {
+  type: string;
+  title: string;
+  body: string;
+  linkUrl: string;
+  recipientName: string;
+  senderName: string | null;
+  senderFirstName: string | null;
+  fromUserId: string | null;
+};
+
+const render = (
+  ctx: TemplateCtx,
+): { subject: string; html: string; text: string } => {
+  switch (ctx.type) {
+    case "chat_message":
+      return chatMessage(ctx);
+    case "chat_request":
+      return chatRequest(ctx);
+    case "application_received":
+    case "application_accepted":
+    case "application_rejected":
+      return applicationUpdate(ctx);
+    case "profile_accepted":
+    case "profile_rejected":
+      return profileReview(ctx);
+    default:
+      return generic(ctx);
+  }
+};
+
+const chatMessage = (ctx: TemplateCtx) => {
+  const sender = ctx.senderName ?? "Someone";
+  const subject = `${sender} messaged you on Polln8`;
+  const lede = `Hey ${ctx.recipientName}, ${sender} just sent you a message.`;
+  const inner = `
+    ${heroEyebrow("New message")}
+    ${heroTitle(`${escapeHtml(sender)} messaged you.`)}
+    ${heroLede(escapeHtml(lede))}
+    ${quoteBubble(ctx.body, sender)}
+    ${primaryButton(ctx.linkUrl, "Reply on Polln8")}
+    ${
+      ctx.fromUserId
+        ? subtleHelp(
+            `Too many pings? <a href="${APP_BASE_URL}/chats/${ctx.fromUserId}" style="color:${C.accent};">Mute ${escapeHtml(
+              ctx.senderFirstName ?? sender,
+            )}</a> from your chat with them.`,
+          )
+        : ""
+    }
+  `;
+  const text = `${lede}\n\n"${ctx.body}"\n\nReply: ${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner), text };
+};
+
+const chatRequest = (ctx: TemplateCtx) => {
+  const sender = ctx.senderName ?? "A founder";
+  const subject = `${sender} wants to chat on Polln8`;
+  const lede = `Hey ${ctx.recipientName}, ${sender} wants to start a conversation.`;
+  const inner = `
+    ${heroEyebrow("Chat request")}
+    ${heroTitle(`${escapeHtml(sender)} wants to chat.`)}
+    ${heroLede(escapeHtml(lede))}
+    ${ctx.body ? quoteBubble(ctx.body, sender) : ""}
+    ${primaryButton(ctx.linkUrl, "Review request")}
+  `;
+  const text = `${lede}\n\n${ctx.body}\n\nReview: ${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner), text };
+};
+
+const applicationUpdate = (ctx: TemplateCtx) => {
+  const subject = `${ctx.title} — Polln8`;
+  const lede = `Hey ${ctx.recipientName},`;
+  const inner = `
+    ${heroEyebrow("Application")}
+    ${heroTitle(escapeHtml(ctx.title))}
+    ${heroLede(escapeHtml(lede))}
+    ${plainBody(ctx.body)}
+    ${primaryButton(ctx.linkUrl, "Open Polln8")}
+  `;
+  const text = `${lede}\n\n${ctx.body}\n\n${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner), text };
+};
+
+const profileReview = (ctx: TemplateCtx) => {
+  const accepted = ctx.type === "profile_accepted";
+  const subject = accepted
+    ? "You're in. Welcome to Polln8."
+    : "Polln8 application update";
+  const lede = accepted
+    ? `Hey ${ctx.recipientName}, your profile was approved. You can start matching now.`
+    : `Hey ${ctx.recipientName}, your profile wasn't accepted this round. Tap below to update it and resubmit.`;
+  const inner = `
+    ${heroEyebrow(accepted ? "You're in" : "Update needed")}
+    ${heroTitle(escapeHtml(ctx.title))}
+    ${heroLede(escapeHtml(lede))}
+    ${ctx.body ? plainBody(ctx.body) : ""}
+    ${primaryButton(ctx.linkUrl, accepted ? "Start matching" : "Update profile")}
+  `;
+  const text = `${lede}\n\n${ctx.body}\n\n${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner), text };
+};
+
+const generic = (ctx: TemplateCtx) => {
+  const subject = `${ctx.title} — Polln8`;
+  const lede = `Hey ${ctx.recipientName},`;
+  const inner = `
+    ${heroEyebrow("Polln8")}
+    ${heroTitle(escapeHtml(ctx.title))}
+    ${heroLede(escapeHtml(lede))}
+    ${plainBody(ctx.body)}
+    ${primaryButton(ctx.linkUrl, "Open Polln8")}
+  `;
+  const text = `${lede}\n\n${ctx.body}\n\n${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner), text };
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// Building blocks
+// ──────────────────────────────────────────────────────────────────────
+
+const shell = (subject: string, inner: string): string => `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>${escapeHtml(subject)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:${C.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${C.ink};">
+    <!-- Hidden preheader (sets the preview text in inbox listings) -->
+    <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+      ${escapeHtml(subject)}
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.bg};">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:${C.surface};border:1px solid ${C.border};border-radius:14px;overflow:hidden;">
+            <!-- Branded header strip -->
+            <tr>
+              <td style="padding:20px 28px;border-bottom:1px solid ${C.border};">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-family:Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;color:${C.ink};">
+                      Polln8
+                    </td>
+                    <td align="right" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.2em;color:${C.quiet};text-transform:uppercase;">
+                      Network
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Body slot -->
+            <tr>
+              <td style="padding:32px 28px 36px;">
+                ${inner}
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="padding:18px 28px 22px;border-top:1px solid ${C.border};background:${C.bg};font-size:12px;line-height:1.55;color:${C.quiet};">
+                Sent because you have a Polln8 account. Manage
+                <a href="${APP_BASE_URL}/chats" style="color:${C.accent};text-decoration:none;">message preferences</a>
+                or
+                <a href="${APP_BASE_URL}/settings" style="color:${C.accent};text-decoration:none;">account settings</a>.
+              </td>
+            </tr>
+          </table>
+          <div style="font-size:11px;color:${C.quiet};padding-top:14px;">
+            Polln8 · polln8.com
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+const heroEyebrow = (text: string): string => `
+  <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.22em;color:${C.accent};text-transform:uppercase;margin:0 0 12px;">
+    ${escapeHtml(text)}
+  </div>
+`;
+
+const heroTitle = (titleHtml: string): string => `
+  <h1 style="margin:0 0 12px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:28px;line-height:1.18;letter-spacing:-0.02em;color:${C.ink};">
+    ${titleHtml}
+  </h1>
+`;
+
+const heroLede = (textHtml: string): string => `
+  <p style="margin:0 0 22px;font-size:15px;line-height:1.55;color:${C.muted};">
+    ${textHtml}
+  </p>
+`;
+
+const quoteBubble = (raw: string, attribution: string): string => `
+  <div style="background:${C.accentBg};border-left:3px solid ${C.accent};border-radius:8px;padding:16px 18px;margin:0 0 24px;font-size:15px;line-height:1.55;color:${C.ink};">
+    "${escapeHtml(raw)}"
+    <div style="margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.16em;color:${C.quiet};text-transform:uppercase;">
+      — ${escapeHtml(attribution)}
+    </div>
+  </div>
+`;
+
+const plainBody = (raw: string): string => `
+  <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:${C.muted};white-space:pre-line;">
+    ${escapeHtml(raw)}
+  </p>
+`;
+
+const primaryButton = (href: string, label: string): string => `
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 4px;">
+    <tr>
+      <td style="border-radius:10px;background:${C.accent};">
+        <a href="${href}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 26px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:-0.005em;color:${C.onAccent};text-decoration:none;border-radius:10px;">
+          ${escapeHtml(label)}
+        </a>
+      </td>
+    </tr>
+  </table>
+`;
+
+const subtleHelp = (html: string): string => `
+  <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:${C.quiet};">
+    ${html}
+  </p>
+`;
+
+// ──────────────────────────────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────────────────────────────
+
+const firstName = (raw: string | undefined | null): string => {
+  if (!raw) return "there";
+  const first = raw.trim().split(/\s+/)[0];
+  return first || "there";
+};
 
 const escapeHtml = (s: string): string =>
   s

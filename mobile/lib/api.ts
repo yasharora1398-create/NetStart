@@ -1299,6 +1299,30 @@ export const deleteChatThread = async (
   if (error) throw error;
 };
 
+// Per-contact mute. When true, the chat_message email/in-app
+// notification trigger skips this sender (migration 0029).
+// One-sided — the other person isn't told.
+export const getChatMute = async (
+  otherUserId: string,
+): Promise<boolean> => {
+  const { data, error } = await supabase.rpc("get_chat_mute", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+  return Boolean(data);
+};
+
+export const setChatMute = async (
+  otherUserId: string,
+  muted: boolean,
+): Promise<void> => {
+  const { error } = await supabase.rpc("set_chat_mute", {
+    other_user_id: otherUserId,
+    next_muted: muted,
+  });
+  if (error) throw error;
+};
+
 // Founder-only: change the lifecycle state on one of their
 // projects. Browse / Search hide non-active projects.
 export const setProjectLifecycle = async (

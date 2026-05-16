@@ -27,6 +27,8 @@ import {
 import { Link } from "@/lib/router-compat";
 import {
   ArrowLeft,
+  Bell,
+  BellOff,
   Check,
   CheckCheck,
   ExternalLink,
@@ -58,6 +60,7 @@ import {
   declineChatThread,
   deleteChatThread,
   getAvatarUrl,
+  getChatMute,
   getChatThreadState,
   getPublicFounder,
   listChatThread,
@@ -65,6 +68,7 @@ import {
   markMessagesRead,
   markNotificationsReadForSender,
   requestOrSendChatMessage,
+  setChatMute,
   type ChatMessage,
   type ChatThreadState,
   type ThreadState,
@@ -134,6 +138,11 @@ export const ChatConversation = ({
   // a different thread.
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // Per-contact mute. When true, incoming messages from this contact
+  // don't fire the email-on-DM notification (server-side trigger
+  // suppresses the notifications row before the email webhook runs).
+  const [muted, setMuted] = useState(false);
+  const [mutingBusy, setMutingBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   // Track whether we should auto-scroll on the next message — only
   // when the user is already near the bottom of the thread.
@@ -162,10 +171,46 @@ export const ChatConversation = ({
     setDraft("");
     setSearchOpen(false);
     setSearchQuery("");
+    setMuted(false);
     setLoading(true);
     stickToBottomRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId]);
+
+  // Pull the per-contact mute flag whenever the thread changes so
+  // the dropdown shows the right Mute / Unmute label.
+  useEffect(() => {
+    let cancelled = false;
+    void getChatMute(contactId)
+      .then((v) => {
+        if (!cancelled) setMuted(v);
+      })
+      .catch(() => {
+        // soft-fail; mute UI just defaults to "Mute"
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [contactId]);
+
+  const handleToggleMute = useCallback(async () => {
+    if (mutingBusy) return;
+    setMutingBusy(true);
+    const next = !muted;
+    try {
+      await setChatMute(contactId, next);
+      setMuted(next);
+      toast.success(
+        next ? "Muted. You won't get emails for new messages." : "Unmuted.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Couldn't update mute.",
+      );
+    } finally {
+      setMutingBusy(false);
+    }
+  }, [contactId, muted, mutingBusy]);
 
   // Filtered view of the messages for the open thread. When the
   // search bar is empty (or closed), the full list passes through.
@@ -532,6 +577,9 @@ export const ChatConversation = ({
             return !v;
           });
         }}
+        muted={muted}
+        mutingBusy={mutingBusy}
+        onToggleMute={() => void handleToggleMute()}
       />
 
       {searchOpen ? (
@@ -631,6 +679,9 @@ const Header = ({
   deleting,
   searchOpen,
   onToggleSearch,
+  muted,
+  mutingBusy,
+  onToggleMute,
 }: {
   profile: CounterpartyProfile | null;
   url: string | null;
@@ -639,6 +690,9 @@ const Header = ({
   deleting: boolean;
   searchOpen: boolean;
   onToggleSearch: () => void;
+  muted: boolean;
+  mutingBusy: boolean;
+  onToggleMute: () => void;
 }) => (
   <header className="flex items-center gap-3 border-b border-border bg-card/30 px-4 py-3 sm:px-6">
     <Link
@@ -696,7 +750,7 @@ const Header = ({
             <MoreVertical className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuItem
             onSelect={() => {
               markThreadUnread(contactId);
@@ -705,6 +759,19 @@ const Header = ({
           >
             <Mail className="mr-2 size-4" />
             Mark as unread
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={onToggleMute} disabled={mutingBusy}>
+            {muted ? (
+              <>
+                <Bell className="mr-2 size-4" />
+                Unmute notifications
+              </>
+            ) : (
+              <>
+                <BellOff className="mr-2 size-4" />
+                Mute notifications
+              </>
+            )}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={onDelete}

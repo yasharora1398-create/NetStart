@@ -1329,6 +1329,7 @@ export type ChatThreadSummary = {
   lastSender: string | null;
   state: ThreadState;
   acceptedAt: string | null;
+  muted: boolean;
 };
 
 type ChatThreadsRpcRow = {
@@ -1338,6 +1339,7 @@ type ChatThreadsRpcRow = {
   last_sender: string | null;
   state: ThreadState;
   accepted_at: string | null;
+  muted: boolean | null;
 };
 
 // Load the full message thread between the current user and another.
@@ -1374,7 +1376,32 @@ export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
     lastSender: r.last_sender ?? null,
     state: r.state ?? "none",
     acceptedAt: r.accepted_at ?? null,
+    muted: Boolean(r.muted),
   }));
+};
+
+// Per-contact mute. When true, the chat_message email/in-app
+// notification trigger skips this sender. One-sided — the other
+// person isn't told.
+export const getChatMute = async (
+  otherUserId: string,
+): Promise<boolean> => {
+  const { data, error } = await getSupabase().rpc("get_chat_mute", {
+    other_user_id: otherUserId,
+  });
+  if (error) throw error;
+  return Boolean(data);
+};
+
+export const setChatMute = async (
+  otherUserId: string,
+  muted: boolean,
+): Promise<void> => {
+  const { error } = await getSupabase().rpc("set_chat_mute", {
+    other_user_id: otherUserId,
+    next_muted: muted,
+  });
+  if (error) throw error;
 };
 
 export const getChatThreadState = async (
