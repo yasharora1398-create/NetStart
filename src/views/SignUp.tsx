@@ -67,7 +67,10 @@ const PERKS = [
   "Verified execution signal",
 ];
 
+import { useForceLightMode } from "@/hooks/useForceLightMode";
+
 const SignUp = () => {
+  useForceLightMode();
   usePageMeta({
     title: "Sign Up | Find a Cofounder or a Startup to Join",
     description:

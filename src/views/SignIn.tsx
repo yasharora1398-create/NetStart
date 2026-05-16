@@ -59,7 +59,10 @@ const friendlySignInError = (
   return { message: err.message };
 };
 
+import { useForceLightMode } from "@/hooks/useForceLightMode";
+
 const SignIn = () => {
+  useForceLightMode();
   usePageMeta({
     title: "Sign In to Polln8 | Find a Cofounder or a Startup",
     description:

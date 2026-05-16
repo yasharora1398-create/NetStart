@@ -21,7 +21,10 @@ import { useAuth } from "@/context/AuthContext";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
+import { useForceLightMode } from "@/hooks/useForceLightMode";
+
 const CheckEmail = () => {
+  useForceLightMode();
   const location = useLocation();
   const navigate = useNavigate();
   const { resendVerification } = useAuth();

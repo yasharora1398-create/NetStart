@@ -18,12 +18,14 @@
 import { Link } from "@/lib/router-compat";
 import mothImage from "@/assets/moth.png";
 import { assetUrl } from "@/lib/asset-url";
+import { useForceLightMode } from "@/hooks/useForceLightMode";
 
 // Spectral (serif) + Inter (sans) are loaded via a stylesheet tag in
 // src/app/layout.tsx <head>. The .welcome-* CSS rules in src/index.css
 // reference them by family name directly.
 
 const Welcome = () => {
+  useForceLightMode();
   return (
     <main className="welcome-stage">
       <div className="welcome-frame">

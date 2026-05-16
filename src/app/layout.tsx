@@ -319,6 +319,14 @@ export default function RootLayout({
           {`
             (function () {
               try {
+                // One-time migration: every existing user who had
+                // "dark" saved gets reset to light. The marker key
+                // makes this run exactly once per browser. After
+                // this, the toggle still works normally.
+                if (!localStorage.getItem("polln8_web_theme_v2")) {
+                  localStorage.removeItem("polln8_web_theme");
+                  localStorage.setItem("polln8_web_theme_v2", "1");
+                }
                 var saved = localStorage.getItem("polln8_web_theme");
                 var mode = saved === "light" || saved === "dark" ? saved : "light";
                 if (mode === "dark") document.documentElement.classList.add("dark");

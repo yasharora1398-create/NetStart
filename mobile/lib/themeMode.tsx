@@ -178,12 +178,26 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((v) => {
+    // One-time migration: any existing user who had "dark" saved
+    // gets reset to light on the first launch after this code ships.
+    // Marker key makes it run exactly once per install. The user can
+    // still toggle to dark later via Settings; that pick persists.
+    const MIGRATION_KEY = "netstart_theme_v2_migrated";
+    (async () => {
+      try {
+        const migrated = await AsyncStorage.getItem(MIGRATION_KEY);
+        if (!migrated) {
+          await AsyncStorage.removeItem(STORAGE_KEY);
+          await AsyncStorage.setItem(MIGRATION_KEY, "1");
+        }
+        const v = await AsyncStorage.getItem(STORAGE_KEY);
         if (v === "dark" || v === "light") setModeState(v);
-      })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
+      } catch {
+        // soft-fail; default mode stays
+      } finally {
+        setLoaded(true);
+      }
+    })();
   }, []);
 
   const setMode = useCallback((m: ThemeMode) => {

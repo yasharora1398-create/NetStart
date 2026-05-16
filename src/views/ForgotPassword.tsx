@@ -41,7 +41,10 @@ const friendlyError = (msg: string): string => {
   return msg;
 };
 
+import { useForceLightMode } from "@/hooks/useForceLightMode";
+
 const ForgotPassword = () => {
+  useForceLightMode();
   const { requestPasswordReset } = useAuth();
   const location = useLocation();
   // Pre-fill from SignIn's "Forgot?" link state if present.

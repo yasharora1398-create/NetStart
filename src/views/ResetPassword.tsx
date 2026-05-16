@@ -56,7 +56,10 @@ const friendlyError = (msg: string): string => {
   return msg;
 };
 
+import { useForceLightMode } from "@/hooks/useForceLightMode";
+
 const ResetPassword = () => {
+  useForceLightMode();
   const { user, loading, updatePassword } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
