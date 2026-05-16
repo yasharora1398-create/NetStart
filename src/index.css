@@ -1051,6 +1051,160 @@
   }
 }
 
+@layer utilities {
+  /* ─── /welcome animated landing ────────────────────────────────────
+     Choreography in three beats:
+       0 -> 600ms     Polln8 brand mark fades out
+       0 -> 2200ms    Moth arcs from center (small) to upper-right
+                       (large + tilted), tracing a wide swooping path
+       1800 -> 2500ms Welcome copy + CTAs fade in from below
+     All durations match ANIMATION_MS in src/views/Welcome.tsx so the
+     pointer-events gate lifts at the same moment the animation
+     finishes. */
+
+  .welcome-stage {
+    position: relative;
+    /* Vertical layout: brand on top, big moth/copy block in the middle,
+       CTAs at the bottom. The moth stage is absolutely positioned so
+       its keyframe translate values are relative to viewport center. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(20px, 6vh, 56px) 24px clamp(20px, 6vh, 48px);
+    gap: clamp(20px, 4vh, 36px);
+  }
+
+  .welcome-brand {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: hsl(var(--foreground));
+    animation: welcome-brand-fade 600ms cubic-bezier(0.4, 0, 0.2, 1) 200ms forwards;
+  }
+  @keyframes welcome-brand-fade {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-12px); }
+  }
+
+  /* Stage occupies a fixed vertical slice so the moth's translate
+     keyframes (in px) always land within the visible area on a wide
+     range of viewport heights. Absolute children are positioned
+     against the stage's center. */
+  .welcome-moth-stage {
+    position: relative;
+    width: 100%;
+    height: clamp(320px, 56vh, 520px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .welcome-moth {
+    width: clamp(120px, 28vw, 200px);
+    height: auto;
+    transform-origin: 50% 50%;
+    /* Start state is the first keyframe (scale 0.55, center). */
+    animation: welcome-moth-arc 2200ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+    will-change: transform;
+  }
+  /* The arc: starts small in the center, swoops up-left, sweeps across
+     the top, dips down-right, lands large + tilted in the upper-right
+     corner of the stage. Values are tuned for a roughly portrait-mobile
+     viewport but degrade fine on desktop because the stage is centered. */
+  @keyframes welcome-moth-arc {
+    0% {
+      transform: translate(0, 60px) rotate(0deg) scale(0.55);
+      opacity: 1;
+    }
+    20% {
+      transform: translate(-110px, -40px) rotate(-22deg) scale(0.7);
+    }
+    45% {
+      transform: translate(-20px, -160px) rotate(0deg) scale(0.9);
+    }
+    70% {
+      transform: translate(130px, -100px) rotate(28deg) scale(1.25);
+    }
+    100% {
+      transform: translate(150px, -10px) rotate(32deg) scale(1.6);
+      opacity: 1;
+    }
+  }
+
+  .welcome-copy {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: welcome-content-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 1800ms forwards;
+  }
+
+  .welcome-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    margin-top: auto;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: welcome-content-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 1950ms forwards;
+  }
+  @keyframes welcome-content-in {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .welcome-primary {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 24px;
+    border-radius: 6px;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 8px 24px -10px hsl(var(--primary) / 0.45);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 160ms ease;
+  }
+  .welcome-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08), 0 12px 28px -10px hsl(var(--primary) / 0.55);
+  }
+  .welcome-primary:active {
+    transform: translateY(0) scale(0.99);
+  }
+  .welcome-primary[aria-disabled="true"] {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .welcome-secondary {
+    color: hsl(var(--muted-foreground));
+    font-size: 14px;
+  }
+  .welcome-secondary a[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.55;
+  }
+}
+
 /* Reduced-motion respect. Anyone who's set
    "prefers-reduced-motion: reduce" gets one-frame versions of every
    moth/empty-state/keyframe animation. The illustrations themselves
@@ -1063,14 +1217,25 @@
   .tab-fade,
   .rc-ring,
   .rc-pulse,
-  .rq-pulse-cta {
+  .rq-pulse-cta,
+  .welcome-brand,
+  .welcome-moth,
+  .welcome-copy,
+  .welcome-actions {
     animation: none !important;
   }
-  .moth-emerge {
-    /* still ensure the empty-state is visible — just no entrance */
+  .moth-emerge,
+  .welcome-copy,
+  .welcome-actions {
+    /* still ensure content is visible — just no entrance */
     opacity: 1 !important;
     filter: none !important;
     transform: none !important;
+  }
+  .welcome-brand { opacity: 1 !important; transform: none !important; }
+  /* End state of the moth arc, applied as a static transform. */
+  .welcome-moth {
+    transform: translate(150px, -10px) rotate(32deg) scale(1.6) !important;
   }
 }
 

@@ -61,10 +61,12 @@ export const SignOutConfirmProvider = ({ children }: { children: ReactNode }) =>
     try {
       await signOut(scope);
       setOpen(false);
-      // Land on the homepage so the just-signed-out user doesn't sit
-      // on a now-blurred private route. `replace` so back-button
-      // doesn't bring them right back.
-      navigate("/", { replace: true });
+      // Land on /welcome so the just-signed-out user gets the moth
+      // animation + a clean sign-in/sign-up CTA pair instead of
+      // dropping back onto the marketing home page or a blurred
+      // private route. `replace` so back-button doesn't bring them
+      // right back into the now-unauthenticated app.
+      navigate("/welcome", { replace: true });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Could not sign out.",
