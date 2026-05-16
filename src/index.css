@@ -1052,26 +1052,20 @@
 }
 
 @layer utilities {
-  /* ─── /welcome animated landing ────────────────────────────────────
-     Storyboard mapping (delays measured from t=0):
-       brand mark            visible the whole time (no fade-out)
-       moth orbit             200 -> 2400ms   1 full CCW revolution
-                              ending upper-right, large + tilted
-       Welcome title          1500 -> 2200ms  fade + lift in
-       dashed arrow draw      2000 -> 2700ms  stroke offset 0
-       body copy              2400 -> 3000ms  fade in
-       Get started CTA        2700 -> 3300ms  rise + soft pulse forever
-       Sign in link           2900 -> 3300ms  fade
-     Total: ~3000ms before pointer-events unlock (matches
-     ANIMATION_MS in Welcome.tsx). */
+  /* ─── /welcome static landing ──────────────────────────────────────
+     The unauthenticated landing. Brand mark up top, huge "Welcome"
+     headline, large tilted moth in the upper-right corner (partly
+     clipped on narrow viewports), dashed arrow pointing toward it,
+     bold body copy, full-width Get started, sign-in link. No
+     animations — the layout reads the same on every visit. */
 
   .welcome-stage {
     position: relative;
     min-height: 100svh;
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    display: grid;
-    grid-template-rows: auto 1fr auto auto;
+    display: flex;
+    flex-direction: column;
     padding: clamp(16px, 4vh, 28px) 24px clamp(20px, 5vh, 36px);
     overflow: hidden;
   }
@@ -1079,134 +1073,63 @@
   .welcome-brand {
     text-align: center;
     color: hsl(var(--foreground));
-    z-index: 4;
   }
 
   .welcome-title {
-    position: relative;
-    z-index: 1;
-    margin: clamp(8px, 3vh, 24px) auto 0;
+    margin: clamp(12px, 4vh, 32px) auto 0;
     text-align: center;
     color: hsl(var(--foreground));
     font-weight: 800;
-    font-size: clamp(64px, 18vw, 140px);
+    font-size: clamp(72px, 22vw, 156px);
     line-height: 0.92;
     letter-spacing: -0.05em;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: welcome-content-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 1500ms forwards;
   }
 
-  /* Stage hosts the moth (absolutely positioned) and the SVG arrow
-     (also absolute). Its height is fluid so the orbit always lands
-     inside the visible area on phone-portrait viewports. */
+  /* Hero strip that hosts the moth + dashed arrow. The moth is
+     anchored to the upper-right and rotated; on phone widths it
+     clips off the right edge the way the storyboard shows. */
   .welcome-moth-stage {
     position: relative;
     width: 100%;
-    height: clamp(280px, 42vh, 460px);
-    margin-top: clamp(-90px, -8vh, -40px);
+    flex: 1;
+    min-height: clamp(220px, 32vh, 380px);
     pointer-events: none;
     color: hsl(var(--foreground));
   }
 
   .welcome-moth {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: clamp(120px, 32vw, 220px);
+    right: -14%;
+    top: 8%;
+    width: clamp(220px, 64vw, 460px);
     height: auto;
-    margin-left: calc(clamp(120px, 32vw, 220px) / -2);
-    margin-top: calc(clamp(120px, 32vw, 220px) / -2);
+    transform: rotate(32deg);
     transform-origin: 50% 50%;
-    animation: welcome-moth-orbit 2200ms cubic-bezier(0.42, 0, 0.58, 1) 200ms both;
-    will-change: transform;
     user-select: none;
   }
 
-  /* Full counter-clockwise orbit around the start point, growing as
-     it goes and breaking out toward the upper-right at the end.
-     Rotation tracks the tangent of motion so the moth looks like it's
-     flying along the path (head leading), then finishes tilted +32°. */
-  @keyframes welcome-moth-orbit {
-    0% {
-      transform: translate(0, 0) rotate(0deg) scale(0.45);
-    }
-    8% {
-      transform: translate(0, -90px) rotate(-40deg) scale(0.55);
-    }
-    18% {
-      transform: translate(-95px, -120px) rotate(-95deg) scale(0.62);
-    }
-    30% {
-      transform: translate(-150px, -25px) rotate(-150deg) scale(0.7);
-    }
-    42% {
-      transform: translate(-120px, 85px) rotate(-200deg) scale(0.78);
-    }
-    54% {
-      transform: translate(0, 130px) rotate(-235deg) scale(0.9);
-    }
-    66% {
-      transform: translate(120px, 85px) rotate(-275deg) scale(1.05);
-    }
-    78% {
-      transform: translate(155px, -25px) rotate(-310deg) scale(1.25);
-    }
-    90% {
-      transform: translate(130px, -110px) rotate(-340deg) scale(1.5);
-    }
-    100% {
-      /* Final pose: upper-right, large, tilted +32° (equivalent to
-         -328° on a -360° trajectory). */
-      transform: translate(150px, -90px) rotate(-328deg) scale(1.75);
-    }
-  }
-
-  /* Dashed arrow lives inside the moth stage so it overlays the same
-     hero area. Sized to span ~80% of the stage so the arrowhead lands
-     where the moth comes to rest. */
   .welcome-arrow {
     position: absolute;
-    left: 8%;
-    right: 6%;
-    bottom: 12%;
+    left: 4%;
+    right: 18%;
+    bottom: 8%;
     height: 60%;
-    color: hsl(var(--muted-foreground));
-    opacity: 0;
-    animation: welcome-arrow-fade 600ms ease-out 2000ms forwards;
-  }
-  @keyframes welcome-arrow-fade {
-    to { opacity: 0.7; }
-  }
-  .welcome-arrow-path {
-    stroke-dasharray: 3 7;
-    stroke-dashoffset: 360;
-    animation: welcome-arrow-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) 2000ms forwards;
-  }
-  @keyframes welcome-arrow-draw {
-    to { stroke-dashoffset: 0; }
-  }
-  .welcome-arrow-head {
-    opacity: 0;
-    animation: welcome-arrow-fade 300ms ease-out 2700ms forwards;
+    color: hsl(var(--foreground));
+    opacity: 0.85;
   }
 
   .welcome-body {
-    margin: clamp(8px, 2vh, 16px) auto 0;
+    margin: clamp(4px, 2vh, 12px) auto clamp(20px, 4vh, 28px);
     max-width: 540px;
     text-align: center;
     color: hsl(var(--foreground));
-    font-size: clamp(16px, 4.2vw, 19px);
+    font-size: clamp(17px, 4.6vw, 20px);
     font-weight: 700;
     line-height: 1.32;
     letter-spacing: -0.005em;
-    opacity: 0;
-    transform: translateY(12px);
-    animation: welcome-content-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 2400ms forwards;
   }
 
   .welcome-actions {
-    margin-top: clamp(16px, 4vh, 28px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1215,12 +1138,6 @@
     max-width: 440px;
     margin-left: auto;
     margin-right: auto;
-  }
-  @keyframes welcome-content-in {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 
   .welcome-primary {
@@ -1237,48 +1154,19 @@
     letter-spacing: -0.005em;
     text-decoration: none;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 8px 24px -10px hsl(var(--primary) / 0.45);
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-    /* Rise-in entrance, then a slow breathing glow forever. */
-    animation:
-      welcome-cta-rise 650ms cubic-bezier(0.22, 1, 0.36, 1) 2700ms forwards,
-      welcome-cta-pulse 2600ms ease-in-out 3400ms infinite;
-    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @keyframes welcome-cta-rise {
-    0%   { opacity: 0; transform: translateY(20px) scale(0.96); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @keyframes welcome-cta-pulse {
-    0%, 100% {
-      box-shadow:
-        0 1px 0 rgba(0, 0, 0, 0.06),
-        0 8px 24px -10px hsl(var(--primary) / 0.45);
-      transform: translateY(0) scale(1);
-    }
-    50% {
-      box-shadow:
-        0 1px 0 rgba(0, 0, 0, 0.08),
-        0 14px 36px -10px hsl(var(--primary) / 0.65);
-      transform: translateY(-2px) scale(1.012);
-    }
+    transition: transform 160ms ease, box-shadow 160ms ease;
   }
   .welcome-primary:hover {
-    transform: translateY(-2px) scale(1.012);
+    transform: translateY(-1px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08), 0 12px 28px -10px hsl(var(--primary) / 0.55);
   }
   .welcome-primary:active {
-    transform: translateY(0) scale(0.985);
-  }
-  .welcome-primary[aria-disabled="true"] {
-    opacity: 0.55;
-    pointer-events: none;
+    transform: translateY(0) scale(0.99);
   }
 
   .welcome-signin {
     color: hsl(var(--muted-foreground));
     font-size: 14px;
-    opacity: 0;
-    animation: welcome-content-in 500ms ease-out 2900ms forwards;
   }
   .welcome-signin a {
     color: hsl(var(--primary));
@@ -1288,10 +1176,6 @@
   .welcome-signin a:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
-  }
-  .welcome-signin a[aria-disabled="true"] {
-    pointer-events: none;
-    opacity: 0.55;
   }
 }
 
@@ -1307,33 +1191,13 @@
   .tab-fade,
   .rc-ring,
   .rc-pulse,
-  .rq-pulse-cta,
-  .welcome-moth,
-  .welcome-title,
-  .welcome-body,
-  .welcome-primary,
-  .welcome-signin,
-  .welcome-arrow,
-  .welcome-arrow-path,
-  .welcome-arrow-head {
+  .rq-pulse-cta {
     animation: none !important;
   }
-  .moth-emerge,
-  .welcome-title,
-  .welcome-body,
-  .welcome-actions,
-  .welcome-primary,
-  .welcome-signin {
+  .moth-emerge {
     opacity: 1 !important;
     filter: none !important;
     transform: none !important;
-  }
-  .welcome-arrow { opacity: 0.7 !important; }
-  .welcome-arrow-path { stroke-dashoffset: 0 !important; }
-  .welcome-arrow-head { opacity: 1 !important; }
-  /* End pose of the orbit, applied statically. */
-  .welcome-moth {
-    transform: translate(150px, -90px) rotate(-328deg) scale(1.75) !important;
   }
 }
 
