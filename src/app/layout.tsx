@@ -124,7 +124,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#050505",
+  // Default to the light surface; the boot-theme inline script
+  // overrides this to #050505 when a dark preference is saved.
+  themeColor: "#FAFAF7",
 };
 
 // JSON-LD blobs preserved verbatim from index.html so search engines
@@ -318,7 +320,7 @@ export default function RootLayout({
             (function () {
               try {
                 var saved = localStorage.getItem("polln8_web_theme");
-                var mode = saved === "light" || saved === "dark" ? saved : "dark";
+                var mode = saved === "light" || saved === "dark" ? saved : "light";
                 if (mode === "dark") document.documentElement.classList.add("dark");
                 var meta = document.querySelector('meta[name="theme-color"]');
                 if (meta) meta.setAttribute("content", mode === "dark" ? "#050505" : "#FAFAF7");

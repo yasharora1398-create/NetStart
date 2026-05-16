@@ -4,8 +4,8 @@
  * model: the green is reserved for CTAs, focus rings, links, and brand
  * moments; everything else is neutral.
  *
- * App boots in DARK by default. Existing users with a saved preference
- * keep their preference. Persisted to AsyncStorage as
+ * App boots in LIGHT by default. Existing users with a saved
+ * preference keep their preference. Persisted to AsyncStorage as
  * `netstart_theme_mode`.
  *
  * Screens that read `theme` from "@/lib/theme" (the static export) stay
@@ -160,14 +160,14 @@ type ThemeContextValue = {
   loaded: boolean;
 };
 
-// Default to DARK so new users land in dark mode immediately. The
+// Default to LIGHT so new users land in light mode immediately. The
 // AsyncStorage check overrides this with whatever the user previously
 // chose (if anything).
-const DEFAULT_MODE: ThemeMode = "dark";
+const DEFAULT_MODE: ThemeMode = "light";
 
 const ThemeContext = createContext<ThemeContextValue>({
   mode: DEFAULT_MODE,
-  theme: darkTheme,
+  theme: lightTheme,
   setMode: () => {},
   toggle: () => {},
   loaded: false,
