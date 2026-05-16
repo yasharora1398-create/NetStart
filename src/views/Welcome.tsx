@@ -62,13 +62,64 @@ const Welcome = () => {
 
         <div className="welcome-spacer" />
 
-        <div className="welcome-actions">
-          <Link to="/signup" className="welcome-primary">
+        {/* Inline-styled actions so no CSS class can hide the CTA.
+            Stays a plain <a> for max compatibility — NextLink does
+            client-side nav but a regular anchor still works. */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 390,
+            margin: "0 auto",
+            padding: "0 32px 48px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            boxSizing: "border-box",
+          }}
+        >
+          <a
+            href="/signup"
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "18px 24px",
+              borderRadius: 12,
+              background: "#1F5F3E",
+              color: "#FAFAF7",
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontWeight: 600,
+              fontSize: 16,
+              letterSpacing: "-0.01em",
+              textAlign: "center",
+              textDecoration: "none",
+              boxSizing: "border-box",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
             Get started
-          </Link>
-          <p className="welcome-signin">
+          </a>
+          <p
+            style={{
+              margin: 0,
+              textAlign: "center",
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 14,
+              color: "#6B6E73",
+              fontWeight: 400,
+            }}
+          >
             Already have an account?{" "}
-            <Link to="/signin">Sign in</Link>
+            <a
+              href="/signin"
+              style={{
+                color: "#1F5F3E",
+                fontWeight: 500,
+                textDecoration: "none",
+              }}
+            >
+              Sign in
+            </a>
           </p>
         </div>
       </div>
