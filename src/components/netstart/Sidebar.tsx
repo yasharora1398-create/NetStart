@@ -11,15 +11,18 @@
  */
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "@/lib/router-compat";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronLeft, PanelLeftOpen } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
+import { ThemeToggleButton } from "@/components/netstart/ThemeToggleButton";
+import { Button } from "@/components/ui/button";
 
 const COLLAPSED_KEY = "polln8.sidebar.collapsed";
 const EXPANDED_WIDTH = "248px";
-const COLLAPSED_WIDTH = "64px";
+// Collapsed reserves zero horizontal space — pages take the full
+// viewport while the floating top-right strip sits over the content.
+const COLLAPSED_WIDTH = "0px";
 
 // Hardcoded admin gate: the Admin section in the sidebar only shows
 // when this exact email is signed in. The Admin page itself has its
@@ -97,34 +100,38 @@ export const Sidebar = () => {
   // misclick on the avatar menu doesn't drop the session.
   const handleSignOut = () => confirmSignOut();
 
+  // When collapsed, hide the full sidebar panel and render a
+  // floating top-right strip in the HomeAuthStrip style instead.
+  // The strip has the user pill (or sign in / sign up), the theme
+  // toggle, and an expand button to bring the sidebar back.
+  if (collapsed) {
+    return <CollapsedTopBar onExpand={() => setCollapsed(false)} />;
+  }
+
   return (
     <aside
-      className={`glass-sidebar${collapsed ? " is-collapsed" : ""}`}
+      className="glass-sidebar"
       aria-label="Sidebar"
     >
       {/* Collapse toggle - small chevron at the top-right of the
-          sidebar. Aria label flips with state. stopPropagation +
-          preventDefault on the mouse event so a misfire near the
-          underlying brand Link can't bubble up and trigger a
-          navigation to "/" -- which is what previously happened
-          when users clicked the chevron from /how. */}
+          sidebar. stopPropagation + preventDefault on the mouse
+          event so a misfire near the underlying brand Link can't
+          bubble up and trigger a navigation to "/" -- which is
+          what previously happened when users clicked the chevron
+          from /how. */}
       <button
         type="button"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setCollapsed((c) => !c);
+          setCollapsed(true);
         }}
         onMouseDown={(e) => e.stopPropagation()}
         className="gs-toggle"
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        aria-expanded={!collapsed}
+        aria-label="Collapse sidebar"
+        aria-expanded={true}
       >
-        {collapsed ? (
-          <ChevronRight className="h-3.5 w-3.5" />
-        ) : (
-          <ChevronLeft className="h-3.5 w-3.5" />
-        )}
+        <ChevronLeft className="h-3.5 w-3.5" />
       </button>
 
       {/* Brand - logo image replaces the P8 square; the whole row is
@@ -241,6 +248,83 @@ export const Sidebar = () => {
         </div>
       </div>
     </aside>
+  );
+};
+
+// ─── Collapsed-state floating top bar ───────────────────────────────
+// When the user clicks the chevron to collapse the sidebar, the
+// full panel disappears and this strip floats at the top-right
+// instead — mirroring HomeAuthStrip's layout exactly (user pill /
+// sign-in/up controls + theme toggle) plus an extra "expand
+// sidebar" button so they can bring the nav back.
+
+const userPillName = (
+  user: { email?: string | null; user_metadata?: Record<string, unknown> } | null,
+): string => {
+  if (!user) return "you";
+  const meta = user.user_metadata as { name?: string } | undefined;
+  const raw = meta?.name?.trim() || user.email?.split("@")[0] || "you";
+  const first = raw.split(/\s+/)[0] ?? raw;
+  return first.length > 14 ? `${first.slice(0, 13)}…` : first;
+};
+
+const CollapsedTopBar = ({ onExpand }: { onExpand: () => void }) => {
+  const { user, loading } = useAuth();
+  const confirmSignOut = useConfirmSignOut();
+
+  if (loading) return null;
+
+  return (
+    <div className="hidden md:flex fixed top-4 right-5 z-40 items-center gap-2">
+      <button
+        type="button"
+        onClick={onExpand}
+        aria-label="Expand sidebar"
+        title="Expand sidebar"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/40 bg-gold/5 text-gold transition-colors hover:bg-gold/10"
+      >
+        <PanelLeftOpen className="h-4 w-4" />
+      </button>
+
+      {user ? (
+        <>
+          <span className="px-3 py-1.5 rounded-full border border-gold/40 bg-gold/5 text-[11px] font-mono uppercase tracking-[0.18em] text-gold">
+            {userPillName(user)}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => void confirmSignOut()}
+            className="font-mono text-[11px] uppercase tracking-[0.18em]"
+          >
+            Sign out
+          </Button>
+        </>
+      ) : (
+        <>
+          <Link to="/signin">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="font-mono text-[11px] uppercase tracking-[0.18em]"
+            >
+              Sign in
+            </Button>
+          </Link>
+          <Link to="/signup">
+            <Button
+              variant="gold"
+              size="sm"
+              className="font-mono text-[11px] uppercase tracking-[0.18em]"
+            >
+              Sign up
+            </Button>
+          </Link>
+        </>
+      )}
+
+      <ThemeToggleButton />
+    </div>
   );
 };
 

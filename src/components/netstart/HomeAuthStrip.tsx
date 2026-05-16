@@ -14,6 +14,7 @@ import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
+import { ThemeToggleButton } from "@/components/netstart/ThemeToggleButton";
 
 const displayName = (
   user: { email?: string | null; user_metadata?: Record<string, unknown> } | null,
@@ -70,6 +71,7 @@ export const HomeAuthStrip = () => {
           </Link>
         </>
       )}
+      <ThemeToggleButton />
     </div>
   );
 };
