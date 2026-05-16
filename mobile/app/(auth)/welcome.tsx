@@ -9,6 +9,7 @@
 import { useMemo } from "react";
 import { Link } from "expo-router";
 import {
+  Dimensions,
   Image,
   Pressable,
   StyleSheet,
@@ -100,96 +101,111 @@ export default function Welcome() {
   );
 }
 
-const makeStyles = (theme: ThemePalette) => StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 28,
-    overflow: "hidden",
-  },
-  brandRow: {
-    alignItems: "center",
-    paddingVertical: 4,
-  },
-  brandText: {
-    color: theme.text,
-    fontFamily: fonts.display,
-    fontSize: 22,
-    letterSpacing: -0.4,
-  },
-  title: {
-    textAlign: "center",
-    color: theme.text,
-    fontFamily: fonts.display,
-    fontSize: 110,
-    lineHeight: 100,
-    letterSpacing: -3.5,
-    marginTop: 28,
-    fontWeight: "800",
-  },
-  mothStage: {
-    flex: 1,
-    width: "100%",
-    position: "relative",
-  },
-  mothBox: {
-    position: "absolute",
-    right: -90,
-    top: 16,
-    width: 360,
-    height: 360,
-    transform: [{ rotate: "32deg" }],
-  },
-  moth: { width: "100%", height: "100%" },
-  arrowWrap: {
-    position: "absolute",
-    left: "2%",
-    right: "18%",
-    bottom: "8%",
-    height: "55%",
-  },
-  body: {
-    textAlign: "center",
-    color: theme.text,
-    fontSize: 17,
-    fontWeight: "700",
-    lineHeight: 23,
-    marginTop: 8,
-    marginBottom: 20,
-    paddingHorizontal: 4,
-  },
-  actionBlock: {
-    width: "100%",
-    marginBottom: 12,
-  },
-  primaryBtn: {
-    width: "100%",
-    backgroundColor: theme.gold,
-    borderRadius: 8,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryBtnText: {
-    color: theme.bg,
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  footerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  footerText: {
-    color: theme.textMuted,
-    fontSize: 14,
-  },
-  footerLink: {
-    color: theme.gold,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-});
+const makeStyles = (theme: ThemePalette) => {
+  // Sizing is derived from the screen width so the layout matches
+  // the storyboard proportions on any phone — "Welcome" spans ~85%
+  // of the viewport, the moth fills the right side and clips off
+  // the right edge, body copy is bold and a third the size of the
+  // headline, button sits near the bottom.
+  const w = Dimensions.get("window").width;
+  const titleFont = Math.min(w * 0.26, 160);
+  const titleLine = titleFont * 0.92;
+  const bodyFont = Math.min(w * 0.05, 22);
+  const ctaFont = Math.min(w * 0.044, 19);
+  const signinFont = Math.min(w * 0.036, 16);
+  const mothSize = Math.min(w * 0.86, 520);
+
+  return StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: theme.bg,
+      paddingHorizontal: w * 0.05,
+      paddingTop: 24,
+      paddingBottom: 32,
+      overflow: "hidden",
+    },
+    brandRow: {
+      alignItems: "center",
+    },
+    brandText: {
+      color: theme.text,
+      fontFamily: fonts.display,
+      fontSize: Math.min(w * 0.05, 22),
+      fontWeight: "700",
+      letterSpacing: -0.4,
+    },
+    title: {
+      textAlign: "center",
+      color: theme.text,
+      fontFamily: fonts.display,
+      fontSize: titleFont,
+      lineHeight: titleLine,
+      letterSpacing: -titleFont * 0.04,
+      marginTop: 48,
+      fontWeight: "800",
+    },
+    mothStage: {
+      flex: 1,
+      width: "100%",
+      position: "relative",
+    },
+    mothBox: {
+      position: "absolute",
+      right: -w * 0.14,
+      top: 16,
+      width: mothSize,
+      height: mothSize,
+      transform: [{ rotate: "32deg" }],
+    },
+    moth: { width: "100%", height: "100%" },
+    arrowWrap: {
+      position: "absolute",
+      left: "2%",
+      right: "24%",
+      bottom: "6%",
+      height: "56%",
+    },
+    body: {
+      textAlign: "center",
+      color: theme.text,
+      fontSize: bodyFont,
+      fontWeight: "700",
+      lineHeight: bodyFont * 1.3,
+      marginTop: 16,
+      marginBottom: 32,
+      paddingHorizontal: 8,
+    },
+    actionBlock: {
+      width: "100%",
+      marginBottom: 14,
+    },
+    primaryBtn: {
+      width: "100%",
+      backgroundColor: theme.gold,
+      borderRadius: 10,
+      paddingVertical: 22,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    primaryBtnText: {
+      color: theme.bg,
+      fontSize: ctaFont,
+      fontWeight: "700",
+      letterSpacing: 0.2,
+    },
+    footerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    footerText: {
+      color: theme.textMuted,
+      fontSize: signinFont,
+    },
+    footerLink: {
+      color: theme.gold,
+      fontSize: signinFont,
+      fontWeight: "700",
+    },
+  });
+};
