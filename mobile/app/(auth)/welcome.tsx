@@ -1,19 +1,20 @@
 /**
- * Post-signout welcome screen.
+ * Post-signout welcome screen (Expo native + web bundle).
  *
- * Lives at the root of the (auth) stack so RouteGuard hands the user
- * here whenever the session ends. Plays a short, deliberate intro:
+ * Storyboard:
+ *   t=0       small moth in center, "Polln8" brand at top
+ *   t=0.2s    moth lifts off and orbits counter-clockwise around
+ *             the center, growing as it goes
+ *   t=2.4s    moth lands upper-right, large + tilted ~30°
+ *   t=1.5s    "Welcome" title fades + lifts in
+ *   t=2.0s    dashed arrow fades in pointing toward the moth
+ *   t=2.4s    body copy fades in
+ *   t=2.7s    Get started CTA rises in, then breathes a soft pulse
+ *   t=2.9s    "Already have an account? Sign in" fades in
+ *   t=3.0s    buttons become interactive
  *
- *   t=0       small moth + "Polln8" mark, both centered
- *   t=200ms   "Polln8" fades up + out
- *   t=200ms   moth swoops from center -> upper-right, growing + tilting
- *   t=1800ms  "Welcome" headline + body + CTAs fade in from below
- *   t=2400ms  CTAs become interactive
- *
- * Get started routes to sign-up. The "Sign in" link in the footer
- * routes to sign-in. Both are tabbable + clickable only after the
- * animation completes so the user can't tap through before the
- * screen is finished rendering itself.
+ * The Polln8 brand mark stays pinned through the whole sequence —
+ * matches the final-frame screenshot the design was based on.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "expo-router";
@@ -31,15 +32,17 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withRepeat,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import Svg, { Path } from "react-native-svg";
 
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
 const MOTH_SOURCE = require("@/assets/images/moth.png");
-const ANIMATION_MS = 2400;
+const ANIMATION_MS = 3000;
 
 export default function Welcome() {
   const { theme, mode } = useTheme();
@@ -47,55 +50,84 @@ export default function Welcome() {
   const styles = useMemo(() => makeStyles(theme), [theme]);
   const [ready, setReady] = useState(false);
 
-  // Path values are derived from screen width so the arc lands roughly
-  // in the upper-right corner regardless of device.
-  const endX = Math.min(width * 0.32, 160);
-  const endY = -8;
+  // Orbit radius + final offset are derived from the screen width so
+  // the moth lands roughly upper-right regardless of device.
+  const R = Math.min(width * 0.32, 150);
+  const endX = R * 1.05;
+  const endY = -R * 0.6;
 
+  // Moth motion + scale + rotation
   const tx = useSharedValue(0);
-  const ty = useSharedValue(40);
+  const ty = useSharedValue(0);
   const rot = useSharedValue(0);
-  const scale = useSharedValue(0.55);
-  const brand = useSharedValue(1);
-  const copy = useSharedValue(0);
+  const scale = useSharedValue(0.45);
+
+  // Text / arrow / CTA opacities + entrance lifts
+  const titleOpacity = useSharedValue(0);
+  const titleLift = useSharedValue(14);
+  const arrowOpacity = useSharedValue(0);
+  const bodyOpacity = useSharedValue(0);
+  const bodyLift = useSharedValue(12);
+  const ctaOpacity = useSharedValue(0);
+  const ctaLift = useSharedValue(20);
+  const ctaScale = useSharedValue(0.96);
+  const ctaPulse = useSharedValue(1);
+  const signInOpacity = useSharedValue(0);
 
   useEffect(() => {
-    const ease = Easing.bezier(0.22, 1, 0.36, 1);
-
-    // Brand mark fades out as the moth lifts off.
-    brand.value = withDelay(
-      200,
-      withTiming(0, { duration: 600, easing: Easing.out(Easing.cubic) }),
-    );
-
-    // Moth arc — four waypoints, chained via withSequence so each
-    // segment kicks off when the previous one finishes. Sequencing
-    // every channel separately (tx, ty, rot, scale) keeps each
-    // dimension independent and easy to tune later.
-    const arc = (vals: [number, number, number, number]) =>
+    const ease = Easing.bezier(0.42, 0, 0.58, 1);
+    const easeOut = Easing.bezier(0.22, 1, 0.36, 1);
+    const seg = (vals: number[], durs: number[]) =>
       withDelay(
         200,
         withSequence(
-          withTiming(vals[0], { duration: 440, easing: ease }),
-          withTiming(vals[1], { duration: 540, easing: ease }),
-          withTiming(vals[2], { duration: 560, easing: ease }),
-          withTiming(vals[3], { duration: 460, easing: ease }),
+          ...vals.map((v, i) =>
+            withTiming(v, { duration: durs[i], easing: ease }),
+          ),
         ),
       );
 
-    tx.value = arc([-width * 0.22, -width * 0.04, width * 0.22, endX]);
-    ty.value = arc([-90, -200, -120, endY]);
-    rot.value = arc([-22, 0, 28, 32]);
-    scale.value = arc([0.75, 0.95, 1.3, 1.6]);
+    // CCW orbit waypoints (translateX). 9 segments, ~242ms each.
+    const durs = [180, 220, 260, 260, 260, 260, 260, 260, 240];
+    tx.value = seg([0, -95, -150, -120, 0, 120, 155, 130, endX], durs);
+    ty.value = seg([-90, -120, -25, 85, 130, 85, -25, -110, endY], durs);
+    rot.value = seg([-40, -95, -150, -200, -235, -275, -310, -340, -328], durs);
+    scale.value = seg([0.55, 0.62, 0.7, 0.78, 0.9, 1.05, 1.25, 1.5, 1.75], durs);
 
-    // Copy + CTAs fade in as the moth settles.
-    copy.value = withDelay(1800, withTiming(1, { duration: 700, easing: ease }));
+    // Welcome title fades + lifts in at t=1500
+    titleOpacity.value = withDelay(1500, withTiming(1, { duration: 700, easing: easeOut }));
+    titleLift.value = withDelay(1500, withTiming(0, { duration: 700, easing: easeOut }));
+
+    // Dashed arrow fades in at t=2000
+    arrowOpacity.value = withDelay(2000, withTiming(0.7, { duration: 700, easing: easeOut }));
+
+    // Body copy fades + lifts at t=2400
+    bodyOpacity.value = withDelay(2400, withTiming(1, { duration: 700, easing: easeOut }));
+    bodyLift.value = withDelay(2400, withTiming(0, { duration: 700, easing: easeOut }));
+
+    // Get started CTA rises in at t=2700, then breathes forever from t=3400
+    ctaOpacity.value = withDelay(2700, withTiming(1, { duration: 650, easing: easeOut }));
+    ctaLift.value = withDelay(2700, withTiming(0, { duration: 650, easing: easeOut }));
+    ctaScale.value = withDelay(2700, withTiming(1, { duration: 650, easing: easeOut }));
+    ctaPulse.value = withDelay(
+      3400,
+      withRepeat(
+        withSequence(
+          withTiming(1.015, { duration: 1300, easing: easeOut }),
+          withTiming(1, { duration: 1300, easing: easeOut }),
+        ),
+        -1,
+        false,
+      ),
+    );
+
+    // Sign-in link fades at t=2900
+    signInOpacity.value = withDelay(2900, withTiming(1, { duration: 500, easing: easeOut }));
 
     const t = setTimeout(() => setReady(true), ANIMATION_MS);
     return () => clearTimeout(t);
-    // Shared values are stable refs; we don't include them in deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [endX, endY, width]);
+  }, [endX, endY]);
 
   const mothStyle = useAnimatedStyle(() => ({
     transform: [
@@ -105,22 +137,37 @@ export default function Welcome() {
       { scale: scale.value },
     ],
   }));
-  const brandStyle = useAnimatedStyle(() => ({ opacity: brand.value }));
-  const copyStyle = useAnimatedStyle(() => ({
-    opacity: copy.value,
-    transform: [{ translateY: (1 - copy.value) * 12 }],
+  const titleStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+    transform: [{ translateY: titleLift.value }],
   }));
+  const arrowStyle = useAnimatedStyle(() => ({ opacity: arrowOpacity.value }));
+  const bodyStyle = useAnimatedStyle(() => ({
+    opacity: bodyOpacity.value,
+    transform: [{ translateY: bodyLift.value }],
+  }));
+  const ctaStyle = useAnimatedStyle(() => ({
+    opacity: ctaOpacity.value,
+    transform: [
+      { translateY: ctaLift.value },
+      { scale: ctaScale.value * ctaPulse.value },
+    ],
+  }));
+  const signInStyle = useAnimatedStyle(() => ({ opacity: signInOpacity.value }));
 
-  // In dark mode the moth PNG (dark silhouette) needs to be tinted
-  // white-ish so it reads against the near-black background.
   const mothTint = mode === "dark" ? theme.text : undefined;
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Animated.View style={[styles.brandRow, brandStyle]}>
+      {/* Brand mark — pinned, no fade */}
+      <View style={styles.brandRow}>
         <Text style={styles.brandText}>Polln8</Text>
-      </Animated.View>
+      </View>
 
+      {/* Welcome title */}
+      <Animated.Text style={[styles.title, titleStyle]}>Welcome</Animated.Text>
+
+      {/* Moth stage + dashed arrow overlay */}
       <View style={styles.mothStage} pointerEvents="none">
         <Animated.View style={[styles.mothBox, mothStyle]}>
           <Image
@@ -129,39 +176,61 @@ export default function Welcome() {
             resizeMode="contain"
           />
         </Animated.View>
+
+        <Animated.View style={[styles.arrowWrap, arrowStyle]} pointerEvents="none">
+          <Svg viewBox="0 0 360 220" width="100%" height="100%">
+            <Path
+              d="M 30,200 Q 120,140 200,150 T 320,80"
+              stroke={theme.textMuted}
+              strokeWidth={2.5}
+              strokeDasharray="3 7"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Path
+              d="M 314,72 L 326,82 L 314,92"
+              stroke={theme.textMuted}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </Svg>
+        </Animated.View>
       </View>
 
-      <Animated.View style={[styles.copy, copyStyle]} pointerEvents="none">
-        <Text style={styles.h1}>Welcome</Text>
-        <Text style={styles.body}>
-          Polln8 is where founders find cofounders and builders find startups
-          to join for equity: vetted profiles, real shipping history, no spam.
-        </Text>
-      </Animated.View>
+      {/* Body copy */}
+      <Animated.Text style={[styles.body, bodyStyle]}>
+        Polln8 is where founders find cofounders and builders find startups
+        to join for equity: vetted profiles, real shipping history, no spam.
+      </Animated.Text>
 
-      <Animated.View style={[styles.actions, copyStyle]}>
+      {/* Get started */}
+      <Animated.View style={[styles.actionBlock, ctaStyle]}>
         <Link href="/(auth)/sign-up" asChild>
           <Pressable
             disabled={!ready}
             style={({ pressed }) => [
               styles.primaryBtn,
               pressed && { opacity: 0.85 },
-              !ready && { opacity: 0.55 },
+              !ready && { opacity: 0.6 },
             ]}
           >
             <Text style={styles.primaryBtnText}>Get started</Text>
           </Pressable>
         </Link>
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>Already have an account? </Text>
-          <Link
-            href="/(auth)/sign-in"
-            disabled={!ready}
-            style={[styles.footerLink, !ready && { opacity: 0.55 }]}
-          >
-            Sign in
-          </Link>
-        </View>
+      </Animated.View>
+
+      {/* Already have an account? Sign in */}
+      <Animated.View style={[styles.footerRow, signInStyle]}>
+        <Text style={styles.footerText}>Already have an account? </Text>
+        <Link
+          href="/(auth)/sign-in"
+          disabled={!ready}
+          style={[styles.footerLink, !ready && { opacity: 0.6 }]}
+        >
+          Sign in
+        </Link>
       </Animated.View>
     </SafeAreaView>
   );
@@ -172,13 +241,13 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.bg,
     paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingTop: 12,
+    paddingBottom: 28,
+    overflow: "hidden",
   },
   brandRow: {
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 8,
+    paddingVertical: 4,
   },
   brandText: {
     color: theme.text,
@@ -186,65 +255,78 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     fontSize: 22,
     letterSpacing: -0.4,
   },
-  mothStage: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mothBox: {
-    width: 160,
-    height: 160,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  moth: {
-    width: "100%",
-    height: "100%",
-  },
-  copy: {
-    alignItems: "center",
-    paddingHorizontal: 8,
-    marginTop: 4,
-    marginBottom: 24,
-  },
-  h1: {
+  title: {
+    textAlign: "center",
     color: theme.text,
     fontFamily: fonts.display,
-    fontSize: 56,
-    letterSpacing: -1.2,
-    lineHeight: 60,
-    marginBottom: 16,
+    fontSize: 96,
+    lineHeight: 92,
+    letterSpacing: -3,
+    marginTop: 24,
+    marginBottom: 0,
+    fontWeight: "800",
+  },
+  mothStage: {
+    flex: 1,
+    width: "100%",
+    position: "relative",
+    marginTop: -60,
+  },
+  mothBox: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    left: "50%",
+    top: "50%",
+    marginLeft: -90,
+    marginTop: -90,
+  },
+  moth: { width: "100%", height: "100%" },
+  arrowWrap: {
+    position: "absolute",
+    left: "6%",
+    right: "6%",
+    bottom: "10%",
+    height: "55%",
   },
   body: {
-    color: theme.text,
-    fontSize: 16,
-    fontWeight: "600",
-    lineHeight: 22,
     textAlign: "center",
-    maxWidth: 380,
+    color: theme.text,
+    fontSize: 17,
+    fontWeight: "700",
+    lineHeight: 23,
+    marginTop: 8,
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
-  actions: {
+  actionBlock: {
     width: "100%",
-    gap: 14,
-    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 12,
   },
   primaryBtn: {
     width: "100%",
     backgroundColor: theme.gold,
-    borderRadius: 6,
-    paddingVertical: 16,
+    borderRadius: 8,
+    paddingVertical: 18,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: theme.gold,
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
   primaryBtnText: {
     color: theme.bg,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "700",
     letterSpacing: 0.2,
   },
   footerRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   footerText: {
     color: theme.textMuted,
@@ -253,6 +335,6 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   footerLink: {
     color: theme.gold,
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });
