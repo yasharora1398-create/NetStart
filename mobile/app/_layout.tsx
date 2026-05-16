@@ -11,6 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import {
+  Fraunces_500Medium,
   Fraunces_700Bold,
   Fraunces_700Bold_Italic,
 } from "@expo-google-fonts/fraunces";
@@ -113,6 +114,7 @@ const RouteGuard = () => {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
+    Fraunces_500Medium,
     Fraunces_700Bold,
     Fraunces_700Bold_Italic,
     JetBrainsMono_400Regular,

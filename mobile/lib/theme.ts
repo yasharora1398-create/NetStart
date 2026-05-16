@@ -29,6 +29,7 @@ export const theme = {
 
 export const fonts = {
   display: "Fraunces_700Bold",
+  displayMedium: "Fraunces_500Medium",
   displayItalic: "Fraunces_700Bold_Italic",
   body: "Inter",
   mono: "JetBrainsMono_400Regular",

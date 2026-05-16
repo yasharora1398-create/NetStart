@@ -3,8 +3,16 @@
  * Shown on first install, after every sign-out, and any time the
  * user isn't signed in (routed via RouteGuard in app/_layout.tsx).
  *
- * Pure static layout, no animations. Buttons route directly to the
- * sign-up and sign-in screens.
+ * Layout matches the "Polln8 Welcome" design (HomeScreen variant
+ * from the Claude Design handoff): top wordmark, big serif Welcome
+ * headline, moth rotated 49° just below it, then "Find your person."
+ * + description copy, then the full-width Get started CTA and the
+ * "Already have an account? Sign in" line.
+ *
+ * Sizes follow the 390x844 artboard the designer used. We don't
+ * pin to those exact pixel values on every device — instead we
+ * scale font sizes/widths off the screen width so the same
+ * composition reads on any phone.
  */
 import { useMemo } from "react";
 import { Link } from "expo-router";
@@ -17,7 +25,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Path } from "react-native-svg";
 
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
@@ -28,57 +35,39 @@ export default function Welcome() {
   const { theme, mode } = useTheme();
   const styles = useMemo(() => makeStyles(theme), [theme]);
 
-  // In dark mode the dark-silhouette PNG needs to be tinted to the
-  // foreground colour so it reads against the near-black background.
+  // Dark silhouette PNG → tint to foreground in dark mode so it
+  // reads against the near-black background.
   const mothTint = mode === "dark" ? theme.text : undefined;
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.brandRow}>
-        <Text style={styles.brandText}>Polln8</Text>
+      <View style={styles.wordmarkRow}>
+        <Text style={styles.wordmark}>Polln8</Text>
       </View>
 
-      <Text style={styles.title}>Welcome</Text>
-
-      <View style={styles.mothStage} pointerEvents="none">
-        <View style={styles.mothBox}>
-          <Image
-            source={MOTH_SOURCE}
-            style={[styles.moth, mothTint ? { tintColor: mothTint } : null]}
-            resizeMode="contain"
-          />
-        </View>
-
-        <View style={styles.arrowWrap} pointerEvents="none">
-          <Svg viewBox="0 0 360 220" width="100%" height="100%">
-            <Path
-              d="M 30,200 Q 120,140 200,150 T 320,80"
-              stroke={theme.text}
-              strokeWidth={2.5}
-              strokeDasharray="3 7"
-              strokeLinecap="round"
-              fill="none"
-              opacity={0.85}
-            />
-            <Path
-              d="M 314,72 L 326,82 L 314,92"
-              stroke={theme.text}
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-              opacity={0.85}
-            />
-          </Svg>
-        </View>
+      <View style={styles.titleWrap}>
+        <Text style={styles.title}>Welcome</Text>
       </View>
 
-      <Text style={styles.body}>
-        Polln8 is where founders find cofounders and builders find startups
-        to join for equity: vetted profiles, real shipping history, no spam.
-      </Text>
+      <View style={styles.mothRow} pointerEvents="none">
+        <Image
+          source={MOTH_SOURCE}
+          style={[styles.moth, mothTint ? { tintColor: mothTint } : null]}
+          resizeMode="contain"
+        />
+      </View>
 
-      <View style={styles.actionBlock}>
+      <View style={styles.copyBlock}>
+        <Text style={styles.headline}>Find your person.</Text>
+        <Text style={styles.body}>
+          Polln8 is where founders find cofounders and builders find startups
+          to join for equity. Vetted profiles, real shipping history, no spam.
+        </Text>
+      </View>
+
+      <View style={styles.spacer} />
+
+      <View style={styles.ctaBlock}>
         <Link href="/(auth)/sign-up" asChild>
           <Pressable
             style={({ pressed }) => [
@@ -89,123 +78,134 @@ export default function Welcome() {
             <Text style={styles.primaryBtnText}>Get started</Text>
           </Pressable>
         </Link>
+
+        <View style={styles.signInRow}>
+          <Text style={styles.signInLead}>Already have an account? </Text>
+          <Link href="/(auth)/sign-in" style={styles.signInLink}>
+            Sign in
+          </Link>
+        </View>
       </View>
 
-      <View style={styles.footerRow}>
-        <Text style={styles.footerText}>Already have an account? </Text>
-        <Link href="/(auth)/sign-in" style={styles.footerLink}>
-          Sign in
-        </Link>
-      </View>
+      <View style={styles.bottomSpacer} />
     </SafeAreaView>
   );
 }
 
 const makeStyles = (theme: ThemePalette) => {
-  // Sizing is derived from the screen width so the layout matches
-  // the storyboard proportions on any phone — "Welcome" spans ~85%
-  // of the viewport, the moth fills the right side and clips off
-  // the right edge, body copy is bold and a third the size of the
-  // headline, button sits near the bottom.
+  // Reference artboard: 390x844. Font + moth sizes scale off
+  // screen width so the design reads the same on any phone.
   const w = Dimensions.get("window").width;
-  const titleFont = Math.min(w * 0.26, 160);
-  const titleLine = titleFont * 0.92;
-  const bodyFont = Math.min(w * 0.05, 22);
-  const ctaFont = Math.min(w * 0.044, 19);
-  const signinFont = Math.min(w * 0.036, 16);
-  const mothSize = Math.min(w * 0.86, 520);
+  const ref = 390;
+  const k = w / ref;
+  const titleFont = 76 * k;
+  const headlineFont = 30 * k;
+  const bodyFont = 15 * k;
+  const ctaFont = 16 * k;
+  const signInFont = 14 * k;
+  const wordmarkFont = 22 * k;
+  const mothSize = 340 * k;
 
   return StyleSheet.create({
     safe: {
       flex: 1,
       backgroundColor: theme.bg,
-      paddingHorizontal: w * 0.05,
-      paddingTop: 24,
-      paddingBottom: 32,
-      overflow: "hidden",
     },
-    brandRow: {
+    wordmarkRow: {
+      paddingTop: 24,
+      paddingHorizontal: 24,
       alignItems: "center",
     },
-    brandText: {
+    wordmark: {
       color: theme.text,
-      fontFamily: fonts.display,
-      fontSize: Math.min(w * 0.05, 22),
-      fontWeight: "700",
-      letterSpacing: -0.4,
+      fontFamily: fonts.body,
+      fontSize: wordmarkFont,
+      fontWeight: "600",
+      letterSpacing: -wordmarkFont * 0.025,
+    },
+    titleWrap: {
+      marginTop: 56,
+      alignItems: "center",
     },
     title: {
-      textAlign: "center",
       color: theme.text,
       fontFamily: fonts.display,
       fontSize: titleFont,
-      lineHeight: titleLine,
-      letterSpacing: -titleFont * 0.04,
-      marginTop: 48,
-      fontWeight: "800",
+      lineHeight: titleFont,
+      letterSpacing: -titleFont * 0.045,
+      fontWeight: "700",
     },
-    mothStage: {
-      flex: 1,
-      width: "100%",
-      position: "relative",
+    mothRow: {
+      marginTop: -40,
+      alignItems: "center",
     },
-    mothBox: {
-      position: "absolute",
-      right: -w * 0.14,
-      top: 16,
+    moth: {
       width: mothSize,
       height: mothSize,
-      transform: [{ rotate: "32deg" }],
+      transform: [{ rotate: "49deg" }],
     },
-    moth: { width: "100%", height: "100%" },
-    arrowWrap: {
-      position: "absolute",
-      left: "2%",
-      right: "24%",
-      bottom: "6%",
-      height: "56%",
+    copyBlock: {
+      paddingHorizontal: 24,
+      marginTop: -8,
+      alignItems: "center",
+    },
+    headline: {
+      color: theme.text,
+      fontFamily: fonts.displayMedium,
+      fontSize: headlineFont,
+      lineHeight: headlineFont * 1.1,
+      letterSpacing: -headlineFont * 0.015,
+      fontWeight: "500",
+      marginBottom: 14,
+      textAlign: "center",
     },
     body: {
-      textAlign: "center",
-      color: theme.text,
+      color: theme.textMuted,
+      fontFamily: fonts.body,
       fontSize: bodyFont,
-      fontWeight: "700",
-      lineHeight: bodyFont * 1.3,
-      marginTop: 16,
-      marginBottom: 32,
-      paddingHorizontal: 8,
+      lineHeight: bodyFont * 1.55,
+      letterSpacing: -bodyFont * 0.005,
+      textAlign: "center",
+      maxWidth: 320,
     },
-    actionBlock: {
-      width: "100%",
-      marginBottom: 14,
+    spacer: { flex: 1 },
+    ctaBlock: {
+      paddingHorizontal: 24,
+      paddingBottom: 4,
+      gap: 18,
     },
     primaryBtn: {
-      width: "100%",
+      height: 56,
+      borderRadius: 12,
       backgroundColor: theme.gold,
-      borderRadius: 10,
-      paddingVertical: 22,
       alignItems: "center",
       justifyContent: "center",
     },
     primaryBtnText: {
       color: theme.bg,
+      fontFamily: fonts.body,
       fontSize: ctaFont,
-      fontWeight: "700",
-      letterSpacing: 0.2,
+      fontWeight: "600",
+      letterSpacing: -ctaFont * 0.01,
     },
-    footerRow: {
+    signInRow: {
       flexDirection: "row",
-      alignItems: "center",
       justifyContent: "center",
+      alignItems: "baseline",
     },
-    footerText: {
-      color: theme.textMuted,
-      fontSize: signinFont,
+    signInLead: {
+      color: theme.textDim,
+      fontFamily: fonts.body,
+      fontSize: signInFont,
+      letterSpacing: -signInFont * 0.005,
     },
-    footerLink: {
+    signInLink: {
       color: theme.gold,
-      fontSize: signinFont,
-      fontWeight: "700",
+      fontFamily: fonts.body,
+      fontSize: signInFont,
+      fontWeight: "500",
+      letterSpacing: -signInFont * 0.005,
     },
+    bottomSpacer: { height: 24 },
   });
 };
