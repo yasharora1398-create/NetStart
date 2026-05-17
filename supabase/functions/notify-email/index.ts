@@ -88,19 +88,37 @@ serve(async (req) => {
   );
 
   // Optional: sender name + first name (for chat_message / chat_request).
-  // We pull from profiles so the email greeting reads as the friendly
-  // first name even if the notification title was already personalized.
+  // Tries three sources in order so the email never falls back to
+  // the generic "Someone" if any of them resolve:
+  //   1. notifications.from_user_id (set by migration 0029)
+  //   2. sender UUID parsed out of the link (e.g., /chats/<uuid>)
+  //   3. notifications.title — the SQL trigger writes it as
+  //      "New message from <name>", so we can extract the name
   let senderName: string | null = null;
   let senderFirstName: string | null = null;
-  if (fromUserId) {
+  let senderId: string | null = fromUserId ?? null;
+  if (!senderId && typeof link === "string") {
+    const m = link.match(/\/chats\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+    if (m) senderId = m[1];
+  }
+  if (senderId) {
     const { data: senderProfile } = await admin
       .from("profiles")
       .select("full_name")
-      .eq("user_id", fromUserId)
+      .eq("user_id", senderId)
       .maybeSingle();
     if (senderProfile?.full_name) {
       senderName = senderProfile.full_name;
       senderFirstName = firstName(senderProfile.full_name);
+    }
+  }
+  // Last-ditch: pull the name out of the title which the SQL
+  // trigger formatted as "New message from <name>".
+  if (!senderName && typeof title === "string") {
+    const m = title.match(/^New message from\s+(.+)$/);
+    if (m && m[1] && m[1] !== "Someone") {
+      senderName = m[1].trim();
+      senderFirstName = firstName(senderName);
     }
   }
 
@@ -190,7 +208,16 @@ const chatMessage = (ctx: TemplateCtx) => {
   //   5. Green hairline + lighter footer with manage links
   const sender = ctx.senderName ?? "Someone";
   const senderFirst = ctx.senderFirstName ?? sender;
-  const subject = `${sender} messaged you on Polln8`;
+  // Each subject embeds a 40-char preview of the message so it's
+  // unique per send — keeps Gmail / Apple Mail / Outlook from
+  // threading consecutive messages from the same sender into one
+  // visual conversation. New message = new thread in the inbox.
+  const previewForSubject = (() => {
+    const trimmed = ctx.body.trim().replace(/\s+/g, " ");
+    if (trimmed.length === 0) return "messaged you";
+    return trimmed.length > 40 ? `${trimmed.slice(0, 37)}...` : trimmed;
+  })();
+  const subject = `${sender}: ${previewForSubject}`;
   const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
   const muteLink = ctx.fromUserId
     ? `${APP_BASE_URL}/chats/${ctx.fromUserId}`
