@@ -184,25 +184,37 @@ const chatMessage = (ctx: TemplateCtx) => {
   const subject = `${sender} messaged you on Polln8`;
   const greeting = `Hey ${ctx.recipientName}, ${sender} just sent you a message.`;
   const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
-  // Layout: ONE line of personalized text, a full-bleed hero GIF
-  // (decorative — NOT clickable), then a real HTML "Reply on Polln8"
-  // CTA button. The button is the only click target on the email.
-  // The GIF can't have a clickable sub-region because email HTML
-  // treats <img> as a single element; the button has to live
-  // outside the image to be properly clickable on every device.
+  // Layout: small animated accent at the top + real HTML body
+  // below. Keeps the email scannable in plain HTML (selectable
+  // text, scaling, fonts) while the GIF lives as a 240x240
+  // centered visual rather than the whole content surface.
   const inner = `
-    <div style="padding:28px 28px 22px;">
-      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;line-height:1.45;color:${C.ink};font-weight:500;">
-        ${escapeHtml(greeting)}
-      </p>
+    <div style="text-align:center;margin:0 0 18px;">
+      <img
+        src="${gifUrl}"
+        alt=""
+        width="240"
+        height="240"
+        style="display:inline-block;width:240px;max-width:80%;height:auto;border:0;outline:none;-ms-interpolation-mode:bicubic;pointer-events:none;"
+      />
     </div>
-    <img src="${gifUrl}" alt="" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;-ms-interpolation-mode:bicubic;pointer-events:none;">
-    <div style="padding:22px 28px 28px;text-align:center;">
-      ${primaryButton(ctx.linkUrl, "Reply on Polln8")}
-    </div>
+    ${heroEyebrow("New message")}
+    ${heroTitle(`${escapeHtml(sender)} messaged you.`)}
+    ${heroLede(escapeHtml(greeting))}
+    ${quoteBubble(ctx.body, sender)}
+    ${primaryButton(ctx.linkUrl, "Reply on Polln8")}
+    ${
+      ctx.fromUserId
+        ? subtleHelp(
+            `Too many pings? <a href="${APP_BASE_URL}/chats/${ctx.fromUserId}" style="color:${C.accent};">Mute ${escapeHtml(
+              ctx.senderFirstName ?? sender,
+            )}</a> from your chat with them.`,
+          )
+        : ""
+    }
   `;
-  const text = `${greeting}\n\nReply: ${ctx.linkUrl}`;
-  return { subject, html: shell(subject, inner, { fullBleed: true }), text };
+  const text = `${greeting}\n\n"${ctx.body}"\n\nReply: ${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner), text };
 };
 
 const chatRequest = (ctx: TemplateCtx) => {
