@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   Switch,
@@ -109,6 +110,11 @@ export default function MyNetScreen() {
   // Toggle role with confirmation. Persists to user_metadata so it
   // survives sign-out / reinstall. The warning copy spells out what
   // changes so a founder doesn't accidentally lose project context.
+  //
+  // Web detour: react-native-web's Alert.alert silently no-ops on
+  // multi-button alerts (same gotcha that broke sign-out — see
+  // confirmSignOut.ts). Fall back to window.confirm so the role
+  // switch actually fires on polln8.com/m.
   const toggleRole = () => {
     const next: Role = role === "founder" ? "builder" : "founder";
     const title =
@@ -119,6 +125,16 @@ export default function MyNetScreen() {
         : projects.length > 0
           ? `You have ${projects.length} project${projects.length === 1 ? "" : "s"} that will stay saved, but Match will switch to showing founders looking for builders. Switch back anytime.`
           : "You'll see founders posting projects in Match instead of builders. Switch back anytime.";
+
+    if (Platform.OS === "web") {
+      const ok =
+        typeof window !== "undefined" &&
+        typeof window.confirm === "function" &&
+        window.confirm(`${title}\n\n${body}`);
+      if (ok) void updateRole(next);
+      return;
+    }
+
     Alert.alert(title, body, [
       { text: "Cancel", style: "cancel" },
       {
