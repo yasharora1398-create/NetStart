@@ -36,6 +36,7 @@ import {
 } from "@/lib/options";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { confirm } from "@/lib/confirm";
 
 const TITLE_MAX = 80;
 const DESC_MAX = 280;
@@ -112,14 +113,13 @@ export default function EditProjectScreen() {
       originalCriteriaRef.current !== "" &&
       JSON.stringify(criteria) !== originalCriteriaRef.current;
     if (criteriaChanged && originalPublishedRef.current) {
-      Alert.alert(
-        "Re-rank your matches?",
-        "You've changed the project's criteria. Saving will re-rank Match against the new skills, commitment, and location. Builders who already applied stay where they are.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Save", onPress: () => void performSave(criteria) },
-        ],
-      );
+      confirm({
+        title: "Re-rank your matches?",
+        message:
+          "You've changed the project's criteria. Saving will re-rank Match against the new skills, commitment, and location. Builders who already applied stay where they are.",
+        confirmLabel: "Save",
+        onConfirm: () => void performSave(criteria),
+      });
       return;
     }
     void performSave(criteria);
@@ -148,28 +148,22 @@ export default function EditProjectScreen() {
         // to publish so builders can actually apply - otherwise they
         // post a project, get no applications, and assume the app
         // is broken.
-        Alert.alert(
-          "Project saved",
-          "Publish it so builders can find it and apply? You can unpublish anytime.",
-          [
-            {
-              text: "Later",
-              style: "cancel",
-              onPress: () => router.back(),
-            },
-            {
-              text: "Publish",
-              onPress: async () => {
-                try {
-                  await setProjectPublished(created.id, true);
-                } catch {
-                  // silent - user can publish from project detail later
-                }
-                router.back();
-              },
-            },
-          ],
-        );
+        confirm({
+          title: "Project saved",
+          message:
+            "Publish it so builders can find it? You can unpublish anytime.",
+          confirmLabel: "Publish",
+          cancelLabel: "Later",
+          onConfirm: async () => {
+            try {
+              await setProjectPublished(created.id, true);
+            } catch {
+              // silent - user can publish from project detail later
+            }
+            router.back();
+          },
+          onCancel: () => router.back(),
+        });
       }
     } catch (err) {
       Alert.alert(
@@ -183,31 +177,27 @@ export default function EditProjectScreen() {
 
   const handleDelete = () => {
     if (!editing || !id) return;
-    Alert.alert(
-      "Delete this project?",
-      "This will remove all saved candidates and applications attached to it. Can't be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setDeleting(true);
-            try {
-              await deleteProject(id);
-              router.back();
-            } catch (err) {
-              Alert.alert(
-                "Could not delete",
-                err instanceof Error ? err.message : "Try again.",
-              );
-            } finally {
-              setDeleting(false);
-            }
-          },
-        },
-      ],
-    );
+    confirm({
+      title: "Delete this project?",
+      message:
+        "This will remove all saved candidates attached to it. Can't be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        setDeleting(true);
+        try {
+          await deleteProject(id);
+          router.back();
+        } catch (err) {
+          Alert.alert(
+            "Could not delete",
+            err instanceof Error ? err.message : "Try again.",
+          );
+        } finally {
+          setDeleting(false);
+        }
+      },
+    });
   };
 
   if (loading) {

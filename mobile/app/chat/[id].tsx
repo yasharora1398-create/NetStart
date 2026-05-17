@@ -70,6 +70,7 @@ import { markThreadUnread } from "@/lib/threadUnread";
 import type { Candidate } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { confirm } from "@/lib/confirm";
 import { MothEmptyState } from "@/components/MothEmptyState";
 import { MothLoader } from "@/components/MothLoader";
 
@@ -536,54 +537,46 @@ export default function ChatScreen() {
   };
 
   const handleDecline = () => {
-    Alert.alert(
-      "Decline chat?",
-      "They won't be able to send any more messages. You can delete the thread after.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Decline",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await declineChatThread(otherId);
-              const next = await getChatThreadState(otherId);
-              setThreadState(next);
-            } catch (err) {
-              Alert.alert(
-                "Couldn't decline",
-                err instanceof Error ? err.message : "Try again.",
-              );
-            }
-          },
-        },
-      ],
-    );
+    confirm({
+      title: "Decline chat?",
+      message:
+        "They won't be able to send any more messages. You can delete the thread after.",
+      confirmLabel: "Decline",
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          await declineChatThread(otherId);
+          const next = await getChatThreadState(otherId);
+          setThreadState(next);
+        } catch (err) {
+          Alert.alert(
+            "Couldn't decline",
+            err instanceof Error ? err.message : "Try again.",
+          );
+        }
+      },
+    });
   };
 
   const handleDeleteThread = () => {
-    Alert.alert(
-      "Delete this chat?",
-      "It disappears from your threads. They keep their copy until they delete too.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteChatThread(otherId);
-              router.back();
-            } catch (err) {
-              Alert.alert(
-                "Couldn't delete",
-                err instanceof Error ? err.message : "Try again.",
-              );
-            }
-          },
-        },
-      ],
-    );
+    confirm({
+      title: "Delete this chat?",
+      message:
+        "It disappears from your threads. They keep their copy until they delete too.",
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          await deleteChatThread(otherId);
+          router.back();
+        } catch (err) {
+          Alert.alert(
+            "Couldn't delete",
+            err instanceof Error ? err.message : "Try again.",
+          );
+        }
+      },
+    });
   };
 
   // Header overflow menu helpers ----------------------------------

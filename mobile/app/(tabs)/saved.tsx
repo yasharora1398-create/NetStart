@@ -62,6 +62,7 @@ import { ApplyDialog } from "@/components/ApplyDialog";
 import { MothEmptyState } from "@/components/MothEmptyState";
 import { MothLoader } from "@/components/MothLoader";
 import { readMetadataRole, type Role } from "@/lib/userRole";
+import { confirm } from "@/lib/confirm";
 
 type RankedCandidate = Candidate & { similarity: number };
 
@@ -139,18 +140,13 @@ const BuilderSavedView = ({
   const activeId = useActiveSavedProjectId();
 
   const handleUnsave = (project: PublicProject) => {
-    Alert.alert(
-      "Remove from saved?",
-      `${project.title} won't appear in your shortlist anymore.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => removeSavedProject(project.id),
-        },
-      ],
-    );
+    confirm({
+      title: "Remove from saved?",
+      message: `${project.title} won't appear in your shortlist anymore.`,
+      confirmLabel: "Remove",
+      destructive: true,
+      onConfirm: () => removeSavedProject(project.id),
+    });
   };
 
   return (

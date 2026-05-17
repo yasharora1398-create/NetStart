@@ -354,7 +354,7 @@ export default function MatchScreen() {
               });
             }
             setSelected(null);
-            router.push(`/chats/${target.userId}?intro=1` as never);
+            router.push(`/chat/${target.userId}?intro=1` as never);
           }}
         />
       )}

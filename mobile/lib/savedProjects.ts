@@ -1,26 +1,25 @@
 /**
- * Saved-projects store (builder side). Mirrors `savedCount.ts` but
- * for `PublicProject` rows: builders bookmark projects they might
- * want to join while browsing Search or the project detail page.
+ * Saved-projects store (mobile, builder side). Cross-device, persisted
+ * on the server in public.saved_projects (migration 0030). Same shape
+ * as the web store so a builder who saves on their phone sees it on
+ * their laptop.
  *
  * Two pieces of per-user state:
- *   1. `items`     — list of saved projects, deduped by id
- *   2. `activeId`  — id of the project the builder has chosen as
- *                    their "current focus" (one or none)
+ *   1. `items`     — list of saved PublicProject rows, deduped by id
+ *   2. `activeId`  — id of the project the builder picked as their
+ *                    "current focus" (one or none).
  *
- * Both persist to AsyncStorage so saves survive restarts. A tiny
- * pub/sub keeps the Saved tab, project detail screen, and search
- * row in sync without forcing a refetch. Saving a project bumps
- * the Saved-tab unread badge so the builder notices new items
- * land even when they're on a different tab.
+ * Reads: hydrate from `list_saved_projects()` RPC on user bind.
+ * Writes: optimistic — update memory + emit, then await the round
+ *         trip; on failure, undo and log.
+ *
+ * Saving a project bumps the Saved-tab unread badge so the builder
+ * notices new items land even when they're on a different tab.
  */
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "@/lib/supabase";
 import type { PublicProject } from "@/lib/types";
 import { bumpUnread } from "@/lib/unread";
-
-const ITEMS_PREFIX = "polln8.saved_projects.v1:";
-const ACTIVE_PREFIX = "polln8.saved_projects.active.v1:";
 
 let items: PublicProject[] = [];
 let activeId: string | null = null;
@@ -31,28 +30,49 @@ const emit = () => {
   for (const l of listeners) l();
 };
 
-const persistItems = (): void => {
-  if (!currentUserId) return;
-  AsyncStorage.setItem(
-    ITEMS_PREFIX + currentUserId,
-    JSON.stringify(items),
-  ).catch(() => {});
+type SavedRow = {
+  id: string;
+  owner_id: string;
+  title: string;
+  description: string;
+  criteria: Record<string, unknown> | null;
+  business_type: string;
+  lifecycle_state: string;
+  created_at: string;
+  founder_full_name: string;
+  founder_headline: string;
+  founder_avatar_path: string | null;
+  is_active: boolean;
+  saved_at: string;
 };
 
-const persistActive = (): void => {
-  if (!currentUserId) return;
-  const key = ACTIVE_PREFIX + currentUserId;
-  if (activeId === null) {
-    AsyncStorage.removeItem(key).catch(() => {});
-  } else {
-    AsyncStorage.setItem(key, activeId).catch(() => {});
-  }
+const rowToProject = (r: SavedRow): PublicProject => {
+  const c = (r.criteria ?? {}) as Partial<{
+    skills: string[];
+    commitment: string;
+    location: string;
+    keywords: string;
+  }>;
+  return {
+    id: r.id,
+    ownerId: r.owner_id,
+    title: r.title,
+    description: r.description,
+    criteria: {
+      skills: Array.isArray(c.skills) ? c.skills : [],
+      commitment: typeof c.commitment === "string" ? c.commitment : "",
+      location: typeof c.location === "string" ? c.location : "",
+      keywords: typeof c.keywords === "string" ? c.keywords : "",
+    },
+    businessType: r.business_type ?? "",
+    lifecycleState: (r.lifecycle_state ?? "active") as PublicProject["lifecycleState"],
+    createdAt: r.created_at,
+    founderFullName: r.founder_full_name ?? "",
+    founderHeadline: r.founder_headline ?? "",
+    founderAvatarPath: r.founder_avatar_path,
+  };
 };
 
-// Bind the store to a user. On sign-in, hydrates from AsyncStorage.
-// On sign-out (userId = null), clears the in-memory list without
-// touching storage so the next sign-in for that user still gets
-// their saves back.
 export const setSavedProjectsUser = async (
   userId: string | null,
 ): Promise<void> => {
@@ -65,54 +85,71 @@ export const setSavedProjectsUser = async (
     return;
   }
   try {
-    const [rawItems, rawActive] = await Promise.all([
-      AsyncStorage.getItem(ITEMS_PREFIX + userId),
-      AsyncStorage.getItem(ACTIVE_PREFIX + userId),
-    ]);
-    if (rawItems) {
-      const parsed = JSON.parse(rawItems) as PublicProject[];
-      items = Array.isArray(parsed) ? parsed : [];
-    } else {
-      items = [];
-    }
-    activeId = rawActive ?? null;
+    const { data, error } = await supabase.rpc("list_saved_projects");
+    if (error) throw error;
+    const rows = (data ?? []) as SavedRow[];
+    if (currentUserId !== userId) return;
+    items = rows.map(rowToProject);
+    activeId = rows.find((r) => r.is_active)?.id ?? null;
     emit();
-  } catch {
+  } catch (err) {
+    console.warn("[savedProjects] hydrate failed", err);
     items = [];
     activeId = null;
     emit();
   }
 };
 
-export const addSavedProject = (project: PublicProject): void => {
+export const addSavedProject = async (
+  project: PublicProject,
+): Promise<void> => {
+  if (!currentUserId) return;
   if (items.some((p) => p.id === project.id)) return;
   items = [project, ...items];
   emit();
-  persistItems();
-  // Tab-bar badge bumps so the builder sees something landed even
-  // if they're on Match when they save from the project detail.
   bumpUnread("saved");
+  try {
+    const { error } = await supabase.from("saved_projects").insert({
+      user_id: currentUserId,
+      project_id: project.id,
+    });
+    if (error && error.code !== "23505") throw error;
+  } catch (err) {
+    console.warn("[savedProjects] add failed", err);
+    items = items.filter((p) => p.id !== project.id);
+    emit();
+  }
 };
 
-export const removeSavedProject = (projectId: string): void => {
+export const removeSavedProject = async (
+  projectId: string,
+): Promise<void> => {
+  if (!currentUserId) return;
+  const prev = items;
   const next = items.filter((p) => p.id !== projectId);
   if (next.length === items.length) return;
   items = next;
-  // If the removed project was the active focus, clear it too.
-  if (activeId === projectId) {
-    activeId = null;
-    persistActive();
-  }
+  const prevActive = activeId;
+  if (activeId === projectId) activeId = null;
   emit();
-  persistItems();
+  try {
+    const { error } = await supabase
+      .from("saved_projects")
+      .delete()
+      .eq("user_id", currentUserId)
+      .eq("project_id", projectId);
+    if (error) throw error;
+  } catch (err) {
+    console.warn("[savedProjects] remove failed", err);
+    items = prev;
+    activeId = prevActive;
+    emit();
+  }
 };
 
-// Re-saving an already-saved project replaces the row in place
-// (handy when a project's title/description changed since the
-// last save). Used by the project detail page when the builder
-// taps the bookmark on a project they've already saved — actually
-// no, in that case we unsave. This keeps the API symmetric for
-// callers that want "freshen the cached row".
+// Re-saving an already-saved project replaces the row in memory.
+// Server row stays the same — only the cached `PublicProject`
+// payload gets freshened with new title / description / etc.
 export const refreshSavedProject = (project: PublicProject): void => {
   const idx = items.findIndex((p) => p.id === project.id);
   if (idx === -1) return;
@@ -120,19 +157,28 @@ export const refreshSavedProject = (project: PublicProject): void => {
   next[idx] = project;
   items = next;
   emit();
-  persistItems();
 };
 
-// Pick (or unpick) one saved project as the builder's current focus.
-// Tapping the same id again clears the focus. Setting to a project
-// that isn't saved is a no-op.
-export const setActiveSavedProject = (projectId: string | null): void => {
+export const setActiveSavedProject = async (
+  projectId: string | null,
+): Promise<void> => {
+  if (!currentUserId) return;
   if (projectId !== null && !items.some((p) => p.id === projectId)) return;
-  const next = activeId === projectId ? null : projectId;
-  if (next === activeId) return;
-  activeId = next;
+  const target = activeId === projectId ? null : projectId;
+  if (target === activeId) return;
+  const prevActive = activeId;
+  activeId = target;
   emit();
-  persistActive();
+  try {
+    const { error } = await supabase.rpc("set_active_saved_project", {
+      target_project_id: target,
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.warn("[savedProjects] set active failed", err);
+    activeId = prevActive;
+    emit();
+  }
 };
 
 export const useSavedProjects = (): PublicProject[] => {

@@ -64,32 +64,34 @@ const DownloadPage = () => (
 
         <Reveal delay={80}>
           <div className="grid sm:grid-cols-2 gap-3 max-w-md mb-20">
-            <a
-              href="#"
-              className="group flex items-center gap-3 px-5 py-4 rounded-2xl bg-card backdrop-blur-xl border border-border hover:bg-accent hover:border-primary/30 transition-all"
+            <div
+              aria-disabled="true"
+              className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-card/70 backdrop-blur-xl border border-border opacity-70 cursor-not-allowed select-none"
             >
-              <Apple className="h-5 w-5 text-foreground" />
+              <Apple className="h-5 w-5 text-muted-foreground" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                  Download on
+                  Coming soon
                 </p>
-                <p className="font-display text-base">iOS</p>
+                <p className="font-display text-base text-muted-foreground">
+                  iOS
+                </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </a>
-            <a
-              href="#"
-              className="group flex items-center gap-3 px-5 py-4 rounded-2xl bg-card backdrop-blur-xl border border-border hover:bg-accent hover:border-primary/30 transition-all"
+            </div>
+            <div
+              aria-disabled="true"
+              className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-card/70 backdrop-blur-xl border border-border opacity-70 cursor-not-allowed select-none"
             >
-              <Smartphone className="h-5 w-5 text-foreground" />
+              <Smartphone className="h-5 w-5 text-muted-foreground" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                  Get it on
+                  Coming soon
                 </p>
-                <p className="font-display text-base">Android</p>
+                <p className="font-display text-base text-muted-foreground">
+                  Android
+                </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </a>
+            </div>
           </div>
         </Reveal>
 

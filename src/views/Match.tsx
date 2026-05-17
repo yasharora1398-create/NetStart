@@ -627,10 +627,14 @@ const CandidateActions = ({
 
   const handleSave = async () => {
     if (working) return;
+    // Saves attach to a project. Without one published & marked
+    // active in MyNet, there's nowhere to store the save — so the
+    // old behavior silently lost data. Block the action and tell the
+    // founder exactly what to do.
     if (!activeProjectId) {
-      setSaved((s) => !s);
-      toast.message("No active project", {
-        description: "Pick one in MyNet so saves attach to a project.",
+      toast.error("Finish your active project in MyNet first", {
+        description:
+          "Builders are ranked against your active project's criteria — and saves attach to it. Publish a project in MyNet, then mark it active.",
       });
       return;
     }
@@ -1189,10 +1193,10 @@ const ProjectInfoPanel = ({
 
   const handleToggleSave = () => {
     if (saved) {
-      removeSavedProject(project.id);
+      void removeSavedProject(project.id);
       toast.success("Removed.");
     } else {
-      addSavedProject(project.id);
+      void addSavedProject(project);
       toast.success("Saved.");
     }
   };

@@ -45,6 +45,7 @@ import {
 import type { Candidate } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { confirm } from "@/lib/confirm";
 import { MothEmptyState } from "@/components/MothEmptyState";
 import { MothLoader } from "@/components/MothLoader";
 
@@ -124,20 +125,15 @@ export default function ThreadsScreen() {
   const handleLongPress = (otherId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const isMarked = unreadFlags.has(otherId);
-    Alert.alert(
-      isMarked ? "Clear unread?" : "Mark as unread?",
-      isMarked
+    confirm({
+      title: isMarked ? "Clear unread?" : "Mark as unread?",
+      message: isMarked
         ? "Removes the dot from this thread."
         : "Adds a dot you'll see until you open it again.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: isMarked ? "Clear" : "Mark unread",
-          onPress: () =>
-            isMarked ? clearThreadUnread(otherId) : markThreadUnread(otherId),
-        },
-      ],
-    );
+      confirmLabel: isMarked ? "Clear" : "Mark unread",
+      onConfirm: () =>
+        isMarked ? clearThreadUnread(otherId) : markThreadUnread(otherId),
+    });
   };
 
   const handleAccept = async (otherId: string) => {

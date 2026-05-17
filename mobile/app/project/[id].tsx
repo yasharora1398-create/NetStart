@@ -10,7 +10,6 @@ import {
   Alert,
   FlatList,
   Image,
-  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -57,6 +56,8 @@ import type {
 } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { openLinkedIn } from "@/lib/openLink";
+import { confirm } from "@/lib/confirm";
 import {
   addSavedProject,
   refreshSavedProject,
@@ -160,43 +161,38 @@ export default function ProjectDetailScreen() {
 
   const handleUnsave = (candidate: Candidate) => {
     if (!project) return;
-    Alert.alert(
-      "Remove from saved?",
-      `${candidate.fullName || "Candidate"} won't appear in this project's saved list.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            setActing(candidate.userId);
-            try {
-              await removePerson(project.id, candidate.userId);
-              setSaved((prev) =>
-                prev.filter((c) => c.userId !== candidate.userId),
-              );
-              setProject((p) =>
-                p
-                  ? {
-                      ...p,
-                      savedPersonIds: p.savedPersonIds.filter(
-                        (x) => x !== candidate.userId,
-                      ),
-                    }
-                  : p,
-              );
-            } catch (err) {
-              Alert.alert(
-                "Could not remove",
-                err instanceof Error ? err.message : "Try again.",
-              );
-            } finally {
-              setActing(null);
-            }
-          },
-        },
-      ],
-    );
+    confirm({
+      title: "Remove from saved?",
+      message: `${candidate.fullName || "Candidate"} won't appear in this project's saved list.`,
+      confirmLabel: "Remove",
+      destructive: true,
+      onConfirm: async () => {
+        setActing(candidate.userId);
+        try {
+          await removePerson(project.id, candidate.userId);
+          setSaved((prev) =>
+            prev.filter((c) => c.userId !== candidate.userId),
+          );
+          setProject((p) =>
+            p
+              ? {
+                  ...p,
+                  savedPersonIds: p.savedPersonIds.filter(
+                    (x) => x !== candidate.userId,
+                  ),
+                }
+              : p,
+          );
+        } catch (err) {
+          Alert.alert(
+            "Could not remove",
+            err instanceof Error ? err.message : "Try again.",
+          );
+        } finally {
+          setActing(null);
+        }
+      },
+    });
   };
 
   const handleSetLifecycle = async (next: ProjectLifecycle) => {
@@ -487,7 +483,7 @@ export default function ProjectDetailScreen() {
                       ) : null}
                       {c.linkedinUrl ? (
                         <Pressable
-                          onPress={() => Linking.openURL(c.linkedinUrl)}
+                          onPress={() => openLinkedIn(c.linkedinUrl)}
                           style={styles.linkRow}
                         >
                           <ExternalLink size={11} color={theme.gold} />
@@ -576,7 +572,7 @@ export default function ProjectDetailScreen() {
                   <View style={styles.appActions}>
                     {app.candidate.linkedinUrl ? (
                       <Pressable
-                        onPress={() => Linking.openURL(app.candidate.linkedinUrl)}
+                        onPress={() => openLinkedIn(app.candidate.linkedinUrl)}
                         style={styles.miniLink}
                       >
                         <ExternalLink size={12} color={theme.gold} />
@@ -734,7 +730,7 @@ const BuilderProjectBody = ({
               ) : null}
               {founder.linkedinUrl ? (
                 <Pressable
-                  onPress={() => Linking.openURL(founder.linkedinUrl)}
+                  onPress={() => openLinkedIn(founder.linkedinUrl)}
                   style={styles.linkRow}
                 >
                   <ExternalLink size={11} color={theme.gold} />

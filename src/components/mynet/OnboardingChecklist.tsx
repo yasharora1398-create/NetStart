@@ -214,7 +214,7 @@ export const OnboardingChecklist = ({
               All set
             </p>
             <h3 className="font-display text-xl sm:text-2xl mb-2">
-              You're live on NetStart.
+              You're live on Polln8.
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">
               Time to find your match. Swipe through projects in Match or run

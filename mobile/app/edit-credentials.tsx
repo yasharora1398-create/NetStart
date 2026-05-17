@@ -39,6 +39,7 @@ import { emptyProfile, type Profile } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 import { readMetadataRole, type Role } from "@/lib/userRole";
+import { confirm } from "@/lib/confirm";
 
 const MAX_RESUME_BYTES = 4 * 1024 * 1024;
 const MAX_PROOF_BYTES = 10 * 1024 * 1024;
@@ -182,28 +183,27 @@ export default function EditCredentialsScreen() {
 
   const handleRemoveProof = async () => {
     if (!user) return;
-    Alert.alert("Remove proof?", "You can re-upload anytime.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          setUploading(true);
-          try {
-            const path = await getProofPath(user.id);
-            await removeProof(user.id, path);
-            setProfile((p) => ({ ...p, proof: null }));
-          } catch (err) {
-            Alert.alert(
-              "Could not remove",
-              err instanceof Error ? err.message : "Try again.",
-            );
-          } finally {
-            setUploading(false);
-          }
-        },
+    confirm({
+      title: "Remove proof?",
+      message: "You can re-upload anytime.",
+      confirmLabel: "Remove",
+      destructive: true,
+      onConfirm: async () => {
+        setUploading(true);
+        try {
+          const path = await getProofPath(user.id);
+          await removeProof(user.id, path);
+          setProfile((p) => ({ ...p, proof: null }));
+        } catch (err) {
+          Alert.alert(
+            "Could not remove",
+            err instanceof Error ? err.message : "Try again.",
+          );
+        } finally {
+          setUploading(false);
+        }
       },
-    ]);
+    });
   };
 
   const handlePickResume = async () => {
@@ -249,28 +249,27 @@ export default function EditCredentialsScreen() {
 
   const handleRemoveResume = async () => {
     if (!user) return;
-    Alert.alert("Remove resume?", "You can re-upload anytime.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          setUploading(true);
-          try {
-            const path = await getResumePath(user.id);
-            await removeResume(user.id, path);
-            setProfile((p) => ({ ...p, resume: null }));
-          } catch (err) {
-            Alert.alert(
-              "Could not remove",
-              err instanceof Error ? err.message : "Try again.",
-            );
-          } finally {
-            setUploading(false);
-          }
-        },
+    confirm({
+      title: "Remove resume?",
+      message: "You can re-upload anytime.",
+      confirmLabel: "Remove",
+      destructive: true,
+      onConfirm: async () => {
+        setUploading(true);
+        try {
+          const path = await getResumePath(user.id);
+          await removeResume(user.id, path);
+          setProfile((p) => ({ ...p, resume: null }));
+        } catch (err) {
+          Alert.alert(
+            "Could not remove",
+            err instanceof Error ? err.message : "Try again.",
+          );
+        } finally {
+          setUploading(false);
+        }
       },
-    ]);
+    });
   };
 
   const handleSubmitForReview = async () => {

@@ -3,7 +3,6 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   Image,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,6 +27,7 @@ import {
 import type { PublicProject } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
+import { openLinkedIn } from "@/lib/openLink";
 
 export default function FounderProfileScreen() {
   const { theme } = useTheme();
@@ -162,7 +162,7 @@ export default function FounderProfileScreen() {
           {founder.linkedinUrl ? (
             <Section title="Contact" styles={styles}>
               <Pressable
-                onPress={() => Linking.openURL(founder.linkedinUrl)}
+                onPress={() => openLinkedIn(founder.linkedinUrl)}
                 style={styles.linkRow}
               >
                 <ExternalLink size={14} color={theme.gold} />
