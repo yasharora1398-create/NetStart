@@ -13,8 +13,10 @@ import {
   Plus,
   Telescope,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
@@ -185,17 +187,24 @@ export const MyNetDashboard = ({
 
       {/* LOOKING - always shown. Empty candidate gets the editor by
           default while editing, or a "tell us about you" prompt
-          when read-only. */}
+          when read-only. The Open-to-Work toggle lives in the
+          section header so users can flip discoverability without
+          having to enter edit mode. */}
       <Section
         title="How builders find you"
         eyebrow="02"
         icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
+        action={
+          <OpenToWorkToggle
+            open={profile.candidate.isOpenToWork}
+            onToggle={onToggleOpenToWork}
+          />
+        }
       >
         {editing ? (
           <CandidateCard
             profile={profile}
             onSave={onSaveCandidate}
-            onToggleOpenToWork={onToggleOpenToWork}
             onUploadAvatar={onUploadAvatar}
             onRemoveAvatar={onRemoveAvatar}
           />
@@ -334,6 +343,49 @@ const Section = ({
     {children}
   </section>
 );
+
+// Standalone Open-to-Work toggle. Lives in the "How builders find you"
+// section header so users can flip discoverability on/off without
+// having to enter edit mode. Both directions are always allowed — the
+// parent handler is permissive, and forcing eligibility checks here
+// turned the switch into a one-way trap when a profile was incomplete.
+const OpenToWorkToggle = ({
+  open,
+  onToggle,
+}: {
+  open: boolean;
+  onToggle: (value: boolean) => Promise<void>;
+}) => {
+  const [busy, setBusy] = useState(false);
+  const handleChange = async (next: boolean) => {
+    setBusy(true);
+    try {
+      await onToggle(next);
+      toast.success(next ? "Visible to founders." : "Hidden from search.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className={`text-[11px] font-mono uppercase tracking-[0.18em] ${
+          open ? "text-gold" : "text-muted-foreground"
+        }`}
+      >
+        {open ? "Open to work" : "Closed"}
+      </span>
+      <Switch
+        checked={open}
+        onCheckedChange={handleChange}
+        disabled={busy}
+        aria-label="Open to work"
+      />
+    </div>
+  );
+};
 
 const InfoRow = ({
   label,

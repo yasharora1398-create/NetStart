@@ -664,7 +664,6 @@ const MyNet = () => {
                     <CandidateCard
                       profile={displayProfile}
                       onSave={handleSaveCandidate}
-                      onToggleOpenToWork={handleToggleOpenToWork}
                       onUploadAvatar={handleUploadAvatar}
                       onRemoveAvatar={handleRemoveAvatar}
                     />

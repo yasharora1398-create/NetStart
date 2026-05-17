@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TagInput } from "@/components/mynet/TagInput";
 import { getAvatarUrl } from "@/lib/mynet-storage";
@@ -33,7 +32,6 @@ import {
 import {
   CANDIDATE_BIO_MIN,
   CANDIDATE_SKILLS_MIN,
-  candidateGapLabel,
   candidateGaps,
   isCandidateProfileComplete,
   type CandidateProfile,
@@ -56,7 +54,6 @@ type CandidateCardProps = {
     candidate: CandidateProfile;
     fullName: string;
   }) => Promise<void>;
-  onToggleOpenToWork: (value: boolean) => Promise<void>;
   onUploadAvatar: (file: File) => Promise<void>;
   onRemoveAvatar: () => Promise<void>;
 };
@@ -64,7 +61,6 @@ type CandidateCardProps = {
 export const CandidateCard = ({
   profile,
   onSave,
-  onToggleOpenToWork,
   onUploadAvatar,
   onRemoveAvatar,
 }: CandidateCardProps) => {
@@ -74,10 +70,8 @@ export const CandidateCard = ({
   const [skills, setSkills] = useState<string[]>(profile.candidate.skills);
   const [location, setLocation] = useState(profile.candidate.location);
   const [commitment, setCommitment] = useState(profile.candidate.commitment);
-  const [open, setOpen] = useState(profile.candidate.isOpenToWork);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [togglingOpen, setTogglingOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarRef = useRef<HTMLInputElement | null>(null);
   const avatarUrl = getAvatarUrl(profile.avatarPath);
@@ -90,7 +84,6 @@ export const CandidateCard = ({
     setSkills(profile.candidate.skills);
     setLocation(profile.candidate.location);
     setCommitment(profile.candidate.commitment);
-    setOpen(profile.candidate.isOpenToWork);
   }, [profile, dirty]);
 
   const isAccepted = profile.reviewStatus === "accepted";
@@ -100,12 +93,10 @@ export const CandidateCard = ({
     skills,
     location: location.trim(),
     commitment: commitment.trim(),
-    isOpenToWork: open,
+    isOpenToWork: profile.candidate.isOpenToWork,
   };
   const profileComplete = isCandidateProfileComplete(liveCandidate);
   const missing = candidateGaps(liveCandidate);
-  const missingText = missing.map((g) => candidateGapLabel(g, liveCandidate));
-  const canGoOpen = isAccepted && profileComplete;
   const arraysEqual = (a: string[], b: string[]) =>
     a.length === b.length && a.every((v, i) => v === b[i]);
 
@@ -116,35 +107,10 @@ export const CandidateCard = ({
       bio !== profile.candidate.bio ||
       !arraysEqual(skills, profile.candidate.skills) ||
       location !== profile.candidate.location ||
-      commitment !== profile.candidate.commitment ||
-      open !== profile.candidate.isOpenToWork);
+      commitment !== profile.candidate.commitment);
 
   const markDirty = () => {
     if (!dirty) setDirty(true);
-  };
-
-  const handleToggleOpen = async (next: boolean) => {
-    if (!isAccepted) {
-      toast.error("Get accepted before going live as a candidate.");
-      return;
-    }
-    if (next && !profileComplete) {
-      toast.error(
-        `Fill in: ${missingText.join(", ")}. Founders skip thin profiles.`,
-      );
-      return;
-    }
-    setOpen(next);
-    setTogglingOpen(true);
-    try {
-      await onToggleOpenToWork(next);
-      toast.success(next ? "Visible to founders." : "Hidden from search.");
-    } catch (err) {
-      setOpen(!next);
-      toast.error(err instanceof Error ? err.message : "Could not update.");
-    } finally {
-      setTogglingOpen(false);
-    }
   };
 
   const onAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -188,7 +154,7 @@ export const CandidateCard = ({
           skills,
           location: location.trim(),
           commitment: commitment.trim(),
-          isOpenToWork: open && isAccepted,
+          isOpenToWork: profile.candidate.isOpenToWork && isAccepted,
         },
         fullName: fullName.trim(),
       });
@@ -204,34 +170,15 @@ export const CandidateCard = ({
   return (
     <div className="rounded-sm border border-border bg-card overflow-hidden">
       <div className="p-6 md:p-8">
-        <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-              For founders
-            </p>
-            <h2 className="font-display text-2xl md:text-3xl">
-              How builders find you
-            </h2>
-            <p className="text-sm text-muted-foreground mt-2 max-w-lg">
-              Toggle on to be discoverable. Founders running Find People will see
-              your headline, skills, and LinkedIn.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <span
-              className={`text-[11px] font-mono uppercase tracking-widest ${
-                open ? "text-gold" : "text-muted-foreground"
-              }`}
-            >
-              {open ? "Open to work" : "Closed"}
-            </span>
-            <Switch
-              checked={open}
-              onCheckedChange={handleToggleOpen}
-              disabled={(!canGoOpen && !open) || togglingOpen}
-              aria-label="Open to work"
-            />
-          </div>
+        <div className="mb-6">
+          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+            For founders
+          </p>
+          <p className="text-sm text-muted-foreground max-w-lg">
+            Founders running Find People will see your headline, skills, and
+            LinkedIn. Use the switch at the top of this section to control
+            whether you&apos;re discoverable.
+          </p>
         </div>
 
         {!isAccepted ? (
@@ -251,7 +198,7 @@ export const CandidateCard = ({
             <p className="text-sm">
               Fill in <span className="text-foreground">{missing.join(", ")}</span>
               {" "}
-              before you can flip Open to work. Founders ignore thin profiles.
+              so founders see a strong profile when you go open.
             </p>
           </div>
         ) : null}
