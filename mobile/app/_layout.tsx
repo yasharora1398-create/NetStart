@@ -3,7 +3,7 @@ import { ThemeProvider as NavThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MothLoader } from "@/components/MothLoader";
@@ -54,9 +54,12 @@ const RouteGuard = () => {
     if (loading) return;
     const inAuth = segments[0] === "(auth)";
     if (!session && !inAuth) {
-      // Land unauthenticated sessions on sign-in directly — the
-      // welcome screen has been removed per the latest direction.
-      router.replace("/(auth)/sign-in");
+      // Native (iOS / Android via TestFlight or App Store) gets the
+      // welcome screen first; web (polln8.com/m/) skips it and goes
+      // straight to sign-in per the latest direction.
+      const dest =
+        Platform.OS === "web" ? "/(auth)/sign-in" : "/(auth)/welcome";
+      router.replace(dest);
     } else if (session && inAuth) {
       router.replace("/(tabs)");
     }
