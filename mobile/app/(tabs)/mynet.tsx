@@ -6,6 +6,7 @@ import {
   Image,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from "react-native";
@@ -39,7 +40,13 @@ import {
   getProfile,
   listProjects,
   setActiveProject,
+  setOpenToWork,
 } from "@/lib/api";
+
+// Minimums copied from edit-candidate so the toggle gate logic is
+// the same on both screens.
+const BIO_MIN = 60;
+const SKILLS_MIN = 2;
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 import { resetTutorial, triggerTutorialReplay } from "@/lib/tutorial";
@@ -54,6 +61,9 @@ export default function MyNetScreen() {
   const [profile, setProfile] = useState<Profile>(emptyProfile());
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  // Tracks the in-flight Open-to-work upsert so a double-tap can't
+  // fire two writes simultaneously.
+  const [openBusy, setOpenBusy] = useState(false);
 
   // Refetch every time the screen regains focus, so edits propagate.
   useFocusEffect(
@@ -118,6 +128,60 @@ export default function MyNetScreen() {
         },
       },
     ]);
+  };
+
+  // Open to work — gating logic mirrors edit-candidate so behaviour
+  // is identical whether the user flips it here or in edit mode.
+  const candidate = profile.candidate;
+  const isAccepted = profile.reviewStatus === "accepted";
+  const missing: string[] = [];
+  if (!candidate.headline.trim()) missing.push("headline");
+  if (candidate.bio.trim().length < BIO_MIN)
+    missing.push(`pitch/bio (${candidate.bio.trim().length}/${BIO_MIN})`);
+  if (candidate.skills.length < SKILLS_MIN)
+    missing.push(`${SKILLS_MIN - candidate.skills.length} more skill`);
+  if (!candidate.location.trim()) missing.push("location");
+  if (!candidate.commitment.trim()) missing.push("commitment");
+  const profileComplete = missing.length === 0;
+
+  const handleToggleOpenToWork = async (next: boolean) => {
+    if (!user || openBusy) return;
+    if (!isAccepted) {
+      Alert.alert(
+        "Locked",
+        "Your profile needs to be reviewed and accepted before you can go live.",
+      );
+      return;
+    }
+    if (next && !profileComplete) {
+      Alert.alert(
+        "Almost there",
+        `Finish first: ${missing.join(", ")}. Founders skip thin profiles.`,
+      );
+      return;
+    }
+    setOpenBusy(true);
+    // Optimistic toggle — local profile reflects the new value
+    // immediately, reverts on error.
+    const previous = candidate.isOpenToWork;
+    setProfile((p) => ({
+      ...p,
+      candidate: { ...p.candidate, isOpenToWork: next },
+    }));
+    try {
+      await setOpenToWork(user.id, next);
+    } catch (err) {
+      setProfile((p) => ({
+        ...p,
+        candidate: { ...p.candidate, isOpenToWork: previous },
+      }));
+      Alert.alert(
+        "Could not update",
+        err instanceof Error ? err.message : "Try again.",
+      );
+    } finally {
+      setOpenBusy(false);
+    }
   };
 
   return (
@@ -217,10 +281,16 @@ export default function MyNetScreen() {
           title="Candidate profile"
           onEdit={() => router.push("/edit-candidate" as never)}
         >
-          <Row
-            label="Open to work"
-            value={profile.candidate.isOpenToWork ? "Yes" : "Off"}
-            good={profile.candidate.isOpenToWork}
+          {/* Interactive Open-to-work toggle. Lives here so the
+              user doesn't have to enter Edit profile just to flip
+              it. The gating + alerts mirror edit-candidate. */}
+          <OpenToWorkRow
+            value={profile.candidate.isOpenToWork}
+            isAccepted={isAccepted}
+            profileComplete={profileComplete}
+            missing={missing}
+            busy={openBusy}
+            onToggle={(next) => void handleToggleOpenToWork(next)}
           />
           <Row label="Headline" value={profile.candidate.headline || "-"} />
           <Row label="Location" value={profile.candidate.location || "-"} />
@@ -561,6 +631,60 @@ const Row = ({
   );
 };
 
+// Inline toggle row for Open to work — lives on the candidate
+// profile section so the user can flip it without entering Edit
+// mode. Always-visible description spells out what the switch
+// does + surfaces the current gate (locked / missing fields) or
+// state ("Visible to founders").
+const OpenToWorkRow = ({
+  value,
+  isAccepted,
+  profileComplete,
+  missing,
+  busy,
+  onToggle,
+}: {
+  value: boolean;
+  isAccepted: boolean;
+  profileComplete: boolean;
+  missing: string[];
+  busy: boolean;
+  onToggle: (next: boolean) => void;
+}) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const statusLine = !isAccepted
+    ? "Locked until your profile is reviewed and accepted."
+    : !profileComplete
+      ? `Finish first: ${missing.join(", ")}.`
+      : value
+        ? "Currently on — visible to founders running Find People."
+        : "Currently off — hidden from match results.";
+  return (
+    <View style={styles.openRow}>
+      <View style={styles.openHeaderRow}>
+        <Text style={styles.openLabel}>Open to work</Text>
+        <Switch
+          value={value}
+          onValueChange={onToggle}
+          disabled={busy}
+          trackColor={{ false: theme.border, true: theme.gold }}
+          thumbColor={theme.bg}
+          // Bumps the touch target ~30% so the switch reads as
+          // primary, not a label afterthought.
+          style={{ transform: [{ scaleX: 1.15 }, { scaleY: 1.15 }] }}
+        />
+      </View>
+      <Text style={styles.openHint}>
+        When on, founders running Find People can match with you
+        and send chat requests. When off, your profile is hidden
+        from match results.
+      </Text>
+      <Text style={styles.openStatus}>{statusLine}</Text>
+    </View>
+  );
+};
+
 const makeStyles = (theme: ThemePalette) => StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   eyebrow: {
@@ -742,6 +866,40 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     fontSize: 13,
     flex: 1,
     textAlign: "right",
+  },
+  // Open-to-work toggle row. Has its own block-level layout (not
+  // the inline Row shape) so the description + status can sit
+  // under the switch on their own lines.
+  openRow: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    marginBottom: 4,
+    borderRadius: 6,
+  },
+  openHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 8,
+  },
+  openLabel: {
+    color: theme.text,
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: -0.1,
+  },
+  openHint: {
+    color: theme.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: 6,
+  },
+  openStatus: {
+    color: theme.textDim,
+    fontSize: 11,
+    fontFamily: fonts.mono,
+    letterSpacing: 0.3,
   },
   bio: {
     color: theme.text,
