@@ -182,25 +182,23 @@ const render = (
 const chatMessage = (ctx: TemplateCtx) => {
   const sender = ctx.senderName ?? "Someone";
   const subject = `${sender} messaged you on Polln8`;
-  const lede = `Hey ${ctx.recipientName}, ${sender} just sent you a message.`;
+  const greeting = `Hey ${ctx.recipientName}, ${sender} just sent you a message.`;
+  const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
+  // Minimal layout per the brief: ONE line of personalized text,
+  // then a full-bleed hero GIF that fills the card edge-to-edge.
+  // The GIF itself is the click target — tapping it opens the chat.
   const inner = `
-    ${heroEyebrow("New message")}
-    ${heroTitle(`${escapeHtml(sender)} messaged you.`)}
-    ${heroLede(escapeHtml(lede))}
-    ${quoteBubble(ctx.body, sender)}
-    ${primaryButton(ctx.linkUrl, "Reply on Polln8")}
-    ${
-      ctx.fromUserId
-        ? subtleHelp(
-            `Too many pings? <a href="${APP_BASE_URL}/chats/${ctx.fromUserId}" style="color:${C.accent};">Mute ${escapeHtml(
-              ctx.senderFirstName ?? sender,
-            )}</a> from your chat with them.`,
-          )
-        : ""
-    }
+    <div style="padding:28px 28px 22px;">
+      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;line-height:1.45;color:${C.ink};font-weight:500;">
+        ${escapeHtml(greeting)}
+      </p>
+    </div>
+    <a href="${ctx.linkUrl}" target="_blank" rel="noopener" style="display:block;line-height:0;text-decoration:none;">
+      <img src="${gifUrl}" alt="${escapeHtml(sender)} just messaged you on Polln8" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">
+    </a>
   `;
-  const text = `${lede}\n\n"${ctx.body}"\n\nReply: ${ctx.linkUrl}`;
-  return { subject, html: shell(subject, inner), text };
+  const text = `${greeting}\n\nReply: ${ctx.linkUrl}`;
+  return { subject, html: shell(subject, inner, { fullBleed: true }), text };
 };
 
 const chatRequest = (ctx: TemplateCtx) => {
@@ -269,7 +267,21 @@ const generic = (ctx: TemplateCtx) => {
 // Building blocks
 // ──────────────────────────────────────────────────────────────────────
 
-const shell = (subject: string, inner: string): string => `<!doctype html>
+type ShellOpts = {
+  // When true, the body slot drops its 32x28 padding so the inner
+  // markup can extend edge-to-edge inside the card (used for the
+  // chat_message template's full-width hero GIF). The inner markup
+  // is responsible for its own internal padding in this mode.
+  fullBleed?: boolean;
+};
+
+const shell = (
+  subject: string,
+  inner: string,
+  opts: ShellOpts = {},
+): string => {
+  const bodyPadding = opts.fullBleed ? "0" : "32px 28px 36px";
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -287,7 +299,7 @@ const shell = (subject: string, inner: string): string => `<!doctype html>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.bg};">
       <tr>
         <td align="center" style="padding:32px 16px;">
-          <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:${C.surface};border:1px solid ${C.border};border-radius:14px;overflow:hidden;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:${C.surface};border:1px solid ${C.border};border-radius:14px;overflow:hidden;">
             <!-- Branded header strip -->
             <tr>
               <td style="padding:20px 28px;border-bottom:1px solid ${C.border};">
@@ -305,7 +317,7 @@ const shell = (subject: string, inner: string): string => `<!doctype html>
             </tr>
             <!-- Body slot -->
             <tr>
-              <td style="padding:32px 28px 36px;">
+              <td style="padding:${bodyPadding};">
                 ${inner}
               </td>
             </tr>
@@ -327,6 +339,7 @@ const shell = (subject: string, inner: string): string => `<!doctype html>
     </table>
   </body>
 </html>`;
+};
 
 const heroEyebrow = (text: string): string => `
   <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.22em;color:${C.accent};text-transform:uppercase;margin:0 0 12px;">
