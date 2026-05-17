@@ -1,19 +1,18 @@
 /**
- * Builder-side Match: swipe through published projects. Mirrors the
- * founder Match screen (`(tabs)/index.tsx`) but with project cards
- * instead of candidates.
+ * Builder-side Match: swipe through published projects.
  *
- *   - Top-right has the same two icons as the founder side: Undo
- *     (rolls back the last decision) and Search (jumps to /search).
- *   - One card at a time. Swipe right to save (bookmarks the
- *     project), swipe left to pass.
- *   - SAVE / PASS overlays fade in as the card travels.
- *   - Bottom action buttons mirror the swipe so the user can tap
- *     instead of swipe.
+ *   - One card per project. Big square founder avatar fills the top
+ *     of the card; meta + title + pitch live below.
+ *   - Swipe right to save (bookmark), swipe left to pass. No on-card
+ *     SAVE / PASS labels — the motion is the affordance.
+ *   - Tap the card to slide up the detail sheet (CandidateDetail).
+ *     Shows the founder's full info — bio, skills, LinkedIn, plus the
+ *     project title / description. Mirrors what /u/<founderId> shows
+ *     on the web.
+ *   - Bottom action row still has tap-to-decide buttons.
  *
- * Founders never see this screen — the (tabs) layout hides it from
- * their tab bar, and the effect below redirects any direct nav
- * back to the Match deck.
+ * Founders never see this screen — (tabs)/_layout hides it from
+ * their tab bar; the redirect below catches stale router state.
  */
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
@@ -52,20 +51,54 @@ import {
 import { useAuth } from "@/lib/auth";
 import {
   getAvatarUrl,
+  getPublicFounder,
   listPublishedProjects,
+  type PublicFounder,
 } from "@/lib/api";
 import {
   addSavedProject,
   removeSavedProject,
 } from "@/lib/savedProjects";
-import type { PublicProject } from "@/lib/types";
+import type { Candidate, PublicProject } from "@/lib/types";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 import { MothEmptyState } from "@/components/MothEmptyState";
 import { MothLoader } from "@/components/MothLoader";
+import { CandidateDetail } from "@/components/CandidateDetail";
+import { ApplyDialog } from "@/components/ApplyDialog";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_W * 0.28;
+
+type RankedCandidate = Candidate & {
+  similarity: number;
+  role?: "founder" | "builder";
+  projectTitle?: string;
+  projectDescription?: string;
+};
+
+// Compose a founder profile + project into the Candidate shape that
+// CandidateDetail / ApplyDialog already know how to render.
+const founderToCandidate = (
+  founder: PublicFounder,
+  project: PublicProject,
+): RankedCandidate => ({
+  userId: founder.userId,
+  fullName: founder.fullName,
+  linkedinUrl: founder.linkedinUrl,
+  headline: founder.headline,
+  bio: founder.bio,
+  skills: founder.skills,
+  location: founder.location,
+  commitment: founder.commitment,
+  resumeName: null,
+  resumePath: null,
+  avatarPath: founder.avatarPath,
+  similarity: 0,
+  role: "founder",
+  projectTitle: project.title,
+  projectDescription: project.description,
+});
 
 export default function BrowseScreen() {
   const { user } = useAuth();
@@ -76,11 +109,15 @@ export default function BrowseScreen() {
   const [projects, setProjects] = useState<PublicProject[]>([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  // Track the last decision so the Undo button can roll back.
   const [lastSwipe, setLastSwipe] = useState<{
     project: PublicProject;
     status: "saved" | "passed";
   } | null>(null);
+
+  // Detail-sheet state. `opening` shows a brief spinner-free hold
+  // while we fetch the founder's full profile.
+  const [selected, setSelected] = useState<RankedCandidate | null>(null);
+  const [applyTo, setApplyTo] = useState<RankedCandidate | null>(null);
 
   // Founders shouldn't be on this screen — bounce them to their
   // own Match deck if they end up here via stale router state.
@@ -97,8 +134,8 @@ export default function BrowseScreen() {
     listPublishedProjects()
       .then((list) => {
         if (cancelled) return;
-        // Filter out projects the current user owns; they
-        // shouldn't see their own listing in the deck.
+        // Filter out projects the current user owns; they shouldn't
+        // see their own listing in the deck.
         const visible = user?.id
           ? list.filter((p) => p.ownerId !== user.id)
           : list;
@@ -138,6 +175,38 @@ export default function BrowseScreen() {
     setIndex((i) => Math.max(0, i - 1));
   };
 
+  // Tap a card → fetch the founder's full profile, then open the
+  // detail sheet. We don't block the UI on the fetch; the sheet
+  // pops with what we already have and the network result hydrates
+  // the rest. Realistically `get_public_founder` returns in <200ms.
+  const openDetail = async (project: PublicProject) => {
+    // Seed with what we know from the card so the sheet opens fast.
+    const seed: RankedCandidate = {
+      userId: project.ownerId,
+      fullName: project.founderFullName,
+      linkedinUrl: "",
+      headline: project.founderHeadline,
+      bio: "",
+      skills: [],
+      location: "",
+      commitment: "",
+      resumeName: null,
+      resumePath: null,
+      avatarPath: project.founderAvatarPath,
+      similarity: 0,
+      role: "founder",
+      projectTitle: project.title,
+      projectDescription: project.description,
+    };
+    setSelected(seed);
+    try {
+      const founder = await getPublicFounder(project.ownerId);
+      if (founder) setSelected(founderToCandidate(founder, project));
+    } catch {
+      // Sheet stays open with the seed data.
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
@@ -147,7 +216,6 @@ export default function BrowseScreen() {
             <Text style={styles.eyebrowText}>Match</Text>
           </View>
           <View style={styles.headerActions}>
-            {/* Undo — rolls the deck back one card. */}
             <Pressable
               onPress={handleUndo}
               disabled={!lastSwipe}
@@ -160,7 +228,6 @@ export default function BrowseScreen() {
             >
               <Undo2 size={18} color={theme.gold} />
             </Pressable>
-            {/* Search — opens the filter page. */}
             <Pressable
               onPress={() => router.push("/search" as never)}
               hitSlop={12}
@@ -196,6 +263,7 @@ export default function BrowseScreen() {
               key={current.id + index}
               project={current}
               onDecide={decide}
+              onTap={() => openDetail(current)}
               styles={styles}
               theme={theme}
             />
@@ -203,10 +271,6 @@ export default function BrowseScreen() {
         )}
       </View>
 
-      {/* Bottom action row — same affordances as a swipe so users
-          who don't realize the card is draggable can still decide.
-          Sits just above the floating tab bar; the deck area above
-          absorbs whatever vertical room is left. */}
       {remaining > 0 && (
         <View style={styles.actions}>
           <Pressable
@@ -231,13 +295,33 @@ export default function BrowseScreen() {
           </Pressable>
         </View>
       )}
+
+      {selected && (
+        <CandidateDetail
+          candidate={selected}
+          role="builder"
+          onClose={() => setSelected(null)}
+          onCtaPress={() => {
+            const target = selected;
+            setSelected(null);
+            setApplyTo(target);
+          }}
+        />
+      )}
+
+      {applyTo && (
+        <ApplyDialog
+          candidate={applyTo}
+          onClose={() => setApplyTo(null)}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
-// Project card content — used both as the swipe top card and as
-// the stacked under-card preview. `stacked` styles it slightly
-// smaller and offset so it reads as the next-in-deck.
+// Hero card. Big square founder avatar fills the top; meta + pitch
+// stack below. Used both as the active top card and as the stacked
+// under-card preview.
 const ProjectCard = ({
   project,
   stacked = false,
@@ -264,80 +348,86 @@ const ProjectCard = ({
           opacity: 0.55,
         },
       ]}
+      pointerEvents={stacked ? "none" : "auto"}
     >
-      <View style={styles.cardHeader}>
+      <View style={styles.hero}>
         {founderUrl ? (
-          <Image source={{ uri: founderUrl }} style={styles.founderAvatar} />
+          <Image source={{ uri: founderUrl }} style={styles.heroImg} />
         ) : (
-          <View style={styles.founderAvatarFallback}>
-            <Text style={styles.founderInitials}>
+          <View style={styles.heroFallback}>
+            <Text style={styles.heroInitials}>
               {(project.founderFullName[0] ?? "?").toUpperCase()}
             </Text>
           </View>
         )}
-        <View style={{ flex: 1 }}>
-          <Text style={styles.cardFounder} numberOfLines={1}>
-            {project.founderFullName || "Anonymous"}
-          </Text>
-          {project.founderHeadline ? (
-            <Text style={styles.cardHeadline} numberOfLines={1}>
-              {project.founderHeadline}
-            </Text>
-          ) : null}
-        </View>
       </View>
 
-      <Text style={styles.cardTitle}>{project.title}</Text>
-
-      {project.description ? (
-        <Text style={styles.cardDesc} numberOfLines={6}>
-          {project.description}
+      <View style={styles.cardBody}>
+        <Text style={styles.cardFounder} numberOfLines={1}>
+          {project.founderFullName || "Anonymous"}
         </Text>
-      ) : null}
+        {project.founderHeadline ? (
+          <Text style={styles.cardHeadline} numberOfLines={1}>
+            {project.founderHeadline}
+          </Text>
+        ) : null}
 
-      {(project.businessType ||
-        project.criteria.commitment ||
-        project.criteria.location) && (
-        <View style={styles.metaRow}>
-          {project.businessType ? (
-            <View
-              style={[
-                styles.metaChip,
-                {
-                  backgroundColor: theme.goldGlow,
-                  borderColor: theme.goldSoft,
-                },
-              ]}
-            >
-              <Text style={[styles.metaText, { color: theme.gold }]}>
-                {project.businessType}
-              </Text>
-            </View>
-          ) : null}
-          {project.criteria.commitment ? (
-            <View style={styles.metaChip}>
-              <Briefcase size={10} color={theme.gold} />
-              <Text style={styles.metaText}>{project.criteria.commitment}</Text>
-            </View>
-          ) : null}
-          {project.criteria.location ? (
-            <View style={styles.metaChip}>
-              <MapPin size={10} color={theme.gold} />
-              <Text style={styles.metaText}>{project.criteria.location}</Text>
-            </View>
-          ) : null}
-        </View>
-      )}
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {project.title}
+        </Text>
 
-      {project.criteria.skills.length > 0 && (
-        <View style={styles.skillRow}>
-          {project.criteria.skills.slice(0, 6).map((s) => (
-            <View key={s} style={styles.skillChip}>
-              <Text style={styles.skillText}>{s}</Text>
-            </View>
-          ))}
-        </View>
-      )}
+        {project.description ? (
+          <Text style={styles.cardDesc} numberOfLines={3}>
+            {project.description}
+          </Text>
+        ) : null}
+
+        {(project.businessType ||
+          project.criteria.commitment ||
+          project.criteria.location) && (
+          <View style={styles.metaRow}>
+            {project.businessType ? (
+              <View
+                style={[
+                  styles.metaChip,
+                  {
+                    backgroundColor: theme.goldGlow,
+                    borderColor: theme.goldSoft,
+                  },
+                ]}
+              >
+                <Text style={[styles.metaText, { color: theme.gold }]}>
+                  {project.businessType}
+                </Text>
+              </View>
+            ) : null}
+            {project.criteria.commitment ? (
+              <View style={styles.metaChip}>
+                <Briefcase size={10} color={theme.gold} />
+                <Text style={styles.metaText}>
+                  {project.criteria.commitment}
+                </Text>
+              </View>
+            ) : null}
+            {project.criteria.location ? (
+              <View style={styles.metaChip}>
+                <MapPin size={10} color={theme.gold} />
+                <Text style={styles.metaText}>{project.criteria.location}</Text>
+              </View>
+            ) : null}
+          </View>
+        )}
+
+        {project.criteria.skills.length > 0 && (
+          <View style={styles.skillRow}>
+            {project.criteria.skills.slice(0, 5).map((s) => (
+              <View key={s} style={styles.skillChip}>
+                <Text style={styles.skillText}>{s}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -345,17 +435,23 @@ const ProjectCard = ({
 const SwipeCard = ({
   project,
   onDecide,
+  onTap,
   styles,
   theme,
 }: {
   project: PublicProject;
   onDecide: (dir: "left" | "right") => void;
+  onTap: () => void;
   styles: ReturnType<typeof makeStyles>;
   theme: ThemePalette;
 }) => {
   const x = useSharedValue(0);
 
+  // Pan needs ~10px of travel before it activates, so a clean tap
+  // never registers as a pan. Tap races against pan: whichever wins
+  // first cancels the other.
   const pan = Gesture.Pan()
+    .minDistance(10)
     .onUpdate((e) => {
       x.value = e.translationX;
     })
@@ -371,6 +467,12 @@ const SwipeCard = ({
       }
     });
 
+  const tap = Gesture.Tap().onEnd((_e, success) => {
+    if (success) runOnJS(onTap)();
+  });
+
+  const gesture = Gesture.Exclusive(pan, tap);
+
   const cardStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: x.value },
@@ -385,38 +487,10 @@ const SwipeCard = ({
     ],
   }));
 
-  const saveBadge = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      x.value,
-      [0, SWIPE_THRESHOLD],
-      [0, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
-  const passBadge = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      x.value,
-      [-SWIPE_THRESHOLD, 0],
-      [1, 0],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
   return (
-    <GestureDetector gesture={pan}>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.cardAbsolute, cardStyle]}>
         <ProjectCard project={project} styles={styles} theme={theme} />
-        <Animated.View
-          style={[styles.swipeBadge, styles.saveBadge, saveBadge]}
-        >
-          <Text style={styles.swipeBadgeText}>SAVE</Text>
-        </Animated.View>
-        <Animated.View
-          style={[styles.swipeBadge, styles.passBadge, passBadge]}
-        >
-          <Text style={styles.swipeBadgeText}>PASS</Text>
-        </Animated.View>
       </Animated.View>
     </GestureDetector>
   );
@@ -479,37 +553,37 @@ const makeStyles = (theme: ThemePalette) =>
       flex: 1,
       backgroundColor: theme.bgElev,
       borderWidth: 1,
-      borderColor: theme.border,
+      borderColor: theme.goldSoft,
       borderRadius: 18,
-      padding: 22,
+      overflow: "hidden",
     },
-    cardHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      marginBottom: 18,
-    },
-    founderAvatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.goldSoft,
-    },
-    founderAvatarFallback: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.goldSoft,
+    hero: {
+      width: "100%",
+      aspectRatio: 1,
       backgroundColor: theme.goldGlow,
       alignItems: "center",
       justifyContent: "center",
     },
-    founderInitials: {
+    heroImg: {
+      width: "100%",
+      height: "100%",
+      resizeMode: "cover",
+    },
+    heroFallback: {
+      width: "100%",
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    heroInitials: {
       color: theme.gold,
       fontFamily: fonts.display,
-      fontSize: 19,
+      fontSize: 96,
+    },
+    cardBody: {
+      padding: 18,
+      gap: 6,
+      flexShrink: 1,
     },
     cardFounder: {
       color: theme.text,
@@ -519,27 +593,25 @@ const makeStyles = (theme: ThemePalette) =>
     cardHeadline: {
       color: theme.textMuted,
       fontSize: 12,
-      marginTop: 2,
     },
     cardTitle: {
       color: theme.text,
       fontFamily: fonts.display,
-      fontSize: 26,
-      lineHeight: 30,
-      marginBottom: 12,
+      fontSize: 22,
+      lineHeight: 26,
       letterSpacing: -0.3,
+      marginTop: 6,
     },
     cardDesc: {
       color: theme.textMuted,
-      fontSize: 14,
-      lineHeight: 21,
-      marginBottom: 14,
+      fontSize: 13,
+      lineHeight: 19,
     },
     metaRow: {
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 6,
-      marginBottom: 12,
+      marginTop: 8,
     },
     metaChip: {
       flexDirection: "row",
@@ -558,7 +630,12 @@ const makeStyles = (theme: ThemePalette) =>
       textTransform: "uppercase",
       letterSpacing: 1.2,
     },
-    skillRow: { flexDirection: "row", flexWrap: "wrap", gap: 5 },
+    skillRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 5,
+      marginTop: 6,
+    },
     skillChip: {
       paddingHorizontal: 8,
       paddingVertical: 4,
@@ -568,31 +645,6 @@ const makeStyles = (theme: ThemePalette) =>
       borderRadius: 2,
     },
     skillText: { color: theme.text, fontSize: 11 },
-    swipeBadge: {
-      position: "absolute",
-      top: 30,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-      borderWidth: 3,
-      borderRadius: 6,
-    },
-    saveBadge: {
-      left: 20,
-      borderColor: theme.gold,
-      transform: [{ rotate: "-12deg" }],
-    },
-    passBadge: {
-      right: 20,
-      borderColor: theme.destructive,
-      transform: [{ rotate: "12deg" }],
-    },
-    swipeBadgeText: {
-      color: theme.text,
-      fontFamily: fonts.mono,
-      fontSize: 18,
-      fontWeight: "800",
-      letterSpacing: 2,
-    },
     actions: {
       paddingHorizontal: 24,
       paddingTop: 8,

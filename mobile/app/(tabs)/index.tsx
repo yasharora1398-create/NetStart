@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Dimensions,
   Image,
   Pressable,
@@ -38,6 +37,7 @@ import {
   listProjects,
   matchCandidatesForProject,
   removePerson,
+  requestChat,
   setPersonStatus,
 } from "@/lib/api";
 import type { Candidate, Project } from "@/lib/types";
@@ -45,6 +45,8 @@ import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 import { MothEmptyState } from "@/components/MothEmptyState";
 import { MothLoader } from "@/components/MothLoader";
+import { CandidateDetail } from "@/components/CandidateDetail";
+import { addSentRequest } from "@/lib/sentRequests";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_W * 0.28;
@@ -81,6 +83,9 @@ export default function MatchScreen() {
     candidate: RankedCandidate;
     status: "saved" | "passed";
   } | null>(null);
+  // Detail-sheet state. Opens on tap, slides up the full candidate
+  // info — bio, skills, LinkedIn, resume.
+  const [selected, setSelected] = useState<RankedCandidate | null>(null);
 
   // Load owned projects (user must own at least one to run Match).
   useEffect(() => {
@@ -295,6 +300,7 @@ export default function MatchScreen() {
               key={current!.userId + index}
               candidate={current!}
               onDecide={decide}
+              onTap={() => setSelected(current!)}
               styles={styles}
               theme={theme}
             />
@@ -327,6 +333,25 @@ export default function MatchScreen() {
           </Pressable>
         </View>
       )}
+
+      {selected && (
+        <CandidateDetail
+          candidate={selected}
+          role="founder"
+          onClose={() => setSelected(null)}
+          onCtaPress={() => {
+            const target = selected;
+            addSentRequest(target, "chat");
+            if (!target.userId.startsWith("fake-")) {
+              requestChat(target.userId, null).catch(() => {
+                // Silent — local row still renders.
+              });
+            }
+            setSelected(null);
+            router.push(`/chats/${target.userId}?intro=1` as never);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -334,17 +359,23 @@ export default function MatchScreen() {
 const SwipeCard = ({
   candidate,
   onDecide,
+  onTap,
   styles,
   theme,
 }: {
   candidate: RankedCandidate;
   onDecide: (dir: "left" | "right") => void;
+  onTap: () => void;
   styles: ReturnType<typeof makeStyles>;
   theme: ThemePalette;
 }) => {
   const x = useSharedValue(0);
 
+  // Pan needs ~10px travel before activating, so a clean tap never
+  // registers as a pan. Tap races against pan exclusively — first to
+  // win cancels the other.
   const pan = Gesture.Pan()
+    .minDistance(10)
     .onUpdate((e) => {
       x.value = e.translationX;
     })
@@ -360,6 +391,12 @@ const SwipeCard = ({
       }
     });
 
+  const tap = Gesture.Tap().onEnd((_e, success) => {
+    if (success) runOnJS(onTap)();
+  });
+
+  const gesture = Gesture.Exclusive(pan, tap);
+
   const cardStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: x.value },
@@ -374,34 +411,10 @@ const SwipeCard = ({
     ],
   }));
 
-  const saveBadge = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      x.value,
-      [0, SWIPE_THRESHOLD],
-      [0, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
-  const passBadge = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      x.value,
-      [-SWIPE_THRESHOLD, 0],
-      [1, 0],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
   return (
-    <GestureDetector gesture={pan}>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.cardAbsolute, cardStyle]}>
         <CandidateCard candidate={candidate} styles={styles} theme={theme} />
-        <Animated.View style={[styles.swipeBadge, styles.saveBadge, saveBadge]}>
-          <Text style={styles.swipeBadgeText}>SAVE</Text>
-        </Animated.View>
-        <Animated.View style={[styles.swipeBadge, styles.passBadge, passBadge]}>
-          <Text style={styles.swipeBadgeText}>PASS</Text>
-        </Animated.View>
       </Animated.View>
     </GestureDetector>
   );
@@ -436,63 +449,66 @@ const CandidateCard = ({
       ]}
       pointerEvents={stacked ? "none" : "auto"}
     >
-      <View style={styles.cardHeader}>
+      <View style={styles.hero}>
         {url ? (
-          <Image source={{ uri: url }} style={styles.cardAvatar} />
+          <Image source={{ uri: url }} style={styles.heroImg} />
         ) : (
-          <View style={styles.cardAvatarFallback}>
-            <Text style={styles.cardAvatarInitials}>
+          <View style={styles.heroFallback}>
+            <Text style={styles.heroInitials}>
               {(candidate.fullName[0] ?? "?").toUpperCase()}
             </Text>
           </View>
         )}
-        <View style={{ flex: 1 }}>
-          <Text style={styles.cardName} numberOfLines={1}>
-            {candidate.fullName || "Unnamed"}
-          </Text>
-          {candidate.headline ? (
-            <Text style={styles.cardHeadline} numberOfLines={2}>
-              {candidate.headline}
-            </Text>
-          ) : null}
-        </View>
-        <View style={styles.matchPill}>
-          <Text style={styles.matchPillText}>{score}%</Text>
-        </View>
+        {score > 0 ? (
+          <View style={styles.matchPill}>
+            <Text style={styles.matchPillText}>{score}%</Text>
+          </View>
+        ) : null}
       </View>
 
-      {candidate.bio ? (
-        <Text style={styles.cardBio} numberOfLines={6}>
-          {candidate.bio}
+      <View style={styles.cardBody}>
+        <Text style={styles.cardName} numberOfLines={1}>
+          {candidate.fullName || "Unnamed"}
         </Text>
-      ) : null}
+        {candidate.headline ? (
+          <Text style={styles.cardHeadline} numberOfLines={2}>
+            {candidate.headline}
+          </Text>
+        ) : null}
 
-      {(candidate.location || candidate.commitment) && (
-        <View style={styles.metaRow}>
-          {candidate.commitment ? (
-            <Text style={styles.meta}>
-              <Sparkles size={10} color={theme.gold} />{" "}
-              {candidate.commitment}
-            </Text>
-          ) : null}
-          {candidate.location ? (
-            <View style={styles.metaInline}>
-              <MapPin size={10} color={theme.gold} />
-              <Text style={styles.meta}>{candidate.location}</Text>
-            </View>
-          ) : null}
-        </View>
-      )}
+        {candidate.bio ? (
+          <Text style={styles.cardBio} numberOfLines={3}>
+            {candidate.bio}
+          </Text>
+        ) : null}
 
-      {candidate.skills.length > 0 && (
-        <View style={styles.skillRow}>
-          {candidate.skills.slice(0, 8).map((s) => (
-            <View key={s} style={styles.skillChip}>
-              <Text style={styles.skillText}>{s}</Text>
-            </View>
-          ))}
-        </View>
-      )}
+        {(candidate.location || candidate.commitment) && (
+          <View style={styles.metaRow}>
+            {candidate.commitment ? (
+              <View style={styles.metaInline}>
+                <Sparkles size={10} color={theme.gold} />
+                <Text style={styles.meta}>{candidate.commitment}</Text>
+              </View>
+            ) : null}
+            {candidate.location ? (
+              <View style={styles.metaInline}>
+                <MapPin size={10} color={theme.gold} />
+                <Text style={styles.meta}>{candidate.location}</Text>
+              </View>
+            ) : null}
+          </View>
+        )}
+
+        {candidate.skills.length > 0 && (
+          <View style={styles.skillRow}>
+            {candidate.skills.slice(0, 6).map((s) => (
+              <View key={s} style={styles.skillChip}>
+                <Text style={styles.skillText}>{s}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -586,21 +602,6 @@ const makeStyles = (theme: ThemePalette) =>
   pickerItemText: { color: theme.text, fontSize: 13 },
   deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 96 },
   deckInner: { flex: 1, position: "relative" },
-  empty: { alignItems: "center", padding: 40, justifyContent: "center", flex: 1 },
-  emptyTitle: {
-    color: theme.text,
-    fontFamily: fonts.display,
-    fontSize: 22,
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  emptyBody: {
-    color: theme.textMuted,
-    fontSize: 13,
-    textAlign: "center",
-    lineHeight: 19,
-    maxWidth: 320,
-  },
   cardAbsolute: {
     position: "absolute",
     top: 0,
@@ -613,69 +614,72 @@ const makeStyles = (theme: ThemePalette) =>
     backgroundColor: theme.bgElev,
     borderWidth: 1,
     borderColor: theme.goldSoft,
-    borderRadius: 6,
-    padding: 18,
+    borderRadius: 18,
+    overflow: "hidden",
   },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 14,
-  },
-  cardAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: theme.goldSoft,
-  },
-  cardAvatarFallback: {
-    width: 56,
-    height: 56,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: theme.goldSoft,
+  hero: {
+    width: "100%",
+    aspectRatio: 1,
     backgroundColor: theme.goldGlow,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
-  cardAvatarInitials: {
+  heroImg: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  heroFallback: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heroInitials: {
     color: theme.gold,
     fontFamily: fonts.display,
-    fontSize: 22,
+    fontSize: 96,
   },
-  cardName: { color: theme.text, fontFamily: fonts.display, fontSize: 22 },
+  cardBody: {
+    padding: 18,
+    gap: 6,
+    flexShrink: 1,
+  },
+  cardName: { color: theme.text, fontFamily: fonts.display, fontSize: 24 },
   cardHeadline: {
     color: theme.textMuted,
     fontSize: 12,
     lineHeight: 17,
-    marginTop: 2,
   },
   matchPill: {
-    paddingHorizontal: 8,
+    position: "absolute",
+    top: 12,
+    right: 12,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderWidth: 1,
     borderColor: theme.goldSoft,
-    backgroundColor: theme.goldGlow,
-    borderRadius: 2,
+    backgroundColor: theme.bgElev,
+    borderRadius: 4,
   },
   matchPillText: {
     color: theme.gold,
     fontFamily: fonts.mono,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.2,
   },
   cardBio: {
     color: theme.text,
     fontSize: 13,
     lineHeight: 19,
-    marginBottom: 12,
+    marginTop: 4,
   },
   metaRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginBottom: 12,
+    marginTop: 6,
   },
   metaInline: { flexDirection: "row", alignItems: "center", gap: 4 },
   meta: {
@@ -685,7 +689,12 @@ const makeStyles = (theme: ThemePalette) =>
     textTransform: "uppercase",
     letterSpacing: 1.2,
   },
-  skillRow: { flexDirection: "row", flexWrap: "wrap", gap: 5 },
+  skillRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 5,
+    marginTop: 6,
+  },
   skillChip: {
     paddingHorizontal: 7,
     paddingVertical: 3,
@@ -695,30 +704,6 @@ const makeStyles = (theme: ThemePalette) =>
     borderRadius: 2,
   },
   skillText: { color: theme.text, fontSize: 10 },
-  swipeBadge: {
-    position: "absolute",
-    top: 22,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 2,
-    borderRadius: 4,
-  },
-  saveBadge: {
-    right: 22,
-    borderColor: theme.gold,
-    transform: [{ rotate: "10deg" }],
-  },
-  passBadge: {
-    left: 22,
-    borderColor: theme.destructive,
-    transform: [{ rotate: "-10deg" }],
-  },
-  swipeBadgeText: {
-    fontFamily: fonts.mono,
-    fontSize: 18,
-    letterSpacing: 3,
-    color: theme.text,
-  },
   actions: {
     position: "absolute",
     left: 20,
