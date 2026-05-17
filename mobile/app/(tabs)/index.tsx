@@ -16,7 +16,6 @@ import Animated, {
   Extrapolation,
   interpolate,
   runOnJS,
-  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -87,10 +86,6 @@ export default function MatchScreen() {
   // Detail-sheet state. Opens on tap or on right-swipe (save), slides
   // up the full candidate info — bio, skills, LinkedIn, resume.
   const [selected, setSelected] = useState<RankedCandidate | null>(null);
-
-  // Drives the full-screen save/pass glow. The active SwipeCard
-  // writes the live pan translation here; SwipeGlow reads it.
-  const glowX = useSharedValue(0);
 
   // Load owned projects (user must own at least one to run Match).
   useEffect(() => {
@@ -185,10 +180,6 @@ export default function MatchScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      {/* Full-screen tint that fades in as the user swipes. Behind
-          everything else; pointer events pass through. */}
-      <SwipeGlow x={glowX} />
-
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
@@ -316,7 +307,6 @@ export default function MatchScreen() {
               candidate={current!}
               onDecide={decide}
               onTap={() => setSelected(current!)}
-              glowX={glowX}
               styles={styles}
               theme={theme}
             />
@@ -376,14 +366,12 @@ const SwipeCard = ({
   candidate,
   onDecide,
   onTap,
-  glowX,
   styles,
   theme,
 }: {
   candidate: RankedCandidate;
   onDecide: (dir: "left" | "right") => void;
   onTap: () => void;
-  glowX: SharedValue<number>;
   styles: ReturnType<typeof makeStyles>;
   theme: ThemePalette;
 }) => {
@@ -396,20 +384,16 @@ const SwipeCard = ({
     .minDistance(10)
     .onUpdate((e) => {
       x.value = e.translationX;
-      glowX.value = e.translationX;
     })
     .onEnd((e) => {
       if (e.translationX > SWIPE_THRESHOLD) {
         x.value = withTiming(SCREEN_W * 1.4, { duration: 220 });
-        glowX.value = withTiming(0, { duration: 200 });
         runOnJS(onDecide)("right");
       } else if (e.translationX < -SWIPE_THRESHOLD) {
         x.value = withTiming(-SCREEN_W * 1.4, { duration: 220 });
-        glowX.value = withTiming(0, { duration: 200 });
         runOnJS(onDecide)("left");
       } else {
         x.value = withSpring(0);
-        glowX.value = withSpring(0);
       }
     });
 
@@ -419,19 +403,33 @@ const SwipeCard = ({
 
   const gesture = Gesture.Exclusive(pan, tap);
 
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: x.value },
-      {
-        rotate: `${interpolate(
-          x.value,
-          [-SCREEN_W, 0, SCREEN_W],
-          [-12, 0, 12],
-          Extrapolation.CLAMP,
-        )}deg`,
-      },
-    ],
-  }));
+  // Card transform + soft colored glow on the edges of the card.
+  // Green when swiping right (save), red when swiping left (pass).
+  // iOS / web render this as a true colored shadow on the card's
+  // silhouette. Android falls back to no glow (elevation shadows
+  // can't be tinted).
+  const cardStyle = useAnimatedStyle(() => {
+    const t = Math.min(Math.abs(x.value) / SWIPE_THRESHOLD, 1);
+    const shadowColor =
+      x.value > 0.5 ? "#22c55e" : x.value < -0.5 ? "#ef4444" : "transparent";
+    return {
+      transform: [
+        { translateX: x.value },
+        {
+          rotate: `${interpolate(
+            x.value,
+            [-SCREEN_W, 0, SCREEN_W],
+            [-12, 0, 12],
+            Extrapolation.CLAMP,
+          )}deg`,
+        },
+      ],
+      shadowColor,
+      shadowOpacity: t * 0.85,
+      shadowRadius: 20 + t * 8,
+      shadowOffset: { width: 0, height: 0 },
+    };
+  });
 
   return (
     <GestureDetector gesture={gesture}>
@@ -439,29 +437,6 @@ const SwipeCard = ({
         <CandidateCard candidate={candidate} styles={styles} theme={theme} />
       </Animated.View>
     </GestureDetector>
-  );
-};
-
-// Full-screen color wash that tracks swipe progress. Green right
-// (save), red left (pass). Behind everything; pointer-events pass
-// through.
-const SwipeGlow = ({ x }: { x: SharedValue<number> }) => {
-  const style = useAnimatedStyle(() => {
-    const t = Math.min(Math.abs(x.value) / SWIPE_THRESHOLD, 1);
-    const opacity = t * 0.45;
-    if (x.value > 0) {
-      return { opacity, backgroundColor: "#22c55e" };
-    }
-    if (x.value < 0) {
-      return { opacity, backgroundColor: "#ef4444" };
-    }
-    return { opacity: 0, backgroundColor: "transparent" };
-  });
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={[StyleSheet.absoluteFill, { zIndex: 0 }, style]}
-    />
   );
 };
 
@@ -647,12 +622,17 @@ const makeStyles = (theme: ThemePalette) =>
   pickerItemText: { color: theme.text, fontSize: 13 },
   deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 96 },
   deckInner: { flex: 1, position: "relative" },
+  // Shadow donor: matches the inner card's shape so iOS/web can
+  // compute the colored swipe glow against a real silhouette. The
+  // CandidateCard child fills it and clips its own content.
   cardAbsolute: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    backgroundColor: theme.bgElev,
+    borderRadius: 18,
   },
   card: {
     flex: 1,
