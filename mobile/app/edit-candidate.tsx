@@ -247,24 +247,28 @@ export default function EditCandidateScreen() {
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Open to work */}
+          {/* Open to work — persistent label + always-visible
+              description so the user knows what the switch does
+              before tapping it. Switch is tappable even when
+              gated; handleToggleOpen surfaces an Alert telling
+              them why if they can't flip it on. */}
           <View style={styles.openCard}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.openLabel}>
-                {open ? "Open to work" : "Closed"}
-              </Text>
+              <Text style={styles.openLabel}>Open to work</Text>
               <Text style={styles.openHint}>
-                {isAccepted
-                  ? profileComplete
-                    ? "Founders running Find People will see you."
-                    : `Need: ${missing.join(", ")}.`
-                  : "Get accepted before flipping this on."}
+                When on, founders running Find People can match
+                with you and send chat requests. When off, your
+                profile is hidden from match results.
+                {!isAccepted
+                  ? "\n\nLocked until your profile is reviewed and accepted."
+                  : !profileComplete
+                    ? `\n\nFinish first: ${missing.join(", ")}.`
+                    : `\n\nCurrently ${open ? "on — visible to founders" : "off — hidden from match"}.`}
               </Text>
             </View>
             <Switch
               value={open}
               onValueChange={handleToggleOpen}
-              disabled={!isAccepted}
               trackColor={{ false: theme.border, true: theme.gold }}
               thumbColor={theme.bg}
             />
