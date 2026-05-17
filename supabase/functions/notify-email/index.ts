@@ -71,6 +71,11 @@ serve(async (req) => {
   const body: string = row?.body ?? "";
   const link: string | null = row?.link ?? null;
   const fromUserId: string | null = row?.from_user_id ?? null;
+  // ISO timestamp from the notifications row. Used in subject
+  // lines that include "at <time>" so each send is unique per
+  // message (breaks Gmail / Apple Mail threading).
+  const createdAt: string =
+    typeof row?.created_at === "string" ? row.created_at : new Date().toISOString();
 
   if (!userId) return new Response("Missing user_id", { status: 400 });
 
@@ -135,6 +140,7 @@ serve(async (req) => {
     senderName,
     senderFirstName,
     fromUserId,
+    createdAt,
   };
 
   const { subject, html, text } = render(ctx);
@@ -175,6 +181,7 @@ type TemplateCtx = {
   senderName: string | null;
   senderFirstName: string | null;
   fromUserId: string | null;
+  createdAt: string;
 };
 
 const render = (
@@ -208,16 +215,18 @@ const chatMessage = (ctx: TemplateCtx) => {
   //   5. Green hairline + lighter footer with manage links
   const sender = ctx.senderName ?? "Someone";
   const senderFirst = ctx.senderFirstName ?? sender;
-  // Each subject embeds a 40-char preview of the message so it's
-  // unique per send — keeps Gmail / Apple Mail / Outlook from
+  // Subject embeds the time the notification was created so each
+  // send is unique — keeps Gmail / Apple Mail / Outlook from
   // threading consecutive messages from the same sender into one
-  // visual conversation. New message = new thread in the inbox.
-  const previewForSubject = (() => {
-    const trimmed = ctx.body.trim().replace(/\s+/g, " ");
-    if (trimmed.length === 0) return "messaged you";
-    return trimmed.length > 40 ? `${trimmed.slice(0, 37)}...` : trimmed;
-  })();
-  const subject = `${sender}: ${previewForSubject}`;
+  // visual conversation. Format: "hey, Sarah Chen sent you a
+  // message on Polln8 at 3:42 PM".
+  const sentAt = new Date(ctx.createdAt ?? Date.now());
+  const sentAtLabel = sentAt.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  const subject = `hey, ${sender} sent you a message on Polln8 at ${sentAtLabel}`;
   const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
   const muteLink = ctx.fromUserId
     ? `${APP_BASE_URL}/chats/${ctx.fromUserId}`
