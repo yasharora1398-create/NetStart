@@ -180,41 +180,122 @@ const render = (
 };
 
 const chatMessage = (ctx: TemplateCtx) => {
+  // Dark-mode design per the chat_message hand-off. Custom HTML
+  // (not the light `shell()` used by other templates):
+  //   1. Speech bubble at the top, tail pointing down
+  //   2. welcome.gif centered in the middle (the only image —
+  //      everything else is real HTML)
+  //   3. "Reply on Polln8" green button (real <a>, clickable)
+  //   4. Italic green "Mute {first_name}" help line
+  //   5. Green hairline + lighter footer with manage links
   const sender = ctx.senderName ?? "Someone";
+  const senderFirst = ctx.senderFirstName ?? sender;
   const subject = `${sender} messaged you on Polln8`;
-  const greeting = `Hey ${ctx.recipientName}, ${sender} just sent you a message.`;
   const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
-  // Layout: small animated accent at the top + real HTML body
-  // below. Keeps the email scannable in plain HTML (selectable
-  // text, scaling, fonts) while the GIF lives as a 240x240
-  // centered visual rather than the whole content surface.
-  const inner = `
-    <div style="text-align:center;margin:0 0 18px;">
-      <img
-        src="${gifUrl}"
-        alt=""
-        width="240"
-        height="240"
-        style="display:inline-block;width:240px;max-width:80%;height:auto;border:0;outline:none;-ms-interpolation-mode:bicubic;pointer-events:none;"
-      />
+  const muteLink = ctx.fromUserId
+    ? `${APP_BASE_URL}/chats/${ctx.fromUserId}`
+    : `${APP_BASE_URL}/chats`;
+  const replyHref = escapeHtml(ctx.linkUrl);
+
+  // Dark palette for this email only.
+  const D = {
+    bg: "#1f1f1f",
+    footerBg: "#3a3a3a",
+    bubble: "#6a6a6a",
+    text: "#ffffff",
+    accent: "#1F5F3E",
+    accentLink: "#5fc88c",
+  };
+
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="supported-color-schemes" content="dark" />
+    <title>${escapeHtml(subject)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:${D.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${D.text};">
+    <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+      ${escapeHtml(subject)}
     </div>
-    ${heroEyebrow("New message")}
-    ${heroTitle(`${escapeHtml(sender)} messaged you.`)}
-    ${heroLede(escapeHtml(greeting))}
-    ${quoteBubble(ctx.body, sender)}
-    ${primaryButton(ctx.linkUrl, "Reply on Polln8")}
-    ${
-      ctx.fromUserId
-        ? subtleHelp(
-            `Too many pings? <a href="${APP_BASE_URL}/chats/${ctx.fromUserId}" style="color:${C.accent};">Mute ${escapeHtml(
-              ctx.senderFirstName ?? sender,
-            )}</a> from your chat with them.`,
-          )
-        : ""
-    }
-  `;
-  const text = `${greeting}\n\n"${ctx.body}"\n\nReply: ${ctx.linkUrl}`;
-  return { subject, html: shell(subject, inner), text };
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${D.bg};">
+      <!-- Speech bubble -->
+      <tr>
+        <td align="center" style="padding:48px 24px 0;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;width:100%;">
+            <tr>
+              <td style="background:${D.bubble};border-radius:18px;padding:24px 26px;color:${D.text};">
+                <p style="margin:0 0 28px;font-size:18px;line-height:1.4;font-weight:500;color:${D.text};">
+                  ${escapeHtml(ctx.body)}
+                </p>
+                <p style="margin:0;font-size:16px;color:${D.text};font-weight:400;">
+                  — ${escapeHtml(sender)}
+                </p>
+              </td>
+            </tr>
+            <!-- Bubble tail (CSS-border triangle) -->
+            <tr>
+              <td style="line-height:0;font-size:0;padding:0;text-align:center;">
+                <div style="width:0;height:0;border-top:24px solid ${D.bubble};border-left:18px solid transparent;border-right:18px solid transparent;margin:0 auto;display:inline-block;"></div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Hawk-moth / envelope GIF -->
+      <tr>
+        <td align="center" style="padding:8px 24px 32px;">
+          <img src="${gifUrl}" alt="" width="280" style="display:inline-block;width:280px;max-width:80%;height:auto;border:0;outline:none;-ms-interpolation-mode:bicubic;pointer-events:none;" />
+        </td>
+      </tr>
+
+      <!-- Reply on Polln8 button (real clickable <a>) -->
+      <tr>
+        <td align="center" style="padding:0 24px 24px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+            <tr>
+              <td style="background:${D.accent};border-radius:14px;">
+                <a href="${replyHref}" target="_blank" rel="noopener" style="display:inline-block;padding:18px 44px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:${D.text};text-decoration:none;border-radius:14px;letter-spacing:-0.01em;">
+                  Reply on Polln8
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Mute help line -->
+      <tr>
+        <td align="center" style="padding:8px 24px 36px;">
+          <p style="margin:0;font-size:16px;line-height:1.45;color:${D.text};max-width:440px;">
+            Too many pings? <a href="${escapeHtml(muteLink)}" style="color:${D.accentLink};font-style:italic;text-decoration:none;">Mute ${escapeHtml(senderFirst)}</a> from your chat with them.
+          </p>
+        </td>
+      </tr>
+
+      <!-- Green hairline -->
+      <tr>
+        <td style="padding:0;background:${D.accent};height:3px;line-height:0;font-size:0;">&nbsp;</td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td align="center" style="padding:24px;background:${D.footerBg};">
+          <p style="margin:0;font-size:15px;line-height:1.5;color:${D.text};max-width:480px;">
+            Sent because you have a Polln8 account. Manage <a href="${APP_BASE_URL}/chats" style="color:${D.text};text-decoration:underline;">message preferences</a> or <a href="${APP_BASE_URL}/settings" style="color:${D.text};text-decoration:underline;">account settings</a>.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  const text = `${ctx.body}\n— ${sender}\n\nReply: ${ctx.linkUrl}`;
+  return { subject, html, text };
 };
 
 const chatRequest = (ctx: TemplateCtx) => {
