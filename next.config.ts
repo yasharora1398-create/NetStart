@@ -63,11 +63,14 @@ const config: NextConfig = {
     return [
       // Phone-shaped UAs hitting the main site get pushed into /m/
       // (the Expo web bundle). The negative lookahead keeps static
-      // assets, the Expo bundle itself, favicons, robots, and sitemap
-      // from being redirected.
+      // assets, the Expo bundle itself, favicons, robots, sitemap,
+      // and the `chats/<id>` deep-link path (which we email out as
+      // the Reply CTA) from being redirected. Without `chats/` in
+      // the exclusion list, every Reply button tap on a phone got
+      // shunted to /m/ instead of opening the conversation.
       {
         source:
-          "/((?!m/|m$|_expo/|_next/|assets/|favicon|robots\\.txt|sitemap\\.xml|polln8-|apple-touch-icon|site\\.webmanifest).*)",
+          "/((?!m/|m$|_expo/|_next/|assets/|favicon|robots\\.txt|sitemap\\.xml|polln8-|apple-touch-icon|site\\.webmanifest|chats/).*)",
         has: [
           {
             type: "header",

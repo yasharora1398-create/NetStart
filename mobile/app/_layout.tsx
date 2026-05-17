@@ -54,11 +54,9 @@ const RouteGuard = () => {
     if (loading) return;
     const inAuth = segments[0] === "(auth)";
     if (!session && !inAuth) {
-      // Land on the animated welcome screen on every sign-out so the
-      // user gets a deliberate intro instead of an abrupt drop into
-      // the sign-in form. The CTAs from there route to sign-up or
-      // sign-in.
-      router.replace("/(auth)/welcome");
+      // Land unauthenticated sessions on sign-in directly — the
+      // welcome screen has been removed per the latest direction.
+      router.replace("/(auth)/sign-in");
     } else if (session && inAuth) {
       router.replace("/(tabs)");
     }
