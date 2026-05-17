@@ -184,18 +184,22 @@ const chatMessage = (ctx: TemplateCtx) => {
   const subject = `${sender} messaged you on Polln8`;
   const greeting = `Hey ${ctx.recipientName}, ${sender} just sent you a message.`;
   const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
-  // Minimal layout per the brief: ONE line of personalized text,
-  // then a full-bleed hero GIF that fills the card edge-to-edge.
-  // The GIF itself is the click target — tapping it opens the chat.
+  // Layout: ONE line of personalized text, a full-bleed hero GIF
+  // (decorative — NOT clickable), then a real HTML "Reply on Polln8"
+  // CTA button. The button is the only click target on the email.
+  // The GIF can't have a clickable sub-region because email HTML
+  // treats <img> as a single element; the button has to live
+  // outside the image to be properly clickable on every device.
   const inner = `
     <div style="padding:28px 28px 22px;">
       <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;line-height:1.45;color:${C.ink};font-weight:500;">
         ${escapeHtml(greeting)}
       </p>
     </div>
-    <a href="${ctx.linkUrl}" target="_blank" rel="noopener" style="display:block;line-height:0;text-decoration:none;">
-      <img src="${gifUrl}" alt="${escapeHtml(sender)} just messaged you on Polln8" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">
-    </a>
+    <img src="${gifUrl}" alt="" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;-ms-interpolation-mode:bicubic;pointer-events:none;">
+    <div style="padding:22px 28px 28px;text-align:center;">
+      ${primaryButton(ctx.linkUrl, "Reply on Polln8")}
+    </div>
   `;
   const text = `${greeting}\n\nReply: ${ctx.linkUrl}`;
   return { subject, html: shell(subject, inner, { fullBleed: true }), text };
