@@ -8,7 +8,7 @@
  * top — handy once a user has more than ~10 threads.
  */
 import { useMemo, useState } from "react";
-import { PanelLeftClose, Search } from "lucide-react";
+import { Inbox, PanelLeftClose, Search } from "lucide-react";
 
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 
