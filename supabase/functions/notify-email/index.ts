@@ -205,43 +205,97 @@ const render = (
 };
 
 const chatMessage = (ctx: TemplateCtx) => {
-  // Dark-mode design per the chat_message hand-off. Custom HTML
-  // (not the light `shell()` used by other templates):
-  //   1. Speech bubble at the top, tail pointing down
-  //   2. welcome.gif centered in the middle (the only image —
+  // Dual-mode template per the chat_message hand-off.
+  //   LIGHT MODE (Gmail / Apple Mail default):
+  //     white surface, dark text, light-gray bubble
+  //   DARK MODE (when the email client honors
+  //     prefers-color-scheme: dark):
+  //     #1f1f1f surface, white text, medium-gray bubble — matches
+  //     the screenshot the user sent
+  //
+  // Layout (both modes):
+  //   1. Speech bubble at the top with the message text + sender
+  //      name, tail pointing down
+  //   2. welcome.gif centered below the bubble (the only image —
   //      everything else is real HTML)
   //   3. "Reply on Polln8" green button (real <a>, clickable)
-  //   4. Italic green "Mute {first_name}" help line
+  //   4. Italic accent "Mute {first_name}" help line
   //   5. Green hairline + lighter footer with manage links
   const sender = ctx.senderName ?? "Someone";
   const senderFirst = ctx.senderFirstName ?? sender;
-  // Subject embeds the time the notification was created so each
-  // send is unique — keeps Gmail / Apple Mail / Outlook from
-  // threading consecutive messages from the same sender into one
-  // visual conversation. Format: "hey, Sarah Chen sent you a
-  // message on Polln8 at 3:42 PM".
+  // Subject embeds the FULL date + time the notification was
+  // created so every single send is unique — keeps Gmail / Apple
+  // Mail / Outlook from threading consecutive messages from the
+  // same sender into one visual conversation. Each new message
+  // = brand-new thread in the inbox. Format example:
+  //   "hey, Sarah Chen sent you a message on Polln8 at 3:42 PM on May 17"
   const sentAt = new Date(ctx.createdAt ?? Date.now());
-  const sentAtLabel = sentAt.toLocaleTimeString("en-US", {
+  const timeLabel = sentAt.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   });
-  const subject = `hey, ${sender} sent you a message on Polln8 at ${sentAtLabel}`;
+  const dateLabel = sentAt.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+  const subject = `hey, ${sender} sent you a message on Polln8 at ${timeLabel} on ${dateLabel}`;
   const gifUrl = `${APP_BASE_URL}/email/welcome.gif`;
   const muteLink = ctx.fromUserId
     ? `${APP_BASE_URL}/chats/${ctx.fromUserId}`
     : `${APP_BASE_URL}/chats`;
   const replyHref = escapeHtml(ctx.linkUrl);
 
-  // Dark palette for this email only.
+  // Light = inline defaults (Gmail / Apple Mail in light mode).
+  // Dark = overrides via @media (prefers-color-scheme: dark) AND
+  // [data-ogsc] (Gmail Android's stricter dark mode signal).
+  // Inline styles win over plain CSS, so the dark block uses
+  // !important to take precedence when dark mode is active.
+  const L = {
+    bg: "#ffffff",
+    footerBg: "#f4f4f4",
+    bubble: "#e8e8e8",
+    text: "#0f1410",
+    bubbleText: "#0f1410",
+    accent: "#1F5F3E",
+    accentLink: "#1F5F3E",
+    footerLink: "#0f1410",
+  };
   const D = {
     bg: "#1f1f1f",
     footerBg: "#3a3a3a",
     bubble: "#6a6a6a",
     text: "#ffffff",
+    bubbleText: "#ffffff",
     accent: "#1F5F3E",
     accentLink: "#5fc88c",
+    footerLink: "#ffffff",
   };
+
+  // Dark-mode override CSS — emitted in <head>. Targets element
+  // classes (.e-*) so the inline light styles get overridden when
+  // the client honours prefers-color-scheme. Both standard media
+  // query AND [data-ogsc] for Gmail Android coverage.
+  const darkOverride = `
+    @media (prefers-color-scheme: dark) {
+      .e-bg { background-color: ${D.bg} !important; }
+      .e-text { color: ${D.text} !important; }
+      .e-bubble { background-color: ${D.bubble} !important; color: ${D.bubbleText} !important; }
+      .e-bubble-text { color: ${D.bubbleText} !important; }
+      .e-bubble-tail { border-top-color: ${D.bubble} !important; }
+      .e-footer { background-color: ${D.footerBg} !important; }
+      .e-mute-link { color: ${D.accentLink} !important; }
+      .e-footer-link { color: ${D.footerLink} !important; }
+    }
+    [data-ogsc] .e-bg { background-color: ${D.bg} !important; }
+    [data-ogsc] .e-text { color: ${D.text} !important; }
+    [data-ogsc] .e-bubble { background-color: ${D.bubble} !important; color: ${D.bubbleText} !important; }
+    [data-ogsc] .e-bubble-text { color: ${D.bubbleText} !important; }
+    [data-ogsc] .e-bubble-tail { border-top-color: ${D.bubble} !important; }
+    [data-ogsc] .e-footer { background-color: ${D.footerBg} !important; }
+    [data-ogsc] .e-mute-link { color: ${D.accentLink} !important; }
+    [data-ogsc] .e-footer-link { color: ${D.footerLink} !important; }
+  `;
 
   const html = `<!doctype html>
 <html lang="en">
@@ -249,25 +303,26 @@ const chatMessage = (ctx: TemplateCtx) => {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="x-apple-disable-message-reformatting" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="supported-color-schemes" content="dark" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
     <title>${escapeHtml(subject)}</title>
+    <style>${darkOverride}</style>
   </head>
-  <body style="margin:0;padding:0;background:${D.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${D.text};">
+  <body class="e-bg e-text" style="margin:0;padding:0;background:${L.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${L.text};">
     <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
       ${escapeHtml(subject)}
     </div>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${D.bg};">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="e-bg" style="background:${L.bg};">
       <!-- Speech bubble -->
       <tr>
         <td align="center" style="padding:48px 24px 0;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;width:100%;">
             <tr>
-              <td style="background:${D.bubble};border-radius:18px;padding:24px 26px;color:${D.text};">
-                <p style="margin:0 0 28px;font-size:18px;line-height:1.4;font-weight:500;color:${D.text};">
+              <td class="e-bubble" style="background:${L.bubble};border-radius:18px;padding:24px 26px;color:${L.bubbleText};">
+                <p class="e-bubble-text" style="margin:0 0 28px;font-size:18px;line-height:1.4;font-weight:500;color:${L.bubbleText};">
                   ${escapeHtml(ctx.body)}
                 </p>
-                <p style="margin:0;font-size:16px;color:${D.text};font-weight:400;">
+                <p class="e-bubble-text" style="margin:0;font-size:16px;color:${L.bubbleText};font-weight:400;">
                   — ${escapeHtml(sender)}
                 </p>
               </td>
@@ -275,7 +330,7 @@ const chatMessage = (ctx: TemplateCtx) => {
             <!-- Bubble tail (CSS-border triangle) -->
             <tr>
               <td style="line-height:0;font-size:0;padding:0;text-align:center;">
-                <div style="width:0;height:0;border-top:24px solid ${D.bubble};border-left:18px solid transparent;border-right:18px solid transparent;margin:0 auto;display:inline-block;"></div>
+                <div class="e-bubble-tail" style="width:0;height:0;border-top:24px solid ${L.bubble};border-left:18px solid transparent;border-right:18px solid transparent;margin:0 auto;display:inline-block;"></div>
               </td>
             </tr>
           </table>
@@ -294,8 +349,8 @@ const chatMessage = (ctx: TemplateCtx) => {
         <td align="center" style="padding:0 24px 24px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
             <tr>
-              <td style="background:${D.accent};border-radius:14px;">
-                <a href="${replyHref}" target="_blank" rel="noopener" style="display:inline-block;padding:18px 44px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:${D.text};text-decoration:none;border-radius:14px;letter-spacing:-0.01em;">
+              <td style="background:${L.accent};border-radius:14px;">
+                <a href="${replyHref}" target="_blank" rel="noopener" style="display:inline-block;padding:18px 44px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:14px;letter-spacing:-0.01em;">
                   Reply on Polln8
                 </a>
               </td>
@@ -307,22 +362,22 @@ const chatMessage = (ctx: TemplateCtx) => {
       <!-- Mute help line -->
       <tr>
         <td align="center" style="padding:8px 24px 36px;">
-          <p style="margin:0;font-size:16px;line-height:1.45;color:${D.text};max-width:440px;">
-            Too many pings? <a href="${escapeHtml(muteLink)}" style="color:${D.accentLink};font-style:italic;text-decoration:none;">Mute ${escapeHtml(senderFirst)}</a> from your chat with them.
+          <p class="e-text" style="margin:0;font-size:16px;line-height:1.45;color:${L.text};max-width:440px;">
+            Too many pings? <a class="e-mute-link" href="${escapeHtml(muteLink)}" style="color:${L.accentLink};font-style:italic;text-decoration:none;">Mute ${escapeHtml(senderFirst)}</a> from your chat with them.
           </p>
         </td>
       </tr>
 
       <!-- Green hairline -->
       <tr>
-        <td style="padding:0;background:${D.accent};height:3px;line-height:0;font-size:0;">&nbsp;</td>
+        <td style="padding:0;background:${L.accent};height:3px;line-height:0;font-size:0;">&nbsp;</td>
       </tr>
 
       <!-- Footer -->
       <tr>
-        <td align="center" style="padding:24px;background:${D.footerBg};">
-          <p style="margin:0;font-size:15px;line-height:1.5;color:${D.text};max-width:480px;">
-            Sent because you have a Polln8 account. Manage <a href="${APP_BASE_URL}/chats" style="color:${D.text};text-decoration:underline;">message preferences</a> or <a href="${APP_BASE_URL}/settings" style="color:${D.text};text-decoration:underline;">account settings</a>.
+        <td align="center" class="e-footer" style="padding:24px;background:${L.footerBg};">
+          <p class="e-text" style="margin:0;font-size:15px;line-height:1.5;color:${L.text};max-width:480px;">
+            Sent because you have a Polln8 account. Manage <a class="e-footer-link" href="${APP_BASE_URL}/chats" style="color:${L.footerLink};text-decoration:underline;">message preferences</a> or <a class="e-footer-link" href="${APP_BASE_URL}/settings" style="color:${L.footerLink};text-decoration:underline;">account settings</a>.
           </p>
         </td>
       </tr>
