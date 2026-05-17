@@ -16,6 +16,7 @@ import Animated, {
   Extrapolation,
   interpolate,
   runOnJS,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -83,9 +84,13 @@ export default function MatchScreen() {
     candidate: RankedCandidate;
     status: "saved" | "passed";
   } | null>(null);
-  // Detail-sheet state. Opens on tap, slides up the full candidate
-  // info — bio, skills, LinkedIn, resume.
+  // Detail-sheet state. Opens on tap or on right-swipe (save), slides
+  // up the full candidate info — bio, skills, LinkedIn, resume.
   const [selected, setSelected] = useState<RankedCandidate | null>(null);
+
+  // Drives the full-screen save/pass glow. The active SwipeCard
+  // writes the live pan translation here; SwipeGlow reads it.
+  const glowX = useSharedValue(0);
 
   // Load owned projects (user must own at least one to run Match).
   useEffect(() => {
@@ -148,6 +153,12 @@ export default function MatchScreen() {
     if (!activeProject || !current) return;
     const status = direction === "right" ? "saved" : "passed";
     setLastSwipe({ candidate: current, status });
+    if (direction === "right") {
+      // Saving = "I want to learn more about them". Open the detail
+      // sheet so the user lands on the builder's full info right
+      // after the swipe.
+      setSelected(current);
+    }
     setIndex((i) => i + 1);
     try {
       await setPersonStatus(activeProject.id, current.userId, status);
@@ -174,6 +185,10 @@ export default function MatchScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
+      {/* Full-screen tint that fades in as the user swipes. Behind
+          everything else; pointer events pass through. */}
+      <SwipeGlow x={glowX} />
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
@@ -301,6 +316,7 @@ export default function MatchScreen() {
               candidate={current!}
               onDecide={decide}
               onTap={() => setSelected(current!)}
+              glowX={glowX}
               styles={styles}
               theme={theme}
             />
@@ -360,12 +376,14 @@ const SwipeCard = ({
   candidate,
   onDecide,
   onTap,
+  glowX,
   styles,
   theme,
 }: {
   candidate: RankedCandidate;
   onDecide: (dir: "left" | "right") => void;
   onTap: () => void;
+  glowX: SharedValue<number>;
   styles: ReturnType<typeof makeStyles>;
   theme: ThemePalette;
 }) => {
@@ -378,16 +396,20 @@ const SwipeCard = ({
     .minDistance(10)
     .onUpdate((e) => {
       x.value = e.translationX;
+      glowX.value = e.translationX;
     })
     .onEnd((e) => {
       if (e.translationX > SWIPE_THRESHOLD) {
         x.value = withTiming(SCREEN_W * 1.4, { duration: 220 });
+        glowX.value = withTiming(0, { duration: 200 });
         runOnJS(onDecide)("right");
       } else if (e.translationX < -SWIPE_THRESHOLD) {
         x.value = withTiming(-SCREEN_W * 1.4, { duration: 220 });
+        glowX.value = withTiming(0, { duration: 200 });
         runOnJS(onDecide)("left");
       } else {
         x.value = withSpring(0);
+        glowX.value = withSpring(0);
       }
     });
 
@@ -417,6 +439,29 @@ const SwipeCard = ({
         <CandidateCard candidate={candidate} styles={styles} theme={theme} />
       </Animated.View>
     </GestureDetector>
+  );
+};
+
+// Full-screen color wash that tracks swipe progress. Green right
+// (save), red left (pass). Behind everything; pointer-events pass
+// through.
+const SwipeGlow = ({ x }: { x: SharedValue<number> }) => {
+  const style = useAnimatedStyle(() => {
+    const t = Math.min(Math.abs(x.value) / SWIPE_THRESHOLD, 1);
+    const opacity = t * 0.45;
+    if (x.value > 0) {
+      return { opacity, backgroundColor: "#22c55e" };
+    }
+    if (x.value < 0) {
+      return { opacity, backgroundColor: "#ef4444" };
+    }
+    return { opacity: 0, backgroundColor: "transparent" };
+  });
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, { zIndex: 0 }, style]}
+    />
   );
 };
 

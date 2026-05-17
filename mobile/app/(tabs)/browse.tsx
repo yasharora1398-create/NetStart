@@ -33,6 +33,7 @@ import Animated, {
   Extrapolation,
   interpolate,
   runOnJS,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -119,6 +120,12 @@ export default function BrowseScreen() {
   const [selected, setSelected] = useState<RankedCandidate | null>(null);
   const [applyTo, setApplyTo] = useState<RankedCandidate | null>(null);
 
+  // Drives the full-screen save/pass glow. The active SwipeCard
+  // writes the live pan translation here; SwipeGlow reads it and
+  // tints the screen green (right / save) or red (left / pass).
+  // Lives on the parent so it survives card re-mounts cleanly.
+  const glowX = useSharedValue(0);
+
   // Founders shouldn't be on this screen — bounce them to their
   // own Match deck if they end up here via stale router state.
   const role = user?.user_metadata?.role as string | undefined;
@@ -161,6 +168,10 @@ export default function BrowseScreen() {
     if (dir === "right") {
       addSavedProject(current);
       setLastSwipe({ project: current, status: "saved" });
+      // Saving = "I want to learn more". Open the detail sheet so
+      // the user lands on the founder's full info immediately
+      // after the swipe.
+      void openDetail(current);
     } else {
       setLastSwipe({ project: current, status: "passed" });
     }
@@ -209,6 +220,10 @@ export default function BrowseScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
+      {/* Full-screen tint that fades in as the user swipes. Sits
+          behind everything else, including the floating tab bar. */}
+      <SwipeGlow x={glowX} />
+
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
           <View style={styles.eyebrow}>
@@ -264,6 +279,7 @@ export default function BrowseScreen() {
               project={current}
               onDecide={decide}
               onTap={() => openDetail(current)}
+              glowX={glowX}
               styles={styles}
               theme={theme}
             />
@@ -436,12 +452,14 @@ const SwipeCard = ({
   project,
   onDecide,
   onTap,
+  glowX,
   styles,
   theme,
 }: {
   project: PublicProject;
   onDecide: (dir: "left" | "right") => void;
   onTap: () => void;
+  glowX: SharedValue<number>;
   styles: ReturnType<typeof makeStyles>;
   theme: ThemePalette;
 }) => {
@@ -454,16 +472,22 @@ const SwipeCard = ({
     .minDistance(10)
     .onUpdate((e) => {
       x.value = e.translationX;
+      glowX.value = e.translationX;
     })
     .onEnd((e) => {
       if (e.translationX > SWIPE_THRESHOLD) {
         x.value = withTiming(SCREEN_W * 1.4, { duration: 220 });
+        // Fade the screen tint faster than the card flies off so
+        // the next card mounts on a neutral background.
+        glowX.value = withTiming(0, { duration: 200 });
         runOnJS(onDecide)("right");
       } else if (e.translationX < -SWIPE_THRESHOLD) {
         x.value = withTiming(-SCREEN_W * 1.4, { duration: 220 });
+        glowX.value = withTiming(0, { duration: 200 });
         runOnJS(onDecide)("left");
       } else {
         x.value = withSpring(0);
+        glowX.value = withSpring(0);
       }
     });
 
@@ -493,6 +517,29 @@ const SwipeCard = ({
         <ProjectCard project={project} styles={styles} theme={theme} />
       </Animated.View>
     </GestureDetector>
+  );
+};
+
+// Full-screen color wash that tracks the swipe progress. Green when
+// the user is heading right (save), red when heading left (pass).
+// Sits behind every other view; pointer events pass through.
+const SwipeGlow = ({ x }: { x: SharedValue<number> }) => {
+  const style = useAnimatedStyle(() => {
+    const t = Math.min(Math.abs(x.value) / SWIPE_THRESHOLD, 1);
+    const opacity = t * 0.45;
+    if (x.value > 0) {
+      return { opacity, backgroundColor: "#22c55e" };
+    }
+    if (x.value < 0) {
+      return { opacity, backgroundColor: "#ef4444" };
+    }
+    return { opacity: 0, backgroundColor: "transparent" };
+  });
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, { zIndex: 0 }, style]}
+    />
   );
 };
 
