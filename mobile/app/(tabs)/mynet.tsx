@@ -146,23 +146,13 @@ export default function MyNetScreen() {
 
   const handleToggleOpenToWork = async (next: boolean) => {
     if (!user || openBusy) return;
-    if (!isAccepted) {
-      Alert.alert(
-        "Locked",
-        "Your profile needs to be reviewed and accepted before you can go live.",
-      );
-      return;
-    }
-    if (next && !profileComplete) {
-      Alert.alert(
-        "Almost there",
-        `Finish first: ${missing.join(", ")}. Founders skip thin profiles.`,
-      );
-      return;
-    }
     setOpenBusy(true);
     // Optimistic toggle — local profile reflects the new value
-    // immediately, reverts on error.
+    // immediately, reverts on error. No client-side gating: the
+    // user can flip the switch in either direction freely. If
+    // their profile is incomplete or pending review, the status
+    // line below the toggle tells them what that means; the
+    // switch itself never refuses to move.
     const previous = candidate.isOpenToWork;
     setProfile((p) => ({
       ...p,
@@ -211,6 +201,23 @@ export default function MyNetScreen() {
         </Text>
         <Text style={styles.roleBadgeHint}>tap to switch</Text>
       </Pressable>
+
+      {/* Open-to-work toggle — PINNED AT THE TOP of MyNet so the
+          user can flip it from the main screen without entering
+          Edit profile. Builder-only; founders don't have a
+          candidate profile to flip on/off. */}
+      {role === "builder" ? (
+        <View style={styles.openCard}>
+          <OpenToWorkRow
+            value={profile.candidate.isOpenToWork}
+            isAccepted={isAccepted}
+            profileComplete={profileComplete}
+            missing={missing}
+            busy={openBusy}
+            onToggle={(next) => void handleToggleOpenToWork(next)}
+          />
+        </View>
+      ) : null}
 
       {/* Avatar + status pill */}
       <View style={styles.headerCard}>
@@ -281,17 +288,6 @@ export default function MyNetScreen() {
           title="Candidate profile"
           onEdit={() => router.push("/edit-candidate" as never)}
         >
-          {/* Interactive Open-to-work toggle. Lives here so the
-              user doesn't have to enter Edit profile just to flip
-              it. The gating + alerts mirror edit-candidate. */}
-          <OpenToWorkRow
-            value={profile.candidate.isOpenToWork}
-            isAccepted={isAccepted}
-            profileComplete={profileComplete}
-            missing={missing}
-            busy={openBusy}
-            onToggle={(next) => void handleToggleOpenToWork(next)}
-          />
           <Row label="Headline" value={profile.candidate.headline || "-"} />
           <Row label="Location" value={profile.candidate.location || "-"} />
           <Row
@@ -867,14 +863,23 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     flex: 1,
     textAlign: "right",
   },
+  // Wrapper card for the pinned-at-top Open-to-work toggle. Sits
+  // above the avatar / status block so it's the first interactive
+  // element on the screen.
+  openCard: {
+    backgroundColor: theme.bgElev,
+    borderWidth: 1,
+    borderColor: theme.goldSoft,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
   // Open-to-work toggle row. Has its own block-level layout (not
   // the inline Row shape) so the description + status can sit
   // under the switch on their own lines.
   openRow: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    marginBottom: 4,
-    borderRadius: 6,
+    paddingVertical: 4,
   },
   openHeaderRow: {
     flexDirection: "row",

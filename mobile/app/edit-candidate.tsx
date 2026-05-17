@@ -150,20 +150,9 @@ export default function EditCandidateScreen() {
 
   const handleToggleOpen = async (next: boolean) => {
     if (!user) return;
-    if (!isAccepted) {
-      Alert.alert(
-        "Locked",
-        "Get accepted first before going live as a candidate.",
-      );
-      return;
-    }
-    if (next && !profileComplete) {
-      Alert.alert(
-        "Almost there",
-        `Fill in: ${missing.join(", ")}. Founders skip thin profiles.`,
-      );
-      return;
-    }
+    // No client-side gates — the switch is freely two-directional.
+    // The status line below the toggle tells the user what their
+    // current state means (locked / incomplete / live).
     const previous = open;
     setOpen(next);
     try {
@@ -187,7 +176,11 @@ export default function EditCandidateScreen() {
         skills,
         location: location.trim(),
         commitment: commitment.trim(),
-        isOpenToWork: open && isAccepted && profileComplete,
+        // Honor whatever the toggle is — no longer forced to false
+        // for incomplete profiles. The user controls their own
+        // visibility; if their profile is thin they just won't get
+        // matched as often.
+        isOpenToWork: open,
       };
       await updateCandidate(user.id, candidate, fullName.trim());
       router.back();
