@@ -11,8 +11,20 @@
  *   const confirm = useConfirmSignOut();
  *   <button onClick={() => confirm()}>Sign out</button>
  *
- * Pass `confirm("local")` to sign out only the current device. The
- * dialog text adapts so the user knows which is happening.
+ * The dialog presents two choices each time:
+ *   - "Sign out on this tab"  → Supabase scope "local"
+ *   - "Sign out everywhere"   → Supabase scope "global"
+ *
+ * The casual click loses just this session; the "everywhere" button
+ * is reserved for the compromised-account flow. Callers don't
+ * choose a scope — the user does at the moment of confirmation.
+ *
+ * Note on "this tab": Supabase auth state is shared across all tabs
+ * of the same browser via localStorage, so a "local" sign-out will
+ * sign every tab of *this* browser out (not just the one the user
+ * clicked from). Different browsers or different devices stay
+ * signed in. The label trades technical accuracy for the user's
+ * actual mental model.
  */
 import {
   createContext,
@@ -27,7 +39,6 @@ import { toast } from "sonner";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -35,11 +46,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
 type Scope = "local" | "global";
 
-type ConfirmFn = (scope?: Scope) => void;
+type ConfirmFn = () => void;
 
 const SignOutConfirmContext = createContext<ConfirmFn | null>(null);
 
@@ -47,17 +59,15 @@ export const SignOutConfirmProvider = ({ children }: { children: ReactNode }) =>
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [scope, setScope] = useState<Scope>("global");
-  const [working, setWorking] = useState(false);
+  const [working, setWorking] = useState<Scope | null>(null);
 
-  const confirm: ConfirmFn = useCallback((next = "global") => {
-    setScope(next);
+  const confirm: ConfirmFn = useCallback(() => {
     setOpen(true);
   }, []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (scope: Scope) => {
     if (working) return;
-    setWorking(true);
+    setWorking(scope);
     try {
       await signOut(scope);
       setOpen(false);
@@ -70,9 +80,11 @@ export const SignOutConfirmProvider = ({ children }: { children: ReactNode }) =>
         err instanceof Error ? err.message : "Could not sign out.",
       );
     } finally {
-      setWorking(false);
+      setWorking(null);
     }
   };
+
+  const busy = working !== null;
 
   return (
     <SignOutConfirmContext.Provider value={confirm}>
@@ -82,37 +94,48 @@ export const SignOutConfirmProvider = ({ children }: { children: ReactNode }) =>
         onOpenChange={(next) => {
           // Block close while the request is in flight so the user
           // can't accidentally dismiss mid-signout.
-          if (!working) setOpen(next);
+          if (!busy) setOpen(next);
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Sign out?</AlertDialogTitle>
             <AlertDialogDescription>
-              {scope === "local"
-                ? "You'll be signed out of this device. Other devices stay signed in. You can sign back in any time with your email and password."
-                : "You'll be signed out everywhere. This device, plus any others you're signed in on. You can sign back in any time with your email and password."}
+              Pick one. Sign out of this tab and the rest of your devices
+              stay signed in. Sign out everywhere if you think someone else
+              has access to your account.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={working}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                // Stop the dialog auto-closing — we want the spinner
-                // to ride until the request resolves.
-                e.preventDefault();
-                void handleSignOut();
-              }}
-              disabled={working}
-              className="gap-2"
+          <AlertDialogFooter className="sm:flex-col sm:gap-2 sm:items-stretch">
+            <Button
+              variant="gold"
+              onClick={() => void handleSignOut("local")}
+              disabled={busy}
+              className="gap-2 w-full justify-center"
             >
-              {working ? (
+              {working === "local" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}
-              {working ? "Signing out..." : "Sign out"}
-            </AlertDialogAction>
+              {working === "local" ? "Signing out..." : "Sign out on this tab"}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void handleSignOut("global")}
+              disabled={busy}
+              className="gap-2 w-full justify-center"
+            >
+              {working === "global" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+              {working === "global" ? "Signing out..." : "Sign out everywhere"}
+            </Button>
+            <AlertDialogCancel disabled={busy} className="w-full sm:mt-0">
+              Cancel
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

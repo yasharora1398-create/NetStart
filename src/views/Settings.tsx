@@ -68,13 +68,10 @@ const Settings = () => {
     }
   };
 
-  // Both routes go through the shared confirm-sign-out dialog now.
-  // The dialog handles loading state + post-signout navigation, so
-  // the page-level signingOut* flags only matter while the dialog is
-  // open — kept around so the buttons can show a spinner if we ever
-  // bring back inline confirmations.
-  const handleSignOutLocal = () => confirmSignOut("local");
-  const handleSignOutAll = () => confirmSignOut("global");
+  // The shared confirm-sign-out dialog now presents both scopes
+  // (this tab / everywhere) inside itself, so this page just opens
+  // the dialog and lets the user pick.
+  const handleSignOut = () => confirmSignOut();
 
   const handleDeleteAccount = async () => {
     if (deleteConfirm.trim().toLowerCase() !== "delete") {
@@ -228,28 +225,19 @@ const Settings = () => {
                   Sessions
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Sign out from this device only, or from every device tied to
-                  your account.
+                  You can sign out of this tab only, or sign out from every
+                  device tied to your account.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOutLocal}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out (this device)
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOutAll}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out everywhere
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="self-start"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </Button>
             </div>
           </section>
 
