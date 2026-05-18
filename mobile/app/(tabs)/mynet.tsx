@@ -490,7 +490,7 @@ export default function MyNetScreen() {
             styles.bottomBtn,
             pressed && { opacity: 0.7 },
           ]}
-          onPress={() => confirmSignOut(signOut)}
+          onPress={() => confirmSignOut(signOut, "local")}
         >
           <LogOut size={16} color={theme.destructive} />
           <Text style={styles.signOutText}>Sign out</Text>

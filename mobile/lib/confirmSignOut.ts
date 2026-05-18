@@ -1,15 +1,19 @@
 /**
- * Sign-out confirmation for the mobile app. Native iOS / Android
- * use React Native's Alert.alert so the user sees the proper system
- * dialog with destructive-red "Sign out" and a Cancel default.
+ * Sign-out confirmation for the mobile app.
  *
- * Web is a different story: react-native-web's Alert.alert polyfill
- * silently no-ops on multi-button alerts (it only renders the title
- * via window.alert and drops the buttons). That meant the Sign-out
- * button on polln8.com/m did literally nothing -- the confirmation
- * dialog never appeared, and so the onPress that would actually
- * call signOut() never fired. Fallback to window.confirm() on web
- * so the flow works there too.
+ * Two scopes:
+ *   "local"  — sign out of this device only. Other devices stay
+ *              signed in. This is the default; it's what the casual
+ *              "Sign out" button at the bottom of MyNet does, and
+ *              what the locked-review overlay's escape hatch does.
+ *   "global" — sign out of every device. Reserved for the explicit
+ *              "Sign out everywhere" action in Settings, used when
+ *              the user thinks their account may be compromised.
+ *
+ * Native iOS / Android use Alert.alert. Web (polln8.com/m) falls
+ * back to window.confirm because react-native-web's Alert.alert
+ * polyfill silently drops the buttons on multi-button alerts —
+ * meaning the destructive onPress never fires.
  */
 import { Alert, Platform } from "react-native";
 
@@ -20,27 +24,29 @@ const message = (scope: Scope): string =>
     ? "You'll be signed out of this device. Other devices stay signed in. You can sign back in any time with your email and password."
     : "You'll be signed out everywhere. You can sign back in any time with your email and password.";
 
+const title = (scope: Scope): string =>
+  scope === "local" ? "Sign out of this device?" : "Sign out everywhere?";
+
+const confirmLabel = (scope: Scope): string =>
+  scope === "local" ? "Sign out" : "Sign out everywhere";
+
 export const confirmSignOut = (
   signOut: (scope?: Scope) => Promise<void> | void,
-  scope: Scope = "global",
+  scope: Scope = "local",
 ): void => {
   if (Platform.OS === "web") {
-    // Synchronous confirm() blocks the UI thread until the user
-    // answers, which on web is the same modal-like behavior we'd
-    // get from Alert.alert on native. If confirm returns true,
-    // proceed; otherwise the session stays intact.
     const ok =
       typeof window !== "undefined" &&
       typeof window.confirm === "function" &&
-      window.confirm(`Sign out?\n\n${message(scope)}`);
+      window.confirm(`${title(scope)}\n\n${message(scope)}`);
     if (ok) void signOut(scope);
     return;
   }
 
-  Alert.alert("Sign out?", message(scope), [
+  Alert.alert(title(scope), message(scope), [
     { text: "Cancel", style: "cancel" },
     {
-      text: "Sign out",
+      text: confirmLabel(scope),
       style: "destructive",
       onPress: () => {
         void signOut(scope);

@@ -234,7 +234,7 @@ export const ReviewStatusOverlay = ({
                 Continue button takes its slot). */}
             {!isAccepted && (
               <Pressable
-                onPress={() => confirmSignOut(signOut)}
+                onPress={() => confirmSignOut(signOut, "local")}
                 style={({ pressed }) => [
                   styles.signOutBtn,
                   pressed && { opacity: 0.7 },
