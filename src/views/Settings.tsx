@@ -130,9 +130,6 @@ const Settings = () => {
       <main className="pt-28 pb-24">
         <div className="container max-w-2xl">
           <header className="mb-10">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-              Account
-            </p>
             <h1 className="font-display text-4xl md:text-5xl leading-[1]">
               Settings
             </h1>

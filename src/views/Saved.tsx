@@ -146,12 +146,6 @@ const Saved = () => {
       >
         <div className="container py-10">
           <header className="mb-8">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-sm border border-gold-soft bg-gold/5 px-3 py-1.5">
-              <Bookmark className="size-3 text-gold" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-gold">
-                Saved
-              </span>
-            </div>
             <h1 className="mb-2 font-display text-4xl leading-[1.05] md:text-5xl">
               Your shortlist.
             </h1>

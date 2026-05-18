@@ -129,9 +129,6 @@ const FounderProfile = () => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
-                      Profile
-                    </p>
                     <h1 className="font-display text-3xl sm:text-4xl leading-tight mb-1">
                       {founder.fullName || "Unnamed"}
                     </h1>
@@ -234,9 +231,6 @@ const FounderProfile = () => {
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
-                      Building
-                    </p>
                     <h2 className="font-display text-2xl sm:text-3xl">
                       Active projects{" "}
                       <span className="text-muted-foreground">

@@ -11,10 +11,14 @@ export default {
       screens: { "2xl": "1400px" },
     },
     extend: {
+      // Single Helvetica stack everywhere. `font-display` and
+      // `font-mono` classes still exist so we don't have to rip
+      // them out of every component, but they now render the same
+      // family — just rely on size and weight for hierarchy.
       fontFamily: {
         display: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
         sans: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
-        mono: ['ui-monospace', 'SF Mono', 'Menlo', 'Consolas', 'monospace'],
+        mono: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

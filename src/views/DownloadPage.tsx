@@ -49,9 +49,6 @@ const DownloadPage = () => (
     >
       <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
-            Download
-          </p>
           <h1 className="font-display text-5xl md:text-7xl lg:text-[6rem] tracking-[-0.04em] leading-[0.92] mb-8 max-w-3xl">
             Builders,<br />
             <span className="text-primary">not talkers.</span>
@@ -103,7 +100,7 @@ const DownloadPage = () => (
               { label: "Web", body: "Chrome, Safari, Firefox latest." },
             ].map((s) => (
               <div key={s.label}>
-                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-2">
+                <p className="text-base font-semibold text-primary mb-2">
                   {s.label}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">

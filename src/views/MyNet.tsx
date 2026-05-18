@@ -8,7 +8,6 @@ import {
   Loader2,
   Plus,
   Search,
-  Sparkles,
   Telescope,
   XCircle,
 } from "lucide-react";
@@ -623,12 +622,6 @@ const MyNet = () => {
           ) : (
             <>
               <header className="mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
-                  <Sparkles className="h-3 w-3 text-gold" />
-                  <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-                    MyNet
-                  </span>
-                </div>
                 <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-4">
                   Your network,<br />
                   <em className="text-gradient-gold not-italic">your moves.</em>

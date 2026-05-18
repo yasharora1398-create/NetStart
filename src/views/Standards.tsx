@@ -79,9 +79,6 @@ const Standards = () => (
     >
       <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
-            Standards
-          </p>
           <h1 className="font-display text-5xl md:text-7xl tracking-[-0.04em] leading-[0.95] mb-8">
             Three rules.<br />Nothing else.
           </h1>

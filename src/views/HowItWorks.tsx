@@ -57,7 +57,7 @@ const STEPS: {
   visual: React.ReactNode;
 }[] = [
   {
-    n: "01",
+    n: "1",
     title: "Sign up",
     body: "Create your account in under a minute. Pick your path: founder or cofounder.",
     detail:
@@ -65,7 +65,7 @@ const STEPS: {
     visual: <StepSignup />,
   },
   {
-    n: "02",
+    n: "2",
     title: "Add credentials",
     body: "Drop your LinkedIn, upload a resume, or both.",
     detail:
@@ -73,7 +73,7 @@ const STEPS: {
     visual: <StepCredentials />,
   },
   {
-    n: "03",
+    n: "3",
     title: "Get verified",
     body: "A short manual review confirms shipped work. Usually under 24 hours.",
     detail:
@@ -81,7 +81,7 @@ const STEPS: {
     visual: <StepAccepted />,
   },
   {
-    n: "04",
+    n: "4",
     title: "Match",
     body: "Browse a deck of cofounder candidates ranked against your profile. Three actions per card.",
     detail:
@@ -89,7 +89,7 @@ const STEPS: {
     visual: <StepMatch />,
   },
   {
-    n: "05",
+    n: "5",
     title: "Build",
     body: "Once you connect, you land in DMs with your cofounder. Pick up the thread and ship.",
     detail:
@@ -124,9 +124,6 @@ const HowItWorks = () => {
       <div className="mx-auto w-full max-w-5xl px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
         <Reveal>
           <div className="text-center lg:text-left">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5">
-              How it works
-            </p>
             <h1 className="font-display text-4xl md:text-6xl tracking-[-0.04em] leading-[0.95] mb-6">
               Find a cofounder.<br />Find a startup to join.
             </h1>
@@ -151,10 +148,8 @@ const HowItWorks = () => {
                       reverse ? "lg:order-2" : ""
                     }`}
                   >
-                    <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-3">
-                      Step {s.n}
-                    </p>
                     <h2 className="font-display text-3xl md:text-5xl tracking-[-0.03em] mb-4">
+                      <span className="font-bold text-primary mr-2">{s.n}.</span>
                       {s.title}
                     </h2>
                     <p className="text-base md:text-lg text-foreground/90 leading-relaxed mb-3 max-w-md mx-auto lg:mx-0">

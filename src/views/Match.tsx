@@ -135,12 +135,6 @@ const Match = () => {
     <AppLayout blurred={!isAuthed}>
         <div className="container">
           <header className="mb-6 md:mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-3 md:mb-6">
-              <Sparkles className="h-3 w-3 text-gold" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-                Match
-              </span>
-            </div>
             <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-3 md:mb-4">
               {userMode === "builder"
                 ? "Find your builder."

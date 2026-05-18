@@ -91,9 +91,6 @@ const Terms = () => {
     </header>
     <main className="pt-12 pb-24">
       <div className="container max-w-3xl">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-          Legal
-        </p>
         <h1 className="font-display text-4xl md:text-5xl leading-[1] mb-3">
           Terms of Service
         </h1>

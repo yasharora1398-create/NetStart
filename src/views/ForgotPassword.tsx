@@ -4,7 +4,7 @@ import { Link, useLocation } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, ArrowRight, Loader2, MailCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Logo } from "@/components/netstart/Logo";
@@ -108,12 +108,6 @@ const ForgotPassword = () => {
 
           {sentTo ? (
             <div className="rounded-sm border border-gold-soft bg-card p-8 text-center">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
-                <MailCheck className="h-5 w-5 text-gold" />
-              </div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-                Sent
-              </p>
               <h1 className="font-display text-3xl mb-3">Check your inbox.</h1>
               <p className="text-sm text-muted-foreground mb-2">
                 If an account exists for{" "}
@@ -131,9 +125,6 @@ const ForgotPassword = () => {
             </div>
           ) : (
             <>
-              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-                Reset
-              </p>
               <h1 className="font-display text-4xl leading-[1] mb-3">
                 Forgot your password?
               </h1>

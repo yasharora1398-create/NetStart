@@ -13,7 +13,7 @@
  */
 import { useEffect } from "react";
 import { Navigate, useNavigate } from "@/lib/router-compat";
-import { Check, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -62,12 +62,6 @@ const Authenticated = () => {
           className="w-full max-w-md rounded-2xl border border-border bg-card px-8 py-10 md:px-10 md:py-12 text-center"
           style={{ boxShadow: "var(--shadow-elite)" }}
         >
-          <div className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-primary/10 border border-primary/40 mb-6 mx-auto">
-            <Check className="h-6 w-6 text-primary" strokeWidth={2.5} />
-          </div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-3">
-            Verified
-          </p>
           <h1 className="font-display text-3xl md:text-4xl tracking-[-0.025em] text-foreground mb-4">
             You're in.
           </h1>

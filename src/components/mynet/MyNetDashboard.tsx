@@ -316,28 +316,20 @@ export const MyNetDashboard = ({
 
 const Section = ({
   title,
-  eyebrow,
-  icon,
   action,
   children,
 }: {
   title: string;
-  eyebrow: string;
+  // Legacy props (eyebrow, icon) intentionally accepted but ignored
+  // so we don't have to touch every call site. They no longer render.
+  eyebrow?: string;
   icon?: React.ReactNode;
   action?: React.ReactNode;
   children: React.ReactNode;
 }) => (
   <section className="mb-12">
     <div className="flex items-end justify-between gap-3 mb-5 flex-wrap">
-      <div>
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2 flex items-center gap-2">
-          {icon}
-          <span>
-            {eyebrow} · {title}
-          </span>
-        </p>
-        <h2 className="font-display text-2xl md:text-3xl">{title}</h2>
-      </div>
+      <h2 className="font-display text-2xl md:text-3xl">{title}</h2>
       {action}
     </div>
     {children}

@@ -12,21 +12,7 @@
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@/lib/router-compat";
-import {
-  ArrowRight,
-  Bookmark,
-  Check,
-  Compass,
-  Download,
-  Flower2,
-  Hammer,
-  MessageCircle,
-  ShieldCheck,
-  Sparkles,
-  Telescope,
-  User,
-  X,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/netstart/Footer";
@@ -367,15 +353,6 @@ const Hero = () => {
       />
 
       <div className="mx-auto max-w-5xl">
-        <FadeUp>
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/5 px-3 py-1.5">
-            <Sparkles className="h-3 w-3 text-gold animate-pulse" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-gold">
-              Cofounder matchmaking, with signal
-            </span>
-          </div>
-        </FadeUp>
-
         <h1 className="font-display text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-tight mb-6">
           {HERO_WORDS.flatMap((w, i) => {
             const word = (
@@ -436,30 +413,13 @@ const Hero = () => {
             </Magnetic>
             <Link
               to={isAuthed ? "/saved" : "/match"}
-              className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-gold transition-colors inline-flex items-center gap-1.5"
+              className="text-sm text-muted-foreground hover:text-gold transition-colors"
             >
               {isAuthed ? "Your saved candidates" : "Or peek at the deck"}
-              <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </FadeUp>
 
-        <FadeUp delay={680}>
-          <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Check className="h-3 w-3 text-gold" />
-              Reviewed in &lt;24h
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Check className="h-3 w-3 text-gold" />
-              No DM spam
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Check className="h-3 w-3 text-gold" />
-              Equity-aligned only
-            </span>
-          </div>
-        </FadeUp>
       </div>
     </section>
   );
@@ -471,17 +431,14 @@ const Hero = () => {
 const Problem = () => {
   const items = [
     {
-      icon: <X className="h-5 w-5 text-destructive" />,
       title: "Twitter DMs into the void",
       body: "Founders cold-message strangers on X. Half get ignored. The other half get one reply and then silence after the 'sounds cool, let's chat' moment.",
     },
     {
-      icon: <X className="h-5 w-5 text-destructive" />,
       title: "Networking events full of consultants",
       body: "Three-hour meetups in WeWork basements. You leave with a stack of cards from people pitching services, not teammates.",
     },
     {
-      icon: <X className="h-5 w-5 text-destructive" />,
       title: "Random matchmaking lotteries",
       body: "YC's cofounder match drops you next to 2,000 strangers sorted by a coarse filter. You scroll for an hour and tap five people who never reply.",
     },
@@ -491,9 +448,6 @@ const Problem = () => {
     <section className="relative border-y border-border bg-card/40 px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-5xl">
         <FadeUp>
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-            What's broken
-          </p>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-12 max-w-3xl leading-[1.05]">
             Finding a cofounder is a coin flip with worse odds than a startup.
           </h2>
@@ -504,9 +458,6 @@ const Problem = () => {
             <FadeUp key={it.title} delay={i * 80}>
               <TiltCard intensity={5} className="group h-full">
                 <article className="relative h-full rounded-sm border border-border bg-background p-6 transition-colors group-hover:border-gold/40">
-                  <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-sm border border-destructive/30 bg-destructive/5 transition-transform group-hover:rotate-6 group-hover:scale-110">
-                    {it.icon}
-                  </div>
                   <h3 className="font-display text-xl mb-2 leading-tight">
                     {it.title}
                   </h3>
@@ -532,9 +483,6 @@ const ProofIntro = () => (
   <section className="px-4 sm:px-8 pt-24 md:pt-32 pb-0">
     <div className="mx-auto max-w-5xl">
       <FadeUp>
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-          What you actually see
-        </p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-4 max-w-3xl leading-[1.05]">
           Three screens that do most of the work.
         </h2>
@@ -559,9 +507,6 @@ const RoleSplit = () => {
   <section className="relative border-y border-border bg-gradient-to-b from-card/40 via-background to-card/40 px-4 sm:px-8 py-24 md:py-32">
     <div className="mx-auto max-w-6xl">
       <FadeUp>
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3 text-center">
-          Pick the side you're on
-        </p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-12 text-center leading-[1.05]">
           Same network, two angles.
         </h2>
@@ -571,10 +516,7 @@ const RoleSplit = () => {
         <FadeUp>
           <TiltCard intensity={4} className="group h-full">
             <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold/60">
-              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 text-gold transition-transform group-hover:scale-110 group-hover:-rotate-3">
-                <Hammer className="h-6 w-6" />
-              </div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
                 I'm a founder
               </p>
               <h3 className="font-display text-3xl mb-4 leading-tight">
@@ -601,10 +543,9 @@ const RoleSplit = () => {
                 </Magnetic>
                 <Link
                   to="/standards"
-                  className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-gold transition-colors inline-flex items-center gap-1.5"
+                  className="text-sm text-muted-foreground hover:text-gold transition-colors"
                 >
                   Read the bar
-                  <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             </article>
@@ -614,10 +555,7 @@ const RoleSplit = () => {
         <FadeUp delay={120}>
           <TiltCard intensity={4} className="group h-full">
             <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold/60">
-              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 text-gold transition-transform group-hover:scale-110 group-hover:rotate-3">
-                <Telescope className="h-6 w-6" />
-              </div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
                 I'm a builder
               </p>
               <h3 className="font-display text-3xl mb-4 leading-tight">
@@ -644,10 +582,9 @@ const RoleSplit = () => {
                 </Magnetic>
                 <Link
                   to="/saved"
-                  className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-gold transition-colors inline-flex items-center gap-1.5"
+                  className="text-sm text-muted-foreground hover:text-gold transition-colors"
                 >
                   Your saved
-                  <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             </article>
@@ -660,12 +597,7 @@ const RoleSplit = () => {
 };
 
 const BulletItem = ({ children }: { children: React.ReactNode }) => (
-  <li className="flex items-start gap-2.5 text-sm">
-    <span className="mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border border-gold/50 bg-gold/10">
-      <Check className="h-2.5 w-2.5 text-gold" strokeWidth={3} />
-    </span>
-    <span className="text-foreground/90 leading-relaxed">{children}</span>
-  </li>
+  <li className="text-sm text-foreground/90 leading-relaxed">{children}</li>
 );
 
 // ───────────────────────────────────────────────────────────────
@@ -750,17 +682,17 @@ const HowItWorks = () => {
   const isAuthed = !!user;
   const steps = [
     {
-      n: "01",
+      n: "1",
       title: "Sign up + tell us who you are",
       body: "Founders post what they're building. Builders pick the kinds of projects they'd want to ship. Five minutes, no friction.",
     },
     {
-      n: "02",
+      n: "2",
       title: "We review you",
       body: "A real person looks at every profile in under a day. We send you in or send you back with what's missing. No bots, no waitlist purgatory.",
     },
     {
-      n: "03",
+      n: "3",
       title: "Match starts the moment you're in",
       body: "Swipe through the people we think fit you. Accept the ones who feel right. Chat opens the second the other side accepts back.",
     },
@@ -770,9 +702,6 @@ const HowItWorks = () => {
     <section className="border-y border-border bg-card/40 px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-5xl">
         <FadeUp>
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-            How it works
-          </p>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-12 max-w-3xl leading-[1.05]">
             Three steps. No back-and-forth before your first real match.
           </h2>
@@ -783,7 +712,7 @@ const HowItWorks = () => {
             <FadeUp key={s.n} delay={i * 100}>
               <TiltCard intensity={3} glare={false} className="group h-full">
                 <article className="h-full rounded-sm border border-border bg-background p-7 transition-colors group-hover:border-gold/40">
-                  <p className="font-mono text-4xl text-gold mb-4 tracking-[0.18em] transition-all group-hover:tracking-[0.3em] group-hover:drop-shadow-[0_0_12px_hsl(var(--gold)/0.5)]">
+                  <p className="font-display text-5xl font-bold text-gold mb-4 leading-none">
                     {s.n}
                   </p>
                   <h3 className="font-display text-xl mb-3 leading-tight">
@@ -810,10 +739,9 @@ const HowItWorks = () => {
             </Magnetic>
             <Link
               to="/how"
-              className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-gold transition-colors inline-flex items-center gap-1.5"
+              className="text-sm text-muted-foreground hover:text-gold transition-colors"
             >
               See the full walkthrough
-              <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </FadeUp>
@@ -836,7 +764,6 @@ const ExploreGrid = () => {
   // bounce back to this same page.
   const tiles: Array<{
     to: string;
-    icon: ReactNode;
     title: string;
     body: string;
     cta: string;
@@ -844,56 +771,48 @@ const ExploreGrid = () => {
     isAuthed
       ? {
           to: "/mynet",
-          icon: <Sparkles className="h-5 w-5" />,
           title: "Your MyNet",
           body: "Edit your profile, projects, and connections.",
           cta: "Open MyNet",
         }
       : {
           to: "/signup",
-          icon: <Sparkles className="h-5 w-5" />,
           title: "Get verified",
           body: "Submit your profile. We review in under 24 hours.",
           cta: "Sign up",
         },
     {
       to: "/match",
-      icon: <Flower2 className="h-5 w-5" />,
       title: "Browse the deck",
       body: "Swipe through founders and the projects they're building.",
       cta: "Open Match",
     },
     {
       to: "/saved",
-      icon: <Bookmark className="h-5 w-5" />,
       title: "Saved candidates",
       body: "Your bookmarked matches in one place.",
       cta: "View saved",
     },
     {
       to: "/chats",
-      icon: <MessageCircle className="h-5 w-5" />,
       title: "Conversations",
       body: "Mutual matches unlock chat. No DM spam.",
       cta: "Open chats",
     },
     {
       to: "/standards",
-      icon: <ShieldCheck className="h-5 w-5" />,
       title: "The bar",
       body: "What every member commits to before joining.",
       cta: "Read standards",
     },
     {
       to: "/how",
-      icon: <Compass className="h-5 w-5" />,
       title: "How it works",
       body: "Three minutes, end to end. No surprises.",
       cta: "See the flow",
     },
     {
       to: "/download",
-      icon: <Download className="h-5 w-5" />,
       title: "Mobile",
       body: "Swipe matches on your phone. iOS + Android.",
       cta: "Download",
@@ -901,14 +820,12 @@ const ExploreGrid = () => {
     isAuthed
       ? {
           to: "/settings",
-          icon: <User className="h-5 w-5" />,
           title: "Settings",
           body: "Manage your account, theme, and sign-out.",
           cta: "Open settings",
         }
       : {
           to: "/signin",
-          icon: <User className="h-5 w-5" />,
           title: "Already in?",
           body: "Sign in to your existing account.",
           cta: "Sign in",
@@ -919,9 +836,6 @@ const ExploreGrid = () => {
     <section className="px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
         <FadeUp>
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-            Where to next
-          </p>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-3 max-w-3xl leading-[1.05]">
             Every door is unlocked.
           </h2>
@@ -939,18 +853,14 @@ const ExploreGrid = () => {
                   to={t.to}
                   className="relative block h-full rounded-sm border border-border bg-card/60 p-5 transition-colors hover:border-gold/60 hover:bg-card"
                 >
-                  <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 text-gold transition-transform group-hover:scale-110 group-hover:rotate-6">
-                    {t.icon}
-                  </div>
                   <h3 className="font-display text-lg mb-1.5 leading-tight">
                     {t.title}
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed mb-4">
                     {t.body}
                   </p>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+                  <span className="inline-flex items-center text-sm font-semibold text-gold">
                     {t.cta}
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
               </TiltCard>
@@ -989,9 +899,6 @@ const FAQ = () => {
     <section className="px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-3xl">
         <FadeUp>
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
-            FAQ
-          </p>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-10 leading-[1.05]">
             The short version of every email we get.
           </h2>
@@ -1016,7 +923,7 @@ const FAQ = () => {
         </div>
 
         <FadeUp delay={300}>
-          <p className="mt-10 text-center text-xs font-mono uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="mt-10 text-center text-sm text-muted-foreground">
             Still wondering?{" "}
             <Link to="/how" className="text-gold hover:underline">
               See how it works
@@ -1076,7 +983,7 @@ const FinalCTA = () => {
             </Link>
           </Magnetic>
         </div>
-        <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
           <Link to="/how" className="hover:text-gold transition-colors">
             How it works
           </Link>
