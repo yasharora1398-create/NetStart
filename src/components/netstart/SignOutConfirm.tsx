@@ -49,7 +49,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
-type Scope = "local" | "global";
+type Scope = "tab" | "global";
 
 type ConfirmFn = () => void;
 
@@ -109,16 +109,16 @@ export const SignOutConfirmProvider = ({ children }: { children: ReactNode }) =>
           <AlertDialogFooter className="sm:flex-col sm:gap-2 sm:items-stretch">
             <Button
               variant="gold"
-              onClick={() => void handleSignOut("local")}
+              onClick={() => void handleSignOut("tab")}
               disabled={busy}
               className="gap-2 w-full justify-center"
             >
-              {working === "local" ? (
+              {working === "tab" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}
-              {working === "local" ? "Signing out..." : "Sign out on this tab"}
+              {working === "tab" ? "Signing out..." : "Sign out on this tab"}
             </Button>
             <Button
               variant="destructive"

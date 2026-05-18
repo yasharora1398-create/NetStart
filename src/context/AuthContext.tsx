@@ -38,7 +38,19 @@ type AuthContextValue = {
     role: "founder" | "builder",
     captchaToken?: string,
   ) => Promise<SignUpResult>;
-  signOut: (scope?: "local" | "global") => Promise<void>;
+  // "tab"    — sign out of THIS tab only. Other tabs of the same
+  //            browser stay signed in. Implemented as a per-tab
+  //            sessionStorage flag that masks the shared Supabase
+  //            session; we deliberately do NOT call
+  //            supabase.auth.signOut(), which would clear the shared
+  //            localStorage token and propagate to every tab via
+  //            storage events.
+  // "local"  — sign out of this browser (Supabase "local" scope).
+  //            Affects all tabs of this browser. Other browsers /
+  //            devices stay signed in.
+  // "global" — sign out everywhere (Supabase "global" scope). All
+  //            sessions on every device are invalidated server-side.
+  signOut: (scope?: "tab" | "local" | "global") => Promise<void>;
   requestPasswordReset: (
     email: string,
     captchaToken?: string,
@@ -62,10 +74,43 @@ const notConfiguredSignUp = (): SignUpResult => ({
 // signup and signin.
 const normalizeEmail = (raw: string): string => raw.trim().toLowerCase();
 
+// Per-tab "signed out" flag. Lives in sessionStorage so it's
+// scoped to a single tab — sessionStorage is NOT shared across
+// tabs the way localStorage is. Set by signOut("tab"); cleared by
+// any successful sign-in (so the user can re-auth without
+// reloading) and by the global sign-out path.
+const TAB_SIGNED_OUT_KEY = "polln8.tabSignedOut.v1";
+
+const readTabSignedOut = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(TAB_SIGNED_OUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+const writeTabSignedOut = (value: boolean): void => {
+  if (typeof window === "undefined") return;
+  try {
+    if (value) window.sessionStorage.setItem(TAB_SIGNED_OUT_KEY, "1");
+    else window.sessionStorage.removeItem(TAB_SIGNED_OUT_KEY);
+  } catch {
+    // Storage disabled / quota — non-fatal; the user is briefly
+    // still "signed in" in this tab until they reload.
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
+  const [rawSession, setRawSession] = useState<Session | null>(null);
+  const [tabSignedOut, setTabSignedOut] = useState<boolean>(readTabSignedOut);
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Effective session: real Supabase session unless this tab has
+  // been "soft-signed-out" via the per-tab flag. Other tabs read
+  // the same Supabase session and aren't affected.
+  const session = tabSignedOut ? null : rawSession;
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -75,15 +120,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      setSession(data.session);
+      setRawSession(data.session);
       setLoading(false);
       // Hydrate per-user local stores from localStorage.
       setSavedProjectsUser(data.session?.user?.id ?? null);
       setThreadUnreadUser(data.session?.user?.id ?? null);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      setRawSession(next);
+      // A real Supabase sign-in event (the user re-authed in THIS
+      // tab) clears the per-tab "signed out" mask so the UI snaps
+      // back to the signed-in state.
+      if (event === "SIGNED_IN" && next) {
+        writeTabSignedOut(false);
+        setTabSignedOut(false);
+      }
       // Rebind per-user local stores on every auth change so different
       // users on the same device see their own saves.
       setSavedProjectsUser(next?.user?.id ?? null);
@@ -164,8 +216,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: null, duplicate };
   };
 
-  const signOut = async (scope: "local" | "global" = "local") => {
+  const signOut = async (
+    scope: "tab" | "local" | "global" = "local",
+  ) => {
     if (!isSupabaseConfigured) return;
+    if (scope === "tab") {
+      // Mask the shared Supabase session in THIS tab only. The
+      // localStorage token is left intact so other tabs and the
+      // Supabase client itself stay valid; refreshing this tab
+      // keeps the user "signed out" because the flag lives in
+      // sessionStorage (which survives reload but not new tabs).
+      writeTabSignedOut(true);
+      setTabSignedOut(true);
+      return;
+    }
+    // Any real Supabase sign-out invalidates the shared session,
+    // so the per-tab mask is no longer needed anywhere.
+    writeTabSignedOut(false);
+    setTabSignedOut(false);
     await getSupabase().auth.signOut({ scope });
   };
 
