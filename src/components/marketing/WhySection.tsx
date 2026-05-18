@@ -268,12 +268,6 @@ const ReviewCardMockup = () => {
             <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
               application · step 3 of 3
             </span>
-            <span
-              className="ml-auto font-mono text-[11px] tracking-[0.04em] text-muted-foreground px-2 py-0.5 rounded"
-              style={{ border: "1px solid hsl(var(--foreground) / 0.16)" }}
-            >
-              #1284
-            </span>
           </div>
 
           {/* Two-column layout */}
@@ -805,17 +799,6 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
               </span>
               <span className="text-[12px] px-3 py-1 rounded-full opacity-55">
                 Saved
-              </span>
-            </span>
-            <span className="justify-self-end">
-              <span
-                className="font-mono text-[11px] tracking-[0.04em] px-2 py-1 rounded-md"
-                style={{
-                  background: "hsl(var(--primary) / 0.12)",
-                  color: "hsl(var(--primary))",
-                }}
-              >
-                12 / 24
               </span>
             </span>
           </div>
@@ -1407,18 +1390,6 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                 style={{ fontSize: 11 }}
               >
                 Saved
-              </span>
-            </span>
-            <span className="justify-self-end">
-              <span
-                className="font-mono px-2 py-0.5 rounded-md"
-                style={{
-                  fontSize: 10.5,
-                  background: "hsl(var(--primary) / 0.12)",
-                  color: "hsl(var(--primary))",
-                }}
-              >
-                12 / 24
               </span>
             </span>
           </div>
