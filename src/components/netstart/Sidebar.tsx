@@ -42,7 +42,6 @@ const APP_ITEMS: Item[] = [
   { to: "/match", label: "Match", icon: MatchIcon },
   { to: "/saved", label: "Saved", icon: SavedIcon },
   { to: "/chats", label: "Chat", icon: ChatIcon },
-  { to: "/applications", label: "Applications", icon: ApplicationsIcon },
 ];
 
 const ABOUT_ITEMS: Item[] = [
@@ -472,22 +471,6 @@ function SavedIcon() {
       strokeLinejoin="round"
     >
       <path d="M4 2.5 H12 V13.5 L8 10.7 L4 13.5 Z" />
-    </svg>
-  );
-}
-
-function ApplicationsIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.4}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2.5 4.5 H13.5 V12 a1 1 0 0 1 -1 1 H3.5 a1 1 0 0 1 -1 -1 Z" />
-      <path d="M2.5 4.5 L8 8.5 L13.5 4.5" />
     </svg>
   );
 }

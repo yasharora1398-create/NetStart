@@ -16,7 +16,6 @@ import { type ReactNode } from "react";
 import { NavLink } from "@/lib/router-compat";
 import {
   Bookmark,
-  Briefcase,
   Compass,
   Download,
   Flower2,
@@ -52,11 +51,6 @@ const ITEMS: RailItem[] = [
   { to: "/match", label: "Match", icon: <Flower2 className="size-4" /> },
   { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
   { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
-  {
-    to: "/applications",
-    label: "Applications",
-    icon: <Briefcase className="size-4" />,
-  },
   {
     to: "/how",
     label: "How it works",

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BadgeCheck, Check, Sparkles, Zap } from "lucide-react";
+import { Check } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
 
 // ─── Types & data ────────────────────────────────────────────────
@@ -7,14 +7,12 @@ type MockupKind = "review" | "matches" | "request" | "placeholder";
 export type Persona = "founder" | "builder";
 
 const WHY: {
-  icon: typeof BadgeCheck;
   title: string;
   body: string;
   details: string[];
   mockup: MockupKind;
 }[] = [
   {
-    icon: BadgeCheck,
     title: "Vetted, not viral.",
     body: "Every member reviewed for shipped work. No accounts farmed for engagement.",
     details: [
@@ -25,7 +23,6 @@ const WHY: {
     mockup: "review",
   },
   {
-    icon: Sparkles,
     title: "Matches ranked by AI.",
     body: "The deck is ordered against your skills, project, and intent. Not the algorithm's.",
     details: [
@@ -36,7 +33,6 @@ const WHY: {
     mockup: "matches",
   },
   {
-    icon: Zap,
     title: "Decisive by design.",
     body: "Connect, save, or pass. No likes, no maybes. Apply with one real pitch.",
     details: [
@@ -109,16 +105,12 @@ const WhyRow = ({
   reverse: boolean;
   persona: Persona;
 }) => {
-  const Icon = entry.icon;
   const textCol = (
     <div
       className={`group cursor-default rounded-2xl border border-border bg-card/60 backdrop-blur-md p-6 md:p-8 ${
         reverse ? "lg:order-2" : "lg:order-1"
       }`}
     >
-      <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg mb-5 bg-primary/10 border border-primary/40 text-primary">
-        <Icon className="h-4 w-4" />
-      </div>
       <h3 className="font-display text-2xl md:text-3xl mb-3 tracking-[-0.02em] text-foreground font-bold">
         {entry.title}
       </h3>

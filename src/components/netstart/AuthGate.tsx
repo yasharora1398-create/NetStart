@@ -148,17 +148,6 @@ const Overlay = ({
       <div className="relative z-10 w-full max-w-md rounded-sm border border-gold-soft bg-card shadow-card overflow-hidden">
         <div className="absolute inset-0 bg-gradient-spotlight opacity-60 pointer-events-none" />
         <div className="relative p-8 md:p-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
-            {isAuth ? (
-              <Lock className="h-3 w-3 text-gold" />
-            ) : (
-              <Wrench className="h-3 w-3 text-gold" />
-            )}
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-              {isAuth ? "Members only" : "Setup needed"}
-            </span>
-          </div>
-
           <h2
             id="auth-gate-title"
             className="font-display text-3xl md:text-4xl leading-[1] mb-4"
@@ -190,11 +179,6 @@ const Overlay = ({
               </Button>
             </Link>
           )}
-
-          <div className="flex items-center gap-2 mt-8 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-gold" />
-            {isAuth ? "Vetted builders only" : "One profile unlocks every tab"}
-          </div>
         </div>
       </div>
     </div>

@@ -61,12 +61,6 @@ const friendlySignUpError = (err: AuthError | Error): string => {
   return err.message;
 };
 
-const PERKS = [
-  "Vetted builders only",
-  "Decisive matching, no maybes",
-  "Verified execution signal",
-];
-
 import { useForceLightMode } from "@/hooks/useForceLightMode";
 
 const SignUp = () => {
@@ -205,26 +199,10 @@ const SignUp = () => {
         </Link>
 
         <div className="relative z-10 max-w-md">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-8">
-            <Sparkles className="h-3 w-3 text-gold" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
-              Join the network
-            </span>
-          </div>
           <h2 className="font-display text-5xl leading-[0.95] mb-8">
             For people who<br />
             <em className="text-gradient-gold not-italic">actually</em> build.
           </h2>
-          <ul className="space-y-3 mt-10">
-            {PERKS.map((perk) => (
-              <li key={perk} className="flex items-center gap-3 text-sm text-foreground/80">
-                <span className="h-5 w-5 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center">
-                  <Check className="h-3 w-3 text-gold" />
-                </span>
-                {perk}
-              </li>
-            ))}
-          </ul>
         </div>
 
         <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
