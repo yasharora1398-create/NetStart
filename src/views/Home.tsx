@@ -3,12 +3,16 @@
  * Marketing homepage. One purpose: get a stranger to sign up.
  *
  * Structure: hero, problem, proof-mockups (WhySection), role split,
- * stats, how-it-works, explore grid, FAQ, final CTA. Most of the
- * interactive flourish from the early version (cursor-follow
- * gradient, parallax grid, word-stagger headline, magnetic CTAs,
- * 3D-tilt cards, count-up stats) has been pulled out: it was
- * heavy and added nothing the headline couldn't.
+ * stats, how-it-works, explore grid, FAQ, final CTA.
+ *
+ * Light interactive flourish kept on purpose:
+ *   - Per-word stagger reveal on the headline (HERO_WORDS).
+ *   - CountUp on the four-stat row (SocialProof). Hard numbers
+ *     animating to value as the section enters the viewport.
+ * Everything else (cursor-follow gradient, parallax grid,
+ * magnetic CTAs, 3D-tilt cards) stayed pulled.
  */
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight } from "lucide-react";
 
@@ -20,6 +24,66 @@ import { FadeUp } from "@/components/netstart/FadeUp";
 import WhySection from "@/components/marketing/WhySection";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+
+// CountUp: animates a number from 0 to target when its containing
+// row enters the viewport. Eased cubic-out so the value lands on
+// the target rather than crawling at the end. Respects
+// prefers-reduced-motion.
+const CountUp = ({
+  target,
+  prefix = "",
+  suffix = "",
+  duration = 1400,
+}: {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  duration?: number;
+}) => {
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target);
+      return;
+    }
+    let raf = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setValue(Math.round(target * eased));
+          if (p < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        io.disconnect();
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [target, duration]);
+  return (
+    <span ref={ref}>
+      {prefix}
+      {value}
+      {suffix}
+    </span>
+  );
+};
+
+// Hero headline split per word so each can stagger-in on mount.
+// Slogan: "Find a cofounder, faster."
+const HERO_WORDS: string[] = ["Find", "a", "cofounder,", "faster."];
 
 const Home = () => {
   // Keeps the theme toggle's choice respected even though this page
@@ -53,11 +117,48 @@ const Home = () => {
 const Hero = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
+
+  // Per-word fade on first paint. Tiny mount-tick so the first
+  // frame renders in the hidden state; otherwise React paints
+  // already-visible and the transition is skipped.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduce) {
+      setMounted(true);
+      return;
+    }
+    const t = window.setTimeout(() => setMounted(true), 40);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
     <section className="relative px-4 sm:px-8 pt-24 pb-32 md:pt-32 md:pb-40">
       <div className="mx-auto max-w-5xl">
         <h1 className="font-display text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-tight mb-6 font-bold">
-          Find a cofounder, faster.
+          {HERO_WORDS.flatMap((w, i) => {
+            const word = (
+              <span
+                key={i}
+                className={cn(
+                  "inline-block transition-all duration-700 ease-out",
+                  mounted
+                    ? "opacity-100 translate-y-0 blur-0"
+                    : "opacity-0 translate-y-6 blur-sm",
+                )}
+                style={{
+                  transitionDelay: mounted ? `${120 + i * 110}ms` : "0ms",
+                }}
+              >
+                {w}
+              </span>
+            );
+            // The inter-word space sits as a sibling text node so it
+            // isn't clipped at the edge of the animated inline-block.
+            return i < HERO_WORDS.length - 1 ? [word, " "] : [word];
+          })}
         </h1>
 
         <p className="max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed mb-10">
@@ -240,19 +341,76 @@ const BulletItem = ({ children }: { children: React.ReactNode }) => (
 );
 
 // ─── SOCIAL PROOF ──────────────────────────────────────────────────
-// Used to be four count-up stat cards. Replaced with a prose
-// paragraph: same content, less template smell.
-const SocialProof = () => (
-  <section className="px-4 sm:px-8 py-20 md:py-24">
-    <div className="mx-auto max-w-3xl text-center">
-      <p className="font-display text-2xl sm:text-3xl md:text-4xl leading-[1.2] text-foreground">
-        We&apos;ve reviewed every member by hand. Average turnaround is about
-        a day. Two messages and the other side has to accept before the
-        thread opens. No recruiters allowed.
-      </p>
-    </div>
-  </section>
-);
+// Four hard numbers in a row. Each fades in with a slight blur
+// clear as the section enters the viewport; the numbers themselves
+// count from zero to value (CountUp).
+const SocialProof = () => {
+  const stats: { value: number; prefix: string; suffix: string; label: string }[] = [
+    { value: 100, prefix: "", suffix: "%", label: "Reviewed by a human" },
+    { value: 24, prefix: "<", suffix: "h", label: "Average review time" },
+    { value: 2, prefix: "", suffix: "", label: "Messages before they have to accept" },
+    { value: 0, prefix: "", suffix: "", label: "Recruiters allowed" },
+  ];
+
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <section className="px-4 sm:px-8 py-20 md:py-24">
+      <div className="mx-auto max-w-5xl">
+        <div
+          ref={rowRef}
+          className="grid gap-6 md:grid-cols-4 text-center"
+        >
+          {stats.map((s, i) => (
+            <div
+              key={s.label}
+              className={cn(
+                "transition-all duration-700 ease-out",
+                visible
+                  ? "opacity-100 translate-y-0 blur-0"
+                  : "opacity-0 translate-y-3 blur-md",
+              )}
+              style={{
+                transitionDelay: visible ? `${i * 110}ms` : "0ms",
+              }}
+            >
+              <p className="font-display text-5xl md:text-6xl text-gold mb-2 leading-none font-bold">
+                <CountUp
+                  target={s.value}
+                  prefix={s.prefix}
+                  suffix={s.suffix}
+                />
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                {s.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ─── HOW IT WORKS ──────────────────────────────────────────────────
 const HowItWorks = () => {
