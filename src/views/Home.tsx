@@ -5,14 +5,17 @@
  * Structure: hero, problem, proof-mockups (WhySection), role split,
  * stats, how-it-works, explore grid, FAQ, final CTA.
  *
- * Light interactive flourish kept on purpose:
- *   - Per-word stagger reveal on the headline (HERO_WORDS).
- *   - CountUp on the four-stat row (SocialProof). Hard numbers
- *     animating to value as the section enters the viewport.
- * Everything else (cursor-follow gradient, parallax grid,
- * magnetic CTAs, 3D-tilt cards) stayed pulled.
+ * Interactive flourishes that stay on purpose — they make the site
+ * feel high-tech without being template-y once paired with the
+ * rewritten conversational copy:
+ *   - Cursor-following gold glow on the hero
+ *   - Parallax grid lines under the hero
+ *   - Per-word stagger reveal on the headline
+ *   - Magnetic CTAs (gently pulled toward the cursor)
+ *   - TiltCard 3D hover on the cards
+ *   - CountUp on the four-stat row
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight } from "lucide-react";
 
@@ -25,6 +28,120 @@ import WhySection from "@/components/marketing/WhySection";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
+
+// Magnetic: pulls its contents toward the cursor on hover. Skips
+// reduced-motion and coarse-pointer (touch) devices so it never
+// fights with tap targets.
+const Magnetic = ({
+  children,
+  strength = 8,
+  className,
+}: {
+  children: ReactNode;
+  strength?: number;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLSpanElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    const onMove = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) / (r.width / 2);
+      const y = (e.clientY - r.top - r.height / 2) / (r.height / 2);
+      el.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+    };
+    const onLeave = () => {
+      el.style.transform = "";
+    };
+    el.addEventListener("mousemove", onMove);
+    el.addEventListener("mouseleave", onLeave);
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", onLeave);
+    };
+  }, [strength]);
+  return (
+    <span
+      ref={ref}
+      className={cn(
+        "inline-block transition-transform duration-300 ease-out will-change-transform",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+};
+
+// TiltCard: 3D perspective tilt that tracks the cursor across the
+// card. Eased via rAF. No-ops on touch + reduced-motion.
+const TiltCard = ({
+  children,
+  className,
+  intensity = 6,
+}: {
+  children: ReactNode;
+  className?: string;
+  intensity?: number;
+}) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    let raf = 0;
+    let tX = 0;
+    let tY = 0;
+    let cX = 0;
+    let cY = 0;
+    const tick = () => {
+      cX += (tX - cX) * 0.14;
+      cY += (tY - cY) * 0.14;
+      el.style.transform = `perspective(900px) rotateY(${cX}deg) rotateX(${-cY}deg)`;
+      if (Math.abs(tX - cX) > 0.05 || Math.abs(tY - cY) > 0.05) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = 0;
+      }
+    };
+    const onMove = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      tX = nx * intensity;
+      tY = ny * intensity;
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onLeave = () => {
+      tX = 0;
+      tY = 0;
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    el.addEventListener("mousemove", onMove);
+    el.addEventListener("mouseleave", onLeave);
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", onLeave);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [intensity]);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "relative will-change-transform [transform-style:preserve-3d]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
 
 // CountUp: animates a number from 0 to target when its containing
 // row enters the viewport. Eased cubic-out so the value lands on
@@ -134,8 +251,62 @@ const Hero = () => {
     return () => window.clearTimeout(t);
   }, []);
 
+  // Cursor-following glow + parallax grid. We write CSS variables
+  // on the section so the gradient + grid background can read them
+  // without React re-rendering on every mousemove.
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const onMove = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * 100;
+      const y = ((e.clientY - r.top) / r.height) * 100;
+      el.style.setProperty("--mx", `${x}%`);
+      el.style.setProperty("--my", `${y}%`);
+    };
+    el.addEventListener("mousemove", onMove);
+    return () => el.removeEventListener("mousemove", onMove);
+  }, []);
+
   return (
-    <section className="relative px-4 sm:px-8 pt-24 pb-32 md:pt-32 md:pb-40">
+    <section
+      ref={sectionRef}
+      className="relative px-4 sm:px-8 pt-24 pb-32 md:pt-32 md:pb-40"
+      style={
+        {
+          "--mx": "50%",
+          "--my": "-10%",
+        } as React.CSSProperties
+      }
+    >
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 opacity-70 transition-[background] duration-700 ease-out"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 45% at var(--mx) var(--my), hsl(var(--gold) / 0.22), transparent 60%)",
+        }}
+      />
+
+      {/* Decorative grid lines behind the hero. Pure CSS, parallax
+          drift on cursor courtesy of the same --mx/--my variables. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 opacity-[0.07]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--gold)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--gold)) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+          backgroundPosition: "calc(var(--mx) * -0.05) calc(var(--my) * -0.05)",
+          maskImage:
+            "radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent 75%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent 75%)",
+        }}
+      />
+
       <div className="mx-auto max-w-5xl">
         <h1 className="font-display text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-tight mb-6 font-bold">
           {HERO_WORDS.flatMap((w, i) => {
@@ -169,17 +340,21 @@ const Hero = () => {
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Link to={isAuthed ? "/mynet" : "/signup"}>
-            <Button variant="gold" size="xl" className="group">
-              {isAuthed ? "Open MyNet" : "Get started"}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
-          <Link to={isAuthed ? "/match" : "/how"}>
-            <Button variant="outlineGold" size="xl">
-              {isAuthed ? "Open Match" : "How it works"}
-            </Button>
-          </Link>
+          <Magnetic strength={10}>
+            <Link to={isAuthed ? "/mynet" : "/signup"}>
+              <Button variant="gold" size="xl" className="group">
+                {isAuthed ? "Open MyNet" : "Get started"}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </Magnetic>
+          <Magnetic strength={6}>
+            <Link to={isAuthed ? "/match" : "/how"}>
+              <Button variant="outlineGold" size="xl">
+                {isAuthed ? "Open Match" : "How it works"}
+              </Button>
+            </Link>
+          </Magnetic>
           <Link
             to={isAuthed ? "/saved" : "/match"}
             className="text-sm text-muted-foreground hover:text-gold transition-colors"
@@ -218,17 +393,16 @@ const Problem = () => {
 
         <div className="grid gap-4 md:grid-cols-3">
           {items.map((it) => (
-            <article
-              key={it.title}
-              className="h-full rounded-sm border border-border bg-background p-6 transition-colors hover:border-gold"
-            >
-              <h3 className="font-display text-xl mb-2 leading-tight font-semibold">
-                {it.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {it.body}
-              </p>
-            </article>
+            <TiltCard key={it.title} intensity={5} className="group h-full">
+              <article className="relative h-full rounded-sm border border-border bg-background p-6 transition-colors group-hover:border-gold">
+                <h3 className="font-display text-xl mb-2 leading-tight font-semibold">
+                  {it.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {it.body}
+                </p>
+              </article>
+            </TiltCard>
           ))}
         </div>
       </div>
@@ -265,71 +439,79 @@ const RoleSplit = () => {
         </h2>
 
         <div className="grid gap-5 md:grid-cols-2">
-          <article className="h-full rounded-sm border border-border bg-background/80 p-8 transition-colors hover:border-gold">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
-              I'm a founder
-            </p>
-            <h3 className="font-display text-3xl mb-4 leading-tight font-semibold">
-              Stop pitching strangers.
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Post what you're building once. We surface builders whose
-              skills and commitment actually match. Not a thousand "ML
-              enthusiasts" with side projects.
-            </p>
-            <ul className="space-y-2.5 mb-7">
-              <BulletItem>One pitch covers every introduction</BulletItem>
-              <BulletItem>Builders with shipped work, not just bios</BulletItem>
-              <BulletItem>Block the noise. Accept only the ones you want</BulletItem>
-            </ul>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link to={isAuthed ? "/mynet" : "/signup"}>
-                <Button variant="gold" size="lg" className="group">
-                  {isAuthed ? "Edit your project" : "Post a project"}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link
-                to="/standards"
-                className="text-sm text-muted-foreground hover:text-gold transition-colors"
-              >
-                Read the bar
-              </Link>
-            </div>
-          </article>
+          <TiltCard intensity={4} className="group h-full">
+            <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
+                I'm a founder
+              </p>
+              <h3 className="font-display text-3xl mb-4 leading-tight font-semibold">
+                Stop pitching strangers.
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                Post what you're building once. We surface builders whose
+                skills and commitment actually match. Not a thousand "ML
+                enthusiasts" with side projects.
+              </p>
+              <ul className="space-y-2.5 mb-7">
+                <BulletItem>One pitch covers every introduction</BulletItem>
+                <BulletItem>Builders with shipped work, not just bios</BulletItem>
+                <BulletItem>Block the noise. Accept only the ones you want</BulletItem>
+              </ul>
+              <div className="flex flex-wrap items-center gap-3">
+                <Magnetic strength={6}>
+                  <Link to={isAuthed ? "/mynet" : "/signup"}>
+                    <Button variant="gold" size="lg" className="group/btn">
+                      {isAuthed ? "Edit your project" : "Post a project"}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                    </Button>
+                  </Link>
+                </Magnetic>
+                <Link
+                  to="/standards"
+                  className="text-sm text-muted-foreground hover:text-gold transition-colors"
+                >
+                  Read the bar
+                </Link>
+              </div>
+            </article>
+          </TiltCard>
 
-          <article className="h-full rounded-sm border border-border bg-background/80 p-8 transition-colors hover:border-gold">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
-              I'm a builder
-            </p>
-            <h3 className="font-display text-3xl mb-4 leading-tight font-semibold">
-              See real projects. Not job boards.
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Swipe through what founders are actually building right now.
-              Stage, traction, equity ask, what they need. Pitch once when
-              something fits, and only to people who can hear it.
-            </p>
-            <ul className="space-y-2.5 mb-7">
-              <BulletItem>Browse projects, not LinkedIn job titles</BulletItem>
-              <BulletItem>Mutual interest before any commitment</BulletItem>
-              <BulletItem>Save the ones that intrigue you, ignore the rest</BulletItem>
-            </ul>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link to={isAuthed ? "/match" : "/signup"}>
-                <Button variant="gold" size="lg" className="group">
-                  {isAuthed ? "Open Match" : "Find a project"}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link
-                to="/saved"
-                className="text-sm text-muted-foreground hover:text-gold transition-colors"
-              >
-                Your saved
-              </Link>
-            </div>
-          </article>
+          <TiltCard intensity={4} className="group h-full">
+            <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
+                I'm a builder
+              </p>
+              <h3 className="font-display text-3xl mb-4 leading-tight font-semibold">
+                See real projects. Not job boards.
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                Swipe through what founders are actually building right now.
+                Stage, traction, equity ask, what they need. Pitch once when
+                something fits, and only to people who can hear it.
+              </p>
+              <ul className="space-y-2.5 mb-7">
+                <BulletItem>Browse projects, not LinkedIn job titles</BulletItem>
+                <BulletItem>Mutual interest before any commitment</BulletItem>
+                <BulletItem>Save the ones that intrigue you, ignore the rest</BulletItem>
+              </ul>
+              <div className="flex flex-wrap items-center gap-3">
+                <Magnetic strength={6}>
+                  <Link to={isAuthed ? "/match" : "/signup"}>
+                    <Button variant="gold" size="lg" className="group/btn">
+                      {isAuthed ? "Open Match" : "Find a project"}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                    </Button>
+                  </Link>
+                </Magnetic>
+                <Link
+                  to="/saved"
+                  className="text-sm text-muted-foreground hover:text-gold transition-colors"
+                >
+                  Your saved
+                </Link>
+              </div>
+            </article>
+          </TiltCard>
         </div>
       </div>
     </section>
@@ -443,30 +625,31 @@ const HowItWorks = () => {
 
         <div className="grid gap-6 md:grid-cols-3">
           {steps.map((s) => (
-            <article
-              key={s.n}
-              className="h-full rounded-sm border border-border bg-background p-7 transition-colors hover:border-gold"
-            >
-              <p className="font-display text-5xl font-bold text-gold mb-4 leading-none">
-                {s.n}
-              </p>
-              <h3 className="font-display text-xl mb-3 leading-tight font-semibold">
-                {s.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {s.body}
-              </p>
-            </article>
+            <TiltCard key={s.n} intensity={3} className="group h-full">
+              <article className="h-full rounded-sm border border-border bg-background p-7 transition-colors group-hover:border-gold">
+                <p className="font-display text-5xl font-bold text-gold mb-4 leading-none">
+                  {s.n}
+                </p>
+                <h3 className="font-display text-xl mb-3 leading-tight font-semibold">
+                  {s.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {s.body}
+                </p>
+              </article>
+            </TiltCard>
           ))}
         </div>
 
         <div className="mt-10 flex flex-wrap items-center gap-3">
-          <Link to={isAuthed ? "/mynet" : "/signup"}>
-            <Button variant="gold" size="lg" className="group">
-              {isAuthed ? "Go to MyNet" : "Start step one"}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
+          <Magnetic strength={6}>
+            <Link to={isAuthed ? "/mynet" : "/signup"}>
+              <Button variant="gold" size="lg" className="group/btn">
+                {isAuthed ? "Go to MyNet" : "Start step one"}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+              </Button>
+            </Link>
+          </Magnetic>
           <Link
             to="/how"
             className="text-sm text-muted-foreground hover:text-gold transition-colors"
@@ -566,21 +749,22 @@ const ExploreGrid = () => {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {tiles.map((t) => (
-            <Link
-              key={t.to + t.title}
-              to={t.to}
-              className="block h-full rounded-sm border border-border bg-card/60 p-5 transition-colors hover:border-gold hover:bg-card"
-            >
-              <h3 className="font-display text-lg mb-1.5 leading-tight font-semibold">
-                {t.title}
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                {t.body}
-              </p>
-              <span className="inline-flex items-center text-sm font-semibold text-gold">
-                {t.cta}
-              </span>
-            </Link>
+            <TiltCard key={t.to + t.title} intensity={5} className="group h-full">
+              <Link
+                to={t.to}
+                className="relative block h-full rounded-sm border border-border bg-card/60 p-5 transition-colors hover:border-gold hover:bg-card"
+              >
+                <h3 className="font-display text-lg mb-1.5 leading-tight font-semibold">
+                  {t.title}
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                  {t.body}
+                </p>
+                <span className="inline-flex items-center text-sm font-semibold text-gold">
+                  {t.cta}
+                </span>
+              </Link>
+            </TiltCard>
           ))}
         </div>
       </div>
@@ -655,7 +839,15 @@ const FinalCTA = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
   return (
-    <section className="border-t border-border bg-card/40 px-4 sm:px-8 py-32 md:py-40">
+    <section className="relative border-t border-border bg-gradient-to-b from-card/40 to-background px-4 sm:px-8 py-32 md:py-40">
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 60% at 50% 50%, hsl(var(--gold) / 0.12), transparent 70%)",
+        }}
+      />
       <div className="mx-auto max-w-3xl text-center">
         <FadeUp>
           <h2 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight mb-6 font-bold">
@@ -666,17 +858,21 @@ const FinalCTA = () => {
             you and the people who can move the thing forward.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to={isAuthed ? "/mynet" : "/signup"}>
-              <Button variant="gold" size="xl" className="group">
-                {isAuthed ? "Open MyNet" : "Get started"}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-            <Link to={isAuthed ? "/match" : "/signin"}>
-              <Button variant="ghost" size="xl">
-                {isAuthed ? "Open Match" : "I already have an account"}
-              </Button>
-            </Link>
+            <Magnetic strength={10}>
+              <Link to={isAuthed ? "/mynet" : "/signup"}>
+                <Button variant="gold" size="xl" className="group">
+                  {isAuthed ? "Open MyNet" : "Get started"}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </Magnetic>
+            <Magnetic strength={4}>
+              <Link to={isAuthed ? "/match" : "/signin"}>
+                <Button variant="ghost" size="xl">
+                  {isAuthed ? "Open Match" : "I already have an account"}
+                </Button>
+              </Link>
+            </Magnetic>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <Link to="/how" className="hover:text-gold transition-colors">

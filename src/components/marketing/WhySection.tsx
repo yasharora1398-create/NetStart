@@ -797,7 +797,7 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
               >
                 For you
               </span>
-              <span className="text-[12px] px-3 py-1 rounded-full opacity-55">
+              <span className="text-[12px] px-3 py-1 rounded-full ">
                 Saved
               </span>
             </span>
@@ -863,14 +863,14 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
                 >
                   {info.name}
                 </div>
-                <div className="opacity-70 mt-0.5" style={{ fontSize: 11 }}>
+                <div className=" mt-0.5" style={{ fontSize: 11 }}>
                   {info.role}
                 </div>
               </div>
 
               <div>
                 <div
-                  className="font-mono uppercase mb-1.5 opacity-55"
+                  className="font-mono uppercase mb-1.5 "
                   style={{ fontSize: 9, letterSpacing: "0.12em" }}
                 >
                   {info.sectionLabel}
@@ -889,7 +889,7 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
 
               <div>
                 <div
-                  className="font-mono uppercase mb-1.5 opacity-55"
+                  className="font-mono uppercase mb-1.5 "
                   style={{ fontSize: 9, letterSpacing: "0.12em" }}
                 >
                   Links
@@ -1192,7 +1192,7 @@ const ProjectRow = ({
       {tag}
     </span>
     <span
-      className="opacity-70 leading-snug col-span-full"
+      className=" leading-snug col-span-full"
       style={{ fontSize: 10.5, marginTop: 2 }}
     >
       {desc}
@@ -1235,7 +1235,7 @@ const LinkRow = ({
       <span>{label}</span>
     </span>
     <span
-      className="font-mono opacity-60"
+      className="font-mono "
       style={{ fontSize: 10 }}
     >
       {url}
@@ -1386,7 +1386,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                 Matches
               </span>
               <span
-                className="px-2.5 py-1 rounded-full opacity-55"
+                className="px-2.5 py-1 rounded-full "
                 style={{ fontSize: 11 }}
               >
                 Saved
@@ -1673,7 +1673,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                   style={{ fontSize: 12.5, minHeight: 64 }}
                 >
                   {typed || (
-                    <span className="opacity-50">{placeholder}</span>
+                    <span className="">{placeholder}</span>
                   )}
                   {phase === 1 && typed.length < pitch.length && (
                     <span className="rq-caret" />
