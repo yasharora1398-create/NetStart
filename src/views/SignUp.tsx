@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";
@@ -66,7 +66,7 @@ import { useForceLightMode } from "@/hooks/useForceLightMode";
 const SignUp = () => {
   useForceLightMode();
   usePageMeta({
-    title: "Sign Up | Find a Cofounder or a Startup to Join",
+    title: "Sign Up | Find a cofounder, faster",
     description:
       "Create a Polln8 account in a minute. Match with vetted technical cofounders and founding engineers, or find an early-stage startup worth joining. Free during early access.",
     path: "/signup",

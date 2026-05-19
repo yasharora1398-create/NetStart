@@ -13,31 +13,31 @@ const WHY: {
   mockup: MockupKind;
 }[] = [
   {
-    title: "Vetted, not viral.",
-    body: "Every member reviewed for shipped work. No accounts farmed for engagement.",
+    title: "Every signup gets a real review.",
+    body: "A human looks at your LinkedIn, your resume, and your public work before you ever see the deck.",
     details: [
       "Manual review of every signup, not auto-approval.",
-      "LinkedIn + resume cross-checked against public work.",
+      "LinkedIn and resume cross-checked against public work.",
       "Rejected applicants get a reviewer note and a resubmit path.",
     ],
     mockup: "review",
   },
   {
-    title: "Matches ranked by AI.",
-    body: "The deck is ordered against your skills, project, and intent. Not the algorithm's.",
+    title: "The deck is ranked against what you've built.",
+    body: "Profiles and projects get embedded into vectors and ordered by real similarity to your work, not engagement metrics.",
     details: [
-      "Embeddings of your profile + project intent drive ranking.",
+      "Embeddings of your profile and project intent drive ranking.",
       "Skills weighted by what you've actually shipped, not claimed.",
       "Re-ranks daily as profiles and projects update.",
     ],
     mockup: "matches",
   },
   {
-    title: "Decisive by design.",
-    body: "Connect, save, or pass. No likes, no maybes. Apply with one real pitch.",
+    title: "Three actions per card. That's it.",
+    body: "Connect, save, or pass. No likes, no maybes, no fourth bucket to delay the decision.",
     details: [
       "Three actions per card. No fourth option to defer.",
-      "One pitch per application - no copy-paste spam.",
+      "One pitch per request, no copy-paste spam.",
       "Accepted requests turn into mutual contacts immediately.",
     ],
     mockup: "request",
