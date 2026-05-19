@@ -248,7 +248,7 @@ const ReviewCardMockup = () => {
         className="relative w-full h-full rounded-[28px] p-2 bg-card"
         style={{
           boxShadow:
-            "inset 0 0 0 1px hsl(var(--foreground) / 0.08), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
+            "inset 0 0 0 1px hsl(var(--foreground)), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
         }}
       >
         {/* Screen */}
@@ -263,7 +263,7 @@ const ReviewCardMockup = () => {
           {/* App header */}
           <div
             className="flex items-center gap-2.5 pb-3.5 mb-2"
-            style={{ borderBottom: "1px solid hsl(var(--foreground) / 0.08)" }}
+            style={{ borderBottom: "1px solid hsl(var(--foreground))" }}
           >
             <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
               application · step 3 of 3
@@ -278,7 +278,7 @@ const ReviewCardMockup = () => {
             {/* Left: avatar + title + subtitle */}
             <div
               className="flex flex-col items-center justify-center text-center px-2 py-3"
-              style={{ borderRight: "1px solid hsl(var(--foreground) / 0.08)", paddingRight: "clamp(20px, 4%, 36px)" }}
+              style={{ borderRight: "1px solid hsl(var(--foreground))", paddingRight: "clamp(20px, 4%, 36px)" }}
             >
               <div className="relative mb-4 h-[88px] flex justify-center">
                 <div
@@ -303,7 +303,7 @@ const ReviewCardMockup = () => {
                           ? "var(--rc-accent)"
                           : isReviewing
                             ? "var(--rc-rest)"
-                            : "hsl(var(--foreground) / 0.45)"
+                            : "hsl(var(--foreground))"
                       }`,
                       opacity: isApproved ? 1 : isReviewing ? 0.75 : 0.45,
                       transition: "opacity 420ms ease, border-color 420ms ease",
@@ -379,7 +379,7 @@ const ReviewCardMockup = () => {
           {/* Footer */}
           <div
             className="mt-3.5 pt-3.5 flex items-center gap-2.5 font-mono text-[11.5px] tracking-[0.04em] text-muted-foreground"
-            style={{ borderTop: "1px dashed hsl(var(--foreground) / 0.08)" }}
+            style={{ borderTop: "1px dashed hsl(var(--foreground))" }}
           >
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"
@@ -421,7 +421,7 @@ const ThreadRow = ({
         : "transparent";
   const dotBorder =
     kind === "pending"
-      ? "hsl(var(--foreground) / 0.16)"
+      ? "hsl(var(--foreground))"
       : kind === "active"
         ? pulseTone === "accent"
           ? "var(--rc-accent)"
@@ -466,7 +466,7 @@ const ThreadRow = ({
               background:
                 kind === "done"
                   ? "var(--rc-accent)"
-                  : "hsl(var(--foreground) / 0.16)",
+                  : "hsl(var(--foreground))",
               transition: "background 420ms ease",
             }}
           />
@@ -532,8 +532,8 @@ const ConfettiField = ({ active }: { active: boolean }) => {
                 p.hueShift === 0
                   ? "var(--rc-accent)"
                   : p.hueShift === 1
-                    ? "hsl(var(--foreground) / 0.5)"
-                    : "hsl(var(--foreground) / 0.2)",
+                    ? "hsl(var(--foreground))"
+                    : "hsl(var(--foreground))",
             } as React.CSSProperties
           }
         />
@@ -754,7 +754,7 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
         className="relative w-full h-full rounded-[28px] p-2 bg-card"
         style={{
           boxShadow:
-            "inset 0 0 0 1px hsl(var(--foreground) / 0.06), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
+            "inset 0 0 0 1px hsl(var(--foreground)), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
         }}
       >
         {/* Screen */}
@@ -840,7 +840,7 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
                 style={{
                   width: 44,
                   height: 5,
-                  background: "hsl(var(--foreground) / 0.18)",
+                  background: "hsl(var(--foreground))",
                   margin: "4px 0 6px",
                 }}
               />
@@ -956,9 +956,9 @@ const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
               tabIndex={-1}
               className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full text-[13px] font-medium"
               style={{
-                color: "hsl(var(--primary))",
-                border: "1px solid hsl(var(--primary) / 0.4)",
-                background: "hsl(var(--primary) / 0.10)",
+                color: "#ffffff",
+                border: "1px solid hsl(var(--primary))",
+                background: "hsl(var(--primary))",
               }}
             >
               <Check className="h-3.5 w-3.5" strokeWidth={2.2} />
@@ -1052,8 +1052,8 @@ const ProfileCardMockup = ({
       style={{
         aspectRatio: "16 / 7",
         margin: "2px 0",
-        background: "hsl(var(--primary) / 0.10)",
-        color: "hsl(var(--primary))",
+        background: "hsl(var(--primary))",
+        color: "#ffffff",
       }}
       aria-hidden
     >
@@ -1088,9 +1088,9 @@ const ProfileCardMockup = ({
             fontSize: 12,
             padding: "5px 10px",
             borderRadius: 999,
-            background: "hsl(var(--primary) / 0.12)",
-            color: "hsl(var(--primary))",
-            border: "1px solid hsl(var(--primary) / 0.3)",
+            background: "hsl(var(--primary))",
+            color: "#ffffff",
+            border: "1px solid hsl(var(--primary))",
           }}
         >
           {p}
@@ -1169,7 +1169,7 @@ const ProjectRow = ({
     className="grid items-baseline gap-2 px-2.5 py-2 rounded-lg"
     style={{
       gridTemplateColumns: "1fr auto",
-      background: "hsl(var(--foreground) / 0.035)",
+      background: "hsl(var(--foreground))",
     }}
   >
     <span
@@ -1185,8 +1185,8 @@ const ProjectRow = ({
         letterSpacing: "0.08em",
         padding: "3px 6px",
         borderRadius: 4,
-        background: "hsl(var(--primary) / 0.12)",
-        color: "hsl(var(--primary))",
+        background: "hsl(var(--primary))",
+        color: "#ffffff",
       }}
     >
       {tag}
@@ -1212,7 +1212,7 @@ const LinkRow = ({
   <div
     className="flex items-center justify-between px-2.5 py-2 rounded-lg"
     style={{
-      background: "hsl(var(--foreground) / 0.04)",
+      background: "hsl(var(--foreground))",
       fontSize: 11.5,
       fontWeight: 500,
     }}
@@ -1226,8 +1226,8 @@ const LinkRow = ({
           borderRadius: 4,
           fontSize: 9,
           letterSpacing: "0.04em",
-          background: "hsl(var(--primary) / 0.12)",
-          color: "hsl(var(--primary))",
+          background: "hsl(var(--primary))",
+          color: "#ffffff",
         }}
       >
         {icon}
@@ -1351,7 +1351,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
         className="relative w-full h-full rounded-[28px] p-2 bg-card"
         style={{
           boxShadow:
-            "inset 0 0 0 1px hsl(var(--foreground) / 0.06), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
+            "inset 0 0 0 1px hsl(var(--foreground)), 0 30px 60px -24px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.25)",
         }}
       >
         {/* Screen */}
@@ -1405,7 +1405,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                 border: "1px solid hsl(var(--border))",
                 boxShadow:
                   phase === 2
-                    ? "0 0 0 1px hsl(var(--primary)), 0 0 60px hsl(var(--primary) / 0.30)"
+                    ? "0 0 0 1px hsl(var(--primary)), 0 0 60px hsl(var(--primary))"
                     : "none",
                 transition: "box-shadow 500ms ease",
               }}
@@ -1417,14 +1417,14 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                     width: 36,
                     height: 36,
                     borderRadius: "50%",
-                    background: "hsl(var(--primary) / 0.12)",
-                    color: "hsl(var(--primary))",
+                    background: "hsl(var(--primary))",
+                    color: "#ffffff",
                     fontSize: 12,
                     boxShadow:
                       phase === 3
                         ? "0 0 0 2px hsl(var(--primary))"
                         : phase === 2
-                          ? "0 0 0 2px hsl(var(--primary) / 0.45)"
+                          ? "0 0 0 2px hsl(var(--primary))"
                           : "none",
                     transition: "box-shadow 280ms ease",
                   }}
@@ -1448,9 +1448,9 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                       fontSize: 11,
                       padding: "3px 8px",
                       borderRadius: 999,
-                      background: "hsl(var(--primary) / 0.12)",
-                      color: "hsl(var(--primary))",
-                      border: "1px solid hsl(var(--primary) / 0.30)",
+                      background: "hsl(var(--primary))",
+                      color: "#ffffff",
+                      border: "1px solid hsl(var(--primary))",
                     }}
                   >
                     {p}
@@ -1534,8 +1534,8 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                     style={{
                       padding: "10px 14px",
                       fontSize: 13,
-                      background: "hsl(var(--primary) / 0.12)",
-                      color: "hsl(var(--primary))",
+                      background: "hsl(var(--primary))",
+                      color: "#ffffff",
                     }}
                   >
                     <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
@@ -1640,7 +1640,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
                 style={{
                   width: 36,
                   height: 4,
-                  background: "hsl(var(--foreground) / 0.18)",
+                  background: "hsl(var(--foreground))",
                   margin: "-4px 0 4px",
                 }}
               />
