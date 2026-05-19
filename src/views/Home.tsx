@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /**
  * Public marketing homepage. The product is hidden from a fresh
  * visitor in two ways elsewhere. Most of the app is auth-gated,
@@ -57,9 +57,9 @@ const Home = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // SHARED INTERACTIVE PRIMITIVES
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Magnetic: pulls its contents toward the cursor on hover. Skips
 // reduced-motion and coarse-pointer (touch) devices so it never
@@ -260,9 +260,9 @@ const CountUp = ({
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // HERO
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Title is split into words so each one can stagger-in on mount.
 // "show up" carries the gold accent so the eye lands on the
 // verb phrase that actually carries the meaning of the page.
@@ -425,9 +425,9 @@ const Hero = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // PROBLEM
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Problem = () => {
   const items = [
     {
@@ -457,7 +457,7 @@ const Problem = () => {
           {items.map((it, i) => (
             <FadeUp key={it.title} delay={i * 80}>
               <TiltCard intensity={5} className="group h-full">
-                <article className="relative h-full rounded-sm border border-border bg-background p-6 transition-colors group-hover:border-gold/40">
+                <article className="relative h-full rounded-sm border border-border bg-background p-6 transition-colors group-hover:border-gold">
                   <h3 className="font-display text-xl mb-2 leading-tight">
                     {it.title}
                   </h3>
@@ -474,11 +474,11 @@ const Problem = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // PROOF INTRO: header that precedes the live WhySection mockups.
 // The mockups themselves carry the visual proof; this is just
 // the lead-in so the section doesn't start abruptly.
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ProofIntro = () => (
   <section className="px-4 sm:px-8 pt-24 md:pt-32 pb-0">
     <div className="mx-auto max-w-5xl">
@@ -497,9 +497,9 @@ const ProofIntro = () => (
   </section>
 );
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ROLE SPLIT: for founders / for builders
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const RoleSplit = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
@@ -515,7 +515,7 @@ const RoleSplit = () => {
       <div className="grid gap-5 md:grid-cols-2">
         <FadeUp>
           <TiltCard intensity={4} className="group h-full">
-            <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold/60">
+            <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
                 I'm a founder
               </p>
@@ -554,7 +554,7 @@ const RoleSplit = () => {
 
         <FadeUp delay={120}>
           <TiltCard intensity={4} className="group h-full">
-            <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold/60">
+            <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
                 I'm a builder
               </p>
@@ -600,9 +600,9 @@ const BulletItem = ({ children }: { children: React.ReactNode }) => (
   <li className="text-sm text-foreground/90 leading-relaxed">{children}</li>
 );
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // SOCIAL PROOF
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SocialProof = () => {
   // Each stat has both an animated number (CountUp) and a blur-clear
   // container reveal. The combination feels like the value is locking
@@ -674,9 +674,9 @@ const SocialProof = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // HOW IT WORKS
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const HowItWorks = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
@@ -711,7 +711,7 @@ const HowItWorks = () => {
           {steps.map((s, i) => (
             <FadeUp key={s.n} delay={i * 100}>
               <TiltCard intensity={3} glare={false} className="group h-full">
-                <article className="h-full rounded-sm border border-border bg-background p-7 transition-colors group-hover:border-gold/40">
+                <article className="h-full rounded-sm border border-border bg-background p-7 transition-colors group-hover:border-gold">
                   <p className="font-display text-5xl font-bold text-gold mb-4 leading-none">
                     {s.n}
                   </p>
@@ -750,12 +750,12 @@ const HowItWorks = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // EXPLORE GRID: a buffet of internal pages. Every tile is a real
 // link into a real page. Auth-gated pages render their own
 // AuthGate when clicked, so the rail and the grid are both safe
 // to expose to logged-out visitors.
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ExploreGrid = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
@@ -851,7 +851,7 @@ const ExploreGrid = () => {
               <TiltCard intensity={5} className="group h-full">
                 <Link
                   to={t.to}
-                  className="relative block h-full rounded-sm border border-border bg-card/60 p-5 transition-colors hover:border-gold/60 hover:bg-card"
+                  className="relative block h-full rounded-sm border border-border bg-card/60 p-5 transition-colors hover:border-gold hover:bg-card"
                 >
                   <h3 className="font-display text-lg mb-1.5 leading-tight">
                     {t.title}
@@ -872,9 +872,9 @@ const ExploreGrid = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // FAQ
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FAQ = () => {
   const items = [
     {
@@ -907,7 +907,7 @@ const FAQ = () => {
         <div className="space-y-4">
           {items.map((it, i) => (
             <FadeUp key={it.q} delay={i * 60}>
-              <details className="group rounded-sm border border-border bg-card hover:border-gold/40 transition-colors">
+              <details className="group rounded-sm border border-border bg-card hover:border-gold transition-colors">
                 <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-4">
                   <span className="font-medium text-foreground">{it.q}</span>
                   <span className="font-mono text-xs text-gold transition-transform duration-300 group-open:rotate-45">
@@ -928,7 +928,7 @@ const FAQ = () => {
             <Link to="/how" className="text-gold hover:underline">
               See how it works
             </Link>
-            {" · "}
+            {" Â· "}
             <Link to="/standards" className="text-gold hover:underline">
               Read the standards
             </Link>
@@ -939,9 +939,9 @@ const FAQ = () => {
   );
 };
 
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // FINAL CTA
-// ───────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FinalCTA = () => {
   const { user } = useAuth();
   const isAuthed = !!user;

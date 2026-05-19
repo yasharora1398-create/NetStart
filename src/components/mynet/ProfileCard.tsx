@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+﻿import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   CheckCircle2,
   Clock,
@@ -251,7 +251,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
                 setLinkedinDirty(true);
               }}
               placeholder="https://linkedin.com/in/your-handle"
-              className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+              className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
             />
             {linkedinChanged ? (
               <p className="text-[11px] font-mono uppercase tracking-widest text-gold mt-2">
@@ -259,7 +259,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
               </p>
             ) : profile.linkedinUrl ? (
               <p className="text-[11px] text-muted-foreground mt-2">
-                Saved · <span className="text-foreground/80">{profile.linkedinUrl}</span>
+                Saved Â· <span className="text-foreground/80">{profile.linkedinUrl}</span>
               </p>
             ) : null}
           </div>
@@ -326,7 +326,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
                   setWebsiteDirty(true);
                 }}
                 placeholder="https://your-startup.com"
-                className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
               />
               {websiteChanged ? (
                 <p className="text-[11px] font-mono uppercase tracking-widest text-gold mt-2">
@@ -334,7 +334,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
                 </p>
               ) : profile.websiteUrl ? (
                 <p className="text-[11px] text-muted-foreground mt-2">
-                  Saved · <span className="text-foreground/80">{profile.websiteUrl}</span>
+                  Saved Â· <span className="text-foreground/80">{profile.websiteUrl}</span>
                 </p>
               ) : (
                 <p className="text-[11px] text-muted-foreground mt-2">
@@ -345,7 +345,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
           )}
         </div>
 
-        {/* Founder proof of work — full-width row beneath the grid. */}
+        {/* Founder proof of work â€” full-width row beneath the grid. */}
         {isFounder && (
           <div className="mb-8">
             <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
@@ -440,10 +440,10 @@ const FileRow = ({
 }) => (
   <div
     className={`rounded-sm border bg-background p-3 flex items-center gap-3 ${
-      pending ? "border-gold/50" : "border-border"
+      pending ? "border-gold" : "border-border"
     }`}
   >
-    <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+    <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
       <FileText className="h-4 w-4 text-gold" />
     </div>
     <div className="flex-1 min-w-0">
@@ -453,7 +453,7 @@ const FileRow = ({
         {pending && (
           <span className="text-gold normal-case tracking-normal">
             {" "}
-            · Ready to save
+            Â· Ready to save
           </span>
         )}
       </p>
@@ -491,7 +491,7 @@ const StatusPill = ({ status }: { status: ReviewStatus }) => {
     },
     pending: {
       label: "Under review",
-      className: "border-gold/40 bg-gold/10 text-gold",
+      className: "border-gold bg-gold text-gold",
       Icon: Clock,
     },
     accepted: {

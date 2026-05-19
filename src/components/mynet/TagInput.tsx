@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+﻿import { useState, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -43,14 +43,14 @@ export const TagInput = ({ value, onChange, placeholder, id }: TagInputProps) =>
         onKeyDown={onKeyDown}
         onBlur={commit}
         placeholder={placeholder ?? "Type and press Enter"}
-        className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+        className="h-12 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20"
       />
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {value.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs border border-gold/30 bg-gold/5 rounded-sm text-foreground"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs border border-gold bg-gold rounded-sm text-foreground"
             >
               {tag}
               <button

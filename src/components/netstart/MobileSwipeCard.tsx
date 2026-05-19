@@ -1,7 +1,7 @@
 /**
  * Mobile swipe-card wrapper. Renders one card the user can drag
  * left or right; past the threshold the card flies off-screen and
- * the corresponding callback fires. No animation deps — pointer
+ * the corresponding callback fires. No animation deps â€” pointer
  * events + CSS transforms.
  *
  * Visual model mirrors the Expo Match deck (`mobile/app/(tabs)/
@@ -86,7 +86,7 @@ export const MobileSwipeCard = ({
         // parent keeps the same project on screen behind the info
         // sheet, so without this the card would stay flown off.
         // For swipe-left the parent advances and the resetKey
-        // useEffect would have done this anyway — harmless.
+        // useEffect would have done this anyway â€” harmless.
         setTx(0);
         setFlying(null);
       }, FLY_DURATION_MS);
@@ -139,7 +139,7 @@ export const MobileSwipeCard = ({
 
         <span
           aria-hidden
-          className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-md border-2 border-gold/70 bg-gold/15 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-gold"
+          className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-md border-2 border-gold bg-gold px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-white"
           style={{ opacity: opacityRight }}
         >
           Save

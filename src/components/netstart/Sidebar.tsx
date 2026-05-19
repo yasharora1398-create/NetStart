@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 
 const COLLAPSED_KEY = "polln8.sidebar.collapsed";
 const EXPANDED_WIDTH = "248px";
-// Collapsed reserves zero horizontal space — pages take the full
+// Collapsed reserves zero horizontal space â€” pages take the full
 // viewport while the floating top-right strip sits over the content.
 const COLLAPSED_WIDTH = "0px";
 
@@ -250,10 +250,10 @@ export const Sidebar = () => {
   );
 };
 
-// ─── Collapsed-state floating top bar ───────────────────────────────
+// â”€â”€â”€ Collapsed-state floating top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // When the user clicks the chevron to collapse the sidebar, the
 // full panel disappears and this strip floats at the top-right
-// instead — mirroring HomeAuthStrip's layout exactly (user pill /
+// instead â€” mirroring HomeAuthStrip's layout exactly (user pill /
 // sign-in/up controls + theme toggle) plus an extra "expand
 // sidebar" button so they can bring the nav back.
 
@@ -264,7 +264,7 @@ const userPillName = (
   const meta = user.user_metadata as { name?: string } | undefined;
   const raw = meta?.name?.trim() || user.email?.split("@")[0] || "you";
   const first = raw.split(/\s+/)[0] ?? raw;
-  return first.length > 14 ? `${first.slice(0, 13)}…` : first;
+  return first.length > 14 ? `${first.slice(0, 13)}â€¦` : first;
 };
 
 const CollapsedTopBar = ({ onExpand }: { onExpand: () => void }) => {
@@ -280,14 +280,14 @@ const CollapsedTopBar = ({ onExpand }: { onExpand: () => void }) => {
         onClick={onExpand}
         aria-label="Expand sidebar"
         title="Expand sidebar"
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/40 bg-gold/5 text-gold transition-colors hover:bg-gold/10"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-gold bg-gold text-white transition-colors hover:bg-gold"
       >
         <PanelLeftOpen className="h-4 w-4" />
       </button>
 
       {user ? (
         <>
-          <span className="px-3 py-1.5 rounded-full border border-gold/40 bg-gold/5 text-[11px] font-mono uppercase tracking-[0.18em] text-gold">
+          <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-[11px] font-mono uppercase tracking-[0.18em] text-white">
             {userPillName(user)}
           </span>
           <Button
@@ -367,7 +367,7 @@ const userDisplayName = (user: { email?: string | null; user_metadata?: Record<s
   const meta = user.user_metadata as { name?: string } | undefined;
   const raw = meta?.name?.trim() ?? user.email?.split("@")[0] ?? "you";
   const first = raw.split(/\s+/)[0] ?? raw;
-  return first.length > 12 ? `${first.slice(0, 11)}…` : first;
+  return first.length > 12 ? `${first.slice(0, 11)}â€¦` : first;
 };
 
 // ============== ICONS - verbatim paths from Sidebar.html ==============

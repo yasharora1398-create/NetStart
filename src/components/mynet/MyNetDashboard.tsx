@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   Briefcase,
   CheckCircle2,
@@ -104,7 +104,7 @@ export const MyNetDashboard = ({
       <header className="mb-10 flex flex-wrap items-start justify-between gap-6">
         <div>
           {isPending ? (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold/40 bg-gold/10 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
               <Hourglass className="h-3 w-3 text-gold" />
               <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
                 Review pending
@@ -213,11 +213,11 @@ export const MyNetDashboard = ({
         )}
 
         {!editing && profile.candidate.isOpenToWork && (
-          <div className="mt-6 block rounded-sm border border-gold-soft/60 bg-gradient-to-r from-gold/5 to-transparent p-6">
+          <div className="mt-6 block rounded-sm border border-gold bg-gradient-to-r from-gold to-transparent p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
-                  Find projects · Coming soon
+                  Find projects Â· Coming soon
                 </p>
                 <h3 className="font-display text-2xl mb-1">
                   Browse open projects
@@ -261,10 +261,10 @@ export const MyNetDashboard = ({
             type="button"
             onClick={onNewProject}
             disabled={isPending}
-            className="w-full rounded-sm border border-dashed border-border hover:border-gold/60 disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-70 bg-card/40 hover:bg-card disabled:hover:bg-card/40 transition-colors p-8 text-left group"
+            className="w-full rounded-sm border border-dashed border-border hover:border-gold disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-70 bg-card/40 hover:bg-card disabled:hover:bg-card/40 transition-colors p-8 text-left group"
           >
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
-              {isPending ? "Locked · Review pending" : "Empty"}
+              {isPending ? "Locked Â· Review pending" : "Empty"}
             </p>
             <h3 className="font-display text-2xl mb-2">
               {isPending
@@ -338,7 +338,7 @@ const Section = ({
 
 // Standalone Open-to-Work toggle. Lives in the "How builders find you"
 // section header so users can flip discoverability on/off without
-// having to enter edit mode. Both directions are always allowed — the
+// having to enter edit mode. Both directions are always allowed â€” the
 // parent handler is permissive, and forcing eligibility checks here
 // turned the switch into a one-way trap when a profile was incomplete.
 const OpenToWorkToggle = ({
@@ -440,7 +440,7 @@ const CredentialsDisplay = ({
         <InfoRow label="Proof of work">
           {profile.proof ? (
             <div className="inline-flex items-center gap-3">
-              <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+              <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
                 <FileText className="h-4 w-4 text-gold" />
               </div>
               <div className="min-w-0">
@@ -459,7 +459,7 @@ const CredentialsDisplay = ({
       <InfoRow label="Resume">
         {profile.resume ? (
           <div className="inline-flex items-center gap-3">
-            <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+            <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
               <FileText className="h-4 w-4 text-gold" />
             </div>
             <div className="min-w-0">
@@ -488,10 +488,10 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
           <img
             src={avatarUrl}
             alt={profile.fullName}
-            className="h-20 w-20 rounded-sm object-cover border border-gold/40 flex-shrink-0"
+            className="h-20 w-20 rounded-sm object-cover border border-gold flex-shrink-0"
           />
         ) : (
-          <div className="h-20 w-20 rounded-sm bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
+          <div className="h-20 w-20 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
             <span className="font-display text-2xl text-gold">
               {initials(profile.fullName)}
             </span>
@@ -553,7 +553,7 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
             {c.skills.map((s) => (
               <span
                 key={s}
-                className="px-2.5 py-1 text-xs rounded-sm border border-gold/30 bg-gold/5"
+                className="px-2.5 py-1 text-xs rounded-sm border border-gold bg-gold"
               >
                 {s}
               </span>
@@ -603,8 +603,8 @@ const CandidatePreviewCard = ({ profile }: { profile: Profile }) => {
   const url = getAvatarUrl(profile.avatarPath);
   const c = profile.candidate;
   return (
-    <article className="mx-auto max-w-[480px] overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
-      <div className="relative w-full aspect-square bg-gold/5">
+    <article className="mx-auto max-w-[480px] overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
+      <div className="relative w-full aspect-square bg-gold">
         {url ? (
           <img
             src={url}
@@ -663,8 +663,8 @@ const ProjectPreviewCard = ({
 }) => {
   const url = getAvatarUrl(profile.avatarPath);
   return (
-    <article className="mx-auto max-w-[480px] overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
-      <div className="relative w-full aspect-square bg-gold/5">
+    <article className="mx-auto max-w-[480px] overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
+      <div className="relative w-full aspect-square bg-gold">
         {url ? (
           <img
             src={url}
@@ -733,7 +733,7 @@ const PreviewPill = ({
     className={
       muted
         ? "rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground"
-        : "inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold"
+        : "inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-gold"
     }
   >
     {children}

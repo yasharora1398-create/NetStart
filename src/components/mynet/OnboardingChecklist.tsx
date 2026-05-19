@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -109,7 +109,7 @@ export const OnboardingChecklist = ({
   const pct = Math.round((completedCount / total) * 100);
 
   return (
-    <div className="relative rounded-sm border border-gold-soft bg-gradient-to-br from-gold/5 to-transparent overflow-hidden">
+    <div className="relative rounded-sm border border-gold bg-gradient-to-br from-gold to-transparent overflow-hidden">
       <div
         className={
           allDone
@@ -120,10 +120,10 @@ export const OnboardingChecklist = ({
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
-        className="w-full px-5 sm:px-6 py-4 flex items-center gap-4 hover:bg-gold/5 transition-colors text-left"
+        className="w-full px-5 sm:px-6 py-4 flex items-center gap-4 hover:bg-gold transition-colors text-left"
         aria-expanded={!collapsed}
       >
-        <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
           <Sparkles className="h-4 w-4 text-gold" />
         </div>
         <div className="flex-1 min-w-0">
@@ -132,7 +132,7 @@ export const OnboardingChecklist = ({
           </p>
           <p className="text-sm">
             {completedCount} of {total} done
-            <span className="text-muted-foreground"> · {pct}%</span>
+            <span className="text-muted-foreground"> Â· {pct}%</span>
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -156,7 +156,7 @@ export const OnboardingChecklist = ({
             <li key={step.key} className="px-5 sm:px-6 py-3 flex gap-3">
               <div className="flex-shrink-0 mt-0.5">
                 {step.done ? (
-                  <div className="h-5 w-5 rounded-full bg-gold/20 border border-gold/40 flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-gold border border-gold flex items-center justify-center">
                     <Check className="h-3 w-3 text-gold" />
                   </div>
                 ) : step.failed ? (
@@ -164,7 +164,7 @@ export const OnboardingChecklist = ({
                     <X className="h-3 w-3 text-destructive" />
                   </div>
                 ) : step.pending ? (
-                  <div className="h-5 w-5 rounded-full bg-gold/5 border border-gold/30 flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-gold border border-gold flex items-center justify-center">
                     <Clock className="h-3 w-3 text-gold animate-pulse" />
                   </div>
                 ) : (
@@ -206,8 +206,8 @@ export const OnboardingChecklist = ({
 
       {allDone && (
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <div className="w-3/4 max-w-md rounded-sm border border-gold/50 bg-card/95 backdrop-blur-md shadow-2xl p-5 sm:p-6 text-center">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-3">
+          <div className="w-3/4 max-w-md rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-2xl p-5 sm:p-6 text-center">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold bg-gold mb-3">
               <CheckCircle2 className="h-5 w-5 text-gold" />
             </div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">

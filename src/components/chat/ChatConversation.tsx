@@ -1,15 +1,15 @@
-/**
+﻿/**
  * The active-conversation pane for /chats/:id. Fetches the thread,
  * subscribes to realtime updates, renders messages with day dividers
  * and read receipts, and exposes a composer that obeys the Stage 4
  * pending-thread send rules:
  *
- *   - state="inbound"  → big Accept/Decline banner; sending blocked
+ *   - state="inbound"  â†’ big Accept/Decline banner; sending blocked
  *                        until the recipient acts.
- *   - state="outbound" → composer enabled but capped at 2 messages
+ *   - state="outbound" â†’ composer enabled but capped at 2 messages
  *                        per 48h. Counter shown above the composer.
- *   - state="accepted" → unrestricted send.
- *   - state="declined" → messages blur + a Delete-thread CTA. Send
+ *   - state="accepted" â†’ unrestricted send.
+ *   - state="declined" â†’ messages blur + a Delete-thread CTA. Send
  *                        is hidden.
  *
  * Read-receipt + delivered ticks are upserted by the realtime UPDATE
@@ -144,7 +144,7 @@ export const ChatConversation = ({
   const [muted, setMuted] = useState(false);
   const [mutingBusy, setMutingBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  // Track whether we should auto-scroll on the next message — only
+  // Track whether we should auto-scroll on the next message â€” only
   // when the user is already near the bottom of the thread.
   const stickToBottomRef = useRef(true);
 
@@ -252,7 +252,7 @@ export const ChatConversation = ({
     void reload();
   }, [reload]);
 
-  // Counterparty profile — we don't know if the contact is a builder
+  // Counterparty profile â€” we don't know if the contact is a builder
   // or founder, so try the founder RPC first (cheap; returns null
   // fast when not a founder), then fall back to the candidate row.
   // Extracted so the realtime subscription below can re-fire it when
@@ -290,7 +290,7 @@ export const ChatConversation = ({
         });
       }
     } catch {
-      // silent — the initialProfile (from the thread list) carries us
+      // silent â€” the initialProfile (from the thread list) carries us
     }
   }, [contactId]);
 
@@ -436,7 +436,7 @@ export const ChatConversation = ({
     };
   }, [contactId, currentUserId, loadProfile, onThreadsChanged]);
 
-  // Auto-scroll to bottom when messages change — but only if the
+  // Auto-scroll to bottom when messages change â€” but only if the
   // user was already near the bottom (don't yank them down while
   // they're scrolling up to read history).
   useEffect(() => {
@@ -459,7 +459,7 @@ export const ChatConversation = ({
     setSending(true);
     try {
       const result = await requestOrSendChatMessage(contactId, body);
-      // Optimistic insert — realtime will dedupe via the id check.
+      // Optimistic insert â€” realtime will dedupe via the id check.
       setMessages((prev) =>
         prev.some((m) => m.id === result.messageId)
           ? prev
@@ -669,7 +669,7 @@ export const ChatConversation = ({
   );
 };
 
-// ─── header ────────────────────────────────────────────────────────
+// â”€â”€â”€ header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Header = ({
   profile,
@@ -794,7 +794,7 @@ const Header = ({
   </header>
 );
 
-// ─── inbound (pending) banner ──────────────────────────────────────
+// â”€â”€â”€ inbound (pending) banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const InboundBanner = ({
   name,
@@ -807,7 +807,7 @@ const InboundBanner = ({
   onDecline: () => void;
   busy: "accept" | "decline" | "delete" | null;
 }) => (
-  <div className="flex flex-col gap-3 border-b border-gold/30 bg-gold/5 px-4 py-3 sm:flex-row sm:items-center sm:px-6">
+  <div className="flex flex-col gap-3 border-b border-gold bg-gold px-4 py-3 sm:flex-row sm:items-center sm:px-6">
     <div className="flex-1">
       <p className="text-sm font-medium text-foreground">
         {name} wants to chat.
@@ -839,7 +839,7 @@ const InboundBanner = ({
   </div>
 );
 
-// ─── messages ──────────────────────────────────────────────────────
+// â”€â”€â”€ messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MessageList = ({
   messages,
@@ -933,7 +933,7 @@ const Bubble = ({
   </li>
 );
 
-// ─── declined ──────────────────────────────────────────────────────
+// â”€â”€â”€ declined â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const DeclinedFooter = ({
   onDelete,
@@ -964,7 +964,7 @@ const DeclinedFooter = ({
   </footer>
 );
 
-// ─── composer ──────────────────────────────────────────────────────
+// â”€â”€â”€ composer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Composer = ({
   draft,

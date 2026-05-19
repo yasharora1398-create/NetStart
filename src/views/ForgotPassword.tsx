@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { Link, useLocation } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";
@@ -107,7 +107,7 @@ const ForgotPassword = () => {
           </Link>
 
           {sentTo ? (
-            <div className="rounded-sm border border-gold-soft bg-card p-8 text-center">
+            <div className="rounded-sm border border-gold bg-card p-8 text-center">
               <h1 className="font-display text-3xl mb-3">Check your inbox.</h1>
               <p className="text-sm text-muted-foreground mb-2">
                 If an account exists for{" "}
@@ -154,7 +154,7 @@ const ForgotPassword = () => {
                               inputMode="email"
                               autoFocus={!initialEmail}
                               placeholder="you@example.com"
-                              className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                              className="h-12 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20"
                               {...field}
                             />
                           </FormControl>

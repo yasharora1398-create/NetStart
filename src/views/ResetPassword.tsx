@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";
@@ -171,7 +171,7 @@ const ResetPassword = () => {
                                 autoComplete="new-password"
                                 autoFocus
                                 placeholder="At least 8 characters"
-                                className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20 pr-12"
+                                className="h-12 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20 pr-12"
                                 {...field}
                                 onKeyUp={onPasswordKey}
                                 onKeyDown={onPasswordKey}
@@ -222,7 +222,7 @@ const ResetPassword = () => {
                                 type={showConfirm ? "text" : "password"}
                                 autoComplete="new-password"
                                 placeholder="Re-enter password"
-                                className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20 pr-12"
+                                className="h-12 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20 pr-12"
                                 {...field}
                                 onKeyUp={onPasswordKey}
                                 onKeyDown={onPasswordKey}

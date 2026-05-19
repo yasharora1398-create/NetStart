@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
 import {
@@ -113,16 +113,16 @@ const FounderProfile = () => {
             </div>
           ) : (
             <>
-              <header className="rounded-sm border border-gold-soft bg-gradient-to-br from-gold/5 to-transparent p-6 sm:p-8 mb-10">
+              <header className="rounded-sm border border-gold bg-gradient-to-br from-gold to-transparent p-6 sm:p-8 mb-10">
                 <div className="flex items-start gap-5 flex-wrap">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
                       alt={founder.fullName}
-                      className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm object-cover border border-gold/40 flex-shrink-0"
+                      className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm object-cover border border-gold flex-shrink-0"
                     />
                   ) : (
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
+                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
                       <span className="font-display text-2xl text-gold">
                         {initials(founder.fullName)}
                       </span>
@@ -179,7 +179,7 @@ const FounderProfile = () => {
                       {founder.skills.map((s) => (
                         <span
                           key={s}
-                          className="px-2 py-0.5 text-[11px] rounded-sm border border-gold/30 bg-gold/5"
+                          className="px-2 py-0.5 text-[11px] rounded-sm border border-gold bg-gold"
                         >
                           {s}
                         </span>

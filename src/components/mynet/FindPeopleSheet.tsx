@@ -126,11 +126,11 @@ export const FindPeopleSheet = ({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-xl bg-background border-l border-gold-soft p-0 flex flex-col"
+          className="w-full sm:max-w-xl bg-background border-l border-gold p-0 flex flex-col"
         >
           <div ref={scrollRef} className="flex-1 overflow-y-auto">
             <SheetHeader className="border-b border-border p-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-3 self-start">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-3 self-start">
                 <Sparkles className="h-3 w-3 text-gold" />
                 <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
                   Matching against {project?.title ?? "project"}
@@ -182,7 +182,7 @@ export const FindPeopleSheet = ({
                   return (
                     <article
                       key={candidate.userId}
-                      className={`group relative rounded-sm border border-border bg-card hover:border-gold/50 transition-colors ${
+                      className={`group relative rounded-sm border border-border bg-card hover:border-gold transition-colors ${
                         passed ? "opacity-50" : ""
                       }`}
                     >
@@ -198,11 +198,11 @@ export const FindPeopleSheet = ({
                           <img
                             src={avatarUrl}
                             alt={candidate.fullName}
-                            className="h-12 w-12 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                            className="h-12 w-12 rounded-sm object-cover border border-gold flex-shrink-0"
                             loading="lazy"
                           />
                         ) : (
-                          <div className="h-12 w-12 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                          <div className="h-12 w-12 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
                             <span className="font-display text-base text-gold">
                               {initials(candidate.fullName)}
                             </span>
@@ -213,7 +213,7 @@ export const FindPeopleSheet = ({
                             <h3 className="font-display text-base leading-tight truncate">
                               {candidate.fullName || "Unnamed"}
                             </h3>
-                            <span className="px-1.5 py-0.5 rounded-sm bg-gold/10 border border-gold/30 font-mono text-[10px] text-gold flex-shrink-0">
+                            <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[10px] text-white flex-shrink-0">
                               {score}%
                             </span>
                           </div>
@@ -269,7 +269,7 @@ export const FindPeopleSheet = ({
                           {matchedSkills.slice(0, 4).map((s) => (
                             <span
                               key={s}
-                              className="px-1.5 py-0.5 text-[10px] rounded-sm border border-gold/40 bg-gold/5"
+                              className="px-1.5 py-0.5 text-[10px] rounded-sm border border-gold bg-gold"
                             >
                               {s}
                             </span>
@@ -320,7 +320,7 @@ const CandidateProfileModal = ({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="p-0 bg-card border-gold-soft w-[95vw] sm:w-[min(60vw,800px)] max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col"
+        className="p-0 bg-card border-gold w-[95vw] sm:w-[min(60vw,800px)] max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col"
       >
         <DialogTitle className="sr-only">
           {match?.candidate.fullName || "Candidate profile"}
@@ -361,16 +361,16 @@ const PublicProfileBody = ({
   return (
     <>
       <div className="relative px-8 pt-8 pb-6 border-b border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gold to-transparent pointer-events-none" />
         <div className="relative flex items-start gap-5">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt={candidate.fullName}
-              className="h-24 w-24 rounded-sm object-cover border border-gold/40 flex-shrink-0"
+              className="h-24 w-24 rounded-sm object-cover border border-gold flex-shrink-0"
             />
           ) : (
-            <div className="h-24 w-24 rounded-sm bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
+            <div className="h-24 w-24 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
               <span className="font-display text-3xl text-gold">
                 {initials(candidate.fullName)}
               </span>
@@ -389,7 +389,7 @@ const PublicProfileBody = ({
               </p>
             )}
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-gold/40 bg-gold/10 font-mono text-[11px] text-gold uppercase tracking-widest">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-gold bg-gold font-mono text-[11px] text-white uppercase tracking-widest">
                 {score}% match
               </span>
               {requiredCount > 0 && (
@@ -448,7 +448,7 @@ const PublicProfileBody = ({
                     key={s}
                     className={`px-2.5 py-1 text-xs rounded-sm border ${
                       isMatch
-                        ? "border-gold/50 bg-gold/10 text-foreground"
+                        ? "border-gold bg-gold text-foreground"
                         : "border-border bg-background text-muted-foreground"
                     }`}
                   >

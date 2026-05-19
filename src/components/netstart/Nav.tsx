@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "@/lib/router-compat";
 import { Menu, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
@@ -123,7 +123,7 @@ export const Nav = () => {
   );
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-gold-soft">
+    <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-gold">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" aria-label="Polln8 home">
           <Logo />
@@ -142,8 +142,8 @@ export const Nav = () => {
                 className={({ isActive }) =>
                   `relative h-9 w-9 flex items-center justify-center rounded-sm border transition-colors ${
                     isActive
-                      ? "border-gold/60 text-gold bg-gold/5"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-gold/40"
+                      ? "border-gold text-gold bg-gold"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-gold"
                   }`
                 }
               >
@@ -178,14 +178,14 @@ export const Nav = () => {
               <button
                 type="button"
                 aria-label="Open menu"
-                className="md:hidden h-9 w-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold/40 transition-colors"
+                className="md:hidden h-9 w-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold transition-colors"
               >
                 <Menu className="h-4 w-4" />
               </button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[80vw] sm:w-72 bg-background border-l border-gold-soft"
+              className="w-[80vw] sm:w-72 bg-background border-l border-gold"
             >
               <SheetHeader className="mb-6">
                 <SheetTitle className="font-display text-2xl text-left">

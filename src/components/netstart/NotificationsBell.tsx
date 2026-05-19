@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import {
   Bell,
@@ -139,7 +139,7 @@ export const NotificationsBell = () => {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative h-9 w-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold/40 transition-colors"
+          className="relative h-9 w-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold transition-colors"
         >
           <Bell className="h-4 w-4" />
           {unread.length > 0 && (
@@ -192,7 +192,7 @@ export const NotificationsBell = () => {
                       type="button"
                       onClick={() => handleClick(n)}
                       className={`w-full text-left px-4 py-3 hover:bg-background/60 transition-colors flex gap-3 ${
-                        !n.readAt ? "bg-gold/5" : ""
+                        !n.readAt ? "bg-gold" : ""
                       }`}
                     >
                       <Icon className={`h-4 w-4 flex-shrink-0 mt-0.5 ${color}`} />

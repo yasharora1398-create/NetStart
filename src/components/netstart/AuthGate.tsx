@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+﻿import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "@/lib/router-compat";
 import { Lock, Sparkles, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 /**
  * AuthGate has two modes:
  *
- *   • Standalone overlay (legacy): `<AuthGate />` floats above the
+ *   â€¢ Standalone overlay (legacy): `<AuthGate />` floats above the
  *     current page. Used by /mynet, /match, /u/:id which manage
  *     their own visibility ({!loading && !user && <AuthGate />}).
  *
- *   • Wrapper (preferred for new pages): pass `authLoading`,
+ *   â€¢ Wrapper (preferred for new pages): pass `authLoading`,
  *     `signedIn`, and optionally `needsSetup` plus children. The
  *     gate decides which of three things to render:
- *       – authLoading → a quiet placeholder (no flash of gate)
- *       – !signedIn   → "Members only" overlay with Sign in / Sign up
- *       – needsSetup  → "Finish setting up MyNet" overlay with a
+ *       â€“ authLoading â†’ a quiet placeholder (no flash of gate)
+ *       â€“ !signedIn   â†’ "Members only" overlay with Sign in / Sign up
+ *       â€“ needsSetup  â†’ "Finish setting up MyNet" overlay with a
  *                       single Go-to-MyNet CTA
- *       – otherwise   → children (the page itself)
+ *       â€“ otherwise   â†’ children (the page itself)
  *
  * Copy can be overridden via `authTitle`/`authBody` (unauth state)
  * and `setupTitle`/`setupBody` (signed-in-but-pending state).
@@ -37,7 +37,7 @@ type AuthGateProps = {
   setupTitle?: string;
   setupBody?: string;
 
-  // Legacy aliases — old call sites use `title`/`body` to override
+  // Legacy aliases â€” old call sites use `title`/`body` to override
   // the unauth copy. Keep working.
   title?: string;
   body?: string;
@@ -103,7 +103,7 @@ export const AuthGate = ({
   );
 };
 
-// ─── overlay ───────────────────────────────────────────────────────
+// â”€â”€â”€ overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type OverlayVariant = "auth" | "setup";
 
@@ -145,7 +145,7 @@ const Overlay = ({
         aria-hidden
       />
 
-      <div className="relative z-10 w-full max-w-md rounded-sm border border-gold-soft bg-card shadow-card overflow-hidden">
+      <div className="relative z-10 w-full max-w-md rounded-sm border border-gold bg-card shadow-card overflow-hidden">
         <div className="absolute inset-0 bg-gradient-spotlight opacity-60 pointer-events-none" />
         <div className="relative p-8 md:p-10">
           <h2

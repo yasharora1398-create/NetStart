@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -86,10 +86,10 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
                 <img
                   src={url}
                   alt={project.founderFullName}
-                  className="h-10 w-10 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                  className="h-10 w-10 rounded-sm object-cover border border-gold flex-shrink-0"
                 />
               ) : (
-                <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
                   <span className="font-display text-xs text-gold">
                     {initials(project.founderFullName)}
                   </span>
@@ -105,7 +105,7 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
                 {project.founderHeadline && (
                   <span className="text-muted-foreground">
                     {" "}
-                    · {project.founderHeadline}
+                    Â· {project.founderHeadline}
                   </span>
                 )}
               </p>
@@ -117,7 +117,7 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
           onChange={(e) => setMessage(e.target.value)}
           placeholder="I shipped X, I want to focus on Y, here's why I'm a fit..."
           rows={6}
-          className="bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+          className="bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
         />
         <DialogFooter className="gap-2">
           <Button variant="ghost" onClick={onClose} disabled={submitting}>

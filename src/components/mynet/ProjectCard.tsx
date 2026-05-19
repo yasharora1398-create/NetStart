@@ -53,11 +53,11 @@ export const ProjectCard = ({
     <div
       className={`group relative rounded-sm border bg-card transition-all overflow-hidden ${
         isActive
-          ? "border-gold/70 ring-1 ring-gold/30"
-          : "border-border hover:border-gold/40"
+          ? "border-gold ring-1 ring-gold/30"
+          : "border-border hover:border-gold"
       }`}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
       <div className="relative p-6">
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -73,7 +73,7 @@ export const ProjectCard = ({
 
           <div className="flex flex-col gap-1 items-end flex-shrink-0">
             {isActive ? (
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold/60 bg-gold/15 text-[10px] font-mono uppercase tracking-widest text-gold">
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-white">
                 <Star className="h-2.5 w-2.5 fill-gold text-gold" />
                 Match focus
               </span>
@@ -88,7 +88,7 @@ export const ProjectCard = ({
               {project.isPublished ? "Public" : "Draft"}
             </span>
             {lifecycle !== "active" ? (
-              <span className="px-2 py-1 rounded-sm border border-gold/40 bg-gold/10 text-[10px] font-mono uppercase tracking-widest text-gold">
+              <span className="px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-white">
                 {lifecycleLabel(lifecycle)}
               </span>
             ) : null}
@@ -97,7 +97,7 @@ export const ProjectCard = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="h-8 w-8 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold/40 transition-colors flex-shrink-0"
+                className="h-8 w-8 flex items-center justify-center rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-gold transition-colors flex-shrink-0"
                 aria-label="Project menu"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -184,7 +184,7 @@ export const ProjectCard = ({
             project.criteria.skills.slice(0, 5).map((s) => (
               <span
                 key={s}
-                className="px-2 py-0.5 text-[11px] rounded-sm border border-gold/30 bg-gold/5 text-foreground"
+                className="px-2 py-0.5 text-[11px] rounded-sm border border-gold bg-gold text-foreground"
               >
                 {s}
               </span>
@@ -224,7 +224,7 @@ export const ProjectCard = ({
         <button
           type="button"
           onClick={onOpen}
-          className="relative w-full px-6 py-3 border-t border-border bg-background/40 hover:bg-gold/5 transition-colors flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-gold"
+          className="relative w-full px-6 py-3 border-t border-border bg-background/40 hover:bg-gold transition-colors flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-white"
           aria-label={`View ${savedCount} saved profiles`}
         >
           <span className="flex items-center gap-2">

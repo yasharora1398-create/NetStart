@@ -117,7 +117,7 @@ const Match = () => {
           : "looker";
 
   const Locked = (
-    <div className="rounded-sm border border-gold-soft bg-card p-12 text-center max-w-2xl mx-auto">
+    <div className="rounded-sm border border-gold bg-card p-12 text-center max-w-2xl mx-auto">
       <h1 className="font-display text-3xl mb-3">Almost there.</h1>
       <p className="text-muted-foreground mb-6">
         Match opens up once your profile has been accepted. Hop back to MyNet
@@ -182,7 +182,7 @@ const BuilderView = () => {
   const [commitmentFilter, setCommitmentFilter] = useState("");
   const [decided, setDecided] = useState<Set<string>>(new Set());
   const [detail, setDetail] = useState<Candidate | null>(null);
-  // Founder's active/first project — drives where Save lands plus
+  // Founder's active/first project â€” drives where Save lands plus
   // the "Matching for [project]" banner. Title kept alongside the
   // id so we can show it without a second fetch.
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -327,7 +327,7 @@ const BuilderView = () => {
       {/* Active-project banner + Filters are hidden in full-screen
           mode so the deck takes over the whole canvas. */}
       {!fullscreen && activeProjectTitle ? (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-gold/30 bg-gold/5 px-4 py-3">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-gold bg-gold px-4 py-3">
           <div className="flex items-center gap-2 text-sm">
             <Sparkles className="h-3.5 w-3.5 text-gold flex-shrink-0" />
             <span className="text-muted-foreground">Matching for</span>
@@ -404,7 +404,7 @@ const BuilderView = () => {
                 onClick={undo}
                 aria-label={`Undo: bring back ${lastDecided.fullName}`}
                 title={`Undo: bring back ${lastDecided.fullName || "last candidate"}`}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-gold/40 bg-gold/5 px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/70 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-white hover:bg-gold hover:border-gold transition-colors"
               >
                 <Undo2 className="h-3.5 w-3.5" />
                 Undo
@@ -414,7 +414,7 @@ const BuilderView = () => {
               type="button"
               onClick={() => setFullscreen((v) => !v)}
               aria-label={fullscreen ? "Exit full-screen" : "Full-screen"}
-              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:border-gold/40 hover:text-gold transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:border-gold hover:text-gold transition-colors"
             >
               {fullscreen ? (
                 <>
@@ -430,7 +430,7 @@ const BuilderView = () => {
             </button>
           </div>
 
-          {/* Deck stage — single flex row, justify-center. The card
+          {/* Deck stage â€” single flex row, justify-center. The card
               + side buttons (or action buttons when approving) move
               together as a unit. No absolute positioning, no big
               gaps; the card visibly slides left as the action
@@ -443,7 +443,7 @@ const BuilderView = () => {
                 : "min-h-[760px] py-6",
             )}
           >
-            {/* X button — collapses out of the flex layout when the
+            {/* X button â€” collapses out of the flex layout when the
                 user approves so the row doesn't keep dead space. */}
             <button
               type="button"
@@ -458,21 +458,21 @@ const BuilderView = () => {
               <X className="h-6 w-6" strokeWidth={2.2} />
             </button>
 
-            {/* The card itself — fixed width, never shifts on its
+            {/* The card itself â€” fixed width, never shifts on its
                 own. Justify-center on the parent does the visual
                 slide as the action column grows on the right. */}
             <div className="w-full max-w-[520px] flex-shrink-0">
               <MatchCandidateCard candidate={current} />
             </div>
 
-            {/* ✓ button — same collapse trick on the other side. */}
+            {/* âœ“ button â€” same collapse trick on the other side. */}
             <button
               type="button"
               onClick={accept}
               aria-label="Approve"
               disabled={Boolean(approving)}
               className={cn(
-                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold/60 bg-card text-gold shadow-sm hover:bg-gold/10 transition-all duration-500",
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold transition-all duration-500",
                 approving &&
                   "opacity-0 pointer-events-none scale-75 -ml-[80px]",
               )}
@@ -480,7 +480,7 @@ const BuilderView = () => {
               <Check className="h-6 w-6" strokeWidth={2.4} />
             </button>
 
-            {/* Action column — only the LinkedIn / resume / save /
+            {/* Action column â€” only the LinkedIn / resume / save /
                 message buttons. No box, no headings. Width animates
                 from 0 to auto so the card recenters smoothly. */}
             <div
@@ -513,9 +513,9 @@ const BuilderView = () => {
 const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
   const avatar = getAvatarUrl(candidate.avatarPath);
   return (
-    <article className="overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
-      {/* Picture square — full-width, 1:1 aspect, dominates the card. */}
-      <div className="relative w-full aspect-square bg-gold/5">
+    <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
+      {/* Picture square â€” full-width, 1:1 aspect, dominates the card. */}
+      <div className="relative w-full aspect-square bg-gold">
         {avatar ? (
           <img
             src={avatar}
@@ -531,7 +531,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
         )}
       </div>
 
-      {/* Body — name, pills, bio. */}
+      {/* Body â€” name, pills, bio. */}
       <div className="p-5">
         <h2 className="mb-2 font-display text-2xl leading-tight text-foreground">
           {candidate.fullName || "Unnamed"}
@@ -542,13 +542,13 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
           candidate.skills.length > 0) ? (
           <div className="mb-3 flex flex-wrap gap-1.5">
             {candidate.commitment ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
                 <Sparkles className="h-3 w-3" />
                 {candidate.commitment}
               </span>
             ) : null}
             {candidate.location ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
                 <MapPin className="h-3 w-3" />
                 {candidate.location}
               </span>
@@ -584,7 +584,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
 // headline; the only thing this column adds is the actions you'd
 // take after deciding to engage: open LinkedIn, open the resume,
 // save the candidate, message them, or back out. No surrounding
-// box — the buttons themselves stand free next to the card.
+// box â€” the buttons themselves stand free next to the card.
 const CandidateActions = ({
   candidate,
   activeProjectId,
@@ -622,13 +622,13 @@ const CandidateActions = ({
   const handleSave = async () => {
     if (working) return;
     // Saves attach to a project. Without one published & marked
-    // active in MyNet, there's nowhere to store the save — so the
+    // active in MyNet, there's nowhere to store the save â€” so the
     // old behavior silently lost data. Block the action and tell the
     // founder exactly what to do.
     if (!activeProjectId) {
       toast.error("Finish your active project in MyNet first", {
         description:
-          "Builders are ranked against your active project's criteria — and saves attach to it. Publish a project in MyNet, then mark it active.",
+          "Builders are ranked against your active project's criteria â€” and saves attach to it. Publish a project in MyNet, then mark it active.",
       });
       return;
     }
@@ -660,7 +660,7 @@ const CandidateActions = ({
           rel="noopener noreferrer"
           aria-label="Open LinkedIn"
           title="LinkedIn"
-          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm transition-all hover:bg-gold hover:border-gold hover:shadow-md"
         >
           <Linkedin className="h-6 w-6" />
         </a>
@@ -682,7 +682,7 @@ const CandidateActions = ({
           rel="noopener noreferrer"
           aria-label="Open resume"
           title={candidate.resumeName}
-          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm transition-all hover:bg-gold hover:border-gold hover:shadow-md"
         >
           <FileText className="h-6 w-6" />
         </a>
@@ -705,7 +705,7 @@ const CandidateActions = ({
         disabled={working}
         aria-label={saved ? "Remove from saved" : "Save"}
         title={saved ? "Saved" : "Save"}
-        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-card text-gold shadow-sm transition-all hover:bg-gold/10 hover:border-gold/70 hover:shadow-md disabled:opacity-50"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm transition-all hover:bg-gold hover:border-gold hover:shadow-md disabled:opacity-50"
       >
         {saved ? (
           <BookmarkCheck className="h-6 w-6 fill-current" />
@@ -714,14 +714,14 @@ const CandidateActions = ({
         )}
       </button>
 
-      {/* Message — primary action */}
+      {/* Message â€” primary action */}
       <button
         type="button"
         onClick={handleMessage}
         disabled={working}
         aria-label="Message"
         title="Message"
-        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/60 bg-gold text-gold-foreground shadow-sm transition-all hover:bg-gold/90 hover:shadow-md disabled:opacity-50"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-gold text-white-foreground shadow-sm transition-all hover:bg-gold hover:shadow-md disabled:opacity-50"
       >
         <MessageCircle className="h-6 w-6" />
       </button>
@@ -732,7 +732,7 @@ const CandidateActions = ({
         onClick={onClose}
         aria-label="Back to deck"
         title="Back"
-        className="mt-1 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground"
+        className="mt-1 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
       >
         <X className="h-5 w-5" />
       </button>
@@ -755,7 +755,7 @@ const LookerView = () => {
   const [commitmentFilter, setCommitmentFilter] = useState("");
   // Same deck pattern as the founder side: passed/seen project ids
   // drop out of `filtered`. `approving` is the project the user
-  // tapped ✓ on — drives the action pane that slides in from the
+  // tapped âœ“ on â€” drives the action pane that slides in from the
   // right. `lastDecided` powers Undo / the Back button in the pane.
   const [decided, setDecided] = useState<Set<string>>(new Set());
   const [approving, setApproving] = useState<PublicProject | null>(null);
@@ -823,7 +823,7 @@ const LookerView = () => {
   );
 
   // `current` is the next undecided project in the deck. `displayed`
-  // is what's actually on screen — usually `current`, but when the
+  // is what's actually on screen â€” usually `current`, but when the
   // user taps a sibling project in the info panel we override it so
   // they can browse the founder's other work in place.
   const current = filtered[0] ?? null;
@@ -927,7 +927,7 @@ const LookerView = () => {
                 onClick={goBack}
                 aria-label={`Undo: bring back ${lastDecided.title}`}
                 title={`Undo: bring back "${lastDecided.title}"`}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-gold/40 bg-gold/5 px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/70 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-white hover:bg-gold hover:border-gold transition-colors"
               >
                 <Undo2 className="h-3.5 w-3.5" />
                 Undo
@@ -937,7 +937,7 @@ const LookerView = () => {
               type="button"
               onClick={() => setFullscreen((v) => !v)}
               aria-label={fullscreen ? "Exit full-screen" : "Full-screen"}
-              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:border-gold/40 hover:text-gold transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:border-gold hover:text-gold transition-colors"
             >
               {fullscreen ? (
                 <>
@@ -953,7 +953,7 @@ const LookerView = () => {
             </button>
           </div>
 
-          {/* MOBILE top-bar — two icons pinned to the very top-
+          {/* MOBILE top-bar â€” two icons pinned to the very top-
               right of the viewport, above the page header. Previous
               rewinds the deck by one card; Search opens the filter
               bottom sheet (same Filters component the desktop
@@ -971,7 +971,7 @@ const LookerView = () => {
               onClick={goBack}
               disabled={!lastDecided}
               aria-label="Previous card"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/95 backdrop-blur text-gold shadow-sm transition-colors hover:bg-gold/10 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/95 backdrop-blur text-white shadow-sm transition-colors hover:bg-gold hover:border-gold disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -982,15 +982,15 @@ const LookerView = () => {
               className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-full border bg-card/95 backdrop-blur text-gold shadow-sm transition-colors",
                 hasFilters
-                  ? "border-gold/60 bg-gold/10"
-                  : "border-border hover:bg-gold/10 hover:border-gold/40",
+                  ? "border-gold bg-gold"
+                  : "border-border hover:bg-gold hover:border-gold",
               )}
             >
               <Search className="h-4 w-4" />
             </button>
           </div>
 
-          {/* DESKTOP deck stage — X | Card | ✓ row with a slide-in
+          {/* DESKTOP deck stage â€” X | Card | âœ“ row with a slide-in
               info panel on accept. Hidden under 768px in favour of
               the swipe deck below. */}
           <div
@@ -1021,7 +1021,7 @@ const LookerView = () => {
                 onClick={goBack}
                 disabled={!lastDecided}
                 aria-label="Previous card"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold/40 bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold/10 hover:border-gold/70 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold/40"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-white transition-all hover:bg-gold hover:border-gold disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -1034,7 +1034,7 @@ const LookerView = () => {
               aria-label="Approve"
               disabled={Boolean(approving)}
               className={cn(
-                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold/60 bg-card text-gold shadow-sm hover:bg-gold/10 transition-all duration-500",
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold transition-all duration-500",
                 approving &&
                   "opacity-0 pointer-events-none scale-75 -ml-[80px]",
               )}
@@ -1064,7 +1064,7 @@ const LookerView = () => {
             </div>
           </div>
 
-          {/* MOBILE deck — swipe-left = pass, swipe-right = save +
+          {/* MOBILE deck â€” swipe-left = pass, swipe-right = save +
               open the info sheet. Mirrors the Expo Match feel:
               one card, stacked under-card peeking, no buttons. */}
           <div className="md:hidden mx-auto w-full max-w-[520px] px-3 py-4">
@@ -1081,7 +1081,7 @@ const LookerView = () => {
             />
           </div>
 
-          {/* MOBILE info sheet — bottom sheet (~85dvh) that slides
+          {/* MOBILE info sheet â€” bottom sheet (~85dvh) that slides
               up on swipe-right. The card behind stays visible in
               the gap at the top. Drag the handle down to dismiss
               and the deck moves on (the project was already
@@ -1105,7 +1105,7 @@ const LookerView = () => {
             </BottomSheet>
           </div>
 
-          {/* MOBILE filter sheet — same Filters component the
+          {/* MOBILE filter sheet â€” same Filters component the
               desktop renders inline, surfaced via the search icon
               in the mobile top bar. */}
           <div className="md:hidden">
@@ -1128,9 +1128,9 @@ const LookerView = () => {
   );
 };
 
-// Builder-side info panel — the founder's full public profile
+// Builder-side info panel â€” the founder's full public profile
 // rendered inline beside the project card on accept. Bio, skills,
-// website, LinkedIn — same content as /u/<founder> but laid out as
+// website, LinkedIn â€” same content as /u/<founder> but laid out as
 // a side panel so the builder can read it without leaving the
 // deck. The icon-only action column on the founder side is
 // intentionally different because it's framing a person, not a
@@ -1201,13 +1201,13 @@ const ProjectInfoPanel = ({
   };
 
   return (
-    <article className="relative rounded-2xl border border-gold-soft bg-card shadow-sm">
+    <article className="relative rounded-2xl border border-gold bg-card shadow-sm">
       {/* Close in the corner so the panel header isn't cluttered. */}
       <button
         type="button"
         onClick={onClose}
         aria-label="Close info"
-        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground"
+        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
       >
         <X className="h-4 w-4" />
       </button>
@@ -1217,7 +1217,7 @@ const ProjectInfoPanel = ({
           About the founder
         </p>
         <h3 className="mb-1 font-display text-xl leading-tight text-foreground">
-          {founder?.fullName || project.founderFullName || "Loading…"}
+          {founder?.fullName || project.founderFullName || "Loadingâ€¦"}
         </h3>
         {founder?.headline || project.founderHeadline ? (
           <p className="mb-4 text-xs text-muted-foreground">
@@ -1311,7 +1311,7 @@ const ProjectInfoPanel = ({
                             "block w-full rounded-sm border bg-background/40 p-3 text-left transition-colors",
                             isActive
                               ? "border-emerald-500/60 bg-emerald-500/5 cursor-default"
-                              : "border-border hover:border-gold/50 hover:bg-card",
+                              : "border-border hover:border-gold hover:bg-card",
                           )}
                         >
                           <div className="mb-1 flex items-center gap-2">
@@ -1362,7 +1362,7 @@ const ProjectInfoPanel = ({
             disabled={!canGoBack}
             aria-label="Back to previous card"
             title="Back to previous card"
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -1370,7 +1370,7 @@ const ProjectInfoPanel = ({
           <button
             type="button"
             onClick={handleMessage}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-gold/60 bg-gold px-4 py-2.5 text-sm font-semibold text-gold-foreground transition-all hover:bg-gold/90 hover:shadow-md"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-gold bg-gold px-4 py-2.5 text-sm font-semibold text-white-foreground transition-all hover:bg-gold hover:shadow-md"
           >
             <MessageCircle className="h-4 w-4" />
             Request chat
@@ -1381,7 +1381,7 @@ const ProjectInfoPanel = ({
             onClick={handleToggleSave}
             aria-label={saved ? "Remove from saved" : "Save"}
             title={saved ? "Saved" : "Save"}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold/40 bg-card text-gold transition-all hover:bg-gold/10 hover:border-gold/70"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-white transition-all hover:bg-gold hover:border-gold"
           >
             {saved ? (
               <BookmarkCheck className="h-5 w-5 fill-current" />
@@ -1396,14 +1396,14 @@ const ProjectInfoPanel = ({
 };
 
 // Builder-side project card. Visual twin of MatchCandidateCard so
-// builders and founders see the same deck shape — full-width 1:1
+// builders and founders see the same deck shape â€” full-width 1:1
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
   const avatar = getAvatarUrl(project.founderAvatarPath);
   return (
-    <article className="overflow-hidden rounded-2xl border border-gold-soft bg-card shadow-sm">
-      {/* Picture square — full-width, 1:1 aspect, dominates the card. */}
-      <div className="relative w-full aspect-square bg-gold/5">
+    <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
+      {/* Picture square â€” full-width, 1:1 aspect, dominates the card. */}
+      <div className="relative w-full aspect-square bg-gold">
         {avatar ? (
           <img
             src={avatar}
@@ -1419,7 +1419,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
         )}
       </div>
 
-      {/* Body — title, byline, pills, description. */}
+      {/* Body â€” title, byline, pills, description. */}
       <div className="p-5">
         <h2 className="mb-1 font-display text-2xl leading-tight text-foreground">
           {project.title}
@@ -1429,7 +1429,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
           <span className="text-foreground">
             {project.founderFullName || "Anonymous"}
           </span>
-          {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
+          {project.founderHeadline ? ` Â· ${project.founderHeadline}` : null}
         </p>
 
         {(project.criteria.commitment ||
@@ -1437,13 +1437,13 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
           project.criteria.skills.length > 0) ? (
           <div className="mb-3 flex flex-wrap gap-1.5">
             {project.criteria.commitment ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
                 <Briefcase className="h-3 w-3" />
                 {project.criteria.commitment}
               </span>
             ) : null}
             {project.criteria.location ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
                 <MapPin className="h-3 w-3" />
                 {project.criteria.location}
               </span>
@@ -1503,7 +1503,7 @@ const Filters = ({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search title, skills, founder..."
-        className="pl-10 h-11 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+        className="pl-10 h-11 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20"
       />
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1525,7 +1525,7 @@ const Filters = ({
         value={commitment || "any"}
         onValueChange={(v) => setCommitment(v === "any" ? "" : v)}
       >
-        <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20">
+        <SelectTrigger className="h-11 bg-background border-border focus:border-gold focus:ring-gold/20">
           <SelectValue placeholder="Any commitment" />
         </SelectTrigger>
         <SelectContent className="bg-card border-border">

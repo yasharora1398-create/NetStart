@@ -1,15 +1,15 @@
-"use client";
+﻿"use client";
 /**
  * Saved page. Role-aware:
  *
- *   Builder POV  → list of projects bookmarked from Match / Talent /
+ *   Builder POV  â†’ list of projects bookmarked from Match / Talent /
  *                  project detail. Source: local saved-projects store
  *                  (`useSavedProjects`).
- *   Founder POV  → list of candidates the founder saved across their
+ *   Founder POV  â†’ list of candidates the founder saved across their
  *                  projects. Source: each project's `savedPersonIds`
  *                  joined with `getCandidatesByIds`.
  *
- * Builders can star one saved project as their current focus — same
+ * Builders can star one saved project as their current focus â€” same
  * semantic as the founder-side active-project picker.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -170,7 +170,7 @@ const Saved = () => {
   );
 };
 
-// ─── builder ───────────────────────────────────────────────────────
+// â”€â”€â”€ builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BuilderSaved = () => {
   const projects = useSavedProjects();
@@ -211,7 +211,7 @@ const SavedProjectCard = ({
     <li
       className={cn(
         "group flex flex-col gap-3 rounded-sm border bg-card p-4 transition-colors sm:flex-row sm:items-start",
-        isActive ? "border-gold/60 bg-gold/5" : "border-border hover:border-gold/40",
+        isActive ? "border-gold bg-gold" : "border-border hover:border-gold",
       )}
     >
       <Link
@@ -230,7 +230,7 @@ const SavedProjectCard = ({
             {project.title}
           </h3>
           {isActive ? (
-            <span className="inline-flex items-center gap-1 rounded-sm border border-gold-soft bg-card px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-[0.16em] text-gold">
+            <span className="inline-flex items-center gap-1 rounded-sm border border-gold bg-card px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-[0.16em] text-gold">
               <Star className="size-2.5 fill-gold text-gold" />
               Focus
             </span>
@@ -308,7 +308,7 @@ const SavedProjectCard = ({
   );
 };
 
-// ─── founder ───────────────────────────────────────────────────────
+// â”€â”€â”€ founder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const FounderSaved = ({
   candidates,
@@ -345,7 +345,7 @@ const FounderSaved = ({
 const SavedCandidateCard = ({ candidate }: { candidate: Candidate }) => {
   const url = getAvatarUrl(candidate.avatarPath);
   return (
-    <li className="flex flex-col gap-3 rounded-sm border border-border bg-card p-4 transition-colors hover:border-gold/40 sm:flex-row sm:items-center">
+    <li className="flex flex-col gap-3 rounded-sm border border-border bg-card p-4 transition-colors hover:border-gold sm:flex-row sm:items-center">
       <Avatar className="size-12 shrink-0">
         {url ? <AvatarImage src={url} alt="" /> : null}
         <AvatarFallback>{initials(candidate.fullName)}</AvatarFallback>
@@ -401,7 +401,7 @@ const SavedCandidateCard = ({ candidate }: { candidate: Candidate }) => {
   );
 };
 
-// ─── shared bits ────────────────────────────────────────────────────
+// â”€â”€â”€ shared bits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Pill = ({
   children,
@@ -417,7 +417,7 @@ const Pill = ({
       "inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[11px]",
       muted
         ? "border-border bg-muted/40 text-muted-foreground"
-        : "border-gold/30 bg-gold/5 text-gold",
+        : "border-gold bg-gold text-gold",
     )}
   >
     {icon}

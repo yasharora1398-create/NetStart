@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -26,7 +26,7 @@ import { useAuth } from "@/context/AuthContext";
 // Sidebar mounts on every render; CSS hides it under 768px so on
 // mobile the bottom nav (rendered below) takes over. The
 // `SHOW_SIDEBAR = !PROD` gate this used to carry was deleted when
-// the app became publicly accessible — sidebar is just the
+// the app became publicly accessible â€” sidebar is just the
 // desktop chrome now.
 
 import { MobileBottomNav } from "@/components/netstart/MobileBottomNav";
@@ -86,7 +86,7 @@ const SAMPLE_PROJECTS: Project[] = [
     criteria: {
       skills: ["Distributed systems", "Rust", "B2B GTM"],
       commitment: "Full-time",
-      location: "Remote · NA / EU",
+      location: "Remote Â· NA / EU",
       keywords: "infra, logistics, ex-faang",
     },
     savedPersonIds: [],
@@ -315,14 +315,14 @@ const MyNet = () => {
       await getSupabase().auth.refreshSession();
       await refreshAll();
     } catch {
-      // ignore — onAuthStateChange usually fires on its own
+      // ignore â€” onAuthStateChange usually fires on its own
     }
   };
 
   const handleSetActiveProject = async (projectId: string | null) => {
     if (!uid) return;
     const previous = profile.activeProjectId;
-    // Optimistic update — flip the star immediately, revert on error.
+    // Optimistic update â€” flip the star immediately, revert on error.
     setProfile((p) => ({ ...p, activeProjectId: projectId }));
     try {
       await setActiveProject(uid, projectId);
@@ -664,7 +664,7 @@ const MyNet = () => {
                     {displayProfile.reviewStatus === "accepted" && (
                       <Link
                         to="/match"
-                        className="block rounded-sm border border-gold-soft bg-gradient-to-r from-gold/10 to-transparent p-6 hover:border-gold/60 transition-colors group"
+                        className="block rounded-sm border border-gold bg-gradient-to-r from-gold to-transparent p-6 hover:border-gold transition-colors group"
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div>
@@ -797,8 +797,8 @@ const MyNet = () => {
                         </p>
                       </div>
                     ) : displayProfile.reviewStatus === "draft" ? (
-                      <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
-                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
+                      <div className="max-w-md w-full rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold mb-4">
                           <Hourglass className="h-5 w-5 text-gold" />
                         </div>
                         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
@@ -813,8 +813,8 @@ const MyNet = () => {
                         </p>
                       </div>
                     ) : (
-                      <div className="max-w-md w-full rounded-sm border border-gold-soft bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
-                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 mb-4">
+                      <div className="max-w-md w-full rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold mb-4">
                           <Hourglass className="h-5 w-5 text-gold" />
                         </div>
                         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
@@ -953,7 +953,7 @@ const CriteriaSummary = ({ project }: { project: Project }) => {
               {skills.map((s) => (
                 <span
                   key={s}
-                  className="px-2.5 py-1 text-xs border border-gold/30 bg-gold/5 rounded-sm"
+                  className="px-2.5 py-1 text-xs border border-gold bg-gold rounded-sm"
                 >
                   {s}
                 </span>

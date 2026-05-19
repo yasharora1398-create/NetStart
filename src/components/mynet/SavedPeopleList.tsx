@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   ExternalLink,
   Linkedin,
@@ -188,8 +188,8 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
           return (
             <article
               key={c.userId}
-              className={`rounded-sm border bg-card hover:border-gold/40 transition-colors overflow-hidden ${
-                isChecked ? "border-gold/60 ring-1 ring-gold/30" : "border-border"
+              className={`rounded-sm border bg-card hover:border-gold transition-colors overflow-hidden ${
+                isChecked ? "border-gold ring-1 ring-gold/30" : "border-border"
               }`}
             >
               <div className="flex gap-3 p-4">
@@ -204,11 +204,11 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
                   <img
                     src={avatarUrl}
                     alt={c.fullName}
-                    className="h-14 w-14 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+                    className="h-14 w-14 rounded-sm object-cover border border-gold flex-shrink-0"
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-14 w-14 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                  <div className="h-14 w-14 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
                     <span className="font-display text-base text-gold">
                       {initials(c.fullName)}
                     </span>
@@ -282,7 +282,7 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
             onChange={(e) => setOutreachMessage(e.target.value)}
             placeholder="Optional note. What you want to chat about, what you're impressed by, time you have..."
             rows={5}
-            className="bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+            className="bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
           />
           <DialogFooter className="gap-2">
             <Button

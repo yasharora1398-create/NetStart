@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+﻿import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   Briefcase,
   Camera,
@@ -191,7 +191,7 @@ export const CandidateCard = ({
             </p>
           </div>
         ) : !profileComplete ? (
-          <div className="rounded-sm border border-gold/40 bg-gold/5 p-4 mb-6">
+          <div className="rounded-sm border border-gold bg-gold p-4 mb-6">
             <p className="text-[11px] font-mono uppercase tracking-widest text-gold mb-1">
               Almost there
             </p>
@@ -217,10 +217,10 @@ export const CandidateCard = ({
               <img
                 src={avatarUrl}
                 alt={fullName || "Avatar"}
-                className="h-20 w-20 rounded-sm object-cover border border-gold/30"
+                className="h-20 w-20 rounded-sm object-cover border border-gold"
               />
             ) : (
-              <div className="h-20 w-20 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center">
+              <div className="h-20 w-20 rounded-sm bg-gold border border-gold flex items-center justify-center">
                 <span className="font-display text-2xl text-gold">
                   {initials(fullName)}
                 </span>
@@ -273,7 +273,7 @@ export const CandidateCard = ({
                 markDirty();
               }}
               placeholder="Marcus Vey"
-              className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+              className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
             />
           </div>
           <div>
@@ -293,7 +293,7 @@ export const CandidateCard = ({
             >
               <SelectTrigger
                 id="headline"
-                className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20"
+                className="h-11 bg-background border-border focus:border-gold focus:ring-gold/20"
               >
                 <SelectValue placeholder="Pick the role you fit best" />
               </SelectTrigger>
@@ -333,7 +333,7 @@ export const CandidateCard = ({
             }}
             rows={4}
             placeholder="What you've shipped. Where you want to focus next. Why a founder should reach out."
-            className="bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+            className="bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
           />
         </div>
 
@@ -355,7 +355,7 @@ export const CandidateCard = ({
             >
               <SelectTrigger
                 id="commitment"
-                className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20"
+                className="h-11 bg-background border-border focus:border-gold focus:ring-gold/20"
               >
                 <SelectValue placeholder="How much can you give?" />
               </SelectTrigger>

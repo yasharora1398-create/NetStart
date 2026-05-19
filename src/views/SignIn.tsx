@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";
@@ -145,7 +145,7 @@ const SignIn = () => {
   return (
     <div className="min-h-screen bg-background text-foreground grid lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
-      <aside className="hidden lg:flex relative flex-col justify-between p-12 border-r border-gold-soft overflow-hidden">
+      <aside className="hidden lg:flex relative flex-col justify-between p-12 border-r border-gold overflow-hidden">
         <div
           className="absolute inset-0 -z-10 opacity-50"
           style={{
@@ -162,7 +162,7 @@ const SignIn = () => {
         </Link>
 
         <div className="relative z-10 max-w-md">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-8">
             <Sparkles className="h-3 w-3 text-gold" />
             <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
               Welcome back
@@ -175,13 +175,13 @@ const SignIn = () => {
         </div>
 
         <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-          © Polln8 · A network for builders
+          Â© Polln8 Â· A network for builders
         </p>
       </aside>
 
       {/* Form panel */}
       <main className="flex flex-col">
-        <header className="lg:hidden border-b border-gold-soft">
+        <header className="lg:hidden border-b border-gold">
           <div className="container h-16 flex items-center">
             <Link to="/" aria-label="Back to home">
               <Logo />
@@ -206,7 +206,7 @@ const SignIn = () => {
             {/* "Confirm your email" banner - appears when login is
                 rejected because the address is unconfirmed. */}
             {needsConfirmation && (
-              <div className="mb-6 flex items-start gap-3 rounded-sm border border-gold/40 bg-gold/5 p-4">
+              <div className="mb-6 flex items-start gap-3 rounded-sm border border-gold bg-gold p-4">
                 <AlertCircle className="h-4 w-4 text-gold flex-shrink-0 mt-0.5" />
                 <div className="flex-1 text-sm">
                   <p className="text-foreground font-medium mb-1">
@@ -249,7 +249,7 @@ const SignIn = () => {
                             autoComplete="email"
                             inputMode="email"
                             placeholder="you@company.com"
-                            className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                            className="h-12 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20"
                             {...field}
                             onChange={(e) => {
                               field.onChange(e);
@@ -287,7 +287,7 @@ const SignIn = () => {
                               type={showPassword ? "text" : "password"}
                               autoComplete="current-password"
                               placeholder="Your password"
-                              className="h-12 bg-card border-border focus-visible:border-gold/60 focus-visible:ring-gold/20 pr-12"
+                              className="h-12 bg-card border-border focus-visible:border-gold focus-visible:ring-gold/20 pr-12"
                               {...field}
                               onKeyUp={onPasswordKey}
                               onKeyDown={onPasswordKey}

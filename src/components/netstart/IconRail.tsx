@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Thin left rail of icons for the public homepage. Replaces the
  * full sidebar on logged-out marketing surfaces where the wide
  * navigation panel is overkill and visually noisy.
@@ -42,7 +42,7 @@ type RailItem = {
 };
 
 // Mirrors the desktop Sidebar's nav structure. Logged-out users
-// who click an app route still hit it — the underlying page just
+// who click an app route still hit it â€” the underlying page just
 // renders its own AuthGate, which is the same affordance the
 // Sidebar gives them.
 const ITEMS: RailItem[] = [
@@ -105,20 +105,20 @@ export const IconRail = () => {
           cn(
             "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-card/80 backdrop-blur",
             "text-muted-foreground transition-all duration-200",
-            "hover:scale-110 hover:bg-gold/10 hover:text-gold hover:border-gold/60 hover:shadow-[0_0_18px_hsl(var(--gold)/0.25)]",
+            "hover:scale-110 hover:bg-gold hover:text-gold hover:border-gold hover:shadow-[0_0_18px_hsl(var(--gold)/0.25)]",
             isActive
-              ? "border-gold/60 bg-gold/10 text-gold shadow-[0_0_14px_hsl(var(--gold)/0.18)]"
+              ? "border-gold bg-gold text-gold shadow-[0_0_14px_hsl(var(--gold)/0.18)]"
               : "border-border",
           )
         }
       >
         {item.icon}
-        {/* Tooltip — slides in from the icon's right edge on hover.
+        {/* Tooltip â€” slides in from the icon's right edge on hover.
             Pointer-events disabled so it never blocks the click. */}
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full border border-gold/40 bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md",
+            "pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full border border-gold bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md",
             "opacity-0 -translate-x-1 transition-all duration-200",
             "group-hover:opacity-100 group-hover:translate-x-0",
           )}

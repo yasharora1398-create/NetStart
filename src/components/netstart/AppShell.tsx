@@ -49,7 +49,7 @@ export const AppShell = () => {
         <button
           type="button"
           onClick={() => setBellOpen((v) => !v)}
-          className="relative h-8 w-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold/40 transition-colors"
+          className="relative h-8 w-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-gold transition-colors"
           aria-label="Notifications"
         >
           <Bell className="h-3.5 w-3.5" />
@@ -59,7 +59,7 @@ export const AppShell = () => {
 
       {/* Bell dropdown */}
       {bellOpen && (
-        <div className="absolute top-14 right-3 z-30 w-60 rounded-sm border border-gold-soft bg-card shadow-xl overflow-hidden">
+        <div className="absolute top-14 right-3 z-30 w-60 rounded-sm border border-gold bg-card shadow-xl overflow-hidden">
           <div className="px-3 py-2 border-b border-border bg-background/40">
             <p className="font-mono text-[10px] uppercase tracking-widest text-gold">
               New
@@ -219,7 +219,7 @@ const SavedScreen = () => (
             {b.location}
           </p>
         </div>
-        <span className="px-1.5 py-0.5 rounded-sm border border-gold/40 bg-gold/10 text-[9px] font-mono uppercase tracking-widest text-gold flex-shrink-0">
+        <span className="px-1.5 py-0.5 rounded-sm border border-gold bg-gold text-[9px] font-mono uppercase tracking-widest text-white flex-shrink-0">
           Saved
         </span>
       </article>
@@ -240,13 +240,13 @@ const StartupsScreen = () => (
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
             <p className="text-[10px] font-mono uppercase tracking-widest text-gold mb-0.5">
-              Hiring · {b.commitment}
+              Hiring Â· {b.commitment}
             </p>
             <h3 className="font-display text-base leading-tight">
               {b.building}
             </h3>
           </div>
-          <span className="px-1.5 py-0.5 rounded-sm bg-gold/10 border border-gold/30 font-mono text-[9px] text-gold flex-shrink-0">
+          <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[9px] text-white flex-shrink-0">
             {b.match}%
           </span>
         </div>
@@ -286,7 +286,7 @@ const BrowseScreen = () => (
       <input
         type="text"
         placeholder="Search projects..."
-        className="w-full h-9 pl-8 pr-2.5 rounded-sm border border-border bg-card text-xs focus:outline-none focus:border-gold/40"
+        className="w-full h-9 pl-8 pr-2.5 rounded-sm border border-border bg-card text-xs focus:outline-none focus:border-gold"
         readOnly
       />
     </div>
@@ -297,7 +297,7 @@ const BrowseScreen = () => (
             key={chip}
             className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest flex-shrink-0 ${
               i === 0
-                ? "border-gold/40 bg-gold/10 text-gold"
+                ? "border-gold bg-gold text-gold"
                 : "border-border text-muted-foreground"
             }`}
           >
@@ -316,13 +316,13 @@ const BrowseScreen = () => (
             <h3 className="font-display text-sm leading-tight truncate">
               {b.building}
             </h3>
-            <span className="px-1.5 py-0.5 rounded-sm bg-gold/10 border border-gold/30 font-mono text-[9px] text-gold flex-shrink-0 ml-2">
+            <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[9px] text-white flex-shrink-0 ml-2">
               {b.match}%
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground mb-2 truncate">
             <Briefcase className="inline h-2.5 w-2.5 mr-1 text-gold" />
-            {b.commitment} · {b.location}
+            {b.commitment} Â· {b.location}
           </p>
           <div className="flex items-center justify-between">
             <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/70">
@@ -332,7 +332,7 @@ const BrowseScreen = () => (
               type="button"
               className="text-[10px] text-gold font-mono uppercase tracking-widest"
             >
-              Open ›
+              Open â€º
             </button>
           </div>
         </article>
@@ -398,7 +398,7 @@ const YouScreen = () => {
         <img
           src={me.image}
           alt={me.name}
-          className="h-16 w-16 rounded-sm object-cover border border-gold/30 flex-shrink-0"
+          className="h-16 w-16 rounded-sm object-cover border border-gold flex-shrink-0"
           loading="lazy"
         />
         <div className="min-w-0 flex-1">
@@ -442,7 +442,7 @@ const YouScreen = () => {
           {me.skills.slice(0, 5).map((s) => (
             <span
               key={s}
-              className="px-1.5 py-0.5 text-[10px] rounded-sm border border-gold/30 bg-gold/5"
+              className="px-1.5 py-0.5 text-[10px] rounded-sm border border-gold bg-gold"
             >
               {s}
             </span>
@@ -452,7 +452,7 @@ const YouScreen = () => {
 
       <button
         type="button"
-        className="w-full py-2 rounded-sm border border-gold/40 bg-gold/5 text-gold text-[11px] font-mono uppercase tracking-widest"
+        className="w-full py-2 rounded-sm border border-gold bg-gold text-white text-[11px] font-mono uppercase tracking-widest"
       >
         Edit profile
       </button>

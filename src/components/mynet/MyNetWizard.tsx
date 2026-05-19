@@ -400,7 +400,7 @@ export const MyNetWizard = ({
                 value={linkedin}
                 onChange={(e) => setLinkedin(e.target.value)}
                 placeholder="https://linkedin.com/in/your-handle"
-                className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
               />
             </Field>
 
@@ -461,7 +461,7 @@ export const MyNetWizard = ({
                     value={website}
                     onChange={(e) => setWebsiteValue(e.target.value)}
                     placeholder="https://your-startup.com"
-                    className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                    className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
                   />
                 </Field>
 
@@ -567,12 +567,12 @@ export const MyNetWizard = ({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Marcus Vey"
-                  className="h-11 bg-background border-border focus-visible:border-gold/60"
+                  className="h-11 bg-background border-border focus-visible:border-gold"
                 />
               </Field>
               <Field label="Best fit headline" required>
                 <Select value={headline} onValueChange={setHeadline}>
-                  <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60">
+                  <SelectTrigger className="h-11 bg-background border-border focus:border-gold">
                     <SelectValue placeholder="Pick the role you fit best" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
@@ -596,7 +596,7 @@ export const MyNetWizard = ({
                 onChange={(e) => setBio(e.target.value)}
                 rows={4}
                 placeholder="What you've shipped. Where you want to focus next. Why a founder should reach out."
-                className="bg-background border-border focus-visible:border-gold/60"
+                className="bg-background border-border focus-visible:border-gold"
               />
             </Field>
 
@@ -606,7 +606,7 @@ export const MyNetWizard = ({
                   value={lookingCommitment}
                   onValueChange={setLookingCommitment}
                 >
-                  <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60">
+                  <SelectTrigger className="h-11 bg-background border-border focus:border-gold">
                     <SelectValue placeholder="How much can you give?" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
@@ -678,7 +678,7 @@ export const MyNetWizard = ({
                 value={projectTitle}
                 onChange={(e) => setProjectTitle(e.target.value)}
                 placeholder="e.g. Vertical AI for logistics"
-                className="h-11 bg-background border-border focus-visible:border-gold/60"
+                className="h-11 bg-background border-border focus-visible:border-gold"
               />
             </Field>
 
@@ -688,7 +688,7 @@ export const MyNetWizard = ({
                 onChange={(e) => setProjectDesc(e.target.value)}
                 rows={3}
                 placeholder="One or two sentences. Stage, market, what's already shipped."
-                className="bg-background border-border focus-visible:border-gold/60"
+                className="bg-background border-border focus-visible:border-gold"
               />
             </Field>
 
@@ -718,7 +718,7 @@ export const MyNetWizard = ({
                     value={projectCommitment}
                     onValueChange={setProjectCommitment}
                   >
-                    <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60">
+                    <SelectTrigger className="h-11 bg-background border-border focus:border-gold">
                       <SelectValue placeholder="What you need from them" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border">
@@ -761,7 +761,7 @@ export const MyNetWizard = ({
                     value={projectKeywords}
                     onChange={(e) => setProjectKeywords(e.target.value)}
                     placeholder="e.g. payments, fintech, ex-Stripe"
-                    className="h-11 bg-background border-border focus-visible:border-gold/60"
+                    className="h-11 bg-background border-border focus-visible:border-gold"
                   />
                 </Field>
               </div>
@@ -813,7 +813,7 @@ const Intro = ({
 
   return (
     <div className="max-w-5xl mx-auto text-center animate-fade-up">
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold-soft bg-gold/5 mb-6">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
         <Sparkles className="h-3 w-3 text-gold" />
         <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-gold">
           {rejected ? "Resubmit your profile" : "Welcome to MyNet"}
@@ -842,7 +842,7 @@ const Intro = ({
         {steps.map((s) => (
           <div
             key={s.num}
-            className="relative rounded-sm border border-border bg-card/40 p-6 hover:border-gold/40 transition-colors group"
+            className="relative rounded-sm border border-border bg-card/40 p-6 hover:border-gold transition-colors group"
           >
             <div className="font-mono text-3xl text-gold mb-3 tracking-[0.2em] group-hover:translate-x-0.5 transition-transform">
               {s.num}
@@ -883,9 +883,9 @@ const Stepper = ({ active }: { active: number }) => (
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-sm border text-[11px] font-mono ${
                   current
-                    ? "border-gold/60 bg-gold/10 text-gold"
+                    ? "border-gold bg-gold text-gold"
                     : done
-                      ? "border-gold/40 bg-gold/5"
+                      ? "border-gold bg-gold"
                       : "border-border bg-card/40"
                 }`}
               >
@@ -898,7 +898,7 @@ const Stepper = ({ active }: { active: number }) => (
             {i < STEP_LABELS.length - 1 && (
               <div
                 className={`flex-1 h-px ${
-                  i < active ? "bg-gold/40" : "bg-border"
+                  i < active ? "bg-gold" : "bg-border"
                 }`}
               />
             )}
@@ -997,7 +997,7 @@ const AvatarField = ({
         type="button"
         onClick={onPick}
         aria-label="Upload profile picture"
-        className="h-24 w-24 rounded-sm border-2 border-dashed border-border hover:border-gold/60 transition-colors bg-background overflow-hidden flex items-center justify-center flex-shrink-0"
+        className="h-24 w-24 rounded-sm border-2 border-dashed border-border hover:border-gold transition-colors bg-background overflow-hidden flex items-center justify-center flex-shrink-0"
       >
         {previewUrl ? (
           <img
@@ -1047,10 +1047,10 @@ const ResumeRow = ({
 }) => (
   <div
     className={`rounded-sm border bg-background p-3 flex items-center gap-3 ${
-      pending ? "border-gold/50" : "border-border"
+      pending ? "border-gold" : "border-border"
     }`}
   >
-    <div className="h-10 w-10 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+    <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
       <FileText className="h-4 w-4 text-gold" />
     </div>
     <div className="flex-1 min-w-0">
@@ -1060,7 +1060,7 @@ const ResumeRow = ({
         {pending && (
           <span className="text-gold normal-case tracking-normal">
             {" "}
-            · Ready to upload
+            Â· Ready to upload
           </span>
         )}
       </p>
@@ -1091,11 +1091,11 @@ const ModeCard = ({
 }) => (
   <button
     onClick={onClick}
-    className="group relative rounded-sm border border-border bg-card/40 p-8 text-left hover:border-gold/50 hover:bg-card/60 transition-all"
+    className="group relative rounded-sm border border-border bg-card/40 p-8 text-left hover:border-gold hover:bg-card/60 transition-all"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+    <div className="absolute inset-0 bg-gradient-to-br from-gold via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
     <div className="relative">
-      <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold/40 bg-gold/10 text-gold mb-6 group-hover:bg-gold/20 transition-colors">
+      <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold text-white mb-6 group-hover:bg-gold transition-colors">
         {icon}
       </div>
       <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold mb-3">

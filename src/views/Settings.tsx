@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import { Loader2, LogOut, Mail, Save, ShieldCheck, Trash2 } from "lucide-react";
@@ -155,7 +155,7 @@ const Settings = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-2 h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                  className="mt-2 h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
                 />
               </div>
               <Button
@@ -198,7 +198,7 @@ const Settings = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
-                  className="mt-2 h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                  className="mt-2 h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
                 />
               </div>
               <Button

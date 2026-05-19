@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /**
  * Lightweight privacy notice that floats above the page on first
  * visit. Polln8 uses Plausible analytics (no cookies, no PII tracking),
@@ -55,7 +55,7 @@ export const PrivacyBanner = () => {
       aria-label="Privacy notice"
       className="fixed inset-x-3 bottom-3 z-50 md:inset-x-auto md:right-4 md:bottom-4 md:max-w-md"
     >
-      <div className="relative rounded-sm border border-gold/40 bg-card/95 backdrop-blur shadow-lg p-4 pr-10">
+      <div className="relative rounded-sm border border-gold bg-card/95 backdrop-blur shadow-lg p-4 pr-10">
         <p className="text-xs leading-relaxed text-foreground">
           Polln8 uses{" "}
           <a

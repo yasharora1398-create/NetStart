@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
+﻿import { ReactNode } from "react";
 import { Signal, Wifi, BatteryFull } from "lucide-react";
 
 export const PhoneFrame = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
   <div className={`relative mx-auto ${className}`} style={{ width: 380 }}>
     {/* Glow */}
-    <div className="absolute -inset-8 bg-gradient-to-b from-gold/20 via-gold/5 to-transparent blur-3xl -z-10" />
+    <div className="absolute -inset-8 bg-gradient-to-b from-gold via-gold to-transparent blur-3xl -z-10" />
 
     {/* Device */}
     <div className="relative rounded-[3rem] bg-gradient-to-b from-[#222] to-[#0a0a0a] p-[3px] shadow-card">

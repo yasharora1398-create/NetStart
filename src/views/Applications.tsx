@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /**
  * Applications page. Wraps the existing ApplicationsPanel inside the
  * standard AppLayout so it has its own first-class route. Both
@@ -55,7 +55,7 @@ const Applications = () => {
       >
         <div className="container py-10">
           <header className="mb-8">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-sm border border-gold-soft bg-gold/5 px-3 py-1.5">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-sm border border-gold bg-gold px-3 py-1.5">
               <Inbox className="size-3 text-gold" />
               <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-gold">
                 Applications

@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -105,7 +105,7 @@ export const Autocomplete = ({
           placeholder={placeholder}
           autoComplete="off"
           className={cn(
-            "h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20 pr-9",
+            "h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20 pr-9",
             inputClassName,
           )}
         />
@@ -126,7 +126,7 @@ export const Autocomplete = ({
                     className={cn(
                       "w-full text-left px-3 py-2 text-sm flex items-center justify-between transition-colors",
                       isActive
-                        ? "bg-gold/10 text-foreground"
+                        ? "bg-gold text-foreground"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >

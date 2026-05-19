@@ -1,4 +1,4 @@
-/* Helvetica everywhere. No Google Fonts dependency: every device
+﻿/* Helvetica everywhere. No Google Fonts dependency: every device
    ships either Helvetica (macOS/iOS), an Arial clone (Windows/Android),
    or one of the named substitutes below. Mono labels fall back to the
    OS's system monospace so we keep the visual category without
@@ -188,7 +188,7 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .border-gold-soft {
+  .border-gold {
     border-color: hsl(var(--gold) / 0.3);
   }
   .grain::before {
@@ -393,7 +393,7 @@
   /* GLASS-SIDEBAR - exact spec from Sidebar.html design handoff.
      Frosted-glass panel with a sub-pixel chromatic edge that hugs the
      22px-rounded perimeter. Sits 12px in from top/left/bottom; 224px
-     wide. Body is a translucent white→sand gradient with strong blur
+     wide. Body is a translucent whiteâ†’sand gradient with strong blur
      so the page beneath shows through. Bevel via inset highlights.
      The rainbow ::before is masked to only show on the rim. */
   .glass-sidebar {
@@ -1073,7 +1073,7 @@
   }
 }
 
-/* ─── Mobile breakpoint overrides ─────────────────────────────────
+/* â”€â”€â”€ Mobile breakpoint overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    On phone-sized viewports the desktop sidebar is replaced by the
    <MobileBottomNav> (rendered in AppLayout). The sidebar still
    mounts so its theme toggle wiring stays consistent across

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /**
  * Three-step first-visit overlay shown on MyNet. Walks new users
  * through "what is this page", "what to fill in", "what happens
@@ -98,7 +98,7 @@ export const OnboardingTour = ({ userId }: Props) => {
         onClick={dismiss}
         aria-hidden
       />
-      <div className="relative z-10 w-full max-w-md rounded-sm border border-gold/40 bg-card shadow-card overflow-hidden">
+      <div className="relative z-10 w-full max-w-md rounded-sm border border-gold bg-card shadow-card overflow-hidden">
         <div className="absolute inset-0 bg-gradient-spotlight opacity-50 pointer-events-none" />
         <div className="relative p-8">
           <button
@@ -110,7 +110,7 @@ export const OnboardingTour = ({ userId }: Props) => {
             <X className="h-4 w-4" />
           </button>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold/40 bg-gold/5 mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
             <Sparkles className="h-3 w-3 text-gold" />
             <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
               {current.badge}
@@ -140,7 +140,7 @@ export const OnboardingTour = ({ userId }: Props) => {
                     i === step
                       ? "h-1.5 w-6 rounded-full bg-gold"
                       : i < step
-                      ? "h-1.5 w-1.5 rounded-full bg-gold/60"
+                      ? "h-1.5 w-1.5 rounded-full bg-gold"
                       : "h-1.5 w-1.5 rounded-full bg-border"
                   }
                 />

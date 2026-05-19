@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -117,7 +117,7 @@ export const ProjectDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl bg-card border-gold-soft">
+      <DialogContent className="max-w-xl bg-card border-gold">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
             {editing ? "Edit project" : "New project"}
@@ -144,7 +144,7 @@ export const ProjectDialog = ({
                   <FormControl>
                     <Input
                       placeholder="e.g. Vertical AI for logistics"
-                      className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                      className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
                       {...field}
                     />
                   </FormControl>
@@ -165,7 +165,7 @@ export const ProjectDialog = ({
                     <Textarea
                       rows={3}
                       placeholder="One or two sentences. Stage, market, what's already shipped."
-                      className="bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                      className="bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
                       {...field}
                     />
                   </FormControl>
@@ -212,7 +212,7 @@ export const ProjectDialog = ({
                         value={field.value}
                         onValueChange={field.onChange}
                       >
-                        <SelectTrigger className="h-11 bg-background border-border focus:border-gold/60 focus:ring-gold/20">
+                        <SelectTrigger className="h-11 bg-background border-border focus:border-gold focus:ring-gold/20">
                           <SelectValue placeholder="What you need from them" />
                         </SelectTrigger>
                         <SelectContent className="bg-card border-border">
@@ -282,7 +282,7 @@ export const ProjectDialog = ({
                     <FormControl>
                       <Input
                         placeholder="e.g. payments, fintech, ex-Stripe"
-                        className="h-11 bg-background border-border focus-visible:border-gold/60 focus-visible:ring-gold/20"
+                        className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold/20"
                         {...field}
                       />
                     </FormControl>

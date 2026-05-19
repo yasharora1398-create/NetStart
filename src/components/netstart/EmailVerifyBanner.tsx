@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Loader2, MailWarning, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,8 @@ export const EmailVerifyBanner = () => {
   return (
     <div className="relative z-50 px-3 sm:px-6 pt-2 pb-1">
       <div className="container max-w-3xl">
-        <div className="rounded-sm border border-gold/40 bg-card/95 backdrop-blur-md shadow-lg p-3 sm:p-4 flex items-center gap-3 flex-wrap">
-          <div className="h-8 w-8 rounded-sm bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+        <div className="rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-lg p-3 sm:p-4 flex items-center gap-3 flex-wrap">
+          <div className="h-8 w-8 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
             <MailWarning className="h-4 w-4 text-gold" />
           </div>
           <div className="flex-1 min-w-0">

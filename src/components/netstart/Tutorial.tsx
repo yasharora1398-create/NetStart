@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 const LS_KEY = "netstart_tour_seen";
@@ -79,7 +79,7 @@ export const Tutorial = () => {
   if (stage === "hidden") return null;
 
   const cardClass =
-    "relative bg-obsidian/95 backdrop-blur-xl border border-gold/30 rounded-sm p-5 shadow-elite w-[90vw] max-w-sm";
+    "relative bg-obsidian/95 backdrop-blur-xl border border-gold rounded-sm p-5 shadow-elite w-[90vw] max-w-sm";
 
   if (stage === "welcome") {
     return (
@@ -113,7 +113,7 @@ export const Tutorial = () => {
 
   return (
     <div className="fixed bottom-5 right-5 md:bottom-8 md:right-8 z-50 animate-fade-up">
-      <div className={cardClass.replace("border-gold/30", "border-primary/40")}>
+      <div className={cardClass.replace("border-gold", "border-primary/40")}>
         <button
           onClick={dismiss}
           className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"

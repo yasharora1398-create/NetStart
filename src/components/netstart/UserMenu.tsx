@@ -36,9 +36,9 @@ export const UserMenu = () => {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Open account menu"
-        className="flex items-center gap-2 rounded-sm border border-gold-soft bg-gold/5 hover:bg-gold/10 transition-colors px-3 h-9"
+        className="flex items-center gap-2 rounded-sm border border-gold bg-gold hover:bg-gold transition-colors px-3 h-9"
       >
-        <span className="h-6 w-6 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center text-[10px] font-mono text-gold">
+        <span className="h-6 w-6 rounded-full bg-gold border border-gold flex items-center justify-center text-[10px] font-mono text-white">
           {initials(name, email)}
         </span>
         <span className="hidden sm:block text-sm text-foreground max-w-[140px] truncate">

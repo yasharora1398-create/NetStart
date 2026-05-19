@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Thread sidebar for the /chats page. Renders one row per known
  * counterparty: avatar, name, last-message preview, time, plus a
  * pending / declined badge for unaccepted threads. Clicking a row
  * navigates to /chats/:contactId.
  *
  * The list is filterable by name via the small search input at the
- * top — handy once a user has more than ~10 threads.
+ * top â€” handy once a user has more than ~10 threads.
  */
 import { useMemo, useState } from "react";
 import { Inbox, PanelLeftClose, Search } from "lucide-react";
@@ -80,7 +80,7 @@ export const ChatThreadList = ({
           big display title. Desktop keeps the compact tile header
           to fit the two-column split layout. */}
       <div className="md:hidden px-5 pt-5 pb-2">
-        <div className="mb-3 inline-flex items-center gap-1.5 rounded-sm border border-gold-soft bg-gold/5 px-2.5 py-1">
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-2.5 py-1">
           <Inbox className="size-3 text-gold" aria-hidden />
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-gold">
             Threads
@@ -112,7 +112,7 @@ export const ChatThreadList = ({
           )}
         </div>
       </div>
-      {/* Search input — desktop only. The native app has no
+      {/* Search input â€” desktop only. The native app has no
           per-thread search in the list, so mobile drops it too. */}
       <div className="hidden md:block border-b border-border px-3 py-2">
         <div className="relative">
@@ -267,7 +267,7 @@ const StateBadge = ({
   const label = state === "inbound" ? "Pending" : fromMe ? "Sent" : "Pending";
   const tone =
     state === "inbound"
-      ? "border-gold/40 bg-gold/10 text-gold"
+      ? "border-gold bg-gold text-gold"
       : "border-border bg-muted/40 text-muted-foreground";
   return (
     <span

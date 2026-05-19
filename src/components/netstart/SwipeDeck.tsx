@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Check, X, Bookmark, Zap, Target, Clock } from "lucide-react";
 import { BUILDERS } from "@/lib/builders";
 
@@ -49,7 +49,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent" />
 
           {/* Match badge */}
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-obsidian/80 backdrop-blur border border-gold/30">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-obsidian/80 backdrop-blur border border-gold">
             <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-gold" />
             <span className="font-mono text-[10px] text-gold">{current.match}% MATCH</span>
           </div>
@@ -89,7 +89,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
 
           <div className="flex flex-wrap gap-1">
             {current.skills.slice(0, compact ? 4 : current.skills.length).map((s) => (
-              <span key={s} className={`${compact ? "px-1.5 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"} border border-border rounded-sm text-muted-foreground hover:border-gold/40 hover:text-foreground transition-colors`}>
+              <span key={s} className={`${compact ? "px-1.5 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"} border border-border rounded-sm text-muted-foreground hover:border-gold hover:text-foreground transition-colors`}>
                 {s}
               </span>
             ))}
@@ -112,7 +112,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
 
       {!compact && (
         <p className="text-center text-xs text-muted-foreground mt-6 font-mono uppercase tracking-widest">
-          Tap <span className="text-gold">target</span> to connect · <span className="text-foreground">×</span> to pass
+          Tap <span className="text-gold">target</span> to connect Â· <span className="text-foreground">Ã—</span> to pass
         </p>
       )}
     </div>
