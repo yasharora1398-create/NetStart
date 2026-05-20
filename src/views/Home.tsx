@@ -199,8 +199,7 @@ const CountUp = ({
 };
 
 // Hero headline split per word so each can stagger-in on mount.
-// Slogan: "Find a cofounder, faster."
-const HERO_WORDS: string[] = ["Find", "a", "cofounder,", "faster."];
+const HERO_WORDS: string[] = ["Cofounders", "found", "efficiently."];
 
 const Home = () => {
   // Keeps the theme toggle's choice respected even though this page
@@ -789,7 +788,7 @@ const FAQ = () => {
     },
     {
       q: "Is it free?",
-      a: "Yes, for now. We may charge later, likely for premium discovery or extra messaging, but the core network stays free for everyone who's been vetted in.",
+      a: "Yes. Polln8 is free.",
     },
   ];
 

@@ -66,7 +66,7 @@ import { useForceLightMode } from "@/hooks/useForceLightMode";
 const SignUp = () => {
   useForceLightMode();
   usePageMeta({
-    title: "Sign Up | Find a cofounder, faster",
+    title: "Sign Up | Cofounders found efficiently",
     description:
       "Create a Polln8 account in a minute. Match with vetted technical cofounders and founding engineers, or find an early-stage startup worth joining. Free during early access.",
     path: "/signup",

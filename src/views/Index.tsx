@@ -53,9 +53,9 @@ const WHY: {
 
 const Index = () => {
   usePageMeta({
-    title: "Polln8 | Find a cofounder, faster",
+    title: "Polln8 | Cofounders found efficiently",
     description:
-      "Find a cofounder, faster. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
+      "Cofounders found efficiently. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
     path: "/",
   });
   const { user } = useAuth();

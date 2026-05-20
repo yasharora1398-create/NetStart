@@ -100,7 +100,7 @@ const STEPS: {
 
 const HowItWorks = () => {
   usePageMeta({
-    title: "How Polln8 Works | Find a cofounder, faster",
+    title: "How Polln8 Works | Cofounders found efficiently",
     description:
       "How Polln8 matches founders with vetted technical cofounders, and builders with early-stage startups worth joining. Verify, rank, connect in two clicks.",
     path: "/how",
@@ -125,7 +125,7 @@ const HowItWorks = () => {
         <Reveal>
           <div className="text-center lg:text-left">
             <h1 className="font-display text-4xl md:text-6xl tracking-[-0.04em] leading-[0.95] mb-6">
-              Find a cofounder, faster.
+              Cofounders found efficiently.
             </h1>
             <p className="text-base text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-20 leading-relaxed">
               Five steps from signup to your first match. Polln8 verifies

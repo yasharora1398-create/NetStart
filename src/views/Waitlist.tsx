@@ -33,9 +33,9 @@ type Persona = "founder" | "builder";
 
 const Waitlist = () => {
   usePageMeta({
-    title: "Polln8 | Find a cofounder, faster",
+    title: "Polln8 | Cofounders found efficiently",
     description:
-      "Find a cofounder, faster. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
+      "Cofounders found efficiently. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
     path: "/",
   });
   const { mode, toggle } = useTheme();
@@ -352,7 +352,7 @@ const Waitlist = () => {
             />
             <div className="relative">
               <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-[-0.03em] leading-[1] text-foreground mb-5">
-                Find a cofounder, faster.
+                Cofounders found efficiently.
               </h2>
               <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-10">
                 Polln8 is cofounder matchmaking for early-stage startups.
