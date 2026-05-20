@@ -86,7 +86,7 @@ const STEPS: {
     body: "Browse a deck of cofounder candidates ranked against your profile. Three actions per card.",
     detail:
       "Connect, save, or pass. No likes, no maybes. AI ranks the deck against your skills, your startup, and what you're looking to cofound.",
-    visual: <StepMatch />,
+    visual: <StepMatch anonymous />,
   },
   {
     n: "5",

@@ -555,6 +555,10 @@ export const StepMatch = ({
       ? [undefined, undefined, undefined]
       : (portraits ?? [builder1Url, builder2Url, builder3Url]);
   const [front, back1, back2] = photos;
+  // When anonymous, also suppress the % MATCH pill — without a
+  // specific person it has nothing to anchor to.
+  const showMatch = !anonymous;
+
   return (
     <div
       style={{
@@ -578,7 +582,7 @@ export const StepMatch = ({
         <DeckCard
           position="back-2"
           portrait={back2}
-          match="87% MATCH"
+          match={showMatch ? "87% MATCH" : undefined}
           name="Devon Ortiz"
           sub="Design lead · ex-Figma"
           location="Austin, TX"
@@ -587,7 +591,7 @@ export const StepMatch = ({
         <DeckCard
           position="back-1"
           portrait={back1}
-          match="91% MATCH"
+          match={showMatch ? "91% MATCH" : undefined}
           name="Aisha Bello"
           sub="Founding PM · ex-Notion"
           location="New York, NY"
@@ -596,7 +600,7 @@ export const StepMatch = ({
         <DeckCard
           position="front"
           portrait={front}
-          match="94% MATCH"
+          match={showMatch ? "94% MATCH" : undefined}
           name="Riley Pham"
           sub="Senior eng · ex-Stripe"
           location="San Francisco, CA"
@@ -630,7 +634,9 @@ const DeckCard = ({
   // instead of a real portrait. Used by the waitlist hero so the
   // marketing page doesn't promise specific people.
   portrait?: string;
-  match: string;
+  // Optional - when omitted, the floating "% MATCH" pill is not
+  // drawn at all.
+  match?: string;
   name: string;
   sub: string;
   location: string;
@@ -761,39 +767,41 @@ const DeckCard = ({
             pointerEvents: "none",
           }}
         />
-        <span
-          style={{
-            position: "absolute",
-            left: 12,
-            bottom: 12,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "5px 9px 5px 8px",
-            background: "rgba(21, 23, 26,0.78)",
-            border: `1px solid rgba(244,237,217,0.3)`,
-            borderRadius: 999,
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            fontFamily: FONT_MONO,
-            fontSize: 10,
-            fontWeight: 500,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "#FFFFFF",
-          }}
-        >
+        {match ? (
           <span
             style={{
-              width: 5,
-              height: 5,
-              borderRadius: "50%",
-              background: MARIGOLD,
-              boxShadow: `0 0 8px rgba(253, 232, 219,0.55)`,
+              position: "absolute",
+              left: 12,
+              bottom: 12,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "5px 9px 5px 8px",
+              background: "rgba(21, 23, 26,0.78)",
+              border: `1px solid rgba(244,237,217,0.3)`,
+              borderRadius: 999,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              fontFamily: FONT_MONO,
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "#FFFFFF",
             }}
-          />
-          {match}
-        </span>
+          >
+            <span
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: MARIGOLD,
+                boxShadow: `0 0 8px rgba(253, 232, 219,0.55)`,
+              }}
+            />
+            {match}
+          </span>
+        ) : null}
       </div>
       <div
         style={{

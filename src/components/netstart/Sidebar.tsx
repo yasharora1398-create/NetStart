@@ -15,8 +15,6 @@ import { ChevronLeft, PanelLeftOpen } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
-import { ThemeToggleButton } from "@/components/netstart/ThemeToggleButton";
-import { Button } from "@/components/ui/button";
 
 const COLLAPSED_KEY = "polln8.sidebar.collapsed";
 const EXPANDED_WIDTH = "248px";
@@ -99,12 +97,19 @@ export const Sidebar = () => {
   // misclick on the avatar menu doesn't drop the session.
   const handleSignOut = () => confirmSignOut();
 
-  // When collapsed, hide the full sidebar panel and render a
-  // floating top-right strip in the HomeAuthStrip style instead.
-  // The strip has the user pill (or sign in / sign up), the theme
-  // toggle, and an expand button to bring the sidebar back.
+  // When collapsed, render a thin vertical icon rail on the left
+  // edge (mirroring the public IconRail style) instead of the full
+  // glass panel. The expand button sits at the top of the rail in
+  // the same spot the collapse chevron used to be, so toggling
+  // open/closed always lands the cursor in the same area.
   if (collapsed) {
-    return <CollapsedTopBar onExpand={() => setCollapsed(false)} />;
+    const isAdminEmail = (user?.email ?? "").toLowerCase() === ADMIN_EMAIL;
+    return (
+      <CollapsedRail
+        onExpand={() => setCollapsed(false)}
+        showAdmin={isAdminEmail}
+      />
+    );
   }
 
   return (
@@ -257,73 +262,89 @@ export const Sidebar = () => {
 // sign-in/up controls + theme toggle) plus an extra "expand
 // sidebar" button so they can bring the nav back.
 
-const userPillName = (
-  user: { email?: string | null; user_metadata?: Record<string, unknown> } | null,
-): string => {
-  if (!user) return "you";
-  const meta = user.user_metadata as { name?: string } | undefined;
-  const raw = meta?.name?.trim() || user.email?.split("@")[0] || "you";
-  const first = raw.split(/\s+/)[0] ?? raw;
-  return first.length > 14 ? `${first.slice(0, 13)}â€¦` : first;
+// Collapsed sidebar: a thin vertical icon rail pinned to the left
+// edge, mirroring the public IconRail. The expand button sits at
+// the top in the same area as the collapse chevron used to be, so
+// the toggle is in a consistent location whether the sidebar is
+// open or closed. The expand button is the ONLY opaque button on
+// the rail — every other icon is transparent at rest so the user
+// knows exactly what brings the sidebar back.
+
+type RailItem = {
+  to: string;
+  label: string;
+  icon: React.ComponentType;
+  end?: boolean;
 };
 
-const CollapsedTopBar = ({ onExpand }: { onExpand: () => void }) => {
-  const { user, loading } = useAuth();
-  const confirmSignOut = useConfirmSignOut();
+const RAIL_ITEMS: RailItem[] = [
+  { to: "/", label: "Home", icon: HomeIcon, end: true },
+  { to: "/mynet", label: "MyNet", icon: MyNetIcon },
+  { to: "/match", label: "Match", icon: MatchIcon },
+  { to: "/saved", label: "Saved", icon: SavedIcon },
+  { to: "/chats", label: "Chat", icon: ChatIcon },
+  { to: "/how", label: "How it works", icon: HowItWorksIcon },
+  { to: "/standards", label: "Standards", icon: StandardsIcon },
+  { to: "/download", label: "Download", icon: DownloadIcon },
+];
 
-  if (loading) return null;
+const CollapsedRail = ({
+  onExpand,
+  showAdmin,
+}: {
+  onExpand: () => void;
+  showAdmin: boolean;
+}) => {
+  const items: RailItem[] = showAdmin
+    ? [...RAIL_ITEMS, { to: "/admin", label: "Admin", icon: AdminIcon }]
+    : RAIL_ITEMS;
 
   return (
-    <div className="hidden md:flex fixed top-4 right-5 z-40 items-center gap-2">
+    <nav
+      aria-label="Primary"
+      className="fixed left-3 top-4 z-40 hidden md:flex flex-col items-center gap-2"
+    >
+      {/* Expand: only opaque button on the rail. Same top-left area
+          as the collapse chevron in the open panel. */}
       <button
         type="button"
         onClick={onExpand}
         aria-label="Expand sidebar"
         title="Expand sidebar"
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-gold bg-gold text-white transition-colors hover:bg-gold"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-gold bg-gold text-white shadow-[0_0_18px_hsl(var(--gold)/0.35)] transition-transform hover:scale-105"
       >
         <PanelLeftOpen className="h-4 w-4" />
       </button>
 
-      {user ? (
-        <>
-          <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-[11px] font-mono uppercase tracking-[0.18em] text-white">
-            {userPillName(user)}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => void confirmSignOut()}
-            className="font-mono text-[11px] uppercase tracking-[0.18em]"
-          >
-            Sign out
-          </Button>
-        </>
-      ) : (
-        <>
-          <Link to="/signin">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="font-mono text-[11px] uppercase tracking-[0.18em]"
+      <div className="flex flex-col gap-2 mt-2">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                [
+                  "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-transparent backdrop-blur",
+                  "text-muted-foreground transition-all duration-200",
+                  "hover:scale-110 hover:border-gold hover:text-gold",
+                  isActive ? "border-gold text-gold" : "border-border",
+                ].join(" ")
+              }
             >
-              Sign in
-            </Button>
-          </Link>
-          <Link to="/signup">
-            <Button
-              variant="gold"
-              size="sm"
-              className="font-mono text-[11px] uppercase tracking-[0.18em]"
-            >
-              Sign up
-            </Button>
-          </Link>
-        </>
-      )}
-
-      <ThemeToggleButton />
-    </div>
+              <Icon />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full border border-gold bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+              >
+                {item.label}
+              </span>
+            </NavLink>
+          );
+        })}
+      </div>
+    </nav>
   );
 };
 
