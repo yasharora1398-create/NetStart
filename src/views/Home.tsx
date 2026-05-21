@@ -431,7 +431,7 @@ const RoleSplit = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
   return (
-    <section className="relative border-y border-border bg-gradient-to-b from-card/40 via-background to-card/40 px-4 sm:px-8 py-24 md:py-32">
+    <section className="relative border-y border-border bg-card/40 px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-12 text-center leading-[1.05] font-bold">
           Same network, two angles.
@@ -444,7 +444,7 @@ const RoleSplit = () => {
                 I'm a founder
               </p>
               <h3 className="font-display text-3xl mb-4 leading-tight font-semibold">
-                Stop pitching strangers.
+                Pitch one person, the right one.
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                 Post what you're building once. We surface builders whose
@@ -838,7 +838,7 @@ const FinalCTA = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
   return (
-    <section className="relative border-t border-border bg-gradient-to-b from-card/40 to-background px-4 sm:px-8 py-32 md:py-40">
+    <section className="relative border-t border-border bg-card/40 px-4 sm:px-8 py-32 md:py-40">
       <div
         aria-hidden
         className="absolute inset-0 -z-10"

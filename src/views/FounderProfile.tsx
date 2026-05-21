@@ -113,7 +113,7 @@ const FounderProfile = () => {
             </div>
           ) : (
             <>
-              <header className="rounded-sm border border-gold bg-gradient-to-br from-gold to-transparent p-6 sm:p-8 mb-10">
+              <header className="rounded-sm border border-gold bg-card p-6 sm:p-8 mb-10">
                 <div className="flex items-start gap-5 flex-wrap">
                   {avatarUrl ? (
                     <img

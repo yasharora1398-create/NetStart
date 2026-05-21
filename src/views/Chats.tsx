@@ -335,7 +335,7 @@ const Chats = () => {
               <ul className="space-y-3 mb-10 border-t border-border pt-6">
                 {[
                   { t: "Mutual before chat", b: "A chat request has to be accepted before either side can send a free message." },
-                  { t: "Mute, don't ghost", b: "Open the thread menu to mute it. The other side never knows." },
+                  { t: "Mute a thread", b: "Open the thread menu to mute. The other side never knows." },
                   { t: "Cross-device", b: "Threads sync everywhere you're signed in. Reply from laptop, follow up on phone." },
                   { t: "Decline or delete", b: "Decline an inbound request to stop further messages. Delete a thread to remove it from your list." },
                 ].map((d) => (

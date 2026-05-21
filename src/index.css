@@ -56,10 +56,11 @@
     --obsidian: 60 12% 97%;
     --carbon: 48 13% 94%;
 
-    /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(146 51% 25%), hsl(147 53% 19%));
-    --gradient-obsidian: linear-gradient(180deg, hsl(60 12% 97%) 0%, hsl(48 13% 94%) 100%);
-    --gradient-spotlight: radial-gradient(ellipse at top, hsl(146 51% 25% / 0.10), transparent 60%);
+    /* "Gradient" tokens kept for source compatibility but resolved
+       to solid fills - the site is intentionally flat. */
+    --gradient-gold: hsl(146 51% 25%);
+    --gradient-obsidian: hsl(60 12% 97%);
+    --gradient-spotlight: none;
 
     --shadow-elite: 0 4px 16px rgba(15, 20, 16, 0.14);
     --shadow-card: 0 2px 8px rgba(15, 20, 16, 0.06);
@@ -121,10 +122,9 @@
     --gold-deep: 144 30% 48%;
     --gold-glow: 142 15% 8%;
 
-    --gradient-gold: linear-gradient(135deg, hsl(142 28% 42%), hsl(144 30% 48%));
-    /* Spotlight on body background - much more restrained now (was
-       0.12). Looks like a faint ambient lift, not a beacon. */
-    --gradient-spotlight: radial-gradient(ellipse at top, hsl(142 28% 42% / 0.04), transparent 60%);
+    /* Same flat-fill story in dark mode. */
+    --gradient-gold: hsl(142 28% 42%);
+    --gradient-spotlight: none;
 
     --shadow-elite: 0 4px 16px rgba(0, 0, 0, 0.7);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
@@ -190,6 +190,28 @@
   }
   .border-gold {
     border-color: hsl(var(--gold) / 0.3);
+  }
+
+  /* StepMatch deck: nudges up + down as the user scrolls past the
+     mockup. Uses CSS scroll-driven animations (animation-timeline:
+     view()) which is shipping in Chrome / Edge / Firefox 121+ /
+     Safari 17.4+. Browsers without support just see the static
+     mockup, no fallback needed. The shift is intentionally small
+     so the cards still read as cards, not as a parallax gimmick. */
+  @keyframes deck-scroll {
+    from {
+      transform: translateY(28px);
+    }
+    to {
+      transform: translateY(-28px);
+    }
+  }
+  @supports (animation-timeline: view()) {
+    .step-match-scroll {
+      animation: deck-scroll linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
   }
   .grain::before {
     content: '';

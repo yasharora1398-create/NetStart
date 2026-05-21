@@ -561,6 +561,7 @@ export const StepMatch = ({
 
   return (
     <div
+      className="step-match-scroll"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -656,31 +657,27 @@ const DeckCard = ({
         background: CARD_BG,
         backdropFilter: "blur(24px) saturate(150%)",
         WebkitBackdropFilter: "blur(24px) saturate(150%)",
-        border: "1px solid rgba(255, 255, 255, 0.6)",
+        // Thinner outer edge: a single hairline, no inset frost
+        // highlights. Drop shadows still give the card a sense of
+        // float without the chunky white perimeter.
+        border: "0.5px solid rgba(255, 255, 255, 0.35)",
         borderRadius: 18,
         boxShadow: front
           ? [
               "0 1px 2px rgba(21, 23, 26, 0.05)",
               "0 6px 16px rgba(21, 23, 26, 0.08)",
               "0 24px 56px -8px rgba(21, 23, 26, 0.16)",
-              "inset 0 1px 0 rgba(255, 255, 255, 0.9)",
-              "inset 0 -1px 0 rgba(199, 184, 158, 0.3)",
-              "inset 0 0 0 0.5px rgba(255, 255, 255, 0.55)",
             ].join(", ")
           : back2
             ? [
                 "0 1px 2px rgba(21, 23, 26, 0.04)",
                 "0 4px 12px rgba(21, 23, 26, 0.06)",
                 "-8px 16px 32px -8px rgba(21, 23, 26, 0.10)",
-                "inset 0 1px 0 rgba(255, 255, 255, 0.7)",
-                "inset 0 0 0 0.5px rgba(255, 255, 255, 0.4)",
               ].join(", ")
             : [
                 "0 1px 2px rgba(21, 23, 26, 0.04)",
                 "0 4px 12px rgba(21, 23, 26, 0.06)",
                 "8px 16px 32px -8px rgba(21, 23, 26, 0.10)",
-                "inset 0 1px 0 rgba(255, 255, 255, 0.7)",
-                "inset 0 0 0 0.5px rgba(255, 255, 255, 0.4)",
               ].join(", "),
         transform: back2
           ? "translate(-110px, 18px) scale(0.78)"
@@ -728,14 +725,14 @@ const DeckCard = ({
             }}
           />
         ) : (
-          // Anonymous silhouette fallback - neutral grey field with a
-          // generic avatar shape. Same dimensions as the photo, so the
-          // gradient overlay + name pill below keep working unchanged.
+          // Anonymous silhouette fallback - solid neutral field with a
+          // generic avatar shape. (Was a vertical gradient; switched to
+          // a single colour so the card chrome stays flat.)
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: `linear-gradient(180deg, ${LINE_STRONG} 0%, rgba(199, 184, 158, 0.25) 100%)`,
+              background: LINE_STRONG,
               display: "grid",
               placeItems: "center",
             }}
