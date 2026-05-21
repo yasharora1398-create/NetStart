@@ -99,7 +99,7 @@ export const Tutorial = () => {
           </p>
           <button
             onClick={start}
-            className="w-full bg-gradient-gold text-primary-foreground font-medium text-sm py-2.5 rounded-sm transition-shadow"
+            className="w-full bg-primary text-primary-foreground font-medium text-sm py-2.5 rounded-sm transition-shadow"
           >
             Show me around
           </button>

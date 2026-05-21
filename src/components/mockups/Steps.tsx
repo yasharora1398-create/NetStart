@@ -755,15 +755,6 @@ const DeckCard = ({
             </svg>
           </div>
         )}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(180deg, rgba(21, 23, 26,0) 55%, rgba(21, 23, 26,0.55) 100%)",
-            pointerEvents: "none",
-          }}
-        />
         {match ? (
           <span
             style={{

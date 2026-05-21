@@ -137,7 +137,7 @@ const DecisionBtn = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "gold" | "ghost"; height?: string }) => {
   const styles = {
     default: "border border-border bg-card hover:border-destructive hover:text-destructive",
-    gold: "bg-gradient-gold text-primary-foreground scale-110",
+    gold: "bg-primary text-primary-foreground scale-110",
     ghost: "border border-border bg-card hover:border-foreground/40 text-muted-foreground hover:text-foreground",
   }[variant];
   return (

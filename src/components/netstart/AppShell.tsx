@@ -39,7 +39,7 @@ export const AppShell = () => {
       {/* App header */}
       <header className="flex items-center justify-between px-5 py-3 border-b border-border/60 z-20 bg-background">
         <div className="flex items-center gap-1.5">
-          <div className="h-6 w-6 rounded-sm bg-gradient-gold flex items-center justify-center">
+          <div className="h-6 w-6 rounded-sm bg-primary flex items-center justify-center">
             <span className="font-display text-[11px] text-primary-foreground leading-none">
               N
             </span>
@@ -269,7 +269,7 @@ const StartupsScreen = () => (
           </p>
           <button
             type="button"
-            className="px-2.5 py-1 rounded-sm bg-gradient-gold text-primary-foreground text-[10px] font-medium"
+            className="px-2.5 py-1 rounded-sm bg-primary text-primary-foreground text-[10px] font-medium"
           >
             Apply
           </button>

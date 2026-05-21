@@ -15,8 +15,17 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gold: "bg-gradient-gold text-primary-foreground font-semibold tracking-tight transition-all duration-300",
-        outlineGold: "border border-gold text-white bg-transparent hover:bg-gold hover:border-gold transition-all",
+        // bg-primary uses the --primary token directly (was bg-primary, which
+        // is a background-image that only accepts gradient syntax - when the token
+        // was switched to a solid colour the browser ignored it and the button lost
+        // its background entirely). bg-primary always paints solid forest green;
+        // text-primary-foreground stays white-on-green in light mode and black-on-
+        // sage in dark mode, both contrast-safe.
+        gold: "bg-primary text-primary-foreground font-semibold tracking-tight transition-colors duration-200 hover:bg-primary/90",
+        // Outline variant: solid green text on the page background at rest (cream
+        // in light, near-black in dark - text-primary is readable on both). On
+        // hover the surface fills solid green and text flips to white.
+        outlineGold: "border border-gold text-primary bg-transparent hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors",
       },
       size: {
         default: "h-10 px-4 py-2",
