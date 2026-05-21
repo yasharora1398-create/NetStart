@@ -223,7 +223,12 @@ export default function ChatScreen() {
   const styles = useMemo(() => makeStyles(theme), [theme]);
   const params = useLocalSearchParams<{ id: string; intro?: string }>();
   const otherId = String(params.id);
-  const isFake = otherId.startsWith("fake-");
+  // Fake-ID convention was used during early development to mock
+  // chat threads without hitting Supabase. Production has no fake
+  // contacts (the seed_fake_users.sql file was removed and every
+  // synthetic ID purged); the constant stays at false so the
+  // existing `if (isFake)` branches below are unreachable.
+  const isFake = false;
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Msg[]>([]);

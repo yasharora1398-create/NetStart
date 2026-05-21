@@ -348,11 +348,9 @@ export default function MatchScreen() {
           onCtaPress={() => {
             const target = selected;
             addSentRequest(target, "chat");
-            if (!target.userId.startsWith("fake-")) {
-              requestChat(target.userId, null).catch(() => {
-                // Silent — local row still renders.
-              });
-            }
+            requestChat(target.userId, null).catch(() => {
+              // Silent - local row still renders.
+            });
             setSelected(null);
             router.push(`/chat/${target.userId}?intro=1` as never);
           }}

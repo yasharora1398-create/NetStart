@@ -1,0 +1,26 @@
+-- Wipe the 10 seed/test accounts created by seed_fake_users.sql.
+--
+-- Idempotent and harmless on environments where the seed was never
+-- run: the WHERE clause just matches zero rows. Everything that
+-- references these auth.users rows (profiles, projects, applications,
+-- saved_people, saved_projects, chat_contacts, chat_messages,
+-- notifications, push_tokens, user_reports) is FK'd ON DELETE
+-- CASCADE, so wiping the auth.users row also wipes all attached
+-- data. No orphans left behind.
+--
+-- After this migration runs, the seed file itself (seed_fake_users.sql)
+-- has been deleted from the repo so nobody re-seeds by accident.
+
+delete from auth.users
+where email in (
+  'jamie.ross+founder@polln8.com',
+  'sara.le+founder@polln8.com',
+  'theo.becker+founder@polln8.com',
+  'noor.hassan+founder@polln8.com',
+  'kai.suzuki+founder@polln8.com',
+  'maya.chen+builder@polln8.com',
+  'devon.park+builder@polln8.com',
+  'aria.patel+builder@polln8.com',
+  'marcus.vey+builder@polln8.com',
+  'ravi.sharma+builder@polln8.com'
+);
