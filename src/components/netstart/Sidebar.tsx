@@ -262,30 +262,40 @@ export const Sidebar = () => {
 // sign-in/up controls + theme toggle) plus an extra "expand
 // sidebar" button so they can bring the nav back.
 
-// Collapsed sidebar: a thin vertical icon rail pinned to the left
-// edge, mirroring the public IconRail. The expand button sits at
-// the top in the same area as the collapse chevron used to be, so
-// the toggle is in a consistent location whether the sidebar is
-// open or closed. The expand button is the ONLY opaque button on
-// the rail — every other icon is transparent at rest so the user
-// knows exactly what brings the sidebar back.
+// Collapsed sidebar — identical to the public IconRail component.
+// Same container position, same icon-button styles, same hover
+// tooltip pattern. Only difference: the very first item is the
+// opaque gold expand button that brings the full sidebar back, so
+// the user knows exactly which control re-opens the nav.
+import {
+  Bookmark,
+  Compass,
+  Download as DownloadLucide,
+  Flower2,
+  Home as HomeLucide,
+  MessageCircle,
+  ShieldCheck,
+  User as UserLucide,
+  Wrench,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type RailItem = {
   to: string;
   label: string;
-  icon: React.ComponentType;
+  icon: React.ReactNode;
   end?: boolean;
 };
 
 const RAIL_ITEMS: RailItem[] = [
-  { to: "/", label: "Home", icon: HomeIcon, end: true },
-  { to: "/mynet", label: "MyNet", icon: MyNetIcon },
-  { to: "/match", label: "Match", icon: MatchIcon },
-  { to: "/saved", label: "Saved", icon: SavedIcon },
-  { to: "/chats", label: "Chat", icon: ChatIcon },
-  { to: "/how", label: "How it works", icon: HowItWorksIcon },
-  { to: "/standards", label: "Standards", icon: StandardsIcon },
-  { to: "/download", label: "Download", icon: DownloadIcon },
+  { to: "/", label: "Home", icon: <HomeLucide className="size-4" />, end: true },
+  { to: "/mynet", label: "MyNet", icon: <UserLucide className="size-4" /> },
+  { to: "/match", label: "Match", icon: <Flower2 className="size-4" /> },
+  { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
+  { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
+  { to: "/how", label: "How it works", icon: <Compass className="size-4" /> },
+  { to: "/standards", label: "Standards", icon: <ShieldCheck className="size-4" /> },
+  { to: "/download", label: "Download", icon: <DownloadLucide className="size-4" /> },
 ];
 
 const CollapsedRail = ({
@@ -296,54 +306,63 @@ const CollapsedRail = ({
   showAdmin: boolean;
 }) => {
   const items: RailItem[] = showAdmin
-    ? [...RAIL_ITEMS, { to: "/admin", label: "Admin", icon: AdminIcon }]
+    ? [...RAIL_ITEMS, { to: "/admin", label: "Admin", icon: <Wrench className="size-4" /> }]
     : RAIL_ITEMS;
 
   return (
     <nav
       aria-label="Primary"
-      className="fixed left-3 top-4 z-40 hidden md:flex flex-col items-center gap-2"
+      className="fixed left-3 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2 md:flex"
     >
-      {/* Expand: only opaque button on the rail. Same top-left area
-          as the collapse chevron in the open panel. */}
+      {/* Expand button — same shape and dimensions as every other
+          icon button on the rail, but opaque gold instead of the
+          semi-transparent card surface so it stands out as the
+          "bring the sidebar back" affordance. */}
       <button
         type="button"
         onClick={onExpand}
         aria-label="Expand sidebar"
         title="Expand sidebar"
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-gold bg-gold text-white shadow-[0_0_18px_hsl(var(--gold)/0.35)] transition-transform hover:scale-105"
+        className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-gold bg-gold text-white shadow-[0_0_18px_hsl(var(--gold)/0.35)] transition-all duration-200 hover:scale-110"
       >
         <PanelLeftOpen className="h-4 w-4" />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full border border-gold bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+        >
+          Expand sidebar
+        </span>
       </button>
 
-      <div className="flex flex-col gap-2 mt-2">
-        {items.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                [
-                  "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-transparent backdrop-blur",
-                  "text-muted-foreground transition-all duration-200",
-                  "hover:scale-110 hover:border-gold hover:text-gold",
-                  isActive ? "border-gold text-gold" : "border-border",
-                ].join(" ")
-              }
-            >
-              <Icon />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full border border-gold bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
-              >
-                {item.label}
-              </span>
-            </NavLink>
-          );
-        })}
-      </div>
+      {items.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.end}
+          className={({ isActive }) =>
+            cn(
+              "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-card backdrop-blur",
+              "text-muted-foreground transition-all duration-200",
+              "hover:scale-110 hover:bg-gold hover:text-white hover:border-gold hover:shadow-[0_0_18px_hsl(var(--gold)/0.25)]",
+              isActive
+                ? "border-gold text-gold shadow-[0_0_14px_hsl(var(--gold)/0.18)]"
+                : "border-border",
+            )
+          }
+        >
+          {item.icon}
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full border border-gold bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md",
+              "opacity-0 -translate-x-1 transition-all duration-200",
+              "group-hover:opacity-100 group-hover:translate-x-0",
+            )}
+          >
+            {item.label}
+          </span>
+        </NavLink>
+      ))}
     </nav>
   );
 };
