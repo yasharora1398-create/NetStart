@@ -297,7 +297,7 @@ const BrowseScreen = () => (
             key={chip}
             className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest flex-shrink-0 ${
               i === 0
-                ? "border-gold bg-gold text-gold"
+                ? "border-gold bg-gold text-white"
                 : "border-border text-muted-foreground"
             }`}
           >

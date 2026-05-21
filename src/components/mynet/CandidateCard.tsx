@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   Briefcase,
   Camera,
@@ -192,7 +192,7 @@ export const CandidateCard = ({
           </div>
         ) : !profileComplete ? (
           <div className="rounded-sm border border-gold bg-gold p-4 mb-6">
-            <p className="text-[11px] font-mono uppercase tracking-widest text-gold mb-1">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-white mb-1">
               Almost there
             </p>
             <p className="text-sm">
@@ -221,7 +221,7 @@ export const CandidateCard = ({
               />
             ) : (
               <div className="h-20 w-20 rounded-sm bg-gold border border-gold flex items-center justify-center">
-                <span className="font-display text-2xl text-gold">
+                <span className="font-display text-2xl text-white">
                   {initials(fullName)}
                 </span>
               </div>

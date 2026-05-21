@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   CheckCircle2,
   Clock,
@@ -444,7 +444,7 @@ const FileRow = ({
     }`}
   >
     <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-      <FileText className="h-4 w-4 text-gold" />
+      <FileText className="h-4 w-4 text-white" />
     </div>
     <div className="flex-1 min-w-0">
       <p className="text-sm truncate">{name}</p>
@@ -491,7 +491,7 @@ const StatusPill = ({ status }: { status: ReviewStatus }) => {
     },
     pending: {
       label: "Under review",
-      className: "border-gold bg-gold text-gold",
+      className: "border-gold bg-gold text-white",
       Icon: Clock,
     },
     accepted: {

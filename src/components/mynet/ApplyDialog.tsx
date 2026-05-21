@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,7 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
                 />
               ) : (
                 <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                  <span className="font-display text-xs text-gold">
+                  <span className="font-display text-xs text-white">
                     {initials(project.founderFullName)}
                   </span>
                 </div>

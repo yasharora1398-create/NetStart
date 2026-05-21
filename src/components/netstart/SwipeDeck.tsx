@@ -51,7 +51,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
           {/* Match badge */}
           <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-obsidian/80 backdrop-blur border border-gold">
             <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-gold" />
-            <span className="font-mono text-[10px] text-gold">{current.match}% MATCH</span>
+            <span className="font-mono text-[10px] text-white">{current.match}% MATCH</span>
           </div>
 
           {/* Verified */}

@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import {
   Briefcase,
   CheckCircle2,
@@ -105,8 +105,8 @@ export const MyNetDashboard = ({
         <div>
           {isPending ? (
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
-              <Hourglass className="h-3 w-3 text-gold" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+              <Hourglass className="h-3 w-3 text-white" />
+              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
                 Review pending
               </span>
             </div>
@@ -441,7 +441,7 @@ const CredentialsDisplay = ({
           {profile.proof ? (
             <div className="inline-flex items-center gap-3">
               <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                <FileText className="h-4 w-4 text-gold" />
+                <FileText className="h-4 w-4 text-white" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm truncate">{profile.proof.name}</p>
@@ -460,7 +460,7 @@ const CredentialsDisplay = ({
         {profile.resume ? (
           <div className="inline-flex items-center gap-3">
             <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-              <FileText className="h-4 w-4 text-gold" />
+              <FileText className="h-4 w-4 text-white" />
             </div>
             <div className="min-w-0">
               <p className="text-sm truncate">{profile.resume.name}</p>
@@ -492,7 +492,7 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
           />
         ) : (
           <div className="h-20 w-20 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-            <span className="font-display text-2xl text-gold">
+            <span className="font-display text-2xl text-white">
               {initials(profile.fullName)}
             </span>
           </div>
@@ -733,7 +733,7 @@ const PreviewPill = ({
     className={
       muted
         ? "rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground"
-        : "inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-gold"
+        : "inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white"
     }
   >
     {children}

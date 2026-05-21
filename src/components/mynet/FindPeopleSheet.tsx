@@ -131,8 +131,8 @@ export const FindPeopleSheet = ({
           <div ref={scrollRef} className="flex-1 overflow-y-auto">
             <SheetHeader className="border-b border-border p-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-3 self-start">
-                <Sparkles className="h-3 w-3 text-gold" />
-                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+                <Sparkles className="h-3 w-3 text-white" />
+                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
                   Matching against {project?.title ?? "project"}
                 </span>
               </div>
@@ -203,7 +203,7 @@ export const FindPeopleSheet = ({
                           />
                         ) : (
                           <div className="h-12 w-12 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                            <span className="font-display text-base text-gold">
+                            <span className="font-display text-base text-white">
                               {initials(candidate.fullName)}
                             </span>
                           </div>
@@ -371,7 +371,7 @@ const PublicProfileBody = ({
             />
           ) : (
             <div className="h-24 w-24 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-              <span className="font-display text-3xl text-gold">
+              <span className="font-display text-3xl text-white">
                 {initials(candidate.fullName)}
               </span>
             </div>

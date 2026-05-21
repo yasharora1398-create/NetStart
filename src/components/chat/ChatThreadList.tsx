@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Thread sidebar for the /chats page. Renders one row per known
  * counterparty: avatar, name, last-message preview, time, plus a
  * pending / declined badge for unaccepted threads. Clicking a row
@@ -81,8 +81,8 @@ export const ChatThreadList = ({
           to fit the two-column split layout. */}
       <div className="md:hidden px-5 pt-5 pb-2">
         <div className="mb-3 inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-2.5 py-1">
-          <Inbox className="size-3 text-gold" aria-hidden />
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-gold">
+          <Inbox className="size-3 text-white" aria-hidden />
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white">
             Threads
           </span>
         </div>
@@ -267,7 +267,7 @@ const StateBadge = ({
   const label = state === "inbound" ? "Pending" : fromMe ? "Sent" : "Pending";
   const tone =
     state === "inbound"
-      ? "border-gold bg-gold text-gold"
+      ? "border-gold bg-gold text-white"
       : "border-border bg-muted/40 text-muted-foreground";
   return (
     <span

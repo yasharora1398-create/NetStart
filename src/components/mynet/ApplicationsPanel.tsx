@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Check,
   ExternalLink,
@@ -54,7 +54,7 @@ const statusBadge = (status: ApplicationStatus) => {
   const config = {
     pending: {
       label: "Pending",
-      className: "border-gold bg-gold text-gold",
+      className: "border-gold bg-gold text-white",
     },
     accepted: {
       label: "Accepted",
@@ -231,7 +231,7 @@ export const ApplicationsPanel = ({
                             />
                           ) : (
                             <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                              <span className="font-display text-xs text-gold">
+                              <span className="font-display text-xs text-white">
                                 {initials(app.candidate.fullName)}
                               </span>
                             </div>

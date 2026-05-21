@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -869,7 +869,7 @@ const MyNet = () => {
                     ) : displayProfile.reviewStatus === "draft" ? (
                       <div className="max-w-md w-full rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
                         <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold mb-4">
-                          <Hourglass className="h-5 w-5 text-gold" />
+                          <Hourglass className="h-5 w-5 text-white" />
                         </div>
                         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
                           Profile not submitted
@@ -885,7 +885,7 @@ const MyNet = () => {
                     ) : (
                       <div className="max-w-md w-full rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-2xl p-8 text-center">
                         <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold mb-4">
-                          <Hourglass className="h-5 w-5 text-gold" />
+                          <Hourglass className="h-5 w-5 text-white" />
                         </div>
                         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
                           Review pending

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Thin left rail of icons for the public homepage. Replaces the
  * full sidebar on logged-out marketing surfaces where the wide
  * navigation panel is overkill and visually noisy.
@@ -105,9 +105,9 @@ export const IconRail = () => {
           cn(
             "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-card/80 backdrop-blur",
             "text-muted-foreground transition-all duration-200",
-            "hover:scale-110 hover:bg-gold hover:text-gold hover:border-gold hover:shadow-[0_0_18px_hsl(var(--gold)/0.25)]",
+            "hover:scale-110 hover:bg-gold hover:text-white hover:border-gold hover:shadow-[0_0_18px_hsl(var(--gold)/0.25)]",
             isActive
-              ? "border-gold bg-gold text-gold shadow-[0_0_14px_hsl(var(--gold)/0.18)]"
+              ? "border-gold bg-gold text-white shadow-[0_0_14px_hsl(var(--gold)/0.18)]"
               : "border-border",
           )
         }

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "@/lib/router-compat";
 import { Menu, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
@@ -142,7 +142,7 @@ export const Nav = () => {
                 className={({ isActive }) =>
                   `relative h-9 w-9 flex items-center justify-center rounded-sm border transition-colors ${
                     isActive
-                      ? "border-gold text-gold bg-gold"
+                      ? "border-gold text-white bg-gold"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-gold"
                   }`
                 }

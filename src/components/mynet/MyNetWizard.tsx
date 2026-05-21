@@ -814,8 +814,8 @@ const Intro = ({
   return (
     <div className="max-w-5xl mx-auto text-center animate-fade-up">
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
-        <Sparkles className="h-3 w-3 text-gold" />
-        <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-gold">
+        <Sparkles className="h-3 w-3 text-white" />
+        <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-white">
           {rejected ? "Resubmit your profile" : "Welcome to MyNet"}
         </span>
       </div>
@@ -883,7 +883,7 @@ const Stepper = ({ active }: { active: number }) => (
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-sm border text-[11px] font-mono ${
                   current
-                    ? "border-gold bg-gold text-gold"
+                    ? "border-gold bg-gold text-white"
                     : done
                       ? "border-gold bg-gold"
                       : "border-border bg-card/40"
@@ -1051,7 +1051,7 @@ const ResumeRow = ({
     }`}
   >
     <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-      <FileText className="h-4 w-4 text-gold" />
+      <FileText className="h-4 w-4 text-white" />
     </div>
     <div className="flex-1 min-w-0">
       <p className="text-sm truncate">{name}</p>

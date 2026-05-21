@@ -74,7 +74,7 @@ export const ProjectCard = ({
           <div className="flex flex-col gap-1 items-end flex-shrink-0">
             {isActive ? (
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-white">
-                <Star className="h-2.5 w-2.5 fill-gold text-gold" />
+                <Star className="h-2.5 w-2.5 fill-gold text-white" />
                 Match focus
               </span>
             ) : null}
@@ -228,7 +228,7 @@ export const ProjectCard = ({
           aria-label={`View ${savedCount} saved profiles`}
         >
           <span className="flex items-center gap-2">
-            <Users className="h-3.5 w-3.5 text-gold" />
+            <Users className="h-3.5 w-3.5 text-white" />
             View saved profiles
             <span className="text-foreground/80 normal-case tracking-normal">
               ({savedCount})

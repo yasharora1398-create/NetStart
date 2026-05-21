@@ -238,7 +238,7 @@ const SignUp = () => {
                 impossible to miss after a phantom-success signup. */}
             {duplicateEmail && (
               <div className="mb-6 flex items-start gap-3 rounded-sm border border-gold bg-gold p-4">
-                <AlertCircle className="h-4 w-4 text-gold flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
                 <div className="flex-1 text-sm">
                   <p className="text-foreground font-medium mb-1">
                     {duplicateEmail} is already registered.

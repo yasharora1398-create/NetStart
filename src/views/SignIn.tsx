@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { useForm } from "react-hook-form";
@@ -163,8 +163,8 @@ const SignIn = () => {
 
         <div className="relative z-10 max-w-md">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-8">
-            <Sparkles className="h-3 w-3 text-gold" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+            <Sparkles className="h-3 w-3 text-white" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
               Welcome back
             </span>
           </div>
@@ -207,7 +207,7 @@ const SignIn = () => {
                 rejected because the address is unconfirmed. */}
             {needsConfirmation && (
               <div className="mb-6 flex items-start gap-3 rounded-sm border border-gold bg-gold p-4">
-                <AlertCircle className="h-4 w-4 text-gold flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
                 <div className="flex-1 text-sm">
                   <p className="text-foreground font-medium mb-1">
                     Confirm your email first.

@@ -396,7 +396,7 @@ const BuilderView = () => {
       {!fullscreen && activeProjectTitle ? (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-gold bg-gold px-4 py-3">
           <div className="flex items-center gap-2 text-sm">
-            <Sparkles className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+            <Sparkles className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-muted-foreground">Matching for</span>
             <span className="font-medium text-foreground">
               {activeProjectTitle}
@@ -539,7 +539,7 @@ const BuilderView = () => {
               aria-label="Approve"
               disabled={Boolean(approving)}
               className={cn(
-                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold transition-all duration-500",
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm hover:bg-gold transition-all duration-500",
                 approving &&
                   "opacity-0 pointer-events-none scale-75 -ml-[80px]",
               )}
@@ -1101,7 +1101,7 @@ const LookerView = () => {
               aria-label="Approve"
               disabled={Boolean(approving)}
               className={cn(
-                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold transition-all duration-500",
+                "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm hover:bg-gold transition-all duration-500",
                 approving &&
                   "opacity-0 pointer-events-none scale-75 -ml-[80px]",
               )}

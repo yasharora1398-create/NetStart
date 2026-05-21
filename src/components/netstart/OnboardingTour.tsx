@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /**
  * Three-step first-visit overlay shown on MyNet. Walks new users
  * through "what is this page", "what to fill in", "what happens
@@ -111,8 +111,8 @@ export const OnboardingTour = ({ userId }: Props) => {
           </button>
 
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
-            <Sparkles className="h-3 w-3 text-gold" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-gold">
+            <Sparkles className="h-3 w-3 text-white" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
               {current.badge}
             </span>
           </div>

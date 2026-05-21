@@ -1,4 +1,4 @@
-﻿/**
+/**
  * The active-conversation pane for /chats/:id. Fetches the thread,
  * subscribes to realtime updates, renders messages with day dividers
  * and read receipts, and exposes a composer that obeys the Stage 4
@@ -906,7 +906,7 @@ const Bubble = ({
         className={cn(
           "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
           mine
-            ? "rounded-br-sm bg-gold text-gold-foreground"
+            ? "rounded-br-sm bg-gold text-white-foreground"
             : "rounded-bl-sm bg-muted text-foreground",
         )}
       >

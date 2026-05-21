@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ExternalLink,
   Linkedin,
@@ -209,7 +209,7 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
                   />
                 ) : (
                   <div className="h-14 w-14 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                    <span className="font-display text-base text-gold">
+                    <span className="font-display text-base text-white">
                       {initials(c.fullName)}
                     </span>
                   </div>

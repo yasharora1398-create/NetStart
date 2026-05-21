@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -124,7 +124,7 @@ export const OnboardingChecklist = ({
         aria-expanded={!collapsed}
       >
         <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-          <Sparkles className="h-4 w-4 text-gold" />
+          <Sparkles className="h-4 w-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
@@ -157,7 +157,7 @@ export const OnboardingChecklist = ({
               <div className="flex-shrink-0 mt-0.5">
                 {step.done ? (
                   <div className="h-5 w-5 rounded-full bg-gold border border-gold flex items-center justify-center">
-                    <Check className="h-3 w-3 text-gold" />
+                    <Check className="h-3 w-3 text-white" />
                   </div>
                 ) : step.failed ? (
                   <div className="h-5 w-5 rounded-full bg-destructive/10 border border-destructive/40 flex items-center justify-center">
@@ -165,7 +165,7 @@ export const OnboardingChecklist = ({
                   </div>
                 ) : step.pending ? (
                   <div className="h-5 w-5 rounded-full bg-gold border border-gold flex items-center justify-center">
-                    <Clock className="h-3 w-3 text-gold animate-pulse" />
+                    <Clock className="h-3 w-3 text-white animate-pulse" />
                   </div>
                 ) : (
                   <div className="h-5 w-5 rounded-full border border-border flex items-center justify-center text-muted-foreground">
@@ -208,7 +208,7 @@ export const OnboardingChecklist = ({
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="w-3/4 max-w-md rounded-sm border border-gold bg-card/95 backdrop-blur-md shadow-2xl p-5 sm:p-6 text-center">
             <div className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-gold bg-gold mb-3">
-              <CheckCircle2 className="h-5 w-5 text-gold" />
+              <CheckCircle2 className="h-5 w-5 text-white" />
             </div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
               All set

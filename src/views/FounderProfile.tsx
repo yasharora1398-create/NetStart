@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
 import {
@@ -123,7 +123,7 @@ const FounderProfile = () => {
                     />
                   ) : (
                     <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                      <span className="font-display text-2xl text-gold">
+                      <span className="font-display text-2xl text-white">
                         {initials(founder.fullName)}
                       </span>
                     </div>
