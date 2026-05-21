@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { TabIntro } from "@/components/netstart/TabIntro";
 import { useAuth } from "@/context/AuthContext";
 import { useReviewStatus } from "@/hooks/useReviewStatus";
 import {
@@ -37,6 +38,10 @@ import { ChatConversation } from "@/components/chat/ChatConversation";
 import { cn } from "@/lib/utils";
 
 const Chats = () => {
+  // Intro gate: every visit lands on the explainer first.
+  // Click CTA -> render real chat surface. AuthGate still handles
+  // the unsigned-in case on the real surface.
+  const [opened, setOpened] = useState(false);
   const { user, loading } = useAuth();
   const reviewStatus = useReviewStatus();
   const needsSetup =
@@ -293,6 +298,49 @@ const Chats = () => {
     () => items.find((t) => t.contactId === routeContactId) ?? null,
     [items, routeContactId],
   );
+
+  if (!opened) {
+    return (
+      <TabIntro
+        title="Conversations."
+        body={
+          <>
+            <p>
+              Chat threads on Polln8 only exist when both sides accepted.
+              No cold DMs, no inboxes full of pitches you never asked
+              for. Each conversation is a real signal that someone wants
+              to talk.
+            </p>
+            <p>
+              Threads stay until you or the other person deletes them.
+              You can mute individual contacts when a chat goes
+              one-sided.
+            </p>
+          </>
+        }
+        details={[
+          {
+            title: "Mutual before chat",
+            body: "A chat request has to be accepted before either side can send a free message.",
+          },
+          {
+            title: "Mute, don't ghost",
+            body: "Long-press / open the menu on a thread to mute it. The other side never knows.",
+          },
+          {
+            title: "Cross-device",
+            body: "Threads sync everywhere you're signed in. Reply from laptop, follow up on phone.",
+          },
+          {
+            title: "Decline or delete",
+            body: "Decline an inbound request to stop further messages. Delete a thread to remove it from your list.",
+          },
+        ]}
+        ctaLabel="Open Chat"
+        onCta={() => setOpened(true)}
+      />
+    );
+  }
 
   return (
     <AppLayout>

@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { TabIntro } from "@/components/netstart/TabIntro";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +73,9 @@ const initials = (name: string): string => {
 };
 
 const Match = () => {
+  // Intro gate: every visit lands on a brief explainer screen.
+  // Click CTA -> render real page (gated by AuthGate downstream).
+  const [opened, setOpened] = useState(false);
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hasProjects, setHasProjects] = useState(false);
@@ -130,6 +134,49 @@ const Match = () => {
       </Link>
     </div>
   );
+
+  if (!opened) {
+    return (
+      <TabIntro
+        title="Match."
+        body={
+          <>
+            <p>
+              The ranked deck. Founders see builders ordered against
+              their active project&apos;s criteria; builders see projects
+              ordered against what they&apos;ve built and the kinds of
+              work they&apos;d want to ship next.
+            </p>
+            <p>
+              Three actions per card: save for later, pass, or send a
+              chat request. No fourth bucket and no maybes. Chat opens
+              only when the other side accepts back.
+            </p>
+          </>
+        }
+        details={[
+          {
+            title: "Ranked, not feed-spam",
+            body: "Profile and project text get embedded; cards order by real similarity to what you built.",
+          },
+          {
+            title: "Three actions per card",
+            body: "Save, pass, request. No likes, no maybes — every card is a decision.",
+          },
+          {
+            title: "Mutual before chat",
+            body: "Both sides have to accept before a thread opens. No cold DMs.",
+          },
+          {
+            title: "Undo on the last swipe",
+            body: "Tap undo in the top bar to bring the last card back if you misclicked.",
+          },
+        ]}
+        ctaLabel="Open Match"
+        onCta={() => setOpened(true)}
+      />
+    );
+  }
 
   return (
     <AppLayout blurred={!isAuthed}>

@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { TabIntro } from "@/components/netstart/TabIntro";
 import { OnboardingTour } from "@/components/netstart/OnboardingTour";
 import { trackMynetSubmitted } from "@/lib/analytics";
 import { Sidebar } from "@/components/netstart/Sidebar";
@@ -122,6 +123,10 @@ const errorMessage = (err: unknown): string => {
 };
 
 const MyNet = () => {
+  // Intro gate: every visit to /mynet starts on a brief explainer
+  // screen with a CTA. Clicking it flips this to true and renders
+  // the real page (which still shows AuthGate when not signed in).
+  const [opened, setOpened] = useState(false);
   const { user, loading } = useAuth();
   const uid = user?.id ?? null;
 
@@ -488,6 +493,49 @@ const MyNet = () => {
     isAuthed &&
     (profile.reviewStatus === "accepted" ||
       profile.reviewStatus === "pending");
+
+  if (!opened) {
+    return (
+      <TabIntro
+        title="Your network, your moves."
+        body={
+          <>
+            <p>
+              MyNet is your private workspace on Polln8. Your profile, your
+              credentials, your projects, and the switch that decides
+              whether you&apos;re discoverable to the other side of the
+              network.
+            </p>
+            <p>
+              Nothing here goes public until you publish a project or flip
+              Open to Work. Edit at your own pace; we&apos;ll only show
+              founders what you&apos;ve approved.
+            </p>
+          </>
+        }
+        details={[
+          {
+            title: "Profile + credentials",
+            body: "LinkedIn, resume or proof of work, and the candidate fields founders rank against.",
+          },
+          {
+            title: "Projects",
+            body: "Founders post what they're building. Publish to enter the deck; unpublish anytime.",
+          },
+          {
+            title: "Open to Work",
+            body: "Builders flip the switch when they want founders to see them. Off by default.",
+          },
+          {
+            title: "Find People",
+            body: "Run a focused search against a specific project's criteria.",
+          },
+        ]}
+        ctaLabel="Open MyNet"
+        onCta={() => setOpened(true)}
+      />
+    );
+  }
 
   if (showWizard && uid) {
     return (

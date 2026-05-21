@@ -28,6 +28,7 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { TabIntro } from "@/components/netstart/TabIntro";
 import {
   MothEmptyState,
   type MothVariant,
@@ -73,6 +74,11 @@ const readMetadataRole = (
 const SAVED_CANDIDATES_CACHE_KEY = "polln8.saved.candidates";
 
 const Saved = () => {
+  // Intro gate: every visit to /saved starts on a brief explainer
+  // screen with a CTA. Clicking the CTA flips this to true and
+  // renders the real page (which still shows AuthGate when the
+  // visitor isn't signed in).
+  const [opened, setOpened] = useState(false);
   const { user, loading } = useAuth();
   const reviewStatus = useReviewStatus();
   const needsSetup =
@@ -132,6 +138,41 @@ const Saved = () => {
       cancelled = true;
     };
   }, [user]);
+
+  if (!opened) {
+    return (
+      <TabIntro
+        title="Your shortlist."
+        body={
+          <>
+            <p>
+              Saved is where everything you bookmarked from Match ends up.
+              Builders save projects they want to circle back to. Founders
+              save candidates they want to revisit before sending a chat
+              request.
+            </p>
+            <p>
+              Synced across every device you&apos;re signed in on. Open
+              one to see the full profile, message them, or remove it
+              from the list.
+            </p>
+          </>
+        }
+        details={[
+          {
+            title: "Cross-device sync",
+            body: "Save on your laptop, open on your phone. Your shortlist lives with your account.",
+          },
+          {
+            title: "Star one as your focus",
+            body: "Builders can pick one saved project as their current focus — same as the founder-side active project.",
+          },
+        ]}
+        ctaLabel="Open Saved"
+        onCta={() => setOpened(true)}
+      />
+    );
+  }
 
   return (
     <AppLayout>
