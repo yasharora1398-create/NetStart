@@ -555,7 +555,7 @@ export const StepMatch = ({
       ? [undefined, undefined, undefined]
       : (portraits ?? [builder1Url, builder2Url, builder3Url]);
   const [front, back1, back2] = photos;
-  // When anonymous, also suppress the % MATCH pill — without a
+  // When anonymous, also suppress the % MATCH pill - without a
   // specific person it has nothing to anchor to.
   const showMatch = !anonymous;
 

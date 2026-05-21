@@ -17,7 +17,7 @@
  *
  * The casual click loses just this session; the "everywhere" button
  * is reserved for the compromised-account flow. Callers don't
- * choose a scope — the user does at the moment of confirmation.
+ * choose a scope - the user does at the moment of confirmation.
  *
  * Note on "this tab": Supabase auth state is shared across all tabs
  * of the same browser via localStorage, so a "local" sign-out will

@@ -1,6 +1,6 @@
 "use client";
 /**
- * Hidden post-verification landing — reached only by Supabase
+ * Hidden post-verification landing - reached only by Supabase
  * redirecting here after a confirmation link is clicked. Supabase
  * already created a session at verify-time so the user is now
  * signed in.

@@ -1,7 +1,7 @@
 /**
  * Wraps content with an IntersectionObserver-driven fade-up that
  * runs the moment the wrapper enters the viewport. Cheap and
- * doesn't need a library — we just toggle a class.
+ * doesn't need a library - we just toggle a class.
  *
  * Pages on the marketing surface stack a lot of sections, and a
  * subtle staggered fade as the user scrolls gives the page a
@@ -25,7 +25,7 @@ export const FadeUp = ({ children, delay = 0, className }: Props) => {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // Respect prefers-reduced-motion — skip the animation and just
+    // Respect prefers-reduced-motion - skip the animation and just
     // show the content.
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",

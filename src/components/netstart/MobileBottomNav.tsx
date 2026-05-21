@@ -51,7 +51,7 @@ export const MobileBottomNav = () => {
 
   return (
     <>
-      {/* The bar itself — translates off the right edge when
+      {/* The bar itself - translates off the right edge when
           collapsed. Stays mounted so the slide animation runs both
           directions; pointer-events disabled while hidden so it
           doesn't catch taps. */}
@@ -89,7 +89,7 @@ export const MobileBottomNav = () => {
               <span>{t.label}</span>
             </NavLink>
           ))}
-          {/* Collapse handle — chevron sitting on the trailing edge
+          {/* Collapse handle - chevron sitting on the trailing edge
               of the bar, separated by a hairline so it reads as a
               distinct affordance, not a fifth tab. */}
           <button
@@ -103,7 +103,7 @@ export const MobileBottomNav = () => {
         </div>
       </nav>
 
-      {/* Restore handle — only visible when the bar is collapsed.
+      {/* Restore handle - only visible when the bar is collapsed.
           Floats above the page content, same safe-area awareness
           as the bar so it never sits under the home indicator. */}
       {collapsed && (

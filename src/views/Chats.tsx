@@ -1,6 +1,6 @@
 "use client";
 /**
- * Chats — full-bleed two-column layout. Left rail: thread list with
+ * Chats - full-bleed two-column layout. Left rail: thread list with
  * search. Right pane: active conversation with realtime updates.
  *
  * URL drives selection: /chats shows the placeholder; /chats/:id
@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "@/lib/router-compat";
 import {
   AlertCircle,
+  ArrowRight,
   PanelLeftOpen,
   RefreshCw,
 } from "lucide-react";
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
-import { TabIntro } from "@/components/netstart/TabIntro";
+import { StepChat } from "@/components/mockups/Steps";
 import { useAuth } from "@/context/AuthContext";
 import { useReviewStatus } from "@/hooks/useReviewStatus";
 import {
@@ -182,7 +183,7 @@ const Chats = () => {
             // ignore
           }
         } catch (err) {
-          // Profile fetch failed — rows still render with raw names.
+          // Profile fetch failed - rows still render with raw names.
           // Logged so we can see it in the dev console.
           console.error("getCandidatesByIds failed:", err);
         }
@@ -300,45 +301,64 @@ const Chats = () => {
   );
 
   if (!opened) {
+    // Chat intro: mirror split - StepChat mockup left, text + a
+    // stacked single-column rules list right. Inverse of the MyNet
+    // intro so the four tabs read differently when clicked through
+    // in sequence.
     return (
-      <TabIntro
-        title="Conversations."
-        body={
-          <>
-            <p>
-              Chat threads on Polln8 only exist when both sides accepted.
-              No cold DMs, no inboxes full of pitches you never asked
-              for. Each conversation is a real signal that someone wants
-              to talk.
-            </p>
-            <p>
-              Threads stay until you or the other person deletes them.
-              You can mute individual contacts when a chat goes
-              one-sided.
-            </p>
-          </>
-        }
-        details={[
-          {
-            title: "Mutual before chat",
-            body: "A chat request has to be accepted before either side can send a free message.",
-          },
-          {
-            title: "Mute, don't ghost",
-            body: "Long-press / open the menu on a thread to mute it. The other side never knows.",
-          },
-          {
-            title: "Cross-device",
-            body: "Threads sync everywhere you're signed in. Reply from laptop, follow up on phone.",
-          },
-          {
-            title: "Decline or delete",
-            body: "Decline an inbound request to stop further messages. Delete a thread to remove it from your list.",
-          },
-        ]}
-        ctaLabel="Open Chat"
-        onCta={() => setOpened(true)}
-      />
+      <AppLayout>
+        <div className="container py-12 md:py-16">
+          <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
+            <div className="relative w-full max-w-full overflow-hidden order-2 lg:order-1">
+              <div className="relative left-1/2 w-fit -translate-x-1/2 pointer-events-none">
+                <StepChat />
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1] mb-6 font-bold">
+                Conversations.
+              </h1>
+              <div className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 space-y-4">
+                <p>
+                  Chat threads on Polln8 only exist when both sides
+                  accepted. No cold DMs, no inboxes full of pitches you
+                  never asked for. Each conversation is a real signal
+                  someone wants to talk.
+                </p>
+                <p>
+                  Threads stay until you or the other person deletes
+                  them. Mute individual contacts when a chat goes
+                  one-sided.
+                </p>
+              </div>
+
+              <ul className="space-y-3 mb-10 border-t border-border pt-6">
+                {[
+                  { t: "Mutual before chat", b: "A chat request has to be accepted before either side can send a free message." },
+                  { t: "Mute, don't ghost", b: "Open the thread menu to mute it. The other side never knows." },
+                  { t: "Cross-device", b: "Threads sync everywhere you're signed in. Reply from laptop, follow up on phone." },
+                  { t: "Decline or delete", b: "Decline an inbound request to stop further messages. Delete a thread to remove it from your list." },
+                ].map((d) => (
+                  <li key={d.t} className="text-sm">
+                    <span className="font-semibold text-foreground">{d.t}.</span>{" "}
+                    <span className="text-muted-foreground">{d.b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                variant="gold"
+                size="xl"
+                onClick={() => setOpened(true)}
+                className="group"
+              >
+                Open Chat
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AppLayout>
     );
   }
 

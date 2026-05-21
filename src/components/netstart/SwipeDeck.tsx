@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Check, X, Bookmark, Zap, Target, Clock } from "lucide-react";
 import { BUILDERS } from "@/lib/builders";
 
@@ -112,7 +112,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
 
       {!compact && (
         <p className="text-center text-xs text-muted-foreground mt-6 font-mono uppercase tracking-widest">
-          Tap <span className="text-gold">target</span> to connect Â· <span className="text-foreground">Ã—</span> to pass
+          Tap <span className="text-gold">target</span> to connect Â· <span className="text-foreground">Ã-</span> to pass
         </p>
       )}
     </div>

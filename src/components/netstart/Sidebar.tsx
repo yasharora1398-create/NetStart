@@ -262,7 +262,7 @@ export const Sidebar = () => {
 // sign-in/up controls + theme toggle) plus an extra "expand
 // sidebar" button so they can bring the nav back.
 
-// Collapsed sidebar — identical to the public IconRail component.
+// Collapsed sidebar - identical to the public IconRail component.
 // Same container position, same icon-button styles, same hover
 // tooltip pattern. Only difference: the very first item is the
 // opaque gold expand button that brings the full sidebar back, so
@@ -314,7 +314,7 @@ const CollapsedRail = ({
       aria-label="Primary"
       className="fixed left-3 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2 md:flex"
     >
-      {/* Expand button — same shape and dimensions as every other
+      {/* Expand button - same shape and dimensions as every other
           icon button on the rail, but opaque gold instead of the
           semi-transparent card surface so it stands out as the
           "bring the sidebar back" affordance. */}

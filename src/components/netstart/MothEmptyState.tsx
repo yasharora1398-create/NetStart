@@ -7,18 +7,18 @@
  * dark modes both work without separate assets.
  *
  * Variants
- *   blank          haven't started — bud + dashed flight line
- *   caught         caught up — horizon, perched moth
- *   saves          saves empty — oversized bookmark
- *   threads        no messages — envelope on desk
- *   apps           none sent — paper airplane
- *   platform       nothing yet — minimal scene, drifting moth
- *   filters        no matches — magnifying glass
- *   bio            no bio yet — page with quill
- *   skills         no skills set — three drifting tag chips
- *   notifications  no notifications — bell with clapper
- *   queue          admin queue empty — clipboard, checked
- *   lost           profile not found — broken compass / dashed orbit
+ *   blank          haven't started - bud + dashed flight line
+ *   caught         caught up - horizon, perched moth
+ *   saves          saves empty - oversized bookmark
+ *   threads        no messages - envelope on desk
+ *   apps           none sent - paper airplane
+ *   platform       nothing yet - minimal scene, drifting moth
+ *   filters        no matches - magnifying glass
+ *   bio            no bio yet - page with quill
+ *   skills         no skills set - three drifting tag chips
+ *   notifications  no notifications - bell with clapper
+ *   queue          admin queue empty - clipboard, checked
+ *   lost           profile not found - broken compass / dashed orbit
  *
  * Motion: the moth gets the global .moth-hover oscillation
  * (defined in src/index.css). The whole container fades + lifts

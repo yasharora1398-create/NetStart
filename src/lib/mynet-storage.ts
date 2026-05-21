@@ -290,7 +290,7 @@ export const setWebsite = async (
 };
 
 // Upload a founder's proof-of-work file to the `proofs` bucket. Same
-// shape as uploadResume — replaces the previous file, writes the
+// shape as uploadResume - replaces the previous file, writes the
 // metadata onto the profiles row, rolls back the storage write if
 // the profiles update fails.
 export const uploadProof = async (
@@ -1276,7 +1276,7 @@ export const deleteMyAccount = async (): Promise<void> => {
 // Backend in migrations 0011 (chat_contacts) → 0013 (chat_messages) →
 // 0014 (delivered/read ticks) → 0019 (unified pending-thread send +
 // 2/48h throttle) → 0020 (decline + delete + lifecycle). Flow:
-//   1. Sender calls request_or_send_chat_message — first message
+//   1. Sender calls request_or_send_chat_message - first message
 //      creates a pending row, subsequent messages within 48h get
 //      throttled to 2 (raises 'limit_reached').
 //   2. Recipient sees the inbound thread with state="inbound" and
@@ -1381,7 +1381,7 @@ export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
 };
 
 // Per-contact mute. When true, the chat_message email/in-app
-// notification trigger skips this sender. One-sided — the other
+// notification trigger skips this sender. One-sided - the other
 // person isn't told.
 export const getChatMute = async (
   otherUserId: string,
@@ -1517,7 +1517,7 @@ export const markNotificationsRead = async (ids: string[]): Promise<void> => {
 };
 
 // Mark every notification I have from a specific sender as read.
-// Used when the user opens a chat thread — clears the bell badge
+// Used when the user opens a chat thread - clears the bell badge
 // for chat_request / accept / decline notifications tied to that
 // conversation. RLS already constrains updates to my own row, so a
 // generic update is safe.

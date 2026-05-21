@@ -4,7 +4,7 @@
  * before committing the change. The change goes through
  * `setRole`, which writes to `user_metadata.role` on the auth user.
  *
- * Switching never touches the profile row — a builder's headline,
+ * Switching never touches the profile row - a builder's headline,
  * bio, skills, location, etc. all survive a trip through founder and
  * come back exactly as they were when the user switches back.
  */
@@ -97,7 +97,7 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
                   You'll see the founder dashboard: post projects, review
                   applications, and search for builders. Your builder profile
                   (headline, bio, skills, resume) stays exactly where you left
-                  it — switching back later restores all of it untouched.
+                  it - switching back later restores all of it untouched.
                 </>
               ) : (
                 <>
@@ -113,7 +113,7 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
             <AlertDialogCancel disabled={working}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
-                // Stop the dialog from auto-closing on click — we need
+                // Stop the dialog from auto-closing on click - we need
                 // the spinner to show until setRole actually resolves.
                 e.preventDefault();
                 void handleConfirm();

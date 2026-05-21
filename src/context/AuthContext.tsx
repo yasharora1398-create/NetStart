@@ -38,17 +38,17 @@ type AuthContextValue = {
     role: "founder" | "builder",
     captchaToken?: string,
   ) => Promise<SignUpResult>;
-  // "tab"    — sign out of THIS tab only. Other tabs of the same
+  // "tab"    - sign out of THIS tab only. Other tabs of the same
   //            browser stay signed in. Implemented as a per-tab
   //            sessionStorage flag that masks the shared Supabase
   //            session; we deliberately do NOT call
   //            supabase.auth.signOut(), which would clear the shared
   //            localStorage token and propagate to every tab via
   //            storage events.
-  // "local"  — sign out of this browser (Supabase "local" scope).
+  // "local"  - sign out of this browser (Supabase "local" scope).
   //            Affects all tabs of this browser. Other browsers /
   //            devices stay signed in.
-  // "global" — sign out everywhere (Supabase "global" scope). All
+  // "global" - sign out everywhere (Supabase "global" scope). All
   //            sessions on every device are invalidated server-side.
   signOut: (scope?: "tab" | "local" | "global") => Promise<void>;
   requestPasswordReset: (
@@ -75,7 +75,7 @@ const notConfiguredSignUp = (): SignUpResult => ({
 const normalizeEmail = (raw: string): string => raw.trim().toLowerCase();
 
 // Per-tab "signed out" flag. Lives in sessionStorage so it's
-// scoped to a single tab — sessionStorage is NOT shared across
+// scoped to a single tab - sessionStorage is NOT shared across
 // tabs the way localStorage is. Set by signOut("tab"); cleared by
 // any successful sign-in (so the user can re-auth without
 // reloading) and by the global sign-out path.
@@ -96,7 +96,7 @@ const writeTabSignedOut = (value: boolean): void => {
     if (value) window.sessionStorage.setItem(TAB_SIGNED_OUT_KEY, "1");
     else window.sessionStorage.removeItem(TAB_SIGNED_OUT_KEY);
   } catch {
-    // Storage disabled / quota — non-fatal; the user is briefly
+    // Storage disabled / quota - non-fatal; the user is briefly
     // still "signed in" in this tab until they reload.
   }
 };
@@ -187,7 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!isSupabaseConfigured) return notConfiguredSignUp();
     // After the user clicks the verification link in the email, send
     // them to /authenticated. Supabase auto-creates a session at
-    // verify-time and the page reads that — keeps them signed in.
+    // verify-time and the page reads that - keeps them signed in.
     const emailRedirectTo =
       typeof window !== "undefined"
         ? `${window.location.origin}/authenticated`

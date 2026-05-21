@@ -25,7 +25,7 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
-import { TabIntro } from "@/components/netstart/TabIntro";
+import { StepMatch } from "@/components/mockups/Steps";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,45 +136,65 @@ const Match = () => {
   );
 
   if (!opened) {
+    // Match intro: hero stacked. Centered title + body up top, the
+    // anonymous StepMatch deck mockup huge below, then a single
+    // 4-column strip of facts at the bottom.
     return (
-      <TabIntro
-        title="Match."
-        body={
-          <>
-            <p>
-              The ranked deck. Founders see builders ordered against
-              their active project&apos;s criteria; builders see projects
-              ordered against what they&apos;ve built and the kinds of
-              work they&apos;d want to ship next.
-            </p>
-            <p>
-              Three actions per card: save for later, pass, or send a
-              chat request. No fourth bucket and no maybes. Chat opens
-              only when the other side accepts back.
-            </p>
-          </>
-        }
-        details={[
-          {
-            title: "Ranked, not feed-spam",
-            body: "Profile and project text get embedded; cards order by real similarity to what you built.",
-          },
-          {
-            title: "Three actions per card",
-            body: "Save, pass, request. No likes, no maybes — every card is a decision.",
-          },
-          {
-            title: "Mutual before chat",
-            body: "Both sides have to accept before a thread opens. No cold DMs.",
-          },
-          {
-            title: "Undo on the last swipe",
-            body: "Tap undo in the top bar to bring the last card back if you misclicked.",
-          },
-        ]}
-        ctaLabel="Open Match"
-        onCta={() => setOpened(true)}
-      />
+      <AppLayout>
+        <div className="container py-12 md:py-16">
+          <div className="max-w-3xl mb-12 md:mb-16">
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] mb-6 font-bold">
+              Match.
+            </h1>
+            <div className="text-base sm:text-lg text-muted-foreground leading-relaxed space-y-4">
+              <p>
+                The ranked deck. Founders see builders ordered against
+                their active project&apos;s criteria. Builders see
+                projects ordered against what they&apos;ve built and the
+                work they&apos;d want to ship next.
+              </p>
+              <p>
+                Three actions per card: save for later, pass, or send a
+                chat request. No fourth bucket and no maybes. Chat opens
+                only when the other side accepts back.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative w-full max-w-full overflow-hidden mb-16">
+            <div className="relative left-1/2 w-fit -translate-x-1/2 pointer-events-none">
+              <StepMatch anonymous />
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+            {[
+              { t: "Ranked, not feed-spam", b: "Profile and project text get embedded; cards order by real similarity to what you built." },
+              { t: "Three actions per card", b: "Save, pass, request. No likes, no maybes. Every card is a decision." },
+              { t: "Mutual before chat", b: "Both sides have to accept before a thread opens. No cold DMs." },
+              { t: "Undo the last swipe", b: "Tap undo in the top bar to bring the last card back if you misclicked." },
+            ].map((d) => (
+              <div
+                key={d.t}
+                className="rounded-sm border border-border bg-card p-4"
+              >
+                <h3 className="font-display text-base mb-1.5 font-semibold">{d.t}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{d.b}</p>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            variant="gold"
+            size="xl"
+            onClick={() => setOpened(true)}
+            className="group"
+          >
+            Open Match
+            <ChevronLeft className="h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 

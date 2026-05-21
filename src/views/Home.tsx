@@ -5,7 +5,7 @@
  * Structure: hero, problem, proof-mockups (WhySection), role split,
  * stats, how-it-works, explore grid, FAQ, final CTA.
  *
- * Interactive flourishes that stay on purpose — they make the site
+ * Interactive flourishes that stay on purpose - they make the site
  * feel high-tech without being template-y once paired with the
  * rewritten conversational copy:
  *   - Cursor-following gold glow on the hero

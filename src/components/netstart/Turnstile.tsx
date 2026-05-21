@@ -4,7 +4,7 @@
  *
  * Renders Cloudflare's CAPTCHA in the signup form. In "Managed" mode
  * (which we configured the widget for) Cloudflare decides whether to
- * challenge — bots get a real puzzle, most humans pass invisibly.
+ * challenge - bots get a real puzzle, most humans pass invisibly.
  *
  * Mechanics:
  *   - The first <Turnstile> on the page injects Cloudflare's loader
@@ -18,7 +18,7 @@
  *
  * If the site key env var is missing (local dev without the var, or
  * a misconfigured deploy), we render nothing and warn once in the
- * console — the form falls back to no-CAPTCHA, which Supabase will
+ * console - the form falls back to no-CAPTCHA, which Supabase will
  * reject only if "Enable CAPTCHA protection" is also on in Supabase.
  */
 import { useEffect, useRef, useState } from "react";
@@ -144,7 +144,7 @@ export const Turnstile = ({
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch {
-          // ignore — remove() throws if the widget is already gone
+          // ignore - remove() throws if the widget is already gone
         }
         widgetIdRef.current = null;
       }

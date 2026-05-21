@@ -17,7 +17,8 @@ import { toast } from "sonner";
 
 import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
-import { TabIntro } from "@/components/netstart/TabIntro";
+import { AppLayout } from "@/components/netstart/AppLayout";
+import { StepCredentials } from "@/components/mockups/Steps";
 import { OnboardingTour } from "@/components/netstart/OnboardingTour";
 import { trackMynetSubmitted } from "@/lib/analytics";
 import { Sidebar } from "@/components/netstart/Sidebar";
@@ -495,45 +496,66 @@ const MyNet = () => {
       profile.reviewStatus === "pending");
 
   if (!opened) {
+    // MyNet intro: split layout. Text on the left, the same
+    // Credentials phone mockup we use on /how on the right.
     return (
-      <TabIntro
-        title="Your network, your moves."
-        body={
-          <>
-            <p>
-              MyNet is your private workspace on Polln8. Your profile, your
-              credentials, your projects, and the switch that decides
-              whether you&apos;re discoverable to the other side of the
-              network.
-            </p>
-            <p>
-              Nothing here goes public until you publish a project or flip
-              Open to Work. Edit at your own pace; we&apos;ll only show
-              founders what you&apos;ve approved.
-            </p>
-          </>
-        }
-        details={[
-          {
-            title: "Profile + credentials",
-            body: "LinkedIn, resume or proof of work, and the candidate fields founders rank against.",
-          },
-          {
-            title: "Projects",
-            body: "Founders post what they're building. Publish to enter the deck; unpublish anytime.",
-          },
-          {
-            title: "Open to Work",
-            body: "Builders flip the switch when they want founders to see them. Off by default.",
-          },
-          {
-            title: "Find People",
-            body: "Run a focused search against a specific project's criteria.",
-          },
-        ]}
-        ctaLabel="Open MyNet"
-        onCta={() => setOpened(true)}
-      />
+      <AppLayout>
+        <div className="container py-12 md:py-16">
+          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-20 items-center">
+            <div>
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1] mb-6 font-bold">
+                Your network,
+                <br />
+                your moves.
+              </h1>
+              <div className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 space-y-4">
+                <p>
+                  MyNet is your private workspace on Polln8. Your profile,
+                  your credentials, your projects, and the switch that
+                  decides whether you&apos;re discoverable to the other
+                  side of the network.
+                </p>
+                <p>
+                  Nothing here goes public until you publish a project or
+                  flip Open to Work. Edit at your own pace; we&apos;ll
+                  only show founders what you&apos;ve approved.
+                </p>
+              </div>
+              <Button
+                variant="gold"
+                size="xl"
+                onClick={() => setOpened(true)}
+                className="group"
+              >
+                Open MyNet
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+            <div className="relative w-full max-w-full overflow-hidden">
+              <div className="relative left-1/2 w-fit -translate-x-1/2">
+                <StepCredentials />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-16 max-w-5xl">
+            {[
+              { t: "Profile + credentials", b: "LinkedIn, resume or proof of work, and the candidate fields founders rank against." },
+              { t: "Projects", b: "Founders post what they're building. Publish to enter the deck; unpublish anytime." },
+              { t: "Open to Work", b: "Builders flip the switch when they want founders to see them. Off by default." },
+              { t: "Find People", b: "Run a focused search against a specific project's criteria." },
+            ].map((d) => (
+              <div
+                key={d.t}
+                className="rounded-sm border border-border bg-card p-4"
+              >
+                <h3 className="font-display text-base mb-1.5 font-semibold">{d.t}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{d.b}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </AppLayout>
     );
   }
 

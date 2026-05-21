@@ -5,12 +5,12 @@
  * their phone.
  *
  * State shape per user:
- *   1. items     — list of saved PublicProject rows, deduped by id
- *   2. activeId  — the one project the builder marks as their
+ *   1. items     - list of saved PublicProject rows, deduped by id
+ *   2. activeId  - the one project the builder marks as their
  *                  "current focus" (at most one).
  *
  * Reads: hydrate from `list_saved_projects()` RPC on user bind.
- * Writes: optimistic — update memory + emit, then await the round
+ * Writes: optimistic - update memory + emit, then await the round
  *         trip; on failure, undo and notify via console (callers can
  *         layer toast on top if they want richer error handling).
  *

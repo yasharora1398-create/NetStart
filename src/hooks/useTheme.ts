@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 // Polln8 theme - toggles the `.dark` class on <html> and persists
-// the pick to localStorage. Default is "light" — matches the mobile
+// the pick to localStorage. Default is "light" - matches the mobile
 // app's default and the marketing surfaces, which are designed light.
 //
 // CSS variables in src/index.css drive the actual colors; this hook
@@ -21,7 +21,7 @@ const readInitial = (): ThemeMode => {
 // Hex versions of --background for each mode. Kept in sync with the
 // HSL declarations in src/index.css. We need a raw colour string
 // (not an HSL CSS var) so the <meta name="theme-color"> can be set
-// — browser chrome / status-bar tint can't read CSS variables.
+// - browser chrome / status-bar tint can't read CSS variables.
 const BG_HEX: Record<ThemeMode, string> = {
   light: "#FAFAF7",
   dark: "#050505",

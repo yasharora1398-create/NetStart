@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /**
  * Saved page. Role-aware:
  *
@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import {
+  ArrowRight,
   Bookmark,
   Briefcase,
   ExternalLink,
@@ -28,7 +29,6 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
-import { TabIntro } from "@/components/netstart/TabIntro";
 import {
   MothEmptyState,
   type MothVariant,
@@ -140,37 +140,59 @@ const Saved = () => {
   }, [user]);
 
   if (!opened) {
+    // Saved intro: text-first vertical column with the moth "saves"
+    // empty-state illustration tucked beside the headline. No detail
+    // tiles - just two inline callouts to keep the page light.
     return (
-      <TabIntro
-        title="Your shortlist."
-        body={
-          <>
+      <AppLayout>
+        <div className="container max-w-4xl py-12 md:py-16">
+          <div className="grid md:grid-cols-[1fr_auto] gap-8 items-start mb-10">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1] font-bold">
+              Your shortlist.
+            </h1>
+            <div className="w-40 md:w-52 shrink-0">
+              <MothEmptyState variant="saves" compact />
+            </div>
+          </div>
+
+          <div className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-10 max-w-2xl space-y-4">
             <p>
               Saved is where everything you bookmarked from Match ends up.
-              Builders save projects they want to circle back to. Founders
-              save candidates they want to revisit before sending a chat
-              request.
+              Builders save projects they want to circle back to.
+              Founders save candidates they want to revisit before
+              sending a chat request.
             </p>
             <p>
               Synced across every device you&apos;re signed in on. Open
               one to see the full profile, message them, or remove it
               from the list.
             </p>
-          </>
-        }
-        details={[
-          {
-            title: "Cross-device sync",
-            body: "Save on your laptop, open on your phone. Your shortlist lives with your account.",
-          },
-          {
-            title: "Star one as your focus",
-            body: "Builders can pick one saved project as their current focus — same as the founder-side active project.",
-          },
-        ]}
-        ctaLabel="Open Saved"
-        onCta={() => setOpened(true)}
-      />
+          </div>
+
+          <div className="border-l-2 border-gold pl-5 mb-10 max-w-2xl space-y-3">
+            <p className="text-sm text-foreground/90 leading-relaxed">
+              <span className="font-semibold">Cross-device sync.</span>{" "}
+              Save on your laptop, open on your phone. Your shortlist
+              lives with your account.
+            </p>
+            <p className="text-sm text-foreground/90 leading-relaxed">
+              <span className="font-semibold">Star one as your focus.</span>{" "}
+              Builders can pick one saved project as their current focus,
+              same as the founder-side active project.
+            </p>
+          </div>
+
+          <Button
+            variant="gold"
+            size="xl"
+            onClick={() => setOpened(true)}
+            className="group"
+          >
+            Open Saved
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 

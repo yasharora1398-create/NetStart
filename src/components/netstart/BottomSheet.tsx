@@ -78,7 +78,7 @@ export const BottomSheet = ({
       }}
       aria-hidden={!open}
     >
-      {/* Drag handle — pointer events on this strip drive the
+      {/* Drag handle - pointer events on this strip drive the
           swipe-down dismiss. Made larger than the visible bar so
           the touch target is comfortable. */}
       <div
