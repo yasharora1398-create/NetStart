@@ -50,7 +50,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
 
           {/* Match badge */}
           <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-obsidian/80 backdrop-blur border border-gold">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-gold" />
+            <span className="h-1.5 w-1.5 rounded-full bg-gold" />
             <span className="font-mono text-[10px] text-white">{current.match}% MATCH</span>
           </div>
 
@@ -137,7 +137,7 @@ const DecisionBtn = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "gold" | "ghost"; height?: string }) => {
   const styles = {
     default: "border border-border bg-card hover:border-destructive hover:text-destructive",
-    gold: "bg-gradient-gold text-primary-foreground hover:shadow-glow scale-110",
+    gold: "bg-gradient-gold text-primary-foreground scale-110",
     ghost: "border border-border bg-card hover:border-foreground/40 text-muted-foreground hover:text-foreground",
   }[variant];
   return (

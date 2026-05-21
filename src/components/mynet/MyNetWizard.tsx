@@ -1153,7 +1153,7 @@ const Footer = ({
         disabled={working}
         className={`inline-flex items-center gap-2 px-6 py-3 rounded-sm font-medium text-sm transition-all ${
           valid
-            ? "bg-primary text-primary-foreground hover:opacity-90 hover:shadow-[0_0_22px_hsl(var(--primary)/0.45)]"
+            ? "bg-primary text-primary-foreground hover:opacity-90"
             : "bg-neutral-800/80 text-muted-foreground border border-border cursor-pointer"
         } ${working ? "opacity-60 cursor-wait" : ""}`}
       >

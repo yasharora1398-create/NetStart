@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 const LS_KEY = "netstart_tour_seen";
@@ -99,7 +99,7 @@ export const Tutorial = () => {
           </p>
           <button
             onClick={start}
-            className="w-full bg-gradient-gold text-primary-foreground font-medium text-sm py-2.5 rounded-sm hover:shadow-glow transition-shadow"
+            className="w-full bg-gradient-gold text-primary-foreground font-medium text-sm py-2.5 rounded-sm transition-shadow"
           >
             Show me around
           </button>
@@ -133,7 +133,7 @@ export const Tutorial = () => {
           </button>
           <button
             onClick={next}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium text-sm py-2.5 rounded-sm hover:from-blue-500 hover:to-blue-400 hover:shadow-[0_0_22px_rgba(59,130,246,0.55)] transition-all"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium text-sm py-2.5 rounded-sm hover:from-blue-500 hover:to-blue-400 transition-all"
           >
             {isLast ? "Got it" : "Continue"}
           </button>

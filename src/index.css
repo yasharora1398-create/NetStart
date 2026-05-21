@@ -1,4 +1,4 @@
-﻿/* Helvetica everywhere. No Google Fonts dependency: every device
+/* Helvetica everywhere. No Google Fonts dependency: every device
    ships either Helvetica (macOS/iOS), an Arial clone (Windows/Android),
    or one of the named substitutes below. Mono labels fall back to the
    OS's system monospace so we keep the visual category without
@@ -63,7 +63,9 @@
 
     --shadow-elite: 0 4px 16px rgba(15, 20, 16, 0.14);
     --shadow-card: 0 2px 8px rgba(15, 20, 16, 0.06);
-    --shadow-glow: 0 0 24px hsl(146 51% 25% / 0.35);
+    /* Glow shadows removed - kept the token as a no-op so any
+       remaining var(--shadow-glow) reference resolves to nothing. */
+    --shadow-glow: none;
 
     --transition-precise: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -126,9 +128,7 @@
 
     --shadow-elite: 0 4px 16px rgba(0, 0, 0, 0.7);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
-    /* Button glow - tighter spread + lower alpha (was 32px / 0.5).
-       Reads as a subtle lift rather than a green halo. */
-    --shadow-glow: 0 0 14px hsl(142 28% 42% / 0.22);
+    --shadow-glow: none;
 
     --sidebar-background: 158 30% 3%;
     --sidebar-foreground: 60 6% 95%;
