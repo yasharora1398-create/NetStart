@@ -102,15 +102,19 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [{ url: OG_IMAGE, alt: SITE_TITLE }],
   },
+  // ?v=2 cache-bust appended to every icon URL so Google fetches the
+  // current Polln8 favicon instead of the stale one its index cached
+  // from the previous (Vite/Lovable) deployment. Bump the version
+  // (?v=3, v=4) the next time you change the logo file.
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/polln8-logo.png", type: "image/png", sizes: "32x32" },
-      { url: "/polln8-logo.png", type: "image/png", sizes: "192x192" },
-      { url: "/polln8-logo.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/polln8-logo.png?v=2", type: "image/png", sizes: "32x32" },
+      { url: "/polln8-logo.png?v=2", type: "image/png", sizes: "192x192" },
+      { url: "/polln8-logo.png?v=2", type: "image/png", sizes: "512x512" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    other: [{ rel: "mask-icon", url: "/polln8-logo.png", color: "#050505" }],
+    apple: [{ url: "/apple-touch-icon.png?v=2", sizes: "180x180" }],
+    other: [{ rel: "mask-icon", url: "/polln8-logo.png?v=2", color: "#050505" }],
   },
   manifest: "/site.webmanifest",
   appleWebApp: {
@@ -317,6 +321,32 @@ export default function RootLayout({
             })();
           `}
         </Script>
+
+        {/* Fallback content for crawlers (and the rare user) that
+            don't execute JavaScript. The site is a client-rendered
+            React app under the hood, but the SSR pass already paints
+            real HTML — this is belt-and-braces so if anything ever
+            falls back to the no-JS shell, the visible text is Polln8
+            copy instead of an "enable JavaScript" stub from the
+            previous deployment that Google indexed. */}
+        <noscript>
+          <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 640, margin: "48px auto", padding: 24 }}>
+            <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>
+              Polln8
+            </h1>
+            <p style={{ fontSize: 16, lineHeight: 1.5, color: "#444" }}>
+              Cofounders found efficiently. Polln8 is a private network of
+              vetted founders and technical builders. Every profile is
+              reviewed by a human, every chat starts with mutual interest,
+              and the deck is ranked against what you actually want to
+              build.
+            </p>
+            <p style={{ fontSize: 14, marginTop: 16, color: "#666" }}>
+              Polln8 needs JavaScript enabled to run. Most browsers turn
+              it on by default.
+            </p>
+          </div>
+        </noscript>
 
         <Providers>{children}</Providers>
 
