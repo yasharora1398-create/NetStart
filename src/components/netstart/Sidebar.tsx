@@ -18,9 +18,11 @@ import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
 
 const COLLAPSED_KEY = "polln8.sidebar.collapsed";
 const EXPANDED_WIDTH = "248px";
-// Collapsed reserves zero horizontal space â€” pages take the full
-// viewport while the floating top-right strip sits over the content.
-const COLLAPSED_WIDTH = "0px";
+// Collapsed reserves room for the vertical icon rail (CollapsedRail
+// is fixed at left: 12px with 44px buttons -> ~56px occupied, plus
+// breathing room) so page content slides in next to it instead of
+// underneath.
+const COLLAPSED_WIDTH = "72px";
 
 // Hardcoded admin gate: the Admin section in the sidebar only shows
 // when this exact email is signed in. The Admin page itself has its
