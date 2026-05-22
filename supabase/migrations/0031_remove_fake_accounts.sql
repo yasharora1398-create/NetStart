@@ -11,6 +11,8 @@
 -- After this migration runs, the seed file itself (seed_fake_users.sql)
 -- has been deleted from the repo so nobody re-seeds by accident.
 
+-- Pass 1: nuke by the original seed emails (covers the case where
+-- the seed file was run verbatim).
 delete from auth.users
 where email in (
   'jamie.ross+founder@polln8.com',
@@ -23,4 +25,34 @@ where email in (
   'aria.patel+builder@polln8.com',
   'marcus.vey+builder@polln8.com',
   'ravi.sharma+builder@polln8.com'
+);
+
+-- Pass 2: catch any variant where the seed was tweaked. Anything
+-- with a polln8.com plus-tag of +founder or +builder is by
+-- definition seed data, because real users sign up with their own
+-- email domain, not polln8.com plus-tags.
+delete from auth.users
+where email like '%+founder@polln8.com'
+   or email like '%+builder@polln8.com';
+
+-- Pass 3: nuke by the specific seed full names in case someone
+-- re-seeded under different emails. Profiles is FK'd to auth.users
+-- so this also cascades to wipe the auth row + every dependent
+-- table (projects, saved_*, chat_*, notifications, push_tokens,
+-- user_reports).
+delete from auth.users
+where id in (
+  select user_id from public.profiles
+  where full_name in (
+    'Jamie Ross',
+    'Sara Le',
+    'Theo Becker',
+    'Noor Hassan',
+    'Kai Suzuki',
+    'Maya Chen',
+    'Devon Park',
+    'Aria Patel',
+    'Marcus Vey',
+    'Ravi Sharma'
+  )
 );

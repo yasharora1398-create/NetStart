@@ -17,7 +17,7 @@
  *   - EmailVerifyBanner is a sibling of children -- it floats above
  *     the page when the user hasn't verified yet.
  */
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,6 +27,20 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
 import { PrivacyBanner } from "@/components/netstart/PrivacyBanner";
 import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
+import { logPageView } from "@/lib/analytics";
+
+// Fires logPageView once per browser per calendar day. Sits at the
+// app root so every public route (home, /how, /standards, /signin,
+// etc.) counts toward the page_views table the admin dashboard
+// reads from. Previously only /waitlist (orphaned) called this, so
+// the dashboard read 0 visitors even when Plausible showed real
+// traffic.
+const PageViewLogger = () => {
+  useEffect(() => {
+    void logPageView();
+  }, []);
+  return null;
+};
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -38,6 +52,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         <AuthProvider>
           <SignOutConfirmProvider>
             <SidebarProvider>
+              <PageViewLogger />
               <EmailVerifyBanner />
               <PrivacyBanner />
               {children}
