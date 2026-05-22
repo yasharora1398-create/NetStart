@@ -220,10 +220,8 @@ export const CandidateCard = ({
                 className="h-20 w-20 rounded-sm object-cover border border-gold"
               />
             ) : (
-              <div className="h-20 w-20 rounded-sm bg-gold border border-gold flex items-center justify-center">
-                <span className="font-display text-2xl text-white">
-                  {initials(fullName)}
-                </span>
+              <div className="h-20 w-20 rounded-sm bg-muted border border-border flex items-center justify-center">
+                <User className="h-10 w-10 text-muted-foreground" />
               </div>
             )}
             {uploadingAvatar && (

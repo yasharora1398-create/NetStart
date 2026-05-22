@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
+import { 
   Bookmark,
   BookmarkCheck,
   Briefcase,
@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Sparkles,
   X,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -202,10 +203,8 @@ export const FindPeopleSheet = ({
                             loading="lazy"
                           />
                         ) : (
-                          <div className="h-12 w-12 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                            <span className="font-display text-base text-white">
-                              {initials(candidate.fullName)}
-                            </span>
+                          <div className="h-12 w-12 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+                            <User className="h-6 w-6 text-muted-foreground" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
@@ -370,10 +369,8 @@ const PublicProfileBody = ({
               className="h-24 w-24 rounded-sm object-cover border border-gold flex-shrink-0"
             />
           ) : (
-            <div className="h-24 w-24 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-              <span className="font-display text-3xl text-white">
-                {initials(candidate.fullName)}
-              </span>
+            <div className="h-24 w-24 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+              <User className="h-12 w-12 text-muted-foreground" />
             </div>
           )}
           <div className="flex-1 min-w-0">

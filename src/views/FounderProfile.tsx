@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
-import {
+import { 
   ArrowLeft,
   Briefcase,
   ExternalLink,
@@ -10,6 +10,7 @@ import {
   Loader2,
   MapPin,
   MessageCircle,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -122,10 +123,8 @@ const FounderProfile = () => {
                       className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm object-cover border border-gold flex-shrink-0"
                     />
                   ) : (
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                      <span className="font-display text-2xl text-white">
-                        {initials(founder.fullName)}
-                      </span>
+                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+                      <User className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {
+import { 
   Briefcase,
   CheckCircle2,
   ExternalLink,
@@ -12,6 +12,7 @@ import {
   Pencil,
   Plus,
   Telescope,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -440,7 +441,7 @@ const CredentialsDisplay = ({
         <InfoRow label="Proof of work">
           {profile.proof ? (
             <div className="inline-flex items-center gap-3">
-              <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
+              <div className="h-10 w-10 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
                 <FileText className="h-4 w-4 text-white" />
               </div>
               <div className="min-w-0">
@@ -459,7 +460,7 @@ const CredentialsDisplay = ({
       <InfoRow label="Resume">
         {profile.resume ? (
           <div className="inline-flex items-center gap-3">
-            <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
+            <div className="h-10 w-10 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
               <FileText className="h-4 w-4 text-white" />
             </div>
             <div className="min-w-0">
@@ -491,10 +492,8 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
             className="h-20 w-20 rounded-sm object-cover border border-gold flex-shrink-0"
           />
         ) : (
-          <div className="h-20 w-20 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-            <span className="font-display text-2xl text-white">
-              {initials(profile.fullName)}
-            </span>
+          <div className="h-20 w-20 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+            <User className="h-10 w-10 text-muted-foreground" />
           </div>
         )}
         <div className="flex-1 min-w-0">

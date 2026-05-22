@@ -233,6 +233,25 @@ const Match = () => {
 // ============= Builder view: swipe through lookers ===================
 
 const MATCH_CANDIDATES_CACHE_KEY = "polln8.match.candidates";
+const MATCH_BUILDER_DECIDED_KEY = "polln8.match.builder.decided";
+
+// Read the persisted "already decided" set so a refresh on /match
+// drops the user back on the same card instead of restarting from
+// the top of the deck. Keyed off the auth user id so two people
+// sharing a browser don't merge sets.
+const readBuilderDecided = (uid: string | undefined): Set<string> => {
+  if (typeof window === "undefined" || !uid) return new Set();
+  try {
+    const raw = window.localStorage.getItem(
+      `${MATCH_BUILDER_DECIDED_KEY}.${uid}`,
+    );
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw) as string[];
+    return Array.isArray(arr) ? new Set(arr) : new Set();
+  } catch {
+    return new Set();
+  }
+};
 
 const BuilderView = () => {
   const { user } = useAuth();
@@ -247,7 +266,34 @@ const BuilderView = () => {
   const [skillFilter, setSkillFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [commitmentFilter, setCommitmentFilter] = useState("");
-  const [decided, setDecided] = useState<Set<string>>(new Set());
+  // Persisted across reloads so refreshing /match doesn't reset the
+  // user to the first card. Persisted on every change via the
+  // effect below.
+  const [decided, setDecided] = useState<Set<string>>(() =>
+    readBuilderDecided(user?.id),
+  );
+
+  // Rehydrate when the auth user finishes loading (initial render
+  // may not have user.id yet).
+  useEffect(() => {
+    if (!user?.id) return;
+    const stored = readBuilderDecided(user.id);
+    if (stored.size > 0) setDecided(stored);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Persist the decided set every time it changes.
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id) return;
+    try {
+      window.localStorage.setItem(
+        `${MATCH_BUILDER_DECIDED_KEY}.${user.id}`,
+        JSON.stringify(Array.from(decided)),
+      );
+    } catch {
+      // ignore - localStorage quota / disabled is non-fatal
+    }
+  }, [decided, user?.id]);
   const [detail, setDetail] = useState<Candidate | null>(null);
   // Founder's active/first project â€” drives where Save lands plus
   // the "Matching for [project]" banner. Title kept alongside the
@@ -810,8 +856,24 @@ const CandidateActions = ({
 // ============= Looker view: arrows through builders ==================
 
 const MATCH_PROJECTS_CACHE_KEY = "polln8.match.projects";
+const MATCH_LOOKER_DECIDED_KEY = "polln8.match.looker.decided";
+
+const readLookerDecided = (uid: string | undefined): Set<string> => {
+  if (typeof window === "undefined" || !uid) return new Set();
+  try {
+    const raw = window.localStorage.getItem(
+      `${MATCH_LOOKER_DECIDED_KEY}.${uid}`,
+    );
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw) as string[];
+    return Array.isArray(arr) ? new Set(arr) : new Set();
+  } catch {
+    return new Set();
+  }
+};
 
 const LookerView = () => {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<PublicProject[]>(
     () => readCache<PublicProject[]>(MATCH_PROJECTS_CACHE_KEY) ?? [],
   );
@@ -820,11 +882,29 @@ const LookerView = () => {
   const [skillFilter, setSkillFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [commitmentFilter, setCommitmentFilter] = useState("");
-  // Same deck pattern as the founder side: passed/seen project ids
-  // drop out of `filtered`. `approving` is the project the user
-  // tapped âœ“ on â€” drives the action pane that slides in from the
-  // right. `lastDecided` powers Undo / the Back button in the pane.
-  const [decided, setDecided] = useState<Set<string>>(new Set());
+  // Same deck pattern as the founder side. Persisted to localStorage
+  // so refreshing /match keeps the user on the same project instead
+  // of restarting from the top of the deck.
+  const [decided, setDecided] = useState<Set<string>>(() =>
+    readLookerDecided(user?.id),
+  );
+  useEffect(() => {
+    if (!user?.id) return;
+    const stored = readLookerDecided(user.id);
+    if (stored.size > 0) setDecided(stored);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id) return;
+    try {
+      window.localStorage.setItem(
+        `${MATCH_LOOKER_DECIDED_KEY}.${user.id}`,
+        JSON.stringify(Array.from(decided)),
+      );
+    } catch {
+      // ignore
+    }
+  }, [decided, user?.id]);
   const [approving, setApproving] = useState<PublicProject | null>(null);
   const [lastDecided, setLastDecided] = useState<PublicProject | null>(null);
   const [fullscreen, setFullscreen] = useState(false);

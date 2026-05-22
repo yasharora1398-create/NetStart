@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import {
+import { 
   ExternalLink,
   Linkedin,
   Loader2,
   Send,
   Trash2,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -208,10 +209,8 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-14 w-14 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                    <span className="font-display text-base text-white">
-                      {initials(c.fullName)}
-                    </span>
+                  <div className="h-14 w-14 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+                    <User className="h-6 w-6 text-muted-foreground" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">

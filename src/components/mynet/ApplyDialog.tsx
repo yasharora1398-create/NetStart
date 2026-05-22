@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Loader2, Send } from "lucide-react";
+import {  Loader2, Send,
+  User,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -89,10 +91,8 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
                   className="h-10 w-10 rounded-sm object-cover border border-gold flex-shrink-0"
                 />
               ) : (
-                <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                  <span className="font-display text-xs text-white">
-                    {initials(project.founderFullName)}
-                  </span>
+                <div className="h-10 w-10 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+                  <User className="h-4 w-4 text-muted-foreground" />
                 </div>
               );
             })()}

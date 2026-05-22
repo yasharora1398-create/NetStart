@@ -230,8 +230,8 @@ export const ApplicationsPanel = ({
                               loading="lazy"
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
-                              <span className="font-display text-xs text-white">
+                            <div className="h-10 w-10 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
+                              <span className="font-display text-xs text-muted-foreground">
                                 {initials(app.candidate.fullName)}
                               </span>
                             </div>

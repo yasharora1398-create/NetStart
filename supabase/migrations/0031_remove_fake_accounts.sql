@@ -35,15 +35,21 @@ delete from auth.users
 where email like '%+founder@polln8.com'
    or email like '%+builder@polln8.com';
 
--- Pass 3: nuke by the specific seed full names in case someone
--- re-seeded under different emails. Profiles is FK'd to auth.users
--- so this also cascades to wipe the auth row + every dependent
--- table (projects, saved_*, chat_*, notifications, push_tokens,
--- user_reports).
+-- Pass 3: nuke by full name. The original seed (seed_fake_users.sql)
+-- shipped with 10 names, but more synthetic accounts have appeared
+-- in the DB - either from re-seeds under different emails or from
+-- manual sign-ups during testing. Add any new fake name to this
+-- list and re-run this whole migration; the operation is idempotent
+-- so it can be run repeatedly without harming real accounts.
+--
+-- Profiles is FK'd to auth.users so this cascade-wipes the auth row
+-- + every dependent table (projects, saved_*, chat_*, notifications,
+-- push_tokens, user_reports).
 delete from auth.users
 where id in (
   select user_id from public.profiles
   where full_name in (
+    -- Original seed
     'Jamie Ross',
     'Sara Le',
     'Theo Becker',
@@ -53,6 +59,11 @@ where id in (
     'Devon Park',
     'Aria Patel',
     'Marcus Vey',
-    'Ravi Sharma'
+    'Ravi Sharma',
+    -- Additional synthetic accounts discovered in Match
+    'Marcus Okonkwo',
+    'Priya Singh',
+    'Diego Ramirez',
+    'Aisha Williams'
   )
 );
