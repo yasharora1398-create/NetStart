@@ -69,6 +69,24 @@ where id in (
     'Marcus Okonkwo',
     'Priya Singh',
     'Diego Ramirez',
-    'Aisha Williams'
+    'Aisha Williams',
+    -- The "X" placeholder account (any casing/punctuation variant)
+    'X',
+    'x',
+    'Mr X',
+    'Mr. X',
+    'Mister X',
+    'MR X',
+    'MR. X'
   )
+);
+
+-- Pass 4: belt-and-braces. Any profile whose full_name is just the
+-- single character "x" (any case) or an "x" with stray punctuation is
+-- a placeholder, not a real person. Real names are at least two
+-- characters and contain at least one vowel.
+delete from auth.users
+where id in (
+  select user_id from public.profiles
+  where trim(lower(regexp_replace(full_name, '[^a-zA-Z]', '', 'g'))) = 'x'
 );
