@@ -6,22 +6,22 @@ const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
 export const isSupabaseConfigured = Boolean(url && anonKey);
 
 export const MISSING_CONFIG_MESSAGE =
-  "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local and restart the dev server.";
+ "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local and restart the dev server.";
 
 let client: SupabaseClient | null = null;
 
 export const getSupabase = (): SupabaseClient => {
-  if (!isSupabaseConfigured) {
-    throw new Error(MISSING_CONFIG_MESSAGE);
-  }
-  if (!client) {
-    client = createClient(url as string, anonKey as string, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-    });
-  }
-  return client;
+ if (!isSupabaseConfigured) {
+ throw new Error(MISSING_CONFIG_MESSAGE);
+ }
+ if (!client) {
+ client = createClient(url as string, anonKey as string, {
+ auth: {
+ persistSession: true,
+ autoRefreshToken: true,
+ detectSessionInUrl: true,
+ },
+ });
+ }
+ return client;
 };

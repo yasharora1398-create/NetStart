@@ -18,15 +18,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * of letting the underlying SDK leak its phrasing.
  */
 export const refreshSessionOrThrow = async (
-  supabase: SupabaseClient,
-  friendlyContextForError = "continue",
+ supabase: SupabaseClient,
+ friendlyContextForError = "continue",
 ): Promise<void> => {
-  const { error } = await supabase.auth.refreshSession();
-  if (error) {
-    throw new Error(
-      `Your session expired. Sign in again to ${friendlyContextForError}.`,
-    );
-  }
+ const { error } = await supabase.auth.refreshSession();
+ if (error) {
+ throw new Error(
+ `Your session expired. Sign in again to ${friendlyContextForError}.`,
+ );
+ }
 };
 
 /**
@@ -36,17 +36,17 @@ export const refreshSessionOrThrow = async (
  * call (rare, but possible if the user signed out in another tab).
  */
 export const normalizeAuthError = (
-  err: unknown,
-  friendlyContextForError = "continue",
+ err: unknown,
+ friendlyContextForError = "continue",
 ): Error => {
-  const msg =
-    err instanceof Error
-      ? err.message
-      : (err as { message?: string } | null)?.message ?? "";
-  if (msg.toLowerCase().includes("auth session")) {
-    return new Error(
-      `Your session expired. Sign in again to ${friendlyContextForError}.`,
-    );
-  }
-  return err instanceof Error ? err : new Error(msg || "Unknown error");
+ const msg =
+ err instanceof Error
+ ? err.message
+ : (err as { message?: string } | null)?.message ?? "";
+ if (msg.toLowerCase().includes("auth session")) {
+ return new Error(
+ `Your session expired. Sign in again to ${friendlyContextForError}.`,
+ );
+ }
+ return err instanceof Error ? err : new Error(msg || "Unknown error");
 };

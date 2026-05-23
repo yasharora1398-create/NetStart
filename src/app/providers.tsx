@@ -10,12 +10,12 @@
  * either crash or produce hydration mismatches.
  *
  * Mounting strategy:
- *   - One QueryClient per browser session (useState lazy init so a
- *     React strict-mode re-render doesn't reset the cache).
- *   - Toaster + Sonner mount once at this layer so any page can call
- *     toast() without re-providing.
- *   - EmailVerifyBanner is a sibling of children -- it floats above
- *     the page when the user hasn't verified yet.
+ * - One QueryClient per browser session (useState lazy init so a
+ * React strict-mode re-render doesn't reset the cache).
+ * - Toaster + Sonner mount once at this layer so any page can call
+ * toast() without re-providing.
+ * - EmailVerifyBanner is a sibling of children -- it floats above
+ * the page when the user hasn't verified yet.
  */
 import { useEffect, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -36,30 +36,30 @@ import { logPageView } from "@/lib/analytics";
 // the dashboard read 0 visitors even when Plausible showed real
 // traffic.
 const PageViewLogger = () => {
-  useEffect(() => {
-    void logPageView();
-  }, []);
-  return null;
+ useEffect(() => {
+ void logPageView();
+ }, []);
+ return null;
 };
 
 export default function Providers({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <SignOutConfirmProvider>
-            <SidebarProvider>
-              <PageViewLogger />
-              <EmailVerifyBanner />
-              <PrivacyBanner />
-              {children}
-            </SidebarProvider>
-          </SignOutConfirmProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+ const [queryClient] = useState(() => new QueryClient());
+ return (
+ <QueryClientProvider client={queryClient}>
+ <TooltipProvider>
+ <Toaster />
+ <Sonner />
+ <AuthProvider>
+ <SignOutConfirmProvider>
+ <SidebarProvider>
+ <PageViewLogger />
+ <EmailVerifyBanner />
+ <PrivacyBanner />
+ {children}
+ </SidebarProvider>
+ </SignOutConfirmProvider>
+ </AuthProvider>
+ </TooltipProvider>
+ </QueryClientProvider>
+ );
 }

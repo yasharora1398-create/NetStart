@@ -12,25 +12,25 @@ import { useAuth } from "./auth";
 export type Role = "founder" | "partner";
 
 export const readMetadataRole = (
-  user: { user_metadata?: Record<string, unknown> } | null,
+ user: { user_metadata?: Record<string, unknown> } | null,
 ): Role | null => {
-  const r = user?.user_metadata?.role;
-  return r === "founder" || r === "partner" ? r : null;
+ const r = user?.user_metadata?.role;
+ return r === "founder" || r === "partner" ? r : null;
 };
 
 export const updateRole = async (role: Role): Promise<void> => {
-  await supabase.auth.updateUser({ data: { role } });
+ await supabase.auth.updateUser({ data: { role } });
 };
 
 // Convenience hook — returns the user's current role, with a default
 // fallback for users created before the picker shipped.
 export const useUserRole = (fallback: Role = "partner"): Role => {
-  const { user } = useAuth();
-  const [role, setRole] = useState<Role>(
-    readMetadataRole(user) ?? fallback,
-  );
-  useEffect(() => {
-    setRole(readMetadataRole(user) ?? fallback);
-  }, [user, fallback]);
-  return role;
+ const { user } = useAuth();
+ const [role, setRole] = useState<Role>(
+ readMetadataRole(user) ?? fallback,
+ );
+ useEffect(() => {
+ setRole(readMetadataRole(user) ?? fallback);
+ }, [user, fallback]);
+ return role;
 };

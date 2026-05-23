@@ -4,15 +4,15 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { Footer } from "./Footer";
 
 type Props = {
-  children: ReactNode;
-  /**
-   * Used to be a CSS filter on <main>; that bug caused the AuthGate
-   * (which is rendered as a CHILD of children) to inherit the blur
-   * and become illegible. Visual blur/dim is now handled by the
-   * AuthGate's own backdrop, so this prop is a no-op kept for
-   * source compatibility with existing call sites.
-   */
-  blurred?: boolean;
+ children: ReactNode;
+ /**
+ * Used to be a CSS filter on <main>; that bug caused the AuthGate
+ * (which is rendered as a CHILD of children) to inherit the
+ * and become illegible. Visual /dim is now handled by the
+ * AuthGate's own backdrop, so this prop is a no-op kept for
+ * source compatibility with existing call sites.
+ */
+ blurred?: boolean;
 };
 
 /**
@@ -24,15 +24,15 @@ type Props = {
  * in/out, rather than leaving the white strip a static `100vh` would.
  */
 export const AppLayout = ({ children }: Props) => (
-  <div className="min-h-dvh bg-background text-foreground">
-    <Sidebar />
-    <div
-      className="transition-[padding] duration-300"
-      style={{ paddingLeft: "var(--sidebar-width, 240px)" }}
-    >
-      <main className="pt-12 pb-24">{children}</main>
-      <Footer />
-    </div>
-    <MobileBottomNav />
-  </div>
+ <div className="min-h-dvh bg-background text-foreground">
+ <Sidebar />
+ <div
+ className="transition-[padding] duration-300"
+ style={{ paddingLeft: "var(--sidebar-width, 240px)" }}
+ >
+ <main className="pt-12 pb-24">{children}</main>
+ <Footer />
+ </div>
+ <MobileBottomNav />
+ </div>
 );

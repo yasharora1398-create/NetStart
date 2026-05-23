@@ -22,66 +22,66 @@ import { Link } from "@/lib/router-compat";
 const STORAGE_KEY = "polln8.privacy_banner.dismissed";
 
 export const PrivacyBanner = () => {
-  const [mounted, setMounted] = useState(false);
-  const [hidden, setHidden] = useState(true);
+ const [mounted, setMounted] = useState(false);
+ const [hidden, setHidden] = useState(true);
 
-  useEffect(() => {
-    setMounted(true);
-    try {
-      const seen = window.localStorage.getItem(STORAGE_KEY) === "1";
-      setHidden(seen);
-    } catch {
-      // localStorage blocked (private mode / strict tracker blockers).
-      // Default to hiding the banner -- the privacy /privacy page is
-      // still linked from the Footer so the info is reachable.
-      setHidden(true);
-    }
-  }, []);
+ useEffect(() => {
+ setMounted(true);
+ try {
+ const seen = window.localStorage.getItem(STORAGE_KEY) === "1";
+ setHidden(seen);
+ } catch {
+ // localStorage blocked (private mode / strict tracker blockers).
+ // Default to hiding the banner -- the privacy /privacy page is
+ // still linked from the Footer so the info is reachable.
+ setHidden(true);
+ }
+ }, []);
 
-  const dismiss = () => {
-    setHidden(true);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      // ignore
-    }
-  };
+ const dismiss = () => {
+ setHidden(true);
+ try {
+ window.localStorage.setItem(STORAGE_KEY, "1");
+ } catch {
+ // ignore
+ }
+ };
 
-  if (!mounted || hidden) return null;
+ if (!mounted || hidden) return null;
 
-  return (
-    <div
-      role="dialog"
-      aria-label="Privacy notice"
-      className="fixed inset-x-3 bottom-3 z-50 md:inset-x-auto md:right-4 md:bottom-4 md:max-w-md"
-    >
-      <div className="relative rounded-sm border border-gold bg-card/95 backdrop-blur shadow-lg p-4 pr-10">
-        <p className="text-xs leading-relaxed text-foreground">
-          Polln8 uses{" "}
-          <a
-            href="https://plausible.io/data-policy"
-            target="_blank"
-            rel="noreferrer"
-            className="text-gold hover:underline"
-          >
-            Plausible
-          </a>{" "}
-          for privacy-friendly analytics. No cookies, no cross-site
-          tracking, no personal data collected. Read more in our{" "}
-          <Link to="/privacy" className="text-gold hover:underline">
-            privacy policy
-          </Link>
-          .
-        </p>
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label="Dismiss privacy notice"
-          className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-  );
+ return (
+ <div
+ role="dialog"
+ aria-label="Privacy notice"
+ className="fixed inset-x-3 bottom-3 z-50 md:inset-x-auto md:right-4 md:bottom-4 md:max-w-md"
+ >
+ <div className="relative rounded-sm border border-gold bg-card shadow-lg p-4 pr-10">
+ <p className="text-xs leading-relaxed text-foreground">
+ Polln8 uses{" "}
+ <a
+ href="https://plausible.io/data-policy"
+ target="_blank"
+ rel="noreferrer"
+ className="text-gold hover:underline"
+ >
+ Plausible
+ </a>{" "}
+ for privacy-friendly analytics. No cookies, no cross-site
+ tracking, no personal data collected. Read more in our{" "}
+ <Link to="/privacy" className="text-gold hover:underline">
+ privacy policy
+ </Link>
+ .
+ </p>
+ <button
+ type="button"
+ onClick={dismiss}
+ aria-label="Dismiss privacy notice"
+ className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
+ >
+ <X className="h-4 w-4" />
+ </button>
+ </div>
+ </div>
+ );
 };

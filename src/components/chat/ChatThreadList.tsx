@@ -16,8 +16,8 @@ import type { ChatThreadSummary } from "@/lib/mynet-storage";
 import type { Candidate } from "@/lib/mynet-types";
 import { getAvatarUrl } from "@/lib/mynet-storage";
 import {
-  clearThreadUnread,
-  useThreadUnreadFlags,
+ clearThreadUnread,
+ useThreadUnreadFlags,
 } from "@/lib/threadUnread";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,282 +26,282 @@ import { cn } from "@/lib/utils";
 import { formatRelative } from "./ChatTime";
 
 const initials = (name: string): string => {
-  if (!name.trim()) return "?";
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
+ if (!name.trim()) return "?";
+ return name
+ .trim()
+ .split(/\s+/)
+ .slice(0, 2)
+ .map((p) => p[0]?.toUpperCase() ?? "")
+ .join("");
 };
 
 export type ThreadListItem = ChatThreadSummary & {
-  fullName: string;
-  avatarPath: string | null;
+ fullName: string;
+ avatarPath: string | null;
 };
 
 type Props = {
-  items: ThreadListItem[];
-  selectedId: string | null;
-  currentUserId: string | null;
-  loading: boolean;
-  onSelect: (contactId: string) => void;
-  /** When present, renders a "tuck me away" button next to the search
-   *  input that the parent can use to hide this pane on desktop. */
-  onCollapse?: () => void;
+ items: ThreadListItem[];
+ selectedId: string | null;
+ currentUserId: string | null;
+ loading: boolean;
+ onSelect: (contactId: string) => void;
+ /** When present, renders a "tuck me away" button next to the search
+ * input that the parent can use to hide this pane on desktop. */
+ onCollapse?: () => void;
 };
 
 export const ChatThreadList = ({
-  items,
-  selectedId,
-  currentUserId,
-  loading,
-  onSelect,
-  onCollapse,
+ items,
+ selectedId,
+ currentUserId,
+ loading,
+ onSelect,
+ onCollapse,
 }: Props) => {
-  const [query, setQuery] = useState("");
-  // Read the unread-flag set so any change in another component
-  // (e.g. user marks a thread unread from the chat header) repaints
-  // this list. The hook returns a Set; we look up by contactId.
-  const unreadFlags = useThreadUnreadFlags();
-  const q = query.trim().toLowerCase();
-  const filtered = useMemo(() => {
-    if (!q) return items;
-    return items.filter(
-      (it) =>
-        it.fullName.toLowerCase().includes(q) ||
-        it.lastBody.toLowerCase().includes(q),
-    );
-  }, [items, q]);
+ const [query, setQuery] = useState("");
+ // Read the unread-flag set so any change in another component
+ // (e.g. user marks a thread unread from the chat header) repaints
+ // this list. The hook returns a Set; we look up by contactId.
+ const unreadFlags = useThreadUnreadFlags();
+ const q = query.trim().toLowerCase();
+ const filtered = useMemo(() => {
+ if (!q) return items;
+ return items.filter(
+ (it) =>
+ it.fullName.toLowerCase().includes(q) ||
+ it.lastBody.toLowerCase().includes(q),
+ );
+ }, [items, q]);
 
-  return (
-    <aside className="flex h-full min-h-0 flex-col md:border-r md:border-border md:bg-card/30">
-      {/* Mobile mirrors the native app header: gold-eyebrow pill +
-          big display title. Desktop keeps the compact tile header
-          to fit the two-column split layout. */}
-      <div className="md:hidden px-5 pt-5 pb-2">
-        <div className="mb-3 inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-2.5 py-1">
-          <Inbox className="size-3 text-white" aria-hidden />
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white">
-            Threads
-          </span>
-        </div>
-        <h1 className="font-display text-3xl text-foreground">
-          Conversations.
-        </h1>
-      </div>
-      <div className="hidden md:flex items-center justify-between border-b border-border px-4 py-3">
-        <h2 className="font-display text-base text-foreground">
-          Conversations
-        </h2>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
-            {items.length}
-          </span>
-          {/* Collapse pane button. Hidden when no handler is passed,
-              so existing callers (mobile) get the old layout. */}
-          {onCollapse && (
-            <button
-              type="button"
-              onClick={onCollapse}
-              aria-label="Collapse contacts"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
-      {/* Search input â€” desktop only. The native app has no
-          per-thread search in the list, so mobile drops it too. */}
-      <div className="hidden md:block border-b border-border px-3 py-2">
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            className="h-9 pl-8 text-sm"
-          />
-        </div>
-      </div>
+ return (
+ <aside className="flex h-full min-h-0 flex-col md:border-r md:border-border md:bg-card">
+ {/* Mobile mirrors the native app header: gold-eyebrow pill +
+ big display title. Desktop keeps the compact tile header
+ to fit the two-column split layout. */}
+ <div className="md:hidden px-5 pt-5 pb-2">
+ <div className="mb-3 inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-2.5 py-1">
+ <Inbox className="size-3 text-white" aria-hidden />
+ <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white">
+ Threads
+ </span>
+ </div>
+ <h1 className="font-display text-3xl text-foreground">
+ Conversations.
+ </h1>
+ </div>
+ <div className="hidden md:flex items-center justify-between border-b border-border px-4 py-3">
+ <h2 className="font-display text-base text-foreground">
+ Conversations
+ </h2>
+ <div className="flex items-center gap-2">
+ <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
+ {items.length}
+ </span>
+ {/* Collapse pane button. Hidden when no handler is passed,
+ so existing callers (mobile) get the old layout. */}
+ {onCollapse && (
+ <button
+ type="button"
+ onClick={onCollapse}
+ aria-label="Collapse contacts"
+ className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
+ >
+ <PanelLeftClose className="h-4 w-4" />
+ </button>
+ )}
+ </div>
+ </div>
+ {/* Search input â€” desktop only. The native app has no
+ per-thread search in the list, so mobile drops it too. */}
+ <div className="hidden md:block border-b border-border px-3 py-2">
+ <div className="relative">
+ <Search
+ className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+ aria-hidden
+ />
+ <Input
+ value={query}
+ onChange={(e) => setQuery(e.target.value)}
+ placeholder="Search"
+ className="h-9 pl-8 text-sm"
+ />
+ </div>
+ </div>
 
-      {loading && items.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center px-4 text-xs text-muted-foreground">
-          Loading...
-        </div>
-      ) : items.length === 0 ? (
-        <EmptyState />
-      ) : filtered.length === 0 ? (
-        <MothEmptyState
-          variant="filters"
-          compact
-          title="No matches."
-          sub="Nothing in your threads matches that. Try fewer words."
-        />
-      ) : (
-        <ScrollArea className="flex-1">
-          <ul className="py-1">
-            {filtered.map((it) => (
-              <ThreadRow
-                key={it.contactId}
-                item={it}
-                active={it.contactId === selectedId}
-                currentUserId={currentUserId}
-                markedUnread={unreadFlags.has(it.contactId)}
-                onSelect={() => {
-                  // Clearing the unread flag on open matches the
-                  // user's mental model: "I'm reading it now, so it's
-                  // not unread anymore." If they want it back, they
-                  // hit Mark as unread in the chat header dropdown.
-                  clearThreadUnread(it.contactId);
-                  onSelect(it.contactId);
-                }}
-              />
-            ))}
-          </ul>
-        </ScrollArea>
-      )}
-    </aside>
-  );
+ {loading && items.length === 0 ? (
+ <div className="flex flex-1 items-center justify-center px-4 text-xs text-muted-foreground">
+ Loading...
+ </div>
+ ) : items.length === 0 ? (
+ <EmptyState />
+ ) : filtered.length === 0 ? (
+ <MothEmptyState
+ variant="filters"
+ compact
+ title="No matches."
+ sub="Nothing in your threads matches that. Try fewer words."
+ />
+ ) : (
+ <ScrollArea className="flex-1">
+ <ul className="py-1">
+ {filtered.map((it) => (
+ <ThreadRow
+ key={it.contactId}
+ item={it}
+ active={it.contactId === selectedId}
+ currentUserId={currentUserId}
+ markedUnread={unreadFlags.has(it.contactId)}
+ onSelect={() => {
+ // Clearing the unread flag on open matches the
+ // user's mental model: "I'm reading it now, so it's
+ // not unread anymore." If they want it back, they
+ // hit Mark as unread in the chat header dropdown.
+ clearThreadUnread(it.contactId);
+ onSelect(it.contactId);
+ }}
+ />
+ ))}
+ </ul>
+ </ScrollArea>
+ )}
+ </aside>
+ );
 };
 
 const ThreadRow = ({
-  item,
-  active,
-  currentUserId,
-  markedUnread,
-  onSelect,
+ item,
+ active,
+ currentUserId,
+ markedUnread,
+ onSelect,
 }: {
-  item: ThreadListItem;
-  active: boolean;
-  currentUserId: string | null;
-  markedUnread: boolean;
-  onSelect: () => void;
+ item: ThreadListItem;
+ active: boolean;
+ currentUserId: string | null;
+ markedUnread: boolean;
+ onSelect: () => void;
 }) => {
-  const url = getAvatarUrl(item.avatarPath);
-  const isFromMe = !!item.lastSender && item.lastSender === currentUserId;
-  const preview = item.lastBody
-    ? `${isFromMe ? "You: " : ""}${item.lastBody}`
-    : "No messages yet.";
+ const url = getAvatarUrl(item.avatarPath);
+ const isFromMe = !!item.lastSender && item.lastSender === currentUserId;
+ const preview = item.lastBody
+ ? `${isFromMe ? "You: " : ""}${item.lastBody}`
+ : "No messages yet.";
 
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onSelect}
-        className={cn(
-          "flex w-full items-start gap-3 px-3 py-3 text-left transition-colors",
-          "hover:bg-accent/50",
-          active && "bg-accent text-accent-foreground",
-        )}
-      >
-        <div className="relative shrink-0">
-          <Avatar className="size-10">
-            {url ? <AvatarImage src={url} alt="" /> : null}
-            <AvatarFallback className="text-xs">
-              {initials(item.fullName)}
-            </AvatarFallback>
-          </Avatar>
-          {markedUnread ? (
-            <span
-              aria-label="Marked unread"
-              className="absolute -top-0.5 -right-0.5 block size-2.5 rounded-full bg-gold ring-2 ring-card"
-            />
-          ) : null}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={cn(
-                "truncate text-sm",
-                markedUnread
-                  ? "font-semibold text-foreground"
-                  : "font-medium text-foreground",
-              )}
-            >
-              {item.fullName || "(Deleted user)"}
-            </span>
-            <span className="shrink-0 text-[11px] text-muted-foreground">
-              {formatRelative(item.lastAt)}
-            </span>
-          </div>
-          <div className="mt-0.5 flex items-center gap-2">
-            <span
-              className={cn(
-                "truncate text-xs",
-                markedUnread
-                  ? "text-foreground/80 font-medium"
-                  : "text-muted-foreground",
-              )}
-            >
-              {preview}
-            </span>
-            <StateBadge state={item.state} fromMe={isFromMe} />
-          </div>
-        </div>
-      </button>
-    </li>
-  );
+ return (
+ <li>
+ <button
+ type="button"
+ onClick={onSelect}
+ className={cn(
+ "flex w-full items-start gap-3 px-3 py-3 text-left transition-colors",
+ "hover:bg-accent",
+ active && "bg-accent text-accent-foreground",
+ )}
+ >
+ <div className="relative shrink-0">
+ <Avatar className="size-10">
+ {url ? <AvatarImage src={url} alt="" /> : null}
+ <AvatarFallback className="text-xs">
+ {initials(item.fullName)}
+ </AvatarFallback>
+ </Avatar>
+ {markedUnread ? (
+ <span
+ aria-label="Marked unread"
+ className="absolute -top-0.5 -right-0.5 block size-2.5 rounded-full bg-gold ring-2 ring-card"
+ />
+ ) : null}
+ </div>
+ <div className="min-w-0 flex-1">
+ <div className="flex items-center justify-between gap-2">
+ <span
+ className={cn(
+ "truncate text-sm",
+ markedUnread
+ ? "font-semibold text-foreground"
+ : "font-medium text-foreground",
+ )}
+ >
+ {item.fullName || "(Deleted user)"}
+ </span>
+ <span className="shrink-0 text-[11px] text-muted-foreground">
+ {formatRelative(item.lastAt)}
+ </span>
+ </div>
+ <div className="mt-0.5 flex items-center gap-2">
+ <span
+ className={cn(
+ "truncate text-xs",
+ markedUnread
+ ? "text-foreground font-medium"
+ : "text-muted-foreground",
+ )}
+ >
+ {preview}
+ </span>
+ <StateBadge state={item.state} fromMe={isFromMe} />
+ </div>
+ </div>
+ </button>
+ </li>
+ );
 };
 
 const StateBadge = ({
-  state,
-  fromMe,
+ state,
+ fromMe,
 }: {
-  state: ChatThreadSummary["state"];
-  fromMe: boolean;
+ state: ChatThreadSummary["state"];
+ fromMe: boolean;
 }) => {
-  if (state === "accepted" || state === "none") return null;
-  if (state === "declined") {
-    return (
-      <span className="ml-auto shrink-0 rounded-sm border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em] text-destructive">
-        Declined
-      </span>
-    );
-  }
-  // outbound = waiting on them; inbound = action needed from me
-  const label = state === "inbound" ? "Pending" : fromMe ? "Sent" : "Pending";
-  const tone =
-    state === "inbound"
-      ? "border-gold bg-gold text-white"
-      : "border-border bg-muted/40 text-muted-foreground";
-  return (
-    <span
-      className={cn(
-        "ml-auto shrink-0 rounded-sm border px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em]",
-        tone,
-      )}
-    >
-      {label}
-    </span>
-  );
+ if (state === "accepted" || state === "none") return null;
+ if (state === "declined") {
+ return (
+ <span className="ml-auto shrink-0 rounded-sm border border-destructive bg-destructive px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em] text-destructive">
+ Declined
+ </span>
+ );
+ }
+ // outbound = waiting on them; inbound = action needed from me
+ const label = state === "inbound" ? "Pending" : fromMe ? "Sent" : "Pending";
+ const tone =
+ state === "inbound"
+ ? "border-gold bg-gold text-white"
+ : "border-border bg-muted text-muted-foreground";
+ return (
+ <span
+ className={cn(
+ "ml-auto shrink-0 rounded-sm border px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em]",
+ tone,
+ )}
+ >
+ {label}
+ </span>
+ );
 };
 
 const EmptyState = () => (
-  <MothEmptyState
-    variant="threads"
-    title="No conversations yet."
-    sub="Threads start when both sides accept a chat request. Open Match to find someone, or wait for an inbound request."
-  />
+ <MothEmptyState
+ variant="threads"
+ title="No conversations yet."
+ sub="Threads start when both sides accept a chat request. Open Match to find someone, or wait for an inbound request."
+ />
 );
 
 // Helper for the page to merge thread metadata with profile data
 // pulled from getCandidatesByIds.
 export const mergeThreadProfiles = (
-  threads: ChatThreadSummary[],
-  profiles: Candidate[],
+ threads: ChatThreadSummary[],
+ profiles: Candidate[],
 ): ThreadListItem[] => {
-  const byId = new Map(profiles.map((p) => [p.userId, p]));
-  return threads.map((t) => {
-    const p = byId.get(t.contactId);
-    return {
-      ...t,
-      fullName: p?.fullName ?? "",
-      avatarPath: p?.avatarPath ?? null,
-    };
-  });
+ const byId = new Map(profiles.map((p) => [p.userId, p]));
+ return threads.map((t) => {
+ const p = byId.get(t.contactId);
+ return {
+ ...t,
+ fullName: p?.fullName ?? "",
+ avatarPath: p?.avatarPath ?? null,
+ };
+ });
 };

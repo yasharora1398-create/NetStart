@@ -12,18 +12,18 @@
 import { Alert, Linking } from "react-native";
 
 const withScheme = (raw: string): string =>
-  /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+ /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 
 export const openLinkedIn = (raw: string | null | undefined): void => {
-  const trimmed = raw?.trim();
-  if (!trimmed) return;
-  const url = withScheme(trimmed);
-  Linking.openURL(url).catch(() => Alert.alert("Couldn't open", url));
+ const trimmed = raw?.trim();
+ if (!trimmed) return;
+ const url = withScheme(trimmed);
+ Linking.openURL(url).catch(() => Alert.alert("Couldn't open", url));
 };
 
 export const openWebsite = (raw: string | null | undefined): void => {
-  const trimmed = raw?.trim();
-  if (!trimmed) return;
-  const url = withScheme(trimmed);
-  Linking.openURL(url).catch(() => Alert.alert("Couldn't open", url));
+ const trimmed = raw?.trim();
+ if (!trimmed) return;
+ const url = withScheme(trimmed);
+ Linking.openURL(url).catch(() => Alert.alert("Couldn't open", url));
 };

@@ -18,61 +18,40 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const Authenticated = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+ const { user, loading } = useAuth();
+ const navigate = useNavigate();
 
-  useEffect(() => {
-    if (loading || !user) return;
-    // Brief visual confirmation that the verify worked, then forward
-    // straight into the setup wizard. 600ms is enough to register
-    // the green checkmark; longer just feels slow.
-    const id = setTimeout(() => navigate("/mynet", { replace: true }), 600);
-    return () => clearTimeout(id);
-  }, [loading, user, navigate]);
+ useEffect(() => {
+ if (loading || !user) return;
+ // Brief visual confirmation that the verify worked, then forward
+ // straight into the setup wizard. 600ms is enough to register
+ // the green checkmark; longer just feels slow.
+ const id = setTimeout(() => navigate("/mynet", { replace: true }), 600);
+ return () => clearTimeout(id);
+ }, [loading, user, navigate]);
 
-  if (!loading && !user) {
-    return <Navigate to="/signin" replace />;
-  }
+ if (!loading && !user) {
+ return <Navigate to="/signin" replace />;
+ }
 
-  return (
-    <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{ filter: "blur(60px)" }}
-      >
-        <div
-          className="absolute -top-32 -right-32 h-[480px] w-[480px] rounded-full opacity-[0.10]"
-          style={{
-            background:
-              "radial-gradient(circle, hsl(var(--primary) / 0.5) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute -bottom-40 -left-32 h-[520px] w-[520px] rounded-full opacity-[0.08]"
-          style={{
-            background:
-              "radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, transparent 70%)",
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-5 py-12">
-        <div
-          className="w-full max-w-md rounded-2xl border border-border bg-card px-8 py-10 md:px-10 md:py-12 text-center"
-          style={{ boxShadow: "var(--shadow-elite)" }}
-        >
-          <h1 className="font-display text-3xl md:text-4xl tracking-[-0.025em] text-foreground mb-4">
-            You're in.
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
-            Taking you to set up your profile...
-          </p>
-          <Loader2 className="h-4 w-4 text-primary animate-spin mx-auto" />
-        </div>
-      </div>
-    </div>
-  );
+ return (
+ <div className="relative min-h-screen bg-background text-foreground overflow-x-clip">
+ <div className="relative z-10 min-h-screen flex items-center justify-center px-5 py-12">
+ <div
+ className="w-full max-w-md rounded-2xl border border-border bg-card px-8 py-10 md:px-10 md:py-12 text-center"
+ style={{ boxShadow: "var(--shadow-elite)" }}
+ >
+ <h1 className="font-display text-3xl md:text-4xl tracking-[-0.025em] text-foreground mb-4">
+ You're in.
+ </h1>
+ <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
+ Taking you to set up your profile...
+ </p>
+ <Loader2 className="h-4 w-4 text-primary animate-spin mx-auto" />
+ </div>
+ </div>
+ </div>
+ );
 };
 
 export default Authenticated;

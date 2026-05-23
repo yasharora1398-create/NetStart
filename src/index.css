@@ -1,1126 +1,899 @@
 /* Helvetica everywhere. No Google Fonts dependency: every device
-   ships either Helvetica (macOS/iOS), an Arial clone (Windows/Android),
-   or one of the named substitutes below. Mono labels fall back to the
-   OS's system monospace so we keep the visual category without
-   pulling in a custom monospace face. */
+ ships either Helvetica (macOS/iOS), an Arial clone (Windows/Android),
+ or one of the named substitutes below. Mono labels fall back to the
+ OS's system monospace so we keep the visual category without
+ pulling in a custom monospace face. */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Polln8 - single-accent forest green on warm off-white.
-       Token names are kept for compatibility - `--gold` now means
-       forest green, `--accent` means the soft green-tinted bg, etc. */
+ :root {
+ /* Polln8 - single-accent forest green on warm off-white.
+ Token names are kept for compatibility - `--gold` now means
+ forest green, `--accent` means the soft green-tinted bg, etc. */
 
-    /* Page surfaces */
-    --background: 60 12% 97%;            /* #FAFAF7 warm off-white */
-    --foreground: 132 14% 7%;            /* #0F1410 text primary */
+ /* Page surfaces */
+ --background: 60 12% 97%; /* #FAFAF7 warm off-white */
+ --foreground: 132 14% 7%; /* #0F1410 text primary */
 
-    --card: 0 0% 100%;                   /* #FFFFFF */
-    --card-foreground: 132 14% 7%;
+ --card: 0 0% 100%; /* #FFFFFF */
+ --card-foreground: 132 14% 7%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 132 14% 7%;
+ --popover: 0 0% 100%;
+ --popover-foreground: 132 14% 7%;
 
-    /* Accent - forest green */
-    --primary: 146 51% 25%;              /* #1F5F3E */
-    --primary-foreground: 0 0% 100%;
+ /* Accent - forest green */
+ --primary: 146 51% 25%; /* #1F5F3E */
+ --primary-foreground: 0 0% 100%;
 
-    --secondary: 48 13% 94%;             /* #F2F1ED alt section */
-    --secondary-foreground: 132 14% 7%;
+ --secondary: 48 13% 94%; /* #F2F1ED alt section */
+ --secondary-foreground: 132 14% 7%;
 
-    --muted: 48 13% 94%;
-    --muted-foreground: 220 4% 44%;      /* #6B6E73 */
+ --muted: 48 13% 94%;
+ --muted-foreground: 220 4% 44%; /* #6B6E73 */
 
-    --accent: 133 18% 92%;               /* #E8F0EA accent subtle bg */
-    --accent-foreground: 146 51% 25%;    /* forest green text */
+ --accent: 133 18% 92%; /* #E8F0EA accent subtle bg */
+ --accent-foreground: 146 51% 25%; /* forest green text */
 
-    --destructive: 4 51% 31%;            /* #7A2620 */
-    --destructive-foreground: 0 0% 100%;
+ --destructive: 4 51% 31%; /* #7A2620 */
+ --destructive-foreground: 0 0% 100%;
 
-    --success: 146 51% 25%;              /* same as accent */
-    --success-foreground: 0 0% 100%;
+ --success: 146 51% 25%; /* same as accent */
+ --success-foreground: 0 0% 100%;
 
-    --border: 48 8% 87%;                 /* #E1E1DC */
-    --input: 48 6% 84%;                  /* #D9D9D6 stronger border */
-    --ring: 146 51% 25%;
+ --border: 48 8% 87%; /* #E1E1DC */
+ --input: 48 6% 84%; /* #D9D9D6 stronger border */
+ --ring: 146 51% 25%;
 
-    --radius: 0.5rem;
+ --radius: 0.5rem;
 
-    /* Brand legacy tokens - re-pointed at forest green */
-    --gold: 146 51% 25%;                 /* primary */
-    --gold-deep: 147 53% 19%;            /* #174A30 hover */
-    --gold-glow: 133 18% 92%;            /* #E8F0EA accent subtle */
-    --obsidian: 60 12% 97%;
-    --carbon: 48 13% 94%;
+ /* Brand legacy tokens - re-pointed at forest green */
+ --gold: 146 51% 25%; /* primary */
+ --gold-deep: 147 53% 19%; /* #174A30 hover */
+ --gold-glow: 133 18% 92%; /* #E8F0EA accent subtle */
+ --obsidian: 60 12% 97%;
+ --carbon: 48 13% 94%;
 
-    /* "Gradient" tokens kept for source compatibility but resolved
-       to solid fills - the site is intentionally flat. */
-    --gradient-gold: hsl(146 51% 25%);
-    --gradient-obsidian: hsl(60 12% 97%);
-    --gradient-spotlight: none;
+ /* "Gradient" tokens kept for source compatibility but resolved
+ to solid fills - the site is intentionally flat. */
+ --gradient-gold: hsl(146 51% 25%);
+ --gradient-obsidian: hsl(60 12% 97%);
+ --gradient-spotlight: none;
 
-    --shadow-elite: 0 4px 16px rgba(15, 20, 16, 0.14);
-    --shadow-card: 0 2px 8px rgba(15, 20, 16, 0.06);
-    /* Glow shadows removed - kept the token as a no-op so any
-       remaining var(--shadow-glow) reference resolves to nothing. */
-    --shadow-glow: none;
+ --shadow-elite: 0 4px 16px rgba(15, 20, 16, 0.14);
+ --shadow-card: 0 2px 8px rgba(15, 20, 16, 0.06);
+ /* Glow shadows removed - kept the token as a no-op so any
+ remaining var(--) reference resolves to nothing. */
+ --: none;
 
-    --transition-precise: cubic-bezier(0.16, 1, 0.3, 1);
+ --transition-precise: cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* Sidebar */
-    --sidebar-background: 60 12% 97%;
-    --sidebar-foreground: 132 14% 7%;
-    --sidebar-primary: 146 51% 25%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 48 13% 94%;
-    --sidebar-accent-foreground: 132 14% 7%;
-    --sidebar-border: 48 8% 87%;
-    --sidebar-ring: 146 51% 25%;
-  }
+ /* Sidebar */
+ --sidebar-background: 60 12% 97%;
+ --sidebar-foreground: 132 14% 7%;
+ --sidebar-primary: 146 51% 25%;
+ --sidebar-primary-foreground: 0 0% 100%;
+ --sidebar-accent: 48 13% 94%;
+ --sidebar-accent-foreground: 132 14% 7%;
+ --sidebar-border: 48 8% 87%;
+ --sidebar-ring: 146 51% 25%;
+ }
 
-  /* Polln8 dark mode - near-pure-black base with a very faint forest
-     tint. Cards and dividers stay close to neutral so the green
-     accent stays a punctuation, not the dominant chroma. The glow
-     is intentionally restrained: the brand reads as composed and
-     dark rather than glowy/neon. */
-  .dark {
-    --background: 0 0% 2%;               /* #050505 near pure black */
-    --foreground: 60 6% 95%;             /* near-white */
+ /* Polln8 dark mode - near-pure-black base with a very faint forest
+ tint. Cards and dividers stay close to neutral so the green
+ accent stays a punctuation, not the dominant chroma. The glow
+ is intentionally restrained: the brand reads as composed and
+ dark rather than glowy/neon. */
+ .dark {
+ --background: 0 0% 2%; /* #050505 near pure black */
+ --foreground: 60 6% 95%; /* near-white */
 
-    --card: 0 0% 6%;                     /* #0F0F0F raised surface */
-    --card-foreground: 60 6% 95%;
+ --card: 0 0% 6%; /* #0F0F0F raised surface */
+ --card-foreground: 60 6% 95%;
 
-    --popover: 0 0% 6%;
-    --popover-foreground: 60 6% 95%;
+ --popover: 0 0% 6%;
+ --popover-foreground: 60 6% 95%;
 
-    --primary: 142 28% 42%;              /* slightly darker sage */
-    --primary-foreground: 0 0% 2%;       /* pure black text on sage */
+ --primary: 142 28% 42%; /* slightly darker sage */
+ --primary-foreground: 0 0% 2%; /* pure black text on sage */
 
-    --secondary: 0 0% 4%;                /* alt section, just above bg */
-    --secondary-foreground: 60 6% 95%;
+ --secondary: 0 0% 4%; /* alt section, just above bg */
+ --secondary-foreground: 60 6% 95%;
 
-    --muted: 0 0% 4%;
-    --muted-foreground: 60 4% 64%;       /* #A6A69E muted */
+ --muted: 0 0% 4%;
+ --muted-foreground: 60 4% 64%; /* #A6A69E muted */
 
-    --accent: 142 15% 8%;                /* very subtle green tint */
-    --accent-foreground: 142 33% 58%;
+ --accent: 142 15% 8%; /* very subtle green tint */
+ --accent-foreground: 142 33% 58%;
 
-    --destructive: 6 60% 48%;
-    --destructive-foreground: 60 6% 95%;
+ --destructive: 6 60% 48%;
+ --destructive-foreground: 60 6% 95%;
 
-    --success: 142 28% 42%;
-    --success-foreground: 0 0% 2%;
+ --success: 142 28% 42%;
+ --success-foreground: 0 0% 2%;
 
-    --border: 0 0% 12%;                  /* near-neutral against black */
-    --input: 0 0% 12%;
-    --ring: 142 28% 42%;
+ --border: 0 0% 12%; /* near-neutral against black */
+ --input: 0 0% 12%;
+ --ring: 142 28% 42%;
 
-    --gold: 142 28% 42%;
-    --gold-deep: 144 30% 48%;
-    --gold-glow: 142 15% 8%;
+ --gold: 142 28% 42%;
+ --gold-deep: 144 30% 48%;
+ --gold-glow: 142 15% 8%;
 
-    /* Same flat-fill story in dark mode. */
-    --gradient-gold: hsl(142 28% 42%);
-    --gradient-spotlight: none;
+ /* Same flat-fill story in dark mode. */
+ --gradient-gold: hsl(142 28% 42%);
+ --gradient-spotlight: none;
 
-    --shadow-elite: 0 4px 16px rgba(0, 0, 0, 0.7);
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
-    --shadow-glow: none;
+ --shadow-elite: 0 4px 16px rgba(0, 0, 0, 0.7);
+ --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
+ --: none;
 
-    --sidebar-background: 158 30% 3%;
-    --sidebar-foreground: 60 6% 95%;
-    --sidebar-primary: 142 33% 48%;
-    --sidebar-primary-foreground: 158 30% 3%;
-    --sidebar-accent: 158 16% 9%;
-    --sidebar-accent-foreground: 60 6% 95%;
-    --sidebar-border: 156 12% 18%;
-    --sidebar-ring: 142 33% 48%;
-  }
+ --sidebar-background: 158 30% 3%;
+ --sidebar-foreground: 60 6% 95%;
+ --sidebar-primary: 142 33% 48%;
+ --sidebar-primary-foreground: 158 30% 3%;
+ --sidebar-accent: 158 16% 9%;
+ --sidebar-accent-foreground: 60 6% 95%;
+ --sidebar-border: 156 12% 18%;
+ --sidebar-ring: 142 33% 48%;
+ }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  html {
-    font-feature-settings: "ss01", "cv11";
-    overflow-x: clip;
-  }
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-image: var(--gradient-spotlight);
-    background-attachment: fixed;
-    overflow-x: clip;
-  }
-  /* faint paper grain across the whole page */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.035;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  }
-  body > #root {
-    position: relative;
-    z-index: 1;
-  }
-  .font-display {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-  .font-mono {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
+ * {
+ @apply border-border;
+ }
+ html {
+ font-feature-settings: "ss01", "cv11";
+ overflow-x: clip;
+ }
+ body {
+ @apply bg-background text-foreground antialiased;
+ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+ background-image: var(--gradient-spotlight);
+ background-attachment: fixed;
+ overflow-x: clip;
+ }
+ body > #root {
+ position: relative;
+ z-index: 1;
+ }
+ .font-display {
+ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+ font-weight: 700;
+ letter-spacing: -0.02em;
+ }
+ .font-mono {
+ font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ }
 }
 
 @layer utilities {
-  .text-gradient-gold {
-    background: var(--gradient-gold);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .border-gold {
-    border-color: hsl(var(--gold) / 0.3);
-  }
+ .text-gradient-gold {
+ background: var(--gradient-gold);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+ .border-gold {
+ border-color: hsl(var(--gold));
+ }
 
-  /* StepMatch deck: nudges up + down as the user scrolls past the
-     mockup. Uses CSS scroll-driven animations (animation-timeline:
-     view()) which is shipping in Chrome / Edge / Firefox 121+ /
-     Safari 17.4+. Browsers without support just see the static
-     mockup, no fallback needed. The shift is intentionally small
-     so the cards still read as cards, not as a parallax gimmick. */
-  @keyframes deck-scroll {
-    from {
-      transform: translateY(28px);
-    }
-    to {
-      transform: translateY(-28px);
-    }
-  }
-  @supports (animation-timeline: view()) {
-    .step-match-scroll {
-      animation: deck-scroll linear both;
-      animation-timeline: view();
-      animation-range: cover 0% cover 100%;
-    }
-  }
-  .grain::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mix-blend-mode: multiply;
-  }
+ /* StepMatch deck: nudges up + down as the user scrolls past the
+ mockup. Uses CSS scroll-driven animations (animation-timeline:
+ view()) which is shipping in Chrome / Edge / Firefox 121+ /
+ Safari 17.4+. Browsers without support just see the static
+ mockup, no fallback needed. The shift is intentionally small
+ so the cards still read as cards, not as a parallax gimmick. */
+ @keyframes deck-scroll {
+ from {
+ transform: translateY(28px);
+ }
+ to {
+ transform: translateY(-28px);
+ }
+ }
+ @supports (animation-timeline: view()) {
+ .step-match-scroll {
+ animation: deck-scroll linear both;
+ animation-timeline: view();
+ animation-range: cover 0% cover 100%;
+ }
+ }
 
-  /* Warm liquid glass - semi-transparent frosted surface that floats
-     ~1mm above the cream page. The body picks up whatever's behind it
-     via backdrop-filter. The bevel comes from inset highlights (bright
-     top edge, soft bottom shadow). The float comes from a layered drop
-     shadow that's tight near the surface and softer further out.
+ /* Warm liquid glass - semi-transparent frosted surface that floats
+ ~1mm above the cream page. The body picks up whatever's behind it
+ via . The bevel comes from inset highlights (bright
+ top edge, soft bottom shadow). The float comes from a layered drop
+ shadow that's tight near the surface and softer further out.
 
-     Don't set `position` here; would override Tailwind's fixed/abs. */
-  .glass {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow:
-      /* The 1mm float - tight contact shadow, then a wider soft drop. */
-      0 1px 2px rgba(21, 23, 26, 0.04),
-      0 4px 12px rgba(21, 23, 26, 0.06),
-      0 16px 40px -8px rgba(21, 23, 26, 0.10),
-      /* Frosted bevel - bright top edge, faint dark bottom. */
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      inset 0 -1px 0 rgba(199, 184, 158, 0.25),
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
-    overflow: hidden;
-  }
-  .glass:hover {
-    box-shadow:
-      0 1px 2px rgba(21, 23, 26, 0.05),
-      0 6px 16px rgba(21, 23, 26, 0.08),
-      0 22px 48px -8px rgba(21, 23, 26, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -1px 0 rgba(199, 184, 158, 0.3),
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.55);
-  }
+ Solid surface only - no rgba, no backdrop-filter, no rim glow. */
+ .glass {
+ background: hsl(var(--card));
+ border: 1px solid hsl(var(--border));
+ box-shadow: var(--shadow-card);
+ overflow: hidden;
+ }
 
-  /* Dark-mode frosted glass - same geometry, swapped to a dark
-     translucent surface so the .glass cards on the localhost Index
-     page (Why-section) read as smoked-glass-on-black instead of
-     bright cream-on-black. */
-  .dark .glass {
-    background: rgba(20, 22, 21, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.45),
-      0 4px 12px rgba(0, 0, 0, 0.5),
-      0 16px 40px -8px rgba(0, 0, 0, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.04);
-  }
-  .dark .glass:hover {
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.5),
-      0 6px 16px rgba(0, 0, 0, 0.6),
-      0 22px 48px -8px rgba(0, 0, 0, 0.7),
-      inset 0 1px 0 rgba(255, 255, 255, 0.07),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
-  }
-  /* Rim hairlines - the cream/marigold gradient set in light mode
-     would read as warm tan smudges on a black background. Replace
-     with neutral white + a faint sage hint so the rim still shimmers
-     on scroll without breaking the dark palette. */
-  .dark .glass::before {
-    background:
-      linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.04),
-        rgba(255, 255, 255, 0.16),
-        rgba(120, 200, 150, 0.20),
-        rgba(255, 255, 255, 0.16),
-        rgba(255, 255, 255, 0.04)
-      )
-      0 0 / 250% 1px no-repeat,
-      linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.4),
-        rgba(0, 0, 0, 0.6),
-        rgba(0, 0, 0, 0.4)
-      )
-      0 100% / 250% 1px no-repeat,
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.10),
-        rgba(120, 200, 150, 0.14),
-        rgba(255, 255, 255, 0.06)
-      )
-      0 0 / 1px 250% no-repeat,
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.06),
-        rgba(120, 200, 150, 0.14),
-        rgba(255, 255, 255, 0.10)
-      )
-      100% 0 / 1px 250% no-repeat;
-  }
+ /* Outlined / stroke text - solid stroke, no alpha. */
+ .text-stroke {
+ -webkit-text-stroke: 1.5px hsl(var(--primary));
+ color: transparent;
+ }
+ .text-stroke-soft {
+ -webkit-text-stroke: 1px hsl(var(--primary));
+ color: transparent;
+ }
 
-  /* LIQUID GLASS RIM - a single hairline strip on each edge that pans
-     with --scroll-progress, giving the rim the "liquid" feeling. The
-     warm palette uses cream highlights with marigold and sage chroma
-     instead of the original cyan/magenta. Each gradient is 250% wide
-     so it has headroom to slide as the page scrolls. */
-  .glass::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border-radius: inherit;
-    z-index: 0;
+ /* Reveal-on-scroll utility - translate-up only, no blur filter. */
+ .reveal {
+ opacity: 0;
+ transform: translateY(24px);
+ transition:
+ opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+ transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+ }
+ .reveal.reveal-on {
+ opacity: 1;
+ transform: translateY(0);
+ }
 
-    background:
-      /* TOP edge - bright cream-to-marigold rim, the floating highlight */
-      linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.30),
-        rgba(255, 255, 255, 0.85),
-        rgba(244, 162, 97, 0.55),
-        rgba(255, 255, 255, 0.85),
-        rgba(168, 181, 158, 0.45),
-        rgba(255, 255, 255, 0.30)
-      )
-      0 0 / 250% 1px no-repeat,
+ /* GLASS-SIDEBAR - exact spec from Sidebar.html design handoff.
+ Frosted-glass panel with a sub-pixel chromatic edge that hugs the
+ 22px-rounded perimeter. Sits 12px in from top/left/bottom; 224px
+ wide. Body is a translucent whiteâ†’sand gradient with strong
+ so the page beneath shows through. Bevel via inset highlights.
+ The rainbow ::before is masked to only show on the rim. */
+ .glass-sidebar {
+ position: fixed;
+ left: 12px;
+ top: 12px;
+ width: 224px;
+ height: calc(100vh - 24px);
+ z-index: 40;
+ border-radius: 22px;
+ background: hsl(var(--card));
+ border: 1px solid hsl(var(--border));
+ padding: 16px 12px 12px;
+ display: flex;
+ flex-direction: column;
+ gap: 4px;
+ box-shadow: var(--shadow-card);
+ transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+ }
+ /* Collapsed state - icon-only rail. The chevron toggle button on
+ the brand row flips the .is-collapsed class which drives every
+ visual change below (label hiding, icon centering, etc.). */
+ .glass-sidebar.is-collapsed {
+ width: 52px;
+ padding-left: 6px;
+ padding-right: 6px;
+ }
+ .glass-sidebar.is-collapsed .gs-section-label,
+ .glass-sidebar.is-collapsed .gs-brand-text,
+ .glass-sidebar.is-collapsed .gs-pill,
+ .glass-sidebar.is-collapsed .gs-theme-label,
+ .glass-sidebar.is-collapsed .gs-seg button > span:not(.gs-ico):not(:first-child) {
+ display: none;
+ }
+ /* Items: icons-only and centered. The label text span lives at
+ position 2 inside .gs-item; hiding it via attribute selector
+ keeps the icon visible and lets us center the whole row. */
+ .glass-sidebar.is-collapsed .gs-item {
+ justify-content: center;
+ padding-left: 6px;
+ padding-right: 6px;
+ }
+ .glass-sidebar.is-collapsed .gs-item > span:not(.gs-ico):not(.gs-pill) {
+ display: none;
+ }
+ .glass-sidebar.is-collapsed .gs-brand,
+ .glass-sidebar.is-collapsed .gs-brand-link {
+ justify-content: center;
+ padding-left: 0;
+ padding-right: 0;
+ gap: 0;
+ }
+ /* Theme toggle collapses to two stacked icon buttons. */
+ .glass-sidebar.is-collapsed .gs-seg {
+ grid-template-columns: 1fr;
+ grid-template-rows: 1fr 1fr;
+ }
+ .glass-sidebar.is-collapsed .gs-seg button {
+ padding: 6px;
+ }
+ /* Section dividers don't need their inner padding when collapsed. */
+ .glass-sidebar.is-collapsed .gs-section + .gs-section {
+ padding-top: 6px;
+ }
+ .glass-sidebar.is-collapsed .gs-theme {
+ padding: 8px 0 0;
+ }
 
-      /* BOTTOM edge - faint warm-brown rim */
-      linear-gradient(
-        90deg,
-        rgba(199, 184, 158, 0.20),
-        rgba(184, 92, 56, 0.18),
-        rgba(199, 184, 158, 0.30),
-        rgba(168, 181, 158, 0.20),
-        rgba(199, 184, 158, 0.20)
-      )
-      0 100% / 250% 1px no-repeat,
+ /* Toggle button - small chevron pinned to the top-right of the
+ sidebar. In collapsed mode it stays in the same corner, just
+ against the narrower edge. */
+ .glass-sidebar .gs-toggle {
+ position: absolute;
+ top: 10px;
+ right: 10px;
+ width: 28px;
+ height: 28px;
+ border-radius: 8px;
+ border: 0;
+ background: rgba(0, 0, 0, 0.05);
+ color: #6b6b6b;
+ cursor: pointer;
+ /* Sit above the brand Link below it. The brand Link has z-index:1
+ and stretches the full row width; without a higher z-index the
+ chevron clicks were bleeding through and navigating to "/". */
+ z-index: 5;
+ display: grid;
+ place-items: center;
+ transition: background 140ms ease, color 140ms ease;
+ }
+ .glass-sidebar .gs-toggle:hover {
+ background: rgba(0, 0, 0, 0.1);
+ color: #1a1a1a;
+ }
+ .glass-sidebar.is-collapsed .gs-toggle {
+ top: 8px;
+ right: 8px;
+ }
+ .glass-sidebar .gs-brand {
+ position: relative;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ padding: 8px 8px 14px;
+ border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+ margin-bottom: 10px;
+ z-index: 1;
+ }
+ /* Brand row is a Link now, so suppress underline + inherit the
+ specific text colors from gs-brand-name / gs-brand-sub. */
+ .glass-sidebar .gs-brand-link {
+ text-decoration: none;
+ }
+ .glass-sidebar .gs-brand-logo {
+ width: 32px;
+ height: 32px;
+ flex: none;
+ object-fit: contain;
+ pointer-events: none;
+ user-select: none;
+ }
+ .glass-sidebar .gs-brand-mark {
+ width: 30px;
+ height: 30px;
+ border-radius: 9px;
+ background: #1a1a1a;
+ color: #FFFFFF;
+ display: grid;
+ place-items: center;
+ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+ font-size: 16px;
+ font-weight: 600;
+ flex: none;
+ box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+ }
+ .glass-sidebar .gs-brand-name {
+ font-size: 13.5px;
+ font-weight: 600;
+ letter-spacing: -0.005em;
+ color: #1a1a1a;
+ line-height: 1.15;
+ }
+ .glass-sidebar .gs-brand-sub {
+ font-size: 10.5px;
+ color: #9a9a9a;
+ letter-spacing: 0.02em;
+ margin-top: 1px;
+ }
+ /* Scrollable middle region. flex:1 with min-height:0 lets the
+ container shrink below its content's intrinsic height, which is
+ what enables overflow-y to actually engage inside a flex-column
+ layout. Brand row + theme toggle outside .gs-scroll stay pinned. */
+ .glass-sidebar .gs-scroll {
+ position: relative;
+ z-index: 1;
+ flex: 1 1 auto;
+ min-height: 0;
+ overflow-y: auto;
+ overflow-x: hidden;
+ /* Pull child padding inward and add a touch of right padding so
+ the scrollbar (when visible) sits inside the rim instead of
+ hugging the rounded sidebar border. */
+ padding-right: 2px;
+ margin-right: -2px;
+ /* Thin scrollbar in both engines. Webkit gets explicit styling;
+ Firefox uses scrollbar-width: thin. */
+ scrollbar-width: thin;
+ scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+ }
+ .glass-sidebar .gs-scroll::-webkit-scrollbar {
+ width: 6px;
+ }
+ .glass-sidebar .gs-scroll::-webkit-scrollbar-track {
+ background: transparent;
+ }
+ .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb {
+ background: rgba(0, 0, 0, 0.18);
+ border-radius: 3px;
+ }
+ .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb:hover {
+ background: rgba(0, 0, 0, 0.32);
+ }
+ .dark .glass-sidebar .gs-scroll {
+ scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+ }
+ .dark .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb {
+ background: rgba(255, 255, 255, 0.22);
+ }
+ .dark .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb:hover {
+ background: rgba(255, 255, 255, 0.4);
+ }
 
-      /* LEFT edge - subtle vertical chromatic strip */
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.65),
-        rgba(244, 162, 97, 0.35),
-        rgba(255, 255, 255, 0.55),
-        rgba(168, 181, 158, 0.30),
-        rgba(255, 255, 255, 0.55)
-      )
-      0 0 / 1px 250% no-repeat,
+ .glass-sidebar .gs-section {
+ position: relative;
+ z-index: 1;
+ padding: 6px 0 4px;
+ }
+ .glass-sidebar .gs-section + .gs-section {
+ margin-top: 6px;
+ padding-top: 10px;
+ border-top: 1px solid rgba(0, 0, 0, 0.06);
+ }
+ .glass-sidebar .gs-section-label {
+ font-size: 10px;
+ font-weight: 600;
+ letter-spacing: 0.14em;
+ text-transform: uppercase;
+ color: #9a9a9a;
+ padding: 4px 10px 8px;
+ }
+ .glass-sidebar .gs-item {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ width: 100%;
+ border: 0;
+ background: transparent;
+ color: #1a1a1a;
+ text-align: left;
+ padding: 7px 10px;
+ border-radius: 10px;
+ font-size: 13px;
+ font-weight: 500;
+ letter-spacing: -0.005em;
+ cursor: pointer;
+ font-family: inherit;
+ text-decoration: none;
+ transition: background 140ms ease;
+ }
+ .glass-sidebar .gs-item:hover {
+ background: rgba(255, 255, 255, 0.55);
+ }
+ /* Active item: transparent background, green outline only. The
+ fill used to be opaque white-ish; this reads as "selected" with
+ a lighter visual weight. */
+ .glass-sidebar .gs-item.gs-active {
+ background: transparent;
+ box-shadow: inset 0 0 0 1.5px hsl(var(--gold));
+ color: hsl(var(--gold));
+ }
+ .glass-sidebar .gs-ico {
+ width: 16px;
+ height: 16px;
+ flex: none;
+ color: #6b6b6b;
+ display: grid;
+ place-items: center;
+ }
+ .glass-sidebar .gs-item.gs-active .gs-ico {
+ color: hsl(var(--gold));
+ }
+ .glass-sidebar .gs-ico svg {
+ width: 16px;
+ height: 16px;
+ display: block;
+ }
+ .glass-sidebar .gs-spacer {
+ flex: 1;
+ }
+ /* Right-aligned pill inside a sidebar item (used for the user's
+ name next to MyNet). Squashes long names with ellipsis so it
+ never breaks the sidebar layout. */
+ .glass-sidebar .gs-pill {
+ margin-left: auto;
+ padding: 2px 8px;
+ border-radius: 999px;
+ background: rgba(0, 0, 0, 0.06);
+ font-size: 11px;
+ font-weight: 500;
+ line-height: 1.4;
+ color: #6b6b6b;
+ white-space: nowrap;
+ max-width: 90px;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ letter-spacing: 0;
+ text-transform: none;
+ }
+ .glass-sidebar .gs-item.gs-active .gs-pill {
+ background: rgba(0, 0, 0, 0.08);
+ color: #1a1a1a;
+ }
+ .glass-sidebar .gs-theme {
+ position: relative;
+ z-index: 1;
+ margin-top: 8px;
+ padding: 10px 4px 4px;
+ border-top: 1px solid rgba(0, 0, 0, 0.06);
+ }
+ .glass-sidebar .gs-theme-label {
+ font-size: 10px;
+ font-weight: 600;
+ letter-spacing: 0.14em;
+ text-transform: uppercase;
+ color: #9a9a9a;
+ padding: 0 6px 8px;
+ }
+ .glass-sidebar .gs-seg {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 2px;
+ padding: 3px;
+ background: rgba(0, 0, 0, 0.045);
+ border-radius: 11px;
+ border: 1px solid rgba(0, 0, 0, 0.06);
+ }
+ .glass-sidebar .gs-seg button {
+ appearance: none;
+ border: 0;
+ background: transparent;
+ font: inherit;
+ font-size: 12px;
+ color: #6b6b6b;
+ padding: 6px 8px;
+ border-radius: 8px;
+ cursor: pointer;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 6px;
+ }
+ .glass-sidebar .gs-seg button svg {
+ width: 13px;
+ height: 13px;
+ }
+ .glass-sidebar .gs-seg button[aria-pressed="true"] {
+ background: #ffffff;
+ color: #1a1a1a;
+ box-shadow:
+ 0 1px 2px rgba(0, 0, 0, 0.08),
+ inset 0 1px 0 rgba(255, 255, 255, 0.9);
+ }
 
-      /* RIGHT edge - opposite phase so the two sides drift toward each other */
-      linear-gradient(
-        180deg,
-        rgba(168, 181, 158, 0.30),
-        rgba(255, 255, 255, 0.55),
-        rgba(244, 162, 97, 0.35),
-        rgba(255, 255, 255, 0.55),
-        rgba(184, 92, 56, 0.20)
-      )
-      100% 0 / 1px 250% no-repeat;
+ /* Dark mode overrides - keeps the same frosted geometry but flips
+ the surface, text, and rim colors to the Polln8 dark palette. */
+ .dark .glass-sidebar {
+ background: hsl(var(--card));
+ border: 1px solid hsl(var(--border));
+ box-shadow: var(--shadow-card);
+ }
+ .dark .glass-sidebar .gs-brand {
+ border-bottom-color: rgba(255, 255, 255, 0.08);
+ }
+ .dark .glass-sidebar .gs-brand-mark {
+ background: hsl(142 33% 48%); /* sage primary */
+ color: hsl(162 19% 7%); /* dark text on sage */
+ }
+ .dark .glass-sidebar .gs-brand-name {
+ color: hsl(60 6% 95%);
+ }
+ .dark .glass-sidebar .gs-brand-sub {
+ color: hsl(60 4% 64%);
+ }
+ .dark .glass-sidebar .gs-section + .gs-section {
+ border-top-color: rgba(255, 255, 255, 0.08);
+ }
+ .dark .glass-sidebar .gs-section-label,
+ .dark .glass-sidebar .gs-theme-label {
+ color: hsl(60 4% 64%);
+ }
+ .dark .glass-sidebar .gs-item {
+ color: hsl(60 6% 95%);
+ }
+ .dark .glass-sidebar .gs-item:hover {
+ background: rgba(255, 255, 255, 0.05);
+ }
+ .dark .glass-sidebar .gs-item.gs-active {
+ background: transparent;
+ box-shadow:
+ inset 0 0 0 1.5px hsl(var(--gold)),
+ 0 1px 0 rgba(0, 0, 0, 0.2);
+ }
+ .dark .glass-sidebar .gs-ico {
+ color: hsl(60 4% 64%);
+ }
+ .dark .glass-sidebar .gs-item.gs-active .gs-ico {
+ color: hsl(var(--gold));
+ }
+ .dark .glass-sidebar .gs-pill {
+ background: rgba(255, 255, 255, 0.08);
+ color: hsl(60 4% 64%);
+ }
+ .dark .glass-sidebar .gs-item.gs-active .gs-pill {
+ background: rgba(79, 165, 114, 0.20);
+ color: hsl(142 33% 70%);
+ }
+ .dark .glass-sidebar .gs-toggle {
+ background: rgba(255, 255, 255, 0.06);
+ color: hsl(60 4% 64%);
+ }
+ .dark .glass-sidebar .gs-toggle:hover {
+ background: rgba(255, 255, 255, 0.12);
+ color: hsl(60 6% 95%);
+ }
+ .dark .glass-sidebar .gs-theme {
+ border-top-color: rgba(255, 255, 255, 0.08);
+ }
+ .dark .glass-sidebar .gs-seg {
+ background: rgba(255, 255, 255, 0.04);
+ border-color: rgba(255, 255, 255, 0.06);
+ }
+ .dark .glass-sidebar .gs-seg button {
+ color: hsl(60 4% 64%);
+ }
+ .dark .glass-sidebar .gs-seg button[aria-pressed="true"] {
+ background: hsl(142 33% 48%);
+ color: hsl(162 19% 7%);
+ box-shadow:
+ 0 1px 2px rgba(0, 0, 0, 0.3),
+ inset 0 1px 0 rgba(255, 255, 255, 0.15);
+ }
 
-    background-position:
-      calc(var(--scroll-progress, 0) * -150%) 0,
-      calc(50% + var(--scroll-progress, 0) * 150%) 100%,
-      0 calc(var(--scroll-progress, 0) * -150%),
-      100% calc(50% + var(--scroll-progress, 0) * 150%);
+ /* Polln8 Review Card mockup animations - used by the
+ ReviewCardMockup on the localhost homepage Why-section. The
+ mockup auto-loops through rest -> reviewing -> approved so the
+ visitor can see the manual-review flow without interaction. */
+ .rc-ring {
+ animation: rc-ringspin 18s linear infinite;
+ }
+ .rc-state-reviewing .rc-ring {
+ animation-duration: 6s;
+ }
+ .rc-state-approved .rc-ring {
+ animation-play-state: paused;
+ }
+ @keyframes rc-ringspin {
+ to { transform: rotate(360deg); }
+ }
+ .rc-pulse {
+ animation: rc-pulsering 1.6s ease-out infinite;
+ }
+ .rc-state-reviewing .rc-pulse {
+ animation-duration: 1s;
+ }
+ @keyframes rc-pulsering {
+ 0% { transform: scale(0.7); opacity: 0.9; }
+ 100% { transform: scale(1.9); opacity: 0; }
+ }
+ .rc-confetti.is-on .rc-confetti__p {
+ animation: rc-drift 1500ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--delay) forwards;
+ }
+ @keyframes rc-drift {
+ 0% { opacity: 0; transform: translateY(0) scale(0.6); }
+ 20% { opacity: 0.9; }
+ 100% { opacity: 0; transform: translateY(var(--drift)) scale(1); }
+ }
 
-    transition: background-position 100ms linear;
-  }
+ /* Polln8 Matches Card mockup - auto-looping deck demo. The card's
+ transform/opacity is driven by inline style (set in React from a
+ frontness lookup), and this class supplies the transition + GPU
+ compositor hints so the inline-style change animates smoothly
+ instead of snapping. */
+ .mc-pcard {
+ transition:
+ transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1),
+ opacity 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+ will-change: transform, opacity;
+ backface-visibility: hidden;
+ }
+ .mc-edge-label {
+ opacity: 0;
+ transition: opacity 280ms ease;
+ }
+ .mc-pcard[data-front="swiping-right"] .mc-edge-label--save { opacity: 1; }
+ .mc-pcard[data-front="swiping-left"] .mc-edge-label--pass { opacity: 1; }
+ .mc-profile-tab {
+ transform: translateY(100%);
+ transition: transform 560ms cubic-bezier(0.22, 0.61, 0.36, 1);
+ }
+ /* Sheet rises after Maya's right-swipe (phase 4 in the new flow:
+ Ravi rest -> Ravi swipes left -> Maya rest -> Maya swipes right
+ -> info up). Drops in every other phase. */
+ .mc-phase-4 .mc-profile-tab {
+ transform: translateY(0);
+ }
 
-  /* Outlined / stroke text - now uses rust */
-  .text-stroke {
-    -webkit-text-stroke: 1.5px hsl(var(--primary) / 0.85);
-    color: transparent;
-  }
-  .text-stroke-soft {
-    -webkit-text-stroke: 1px hsl(var(--primary) / 0.35);
-    color: transparent;
-  }
+ /* Polln8 Request Card mockup - auto-loops through:
+ 0 rest : Apply CTA pulses
+ 1 composer : sheet slides up, pitch types in
+ 2 sent : sheet drops, status pill + soft glow on card
+ 3 accepted : pill flips green, ring solid, Open chat reveals
+ The .rq-phase-<n> class on the device root drives every visual
+ change below. Namespaced .rq-* to avoid clashing with .rc-* /
+ .mc-* keyframes from the other two card mockups. */
+ .rq-pulse-cta {
+ animation: rq-btnpulse 2.4s ease-in-out infinite;
+ }
+ @keyframes rq-btnpulse {
+ 0%, 100% { transform: scale(1); }
+ 50% { transform: scale(1.02); }
+ }
+ .rq-glow {
+ animation: rq-glowpulse 600ms ease;
+ }
+ @keyframes rq-glowpulse {
+ 0% { transform: scale(1); }
+ 40% { transform: scale(1.005); }
+ 100% { transform: scale(1); }
+ }
+ .rq-composer {
+ transform: translateY(100%);
+ transition: transform 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+ }
+ .rq-phase-1 .rq-composer { transform: translateY(0); }
+ .rq-caret {
+ display: inline-block;
+ width: 1.5px;
+ height: 13px;
+ vertical-align: text-bottom;
+ margin-left: 1px;
+ background: currentColor;
+ animation: rq-caret 0.9s steps(2) infinite;
+ }
+ @keyframes rq-caret {
+ 50% { opacity: 0; }
+ }
 
-  /* Reveal-on-scroll utility */
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition:
-      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
-      filter 700ms ease-out;
-    filter: blur(8px);
-  }
-  .reveal.reveal-on {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
+ /* Hawk-moth mascot animations - used wherever the moth is shown.
+ The hover oscillation lifts the silhouette ~3px and rocks it
+ gently so the empty states never feel inert. The wing-flap
+ classes are used by the marketing card mockups for a faster,
+ wing-beat-style motion when the moth is mid-action. */
+ .moth-hover {
+ animation: moth-hover 4.6s ease-in-out infinite;
+ transform-origin: center 70%;
+ /* The rotate(...) the JSX sets via inline-style is layered on top
+ of this hover transform thanks to multiple-transform composition;
+ we rely on CSS @keyframes only changing translate/scale here. */
+ }
+ /* The inline transform set by MothEmptyState (rotate(...)) is the
+ base; the .moth-hover keyframes overwrite that via the animation.
+ To keep both, the keyframes use translate only and we read the
+ inline rotation in JSX via CSS custom-property below. */
+ @keyframes moth-hover {
+ 0%, 100% { transform: translateY(0) rotate(var(--moth-rot, 0deg)); }
+ 25% { transform: translateY(-3px) rotate(calc(var(--moth-rot, 0deg) - 1.2deg)); }
+ 50% { transform: translateY(0) rotate(var(--moth-rot, 0deg)); }
+ 75% { transform: translateY(-3px) rotate(calc(var(--moth-rot, 0deg) + 1.2deg)); }
+ }
+ /* Empty-state container fade-in. The whole illustration block
+ emerges with a soft + lift so the moment a list goes
+ empty doesn't feel like a hard cut. */
+ .moth-emerge {
+ animation: moth-emerge 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+ }
+ @keyframes moth-emerge {
+ 0% { opacity: 0; transform: translateY(8px); }
+ 100% { opacity: 1; transform: translateY(0); }
+ }
 
-  /* GLASS-SIDEBAR - exact spec from Sidebar.html design handoff.
-     Frosted-glass panel with a sub-pixel chromatic edge that hugs the
-     22px-rounded perimeter. Sits 12px in from top/left/bottom; 224px
-     wide. Body is a translucent whiteâ†’sand gradient with strong blur
-     so the page beneath shows through. Bevel via inset highlights.
-     The rainbow ::before is masked to only show on the rim. */
-  .glass-sidebar {
-    position: fixed;
-    left: 12px;
-    top: 12px;
-    width: 224px;
-    height: calc(100vh - 24px);
-    z-index: 40;
-    border-radius: 22px;
-    background:
-      linear-gradient(180deg,
-        rgba(255, 255, 255, 0.42) 0%,
-        rgba(245, 240, 228, 0.22) 100%);
-    -webkit-backdrop-filter: blur(32px) saturate(190%);
-    backdrop-filter: blur(32px) saturate(190%);
-    padding: 16px 12px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow:
-      0 0 0 0.5px rgba(0, 0, 0, 0.08),
-      0 18px 40px -16px rgba(60, 50, 30, 0.18),
-      0 2px 6px -2px rgba(60, 50, 30, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.75),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.03);
-    /* Animate width changes so collapse/expand glides instead of
-       snapping. Pages padding past the sidebar via the CSS variable
-       inherit the same transition for a synchronized motion. */
-    transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  /* Collapsed state - icon-only rail. The chevron toggle button on
-     the brand row flips the .is-collapsed class which drives every
-     visual change below (label hiding, icon centering, etc.). */
-  .glass-sidebar.is-collapsed {
-    width: 52px;
-    padding-left: 6px;
-    padding-right: 6px;
-  }
-  .glass-sidebar.is-collapsed .gs-section-label,
-  .glass-sidebar.is-collapsed .gs-brand-text,
-  .glass-sidebar.is-collapsed .gs-pill,
-  .glass-sidebar.is-collapsed .gs-theme-label,
-  .glass-sidebar.is-collapsed .gs-seg button > span:not(.gs-ico):not(:first-child) {
-    display: none;
-  }
-  /* Items: icons-only and centered. The label text span lives at
-     position 2 inside .gs-item; hiding it via attribute selector
-     keeps the icon visible and lets us center the whole row. */
-  .glass-sidebar.is-collapsed .gs-item {
-    justify-content: center;
-    padding-left: 6px;
-    padding-right: 6px;
-  }
-  .glass-sidebar.is-collapsed .gs-item > span:not(.gs-ico):not(.gs-pill) {
-    display: none;
-  }
-  .glass-sidebar.is-collapsed .gs-brand,
-  .glass-sidebar.is-collapsed .gs-brand-link {
-    justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
-    gap: 0;
-  }
-  /* Theme toggle collapses to two stacked icon buttons. */
-  .glass-sidebar.is-collapsed .gs-seg {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-  .glass-sidebar.is-collapsed .gs-seg button {
-    padding: 6px;
-  }
-  /* Section dividers don't need their inner padding when collapsed. */
-  .glass-sidebar.is-collapsed .gs-section + .gs-section {
-    padding-top: 6px;
-  }
-  .glass-sidebar.is-collapsed .gs-theme {
-    padding: 8px 0 0;
-  }
+ /* Subtle "breath" pulse on the accent shapes inside each empty-state
+ scene (the bookmark, the magnifier lens, the bell clapper, etc.).
+ Slow, low-amplitude opacity oscillation so the scene stays alive
+ without distracting from the moth's hover. */
+ .moth-breathe {
+ animation: moth-breathe 5.2s ease-in-out infinite;
+ transform-box: fill-box;
+ transform-origin: center;
+ }
+ @keyframes moth-breathe {
+ 0%, 100% { opacity: 1; transform: scale(1); }
+ 50% { opacity: 0.78; transform: scale(1.03); }
+ }
 
-  /* Toggle button - small chevron pinned to the top-right of the
-     sidebar. In collapsed mode it stays in the same corner, just
-     against the narrower edge. */
-  .glass-sidebar .gs-toggle {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: 0;
-    background: rgba(0, 0, 0, 0.05);
-    color: #6b6b6b;
-    cursor: pointer;
-    /* Sit above the brand Link below it. The brand Link has z-index:1
-       and stretches the full row width; without a higher z-index the
-       chevron clicks were bleeding through and navigating to "/". */
-    z-index: 5;
-    display: grid;
-    place-items: center;
-    transition: background 140ms ease, color 140ms ease;
-  }
-  .glass-sidebar .gs-toggle:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: #1a1a1a;
-  }
-  .glass-sidebar.is-collapsed .gs-toggle {
-    top: 8px;
-    right: 8px;
-  }
-  .glass-sidebar::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 0.75px;
-    background: conic-gradient(
-      from 220deg at 50% 50%,
-      rgba(255, 110, 110, 0.55),
-      rgba(255, 170, 140, 0.35),
-      rgba(255, 220, 180, 0.25),
-      rgba(200, 200, 220, 0.20),
-      rgba(180, 160, 230, 0.30),
-      rgba(255, 140, 180, 0.45),
-      rgba(255, 110, 110, 0.55)
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.9;
-  }
-  .glass-sidebar .gs-brand {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 8px 14px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    margin-bottom: 10px;
-    z-index: 1;
-  }
-  /* Brand row is a Link now, so suppress underline + inherit the
-     specific text colors from gs-brand-name / gs-brand-sub. */
-  .glass-sidebar .gs-brand-link {
-    text-decoration: none;
-  }
-  .glass-sidebar .gs-brand-logo {
-    width: 32px;
-    height: 32px;
-    flex: none;
-    object-fit: contain;
-    pointer-events: none;
-    user-select: none;
-  }
-  .glass-sidebar .gs-brand-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    background: #1a1a1a;
-    color: #FFFFFF;
-    display: grid;
-    place-items: center;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    flex: none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  }
-  .glass-sidebar .gs-brand-name {
-    font-size: 13.5px;
-    font-weight: 600;
-    letter-spacing: -0.005em;
-    color: #1a1a1a;
-    line-height: 1.15;
-  }
-  .glass-sidebar .gs-brand-sub {
-    font-size: 10.5px;
-    color: #9a9a9a;
-    letter-spacing: 0.02em;
-    margin-top: 1px;
-  }
-  /* Scrollable middle region. flex:1 with min-height:0 lets the
-     container shrink below its content's intrinsic height, which is
-     what enables overflow-y to actually engage inside a flex-column
-     layout. Brand row + theme toggle outside .gs-scroll stay pinned. */
-  .glass-sidebar .gs-scroll {
-    position: relative;
-    z-index: 1;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Pull child padding inward and add a touch of right padding so
-       the scrollbar (when visible) sits inside the rim instead of
-       hugging the rounded sidebar border. */
-    padding-right: 2px;
-    margin-right: -2px;
-    /* Thin scrollbar in both engines. Webkit gets explicit styling;
-       Firefox uses scrollbar-width: thin. */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-  }
-  .glass-sidebar .gs-scroll::-webkit-scrollbar {
-    width: 6px;
-  }
-  .glass-sidebar .gs-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.18);
-    border-radius: 3px;
-  }
-  .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.32);
-  }
-  .dark .glass-sidebar .gs-scroll {
-    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
-  }
-  .dark .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.22);
-  }
-  .dark .glass-sidebar .gs-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4);
-  }
+ .wing-flap-l {
+ animation: wing-flap-l 0.18s ease-in-out infinite alternate;
+ transform-origin: 100% 50%;
+ }
+ .wing-flap-r {
+ animation: wing-flap-r 0.18s ease-in-out infinite alternate;
+ transform-origin: 0% 50%;
+ }
+ @keyframes wing-flap-l {
+ from { transform: skewY(-2deg) scaleY(0.96); }
+ to { transform: skewY(2deg) scaleY(1.02); }
+ }
+ @keyframes wing-flap-r {
+ from { transform: skewY(2deg) scaleY(0.96); }
+ to { transform: skewY(-2deg) scaleY(1.02); }
+ }
 
-  .glass-sidebar .gs-section {
-    position: relative;
-    z-index: 1;
-    padding: 6px 0 4px;
-  }
-  .glass-sidebar .gs-section + .gs-section {
-    margin-top: 6px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  .glass-sidebar .gs-section-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #9a9a9a;
-    padding: 4px 10px 8px;
-  }
-  .glass-sidebar .gs-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    border: 0;
-    background: transparent;
-    color: #1a1a1a;
-    text-align: left;
-    padding: 7px 10px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: -0.005em;
-    cursor: pointer;
-    font-family: inherit;
-    text-decoration: none;
-    transition: background 140ms ease;
-  }
-  .glass-sidebar .gs-item:hover {
-    background: rgba(255, 255, 255, 0.55);
-  }
-  /* Active item: transparent background, green outline only. The
-     fill used to be opaque white-ish; this reads as "selected" with
-     a lighter visual weight. */
-  .glass-sidebar .gs-item.gs-active {
-    background: transparent;
-    box-shadow: inset 0 0 0 1.5px hsl(var(--gold));
-    color: hsl(var(--gold));
-  }
-  .glass-sidebar .gs-ico {
-    width: 16px;
-    height: 16px;
-    flex: none;
-    color: #6b6b6b;
-    display: grid;
-    place-items: center;
-  }
-  .glass-sidebar .gs-item.gs-active .gs-ico {
-    color: hsl(var(--gold));
-  }
-  .glass-sidebar .gs-ico svg {
-    width: 16px;
-    height: 16px;
-    display: block;
-  }
-  .glass-sidebar .gs-spacer {
-    flex: 1;
-  }
-  /* Right-aligned pill inside a sidebar item (used for the user's
-     name next to MyNet). Squashes long names with ellipsis so it
-     never breaks the sidebar layout. */
-  .glass-sidebar .gs-pill {
-    margin-left: auto;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.06);
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.4;
-    color: #6b6b6b;
-    white-space: nowrap;
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    letter-spacing: 0;
-    text-transform: none;
-  }
-  .glass-sidebar .gs-item.gs-active .gs-pill {
-    background: rgba(0, 0, 0, 0.08);
-    color: #1a1a1a;
-  }
-  .glass-sidebar .gs-theme {
-    position: relative;
-    z-index: 1;
-    margin-top: 8px;
-    padding: 10px 4px 4px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  .glass-sidebar .gs-theme-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #9a9a9a;
-    padding: 0 6px 8px;
-  }
-  .glass-sidebar .gs-seg {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    padding: 3px;
-    background: rgba(0, 0, 0, 0.045);
-    border-radius: 11px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  .glass-sidebar .gs-seg button {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    font: inherit;
-    font-size: 12px;
-    color: #6b6b6b;
-    padding: 6px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  .glass-sidebar .gs-seg button svg {
-    width: 13px;
-    height: 13px;
-  }
-  .glass-sidebar .gs-seg button[aria-pressed="true"] {
-    background: #ffffff;
-    color: #1a1a1a;
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  }
+ /* Smooth-press: small scale-down on active state for buttons / cards
+ that should feel reactive without changing layout. Use on
+ interactive surfaces (Apply, Save, swipe deck, etc.). */
+ .smooth-press {
+ transition:
+ transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+ box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+ }
+ .smooth-press:active {
+ transform: scale(0.97);
+ }
 
-  /* Dark mode overrides - keeps the same frosted geometry but flips
-     the surface, text, and rim colors to the Polln8 dark palette. */
-  .dark .glass-sidebar {
-    background:
-      linear-gradient(180deg,
-        rgba(25, 33, 29, 0.65) 0%,
-        rgba(15, 22, 20, 0.55) 100%);
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.06),
-      0 18px 40px -16px rgba(0, 0, 0, 0.5),
-      0 2px 6px -2px rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-  }
-  .dark .glass-sidebar::before {
-    background: conic-gradient(
-      from 220deg at 50% 50%,
-      rgba(79, 165, 114, 0.45),
-      rgba(120, 200, 150, 0.30),
-      rgba(160, 220, 180, 0.18),
-      rgba(80, 90, 80, 0.20),
-      rgba(120, 200, 150, 0.30),
-      rgba(79, 165, 114, 0.45)
-    );
-    opacity: 0.7;
-  }
-  .dark .glass-sidebar .gs-brand {
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-  }
-  .dark .glass-sidebar .gs-brand-mark {
-    background: hsl(142 33% 48%);  /* sage primary */
-    color: hsl(162 19% 7%);         /* dark text on sage */
-  }
-  .dark .glass-sidebar .gs-brand-name {
-    color: hsl(60 6% 95%);
-  }
-  .dark .glass-sidebar .gs-brand-sub {
-    color: hsl(60 4% 64%);
-  }
-  .dark .glass-sidebar .gs-section + .gs-section {
-    border-top-color: rgba(255, 255, 255, 0.08);
-  }
-  .dark .glass-sidebar .gs-section-label,
-  .dark .glass-sidebar .gs-theme-label {
-    color: hsl(60 4% 64%);
-  }
-  .dark .glass-sidebar .gs-item {
-    color: hsl(60 6% 95%);
-  }
-  .dark .glass-sidebar .gs-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .dark .glass-sidebar .gs-item.gs-active {
-    background: transparent;
-    box-shadow:
-      inset 0 0 0 1.5px hsl(var(--gold)),
-      0 1px 0 rgba(0, 0, 0, 0.2);
-  }
-  .dark .glass-sidebar .gs-ico {
-    color: hsl(60 4% 64%);
-  }
-  .dark .glass-sidebar .gs-item.gs-active .gs-ico {
-    color: hsl(var(--gold));
-  }
-  .dark .glass-sidebar .gs-pill {
-    background: rgba(255, 255, 255, 0.08);
-    color: hsl(60 4% 64%);
-  }
-  .dark .glass-sidebar .gs-item.gs-active .gs-pill {
-    background: rgba(79, 165, 114, 0.20);
-    color: hsl(142 33% 70%);
-  }
-  .dark .glass-sidebar .gs-toggle {
-    background: rgba(255, 255, 255, 0.06);
-    color: hsl(60 4% 64%);
-  }
-  .dark .glass-sidebar .gs-toggle:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: hsl(60 6% 95%);
-  }
-  .dark .glass-sidebar .gs-theme {
-    border-top-color: rgba(255, 255, 255, 0.08);
-  }
-  .dark .glass-sidebar .gs-seg {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.06);
-  }
-  .dark .glass-sidebar .gs-seg button {
-    color: hsl(60 4% 64%);
-  }
-  .dark .glass-sidebar .gs-seg button[aria-pressed="true"] {
-    background: hsl(142 33% 48%);
-    color: hsl(162 19% 7%);
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
-
-  /* Polln8 Review Card mockup animations - used by the
-     ReviewCardMockup on the localhost homepage Why-section. The
-     mockup auto-loops through rest -> reviewing -> approved so the
-     visitor can see the manual-review flow without interaction. */
-  .rc-ring {
-    animation: rc-ringspin 18s linear infinite;
-  }
-  .rc-state-reviewing .rc-ring {
-    animation-duration: 6s;
-  }
-  .rc-state-approved .rc-ring {
-    animation-play-state: paused;
-  }
-  @keyframes rc-ringspin {
-    to { transform: rotate(360deg); }
-  }
-  .rc-pulse {
-    animation: rc-pulsering 1.6s ease-out infinite;
-  }
-  .rc-state-reviewing .rc-pulse {
-    animation-duration: 1s;
-  }
-  @keyframes rc-pulsering {
-    0%   { transform: scale(0.7); opacity: 0.9; }
-    100% { transform: scale(1.9); opacity: 0; }
-  }
-  .rc-confetti.is-on .rc-confetti__p {
-    animation: rc-drift 1500ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--delay) forwards;
-  }
-  @keyframes rc-drift {
-    0%   { opacity: 0;   transform: translateY(0)               scale(0.6); }
-    20%  { opacity: 0.9; }
-    100% { opacity: 0;   transform: translateY(var(--drift))    scale(1); }
-  }
-
-  /* Polln8 Matches Card mockup - auto-looping deck demo. The card's
-     transform/opacity is driven by inline style (set in React from a
-     frontness lookup), and this class supplies the transition + GPU
-     compositor hints so the inline-style change animates smoothly
-     instead of snapping. */
-  .mc-pcard {
-    transition:
-      transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1),
-      opacity 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-  }
-  .mc-edge-label {
-    opacity: 0;
-    transition: opacity 280ms ease;
-  }
-  .mc-pcard[data-front="swiping-right"] .mc-edge-label--save { opacity: 1; }
-  .mc-pcard[data-front="swiping-left"]  .mc-edge-label--pass { opacity: 1; }
-  .mc-profile-tab {
-    transform: translateY(100%);
-    transition: transform 560ms cubic-bezier(0.22, 0.61, 0.36, 1);
-  }
-  /* Sheet rises after Maya's right-swipe (phase 4 in the new flow:
-     Ravi rest -> Ravi swipes left -> Maya rest -> Maya swipes right
-     -> info up). Drops in every other phase. */
-  .mc-phase-4 .mc-profile-tab {
-    transform: translateY(0);
-  }
-
-  /* Polln8 Request Card mockup - auto-loops through:
-       0 rest      : Apply CTA pulses
-       1 composer  : sheet slides up, pitch types in
-       2 sent      : sheet drops, status pill + soft glow on card
-       3 accepted  : pill flips green, ring solid, Open chat reveals
-     The .rq-phase-<n> class on the device root drives every visual
-     change below. Namespaced .rq-* to avoid clashing with .rc-* /
-     .mc-* keyframes from the other two card mockups. */
-  .rq-pulse-cta {
-    animation: rq-btnpulse 2.4s ease-in-out infinite;
-  }
-  @keyframes rq-btnpulse {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-    50%      { box-shadow: 0 0 0 5px hsl(var(--primary) / 0.18); }
-  }
-  .rq-glow {
-    animation: rq-glowpulse 600ms ease;
-  }
-  @keyframes rq-glowpulse {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.005); }
-    100% { transform: scale(1); }
-  }
-  .rq-composer {
-    transform: translateY(100%);
-    transition: transform 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
-  }
-  .rq-phase-1 .rq-composer { transform: translateY(0); }
-  .rq-caret {
-    display: inline-block;
-    width: 1.5px;
-    height: 13px;
-    vertical-align: text-bottom;
-    margin-left: 1px;
-    background: currentColor;
-    animation: rq-caret 0.9s steps(2) infinite;
-  }
-  @keyframes rq-caret {
-    50% { opacity: 0; }
-  }
-
-  /* Hawk-moth mascot animations - used wherever the moth is shown.
-     The hover oscillation lifts the silhouette ~3px and rocks it
-     gently so the empty states never feel inert. The wing-flap
-     classes are used by the marketing card mockups for a faster,
-     wing-beat-style motion when the moth is mid-action. */
-  .moth-hover {
-    animation: moth-hover 4.6s ease-in-out infinite;
-    transform-origin: center 70%;
-    /* The rotate(...) the JSX sets via inline-style is layered on top
-       of this hover transform thanks to multiple-transform composition;
-       we rely on CSS @keyframes only changing translate/scale here. */
-  }
-  /* The inline transform set by MothEmptyState (rotate(...)) is the
-     base; the .moth-hover keyframes overwrite that via the animation.
-     To keep both, the keyframes use translate only and we read the
-     inline rotation in JSX via CSS custom-property below. */
-  @keyframes moth-hover {
-    0%, 100% { transform: translateY(0) rotate(var(--moth-rot, 0deg)); }
-    25%      { transform: translateY(-3px) rotate(calc(var(--moth-rot, 0deg) - 1.2deg)); }
-    50%      { transform: translateY(0) rotate(var(--moth-rot, 0deg)); }
-    75%      { transform: translateY(-3px) rotate(calc(var(--moth-rot, 0deg) + 1.2deg)); }
-  }
-  /* Empty-state container fade-in. The whole illustration block
-     emerges with a soft blur-clear + lift so the moment a list goes
-     empty doesn't feel like a hard cut. */
-  .moth-emerge {
-    animation: moth-emerge 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  @keyframes moth-emerge {
-    0%   { opacity: 0; transform: translateY(8px); filter: blur(6px); }
-    100% { opacity: 1; transform: translateY(0);    filter: blur(0); }
-  }
-
-  /* Subtle "breath" pulse on the accent shapes inside each empty-state
-     scene (the bookmark, the magnifier lens, the bell clapper, etc.).
-     Slow, low-amplitude opacity oscillation so the scene stays alive
-     without distracting from the moth's hover. */
-  .moth-breathe {
-    animation: moth-breathe 5.2s ease-in-out infinite;
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-  @keyframes moth-breathe {
-    0%, 100% { opacity: 1;    transform: scale(1); }
-    50%      { opacity: 0.78; transform: scale(1.03); }
-  }
-
-  .wing-flap-l {
-    animation: wing-flap-l 0.18s ease-in-out infinite alternate;
-    transform-origin: 100% 50%;
-  }
-  .wing-flap-r {
-    animation: wing-flap-r 0.18s ease-in-out infinite alternate;
-    transform-origin: 0% 50%;
-  }
-  @keyframes wing-flap-l {
-    from { transform: skewY(-2deg) scaleY(0.96); }
-    to   { transform: skewY(2deg)  scaleY(1.02); }
-  }
-  @keyframes wing-flap-r {
-    from { transform: skewY(2deg)  scaleY(0.96); }
-    to   { transform: skewY(-2deg) scaleY(1.02); }
-  }
-
-  /* Smooth-press: small scale-down on active state for buttons / cards
-     that should feel reactive without changing layout. Use on
-     interactive surfaces (Apply, Save, swipe deck, etc.). */
-  .smooth-press {
-    transition:
-      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .smooth-press:active {
-    transform: scale(0.97);
-  }
-
-  /* Tab / panel content crossfade. Pair with key={tabId} so React
-     unmounts/mounts on change, triggering the fade. */
-  .tab-fade {
-    animation: tab-fade 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  @keyframes tab-fade {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+ /* Tab / panel content crossfade. Pair with key={tabId} so React
+ unmounts/mounts on change, triggering the fade. */
+ .tab-fade {
+ animation: tab-fade 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+ }
+ @keyframes tab-fade {
+ from { opacity: 0; transform: translateY(4px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
 }
 
 /* Reduced-motion respect. Anyone who's set
-   "prefers-reduced-motion: reduce" gets one-frame versions of every
-   moth/empty-state/keyframe animation. The illustrations themselves
-   are static; only the gentle oscillations turn off. */
+ "prefers-reduced-motion: reduce" gets one-frame versions of every
+ moth/empty-state/keyframe animation. The illustrations themselves
+ are static; only the gentle oscillations turn off. */
 @media (prefers-reduced-motion: reduce) {
-  .moth-hover,
-  .moth-emerge,
-  .moth-breathe,
-  .smooth-press,
-  .tab-fade,
-  .rc-ring,
-  .rc-pulse,
-  .rq-pulse-cta {
-    animation: none !important;
-  }
-  .moth-emerge {
-    opacity: 1 !important;
-    filter: none !important;
-    transform: none !important;
-  }
+ .moth-hover,
+ .moth-emerge,
+ .moth-breathe,
+ .smooth-press,
+ .tab-fade,
+ .rc-ring,
+ .rc-pulse,
+ .rq-pulse-cta {
+ animation: none !important;
+ }
+ .moth-emerge {
+ opacity: 1 !important;
+ filter: none !important;
+ transform: none !important;
+ }
 }
 
 /* â”€â”€â”€ Mobile breakpoint overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   On phone-sized viewports the desktop sidebar is replaced by the
-   <MobileBottomNav> (rendered in AppLayout). The sidebar still
-   mounts so its theme toggle wiring stays consistent across
-   breakpoints, but we hide it visually and zero out the global
-   --sidebar-width CSS var so pages stop reserving a 240px gutter
-   for it.
+ On phone-sized viewports the desktop sidebar is replaced by the
+ <MobileBottomNav> (rendered in AppLayout). The sidebar still
+ mounts so its theme toggle wiring stays consistent across
+ breakpoints, but we hide it visually and zero out the global
+ --sidebar-width CSS var so pages stop reserving a 240px gutter
+ for it.
 
-   Body background is set explicitly so the area behind the
-   viewport (visible through Safari's pull-to-refresh stretch on
-   iOS) inherits the app's dark/light surface rather than flashing
-   the browser default white. */
+ Body background is set explicitly so the area behind the
+ viewport (visible through Safari's pull-to-refresh stretch on
+ iOS) inherits the app's dark/light surface rather than flashing
+ the browser default white. */
 html, body {
-  background-color: hsl(var(--background));
+ background-color: hsl(var(--background));
 }
 @media (max-width: 767px) {
-  .glass-sidebar { display: none !important; }
-  :root { --sidebar-width: 0px !important; }
-  /* Bottom-pad the app's main scroll surface so the 4-tab bar
-     doesn't sit on top of the last row of page content. ~84px
-     covers the bar's own height plus a comfortable gap and any
-     iOS home-indicator safe area. */
-  main {
-    padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important;
-  }
+ .glass-sidebar { display: none !important; }
+ :root { --sidebar-width: 0px !important; }
+ /* Bottom-pad the app's main scroll surface so the 4-tab bar
+ doesn't sit on top of the last row of page content. ~84px
+ covers the bar's own height plus a comfortable gap and any
+ iOS home-indicator safe area. */
+ main {
+ padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+ }
 }
 

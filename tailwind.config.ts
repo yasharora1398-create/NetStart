@@ -119,8 +119,8 @@ export default {
           "100%": { backgroundPosition: "200% 0" },
         },
         "pulse-gold": {
-          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--gold) / 0.4)" },
-          "50%": { boxShadow: "0 0 0 12px hsl(var(--gold) / 0)" },
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.02)" },
         },
       },
       animation: {

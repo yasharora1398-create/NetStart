@@ -17,4 +17,4 @@
 export type AssetImport = string | { src: string };
 
 export const assetUrl = (asset: AssetImport): string =>
-  typeof asset === "string" ? asset : asset.src;
+ typeof asset === "string" ? asset : asset.src;

@@ -9,25 +9,25 @@ import { getProfile } from "@/lib/mynet-storage";
 import type { ReviewStatus } from "@/lib/mynet-types";
 
 export const useReviewStatus = (): ReviewStatus | null => {
-  const { user } = useAuth();
-  const [status, setStatus] = useState<ReviewStatus | null>(null);
-  useEffect(() => {
-    if (!user) {
-      setStatus(null);
-      return;
-    }
-    let cancelled = false;
-    getProfile(user.id)
-      .then((p) => {
-        if (!cancelled) setStatus(p.reviewStatus);
-      })
-      .catch(() => {
-        // soft-fail; treat as "draft" so the gate prompts setup
-        if (!cancelled) setStatus("draft");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-  return status;
+ const { user } = useAuth();
+ const [status, setStatus] = useState<ReviewStatus | null>(null);
+ useEffect(() => {
+ if (!user) {
+ setStatus(null);
+ return;
+ }
+ let cancelled = false;
+ getProfile(user.id)
+ .then((p) => {
+ if (!cancelled) setStatus(p.reviewStatus);
+ })
+ .catch(() => {
+ // soft-fail; treat as "draft" so the gate prompts setup
+ if (!cancelled) setStatus("draft");
+ });
+ return () => {
+ cancelled = true;
+ };
+ }, [user]);
+ return status;
 };

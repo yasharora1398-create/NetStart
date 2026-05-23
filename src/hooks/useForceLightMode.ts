@@ -11,13 +11,13 @@
 import { useEffect } from "react";
 
 export const useForceLightMode = (): void => {
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    const hadDark = root.classList.contains("dark");
-    if (hadDark) root.classList.remove("dark");
-    return () => {
-      if (hadDark) root.classList.add("dark");
-    };
-  }, []);
+ useEffect(() => {
+ if (typeof document === "undefined") return;
+ const root = document.documentElement;
+ const hadDark = root.classList.contains("dark");
+ if (hadDark) root.classList.remove("dark");
+ return () => {
+ if (hadDark) root.classList.add("dark");
+ };
+ }, []);
 };
