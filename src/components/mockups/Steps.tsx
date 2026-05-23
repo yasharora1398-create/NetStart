@@ -312,9 +312,9 @@ const CredRow = ({
  display: "grid",
  placeItems: "center",
  borderRadius: 7,
- background: "hsl(var(--accent))",
+ background: "hsl(var(--primary))",
  border: `1px solid hsl(var(--primary))`,
- color: RUST,
+ color: "#ffffff",
  }}
  >
  {icon}
@@ -364,9 +364,9 @@ const CredRow = ({
  borderRadius: "50%",
  display: "grid",
  placeItems: "center",
- background: "hsl(var(--accent))",
+ background: "hsl(var(--primary))",
  border: `1px solid hsl(var(--primary))`,
- color: GREEN,
+ color: "#ffffff",
  boxShadow: "none",
  flexShrink: 0,
  }}
