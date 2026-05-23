@@ -29,7 +29,7 @@ const PRINCIPLES = [
     detail: [
       "Three actions per profile and that's it.",
       "Apply once with a real pitch, not a template.",
-      "Founders accept or reject; builders get a clear answer.",
+      "Founders accept or reject; partners get a clear answer.",
     ],
   },
 ];

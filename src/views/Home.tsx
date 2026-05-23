@@ -332,7 +332,7 @@ const Hero = () => {
 
         <p className="max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed mb-10">
           Polln8 is a private network of vetted founders and technical
-          builders. Every profile is reviewed by a human, every chat
+          partners. Every profile is reviewed by a human, every chat
           starts with mutual interest, and the deck is ranked against
           what you actually want to build.
         </p>
@@ -446,13 +446,13 @@ const RoleSplit = () => {
                 Pitch one person, the right one.
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                Post what you're building once. We surface builders whose
+                Post what you're building once. We surface partners whose
                 skills and commitment actually match. Not a thousand "ML
                 enthusiasts" with side projects.
               </p>
               <ul className="space-y-2.5 mb-7">
                 <BulletItem>One pitch covers every introduction</BulletItem>
-                <BulletItem>Builders with shipped work, not just bios</BulletItem>
+                <BulletItem>Partners with shipped work, not just bios</BulletItem>
                 <BulletItem>Block the noise. Accept only the ones you want</BulletItem>
               </ul>
               <div className="flex flex-wrap items-center gap-3">
@@ -477,7 +477,7 @@ const RoleSplit = () => {
           <TiltCard intensity={4} className="group h-full">
             <article className="relative h-full rounded-sm border border-border bg-background/80 p-8 transition-colors group-hover:border-gold">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
-                I'm a builder
+                I'm a partner
               </p>
               <h3 className="font-display text-3xl mb-4 leading-tight font-semibold">
                 See real projects. Not job boards.
@@ -600,7 +600,7 @@ const HowItWorks = () => {
     {
       n: "1",
       title: "Sign up + tell us who you are",
-      body: "Founders post what they're building. Builders pick the kinds of projects they'd want to ship. Five minutes.",
+      body: "Founders post what they're building. Partners pick the kinds of projects they'd want to ship. Five minutes.",
     },
     {
       n: "2",
@@ -778,8 +778,8 @@ const FAQ = () => {
       a: "No. If you have a clear idea, a problem you've been working on, or a project with one paying user, you're in. We're not for tire-kickers, but you don't need a polished deck either.",
     },
     {
-      q: "What if I'm a builder, not a founder?",
-      a: "That's most of our community. You don't need a startup or an idea, just the skills and the appetite to join one. You browse projects the same way founders browse builders.",
+      q: "What if I'm a partner, not a founder?",
+      a: "That's most of our community. You don't need a startup or an idea, just the skills and the appetite to join one. You browse projects the same way founders browse partners.",
     },
     {
       q: "How long does review take?",

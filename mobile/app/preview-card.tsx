@@ -1,11 +1,11 @@
 /**
  * Preview your card. Reached from MyNet via "Preview your card".
  * Renders a faithful simulation of how the user's card appears to
- * the OTHER side - founders see what builders see in Browse / the
- * Match swipe deck; builders see what founders see in Match.
+ * the OTHER side - founders see what partners see in Browse / the
+ * Match swipe deck; partners see what founders see in Match.
  *
  * No mutation, no API writes. Pulls from the user's profile + their
- * active project (founders) or candidate fields (builders) and
+ * active project (founders) or candidate fields (partners) and
  * renders the shared card styles inline.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -72,7 +72,7 @@ export default function PreviewCardScreen() {
     };
   }, [user]);
 
-  const role = readMetadataRole(user) ?? "builder";
+  const role = readMetadataRole(user) ?? "partner";
   const avatarUrl = getAvatarUrl(profile.avatarPath);
 
   return (
@@ -91,13 +91,13 @@ export default function PreviewCardScreen() {
           <View style={styles.eyebrow}>
             <Sparkles size={12} color={theme.gold} />
             <Text style={styles.eyebrowText}>
-              {role === "founder" ? "How builders see you" : "How founders see you"}
+              {role === "founder" ? "How partners see you" : "How founders see you"}
             </Text>
           </View>
           <Text style={styles.h1}>This is your card.</Text>
           <Text style={styles.sub}>
             {role === "founder"
-              ? "Builders see this in Browse and the Match deck. Update it from Edit MyNet if anything looks off."
+              ? "Partners see this in Browse and the Match deck. Update it from Edit MyNet if anything looks off."
               : "Founders see this in Match. Update it from Edit candidate profile if anything looks off."}
           </Text>
 
@@ -114,7 +114,7 @@ export default function PreviewCardScreen() {
               theme={theme}
             />
           ) : (
-            <BuilderPreview
+            <PartnerPreview
               profile={profile}
               avatarUrl={avatarUrl}
               styles={styles}
@@ -145,7 +145,7 @@ const FounderPreview = ({
       <MothEmptyState
         variant="blank"
         title="No project yet."
-        sub="Create a project to preview how it'll appear to builders."
+        sub="Create a project to preview how it'll appear to partners."
       />
     );
   }
@@ -179,7 +179,7 @@ const FounderPreview = ({
         <Text style={styles.cardDesc}>{project.description}</Text>
       ) : (
         <Text style={styles.placeholder}>
-          Add a description so builders know what you're working on.
+          Add a description so partners know what you're working on.
         </Text>
       )}
 
@@ -224,14 +224,14 @@ const FounderPreview = ({
         </View>
       ) : (
         <Text style={styles.placeholder}>
-          Add skills you need so builders match the right project.
+          Add skills you need so partners match the right project.
         </Text>
       )}
     </View>
   );
 };
 
-const BuilderPreview = ({
+const PartnerPreview = ({
   profile,
   avatarUrl,
   styles,
@@ -245,20 +245,20 @@ const BuilderPreview = ({
   const c = profile.candidate;
   return (
     <View style={styles.card}>
-      <View style={styles.builderHeader}>
+      <View style={styles.partnerHeader}>
         {avatarUrl ? (
-          <Image source={{ uri: avatarUrl }} style={styles.builderAvatar} />
+          <Image source={{ uri: avatarUrl }} style={styles.partnerAvatar} />
         ) : (
-          <View style={styles.builderAvatarFallback}>
+          <View style={styles.partnerAvatarFallback}>
             <User size={28} color={theme.textDim} strokeWidth={1.5} />
           </View>
         )}
         <View style={{ flex: 1 }}>
-          <Text style={styles.builderName}>
+          <Text style={styles.partnerName}>
             {profile.fullName || "Add your name"}
           </Text>
           {c.headline ? (
-            <Text style={styles.builderHeadline}>{c.headline}</Text>
+            <Text style={styles.partnerHeadline}>{c.headline}</Text>
           ) : (
             <Text style={styles.placeholder}>Add a headline.</Text>
           )}
@@ -466,19 +466,19 @@ const makeStyles = (theme: ThemePalette) =>
       borderRadius: 999,
     },
     skillText: { color: theme.gold, fontSize: 11, fontWeight: "600" },
-    builderHeader: {
+    partnerHeader: {
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
     },
-    builderAvatar: {
+    partnerAvatar: {
       width: 64,
       height: 64,
       borderRadius: 32,
       borderWidth: 1,
       borderColor: theme.goldSoft,
     },
-    builderAvatarFallback: {
+    partnerAvatarFallback: {
       width: 64,
       height: 64,
       borderRadius: 32,
@@ -488,13 +488,13 @@ const makeStyles = (theme: ThemePalette) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    builderName: {
+    partnerName: {
       color: theme.text,
       fontSize: 18,
       fontWeight: "700",
       letterSpacing: -0.3,
     },
-    builderHeadline: {
+    partnerHeadline: {
       color: theme.textMuted,
       fontSize: 13,
       marginTop: 2,

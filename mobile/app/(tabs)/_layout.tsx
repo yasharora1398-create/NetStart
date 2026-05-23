@@ -196,11 +196,11 @@ export default function TabLayout() {
   // top-right edge.
   const { collapsed: tabBarCollapsed, toggle: toggleTabBar } =
     useTabBarCollapsed();
-  // Builders browse projects; founders swipe candidates. We swap
+  // Partners browse projects; founders swipe candidates. We swap
   // which of Match/Browse is the visible primary tab based on the
   // role stamped on user_metadata at sign-up (or after a role switch).
-  const role = (user?.user_metadata?.role as string | undefined) ?? "builder";
-  const isBuilder = role === "builder";
+  const role = (user?.user_metadata?.role as string | undefined) ?? "partner";
+  const isPartner = role === "partner";
   // Per-tab unread badges. Saved bumps when a swipe lands; Threads
   // bumps on every inbound chat_message INSERT. Both clear the moment
   // the user opens that tab (handled in the saved.tsx / threads.tsx
@@ -395,14 +395,14 @@ export default function TabLayout() {
       }}
     >
       {/* Match (the founder swipe deck through candidates) is the
-          discovery tab for founders only. Builders see Browse — a
+          discovery tab for founders only. Partners see Browse — a
           project list — in the same slot. Whichever is not the
           user's side is hidden from the tab bar via href:null but
           stays routable so old deep links don't break. */}
       <Tabs.Screen
         name="index"
         options={
-          isBuilder
+          isPartner
             ? { href: null }
             : {
                 title: "Match",
@@ -415,7 +415,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="browse"
         options={
-          isBuilder
+          isPartner
             ? {
                 title: "Browse",
                 tabBarIcon: ({ color, size }) => (

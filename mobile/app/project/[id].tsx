@@ -102,14 +102,14 @@ export default function ProjectDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("saved");
   const [acting, setActing] = useState<string | null>(null);
-  // Builder-side state (only fetched when viewer != owner)
+  // Partner-side state (only fetched when viewer != owner)
   const [founder, setFounder] = useState<PublicFounder | null>(null);
 
   const isOwner = Boolean(
     project && user && project.ownerId === user.id,
   );
 
-  // Saved-projects state — only meaningful for the builder POV. The
+  // Saved-projects state — only meaningful for the partner POV. The
   // hooks no-op cleanly for owners (they just won't render the
   // bookmark UI). Reading the active id keeps the focus star in sync
   // when set/cleared from the Saved tab.
@@ -137,11 +137,11 @@ export default function ProjectDetailScreen() {
         setSaved(people);
         setApps(applications);
       } else {
-        // Builder POV: fetch founder profile so the row can render
+        // Partner POV: fetch founder profile so the row can render
         // their name + LinkedIn alongside the project body.
         const f = await getPublicFounder(proj.ownerId).catch(() => null);
         setFounder(f);
-        // If the builder already saved this project, freshen the
+        // If the partner already saved this project, freshen the
         // cached row so the Saved tab reflects the latest title/desc
         // without forcing them to unsave + resave.
         refreshSavedProject(toPublicProject(proj, f));
@@ -374,7 +374,7 @@ export default function ProjectDetailScreen() {
 
               {/* Lifecycle picker. Only Active projects appear in
                   Browse / Search; the others stay listed for the
-                  owner but are hidden from builders. */}
+                  owner but are hidden from partners. */}
               {(["active", "paused", "filled", "closed"] as const).map(
                 (s) => {
                   const on = project.lifecycleState === s;
@@ -424,7 +424,7 @@ export default function ProjectDetailScreen() {
           )}
         </View>
 
-        {/* Tabs (owner only). Builders see the public detail view below. */}
+        {/* Tabs (owner only). Partners see the public detail view below. */}
         {isOwner && (
           <>
         <View style={styles.tabs}>
@@ -449,7 +449,7 @@ export default function ProjectDetailScreen() {
             <MothEmptyState
               variant="saves"
               title="No saved candidates yet."
-              sub="Use the Match tab to start saving builders against this project."
+              sub="Use the Match tab to start saving partners against this project."
             />
           ) : (
             <FlatList
@@ -630,15 +630,15 @@ export default function ProjectDetailScreen() {
           </>
         )}
 
-        {/* Builder POV — when the viewer is not the project owner. */}
+        {/* Partner POV — when the viewer is not the project owner. */}
         {!isOwner && (
-          <BuilderProjectBody
+          <PartnerProjectBody
             project={project}
             founder={founder}
             isSaved={isSaved}
             isFocus={isFocus}
             onToggleFocus={() => {
-              // Auto-save before promoting to focus so the builder
+              // Auto-save before promoting to focus so the partner
               // doesn't have to do it in two taps.
               if (!isSaved) {
                 addSavedProject(toPublicProject(project, founder));
@@ -658,12 +658,12 @@ export default function ProjectDetailScreen() {
 }
 
 // ────────────────────────────────────────────────────────────────
-// Builder-facing project detail body. Shown when a non-owner
-// (typically a builder) navigates to /project/[id]. Renders the
+// Partner-facing project detail body. Shown when a non-owner
+// (typically a partner) navigates to /project/[id]. Renders the
 // founder profile + Apply CTA, or a status pill if they've already
 // applied.
 // ────────────────────────────────────────────────────────────────
-const BuilderProjectBody = ({
+const PartnerProjectBody = ({
   project,
   founder,
   isSaved,
@@ -685,17 +685,17 @@ const BuilderProjectBody = ({
   const founderUrl = getAvatarUrl(founder?.avatarPath ?? null);
   const skills = project.criteria.skills;
   return (
-    <View style={styles.builderBody}>
+    <View style={styles.partnerBody}>
       {project.description ? (
-        <View style={styles.builderSection}>
-          <Text style={styles.builderSectionLabel}>About this project</Text>
-          <Text style={styles.builderProse}>{project.description}</Text>
+        <View style={styles.partnerSection}>
+          <Text style={styles.partnerSectionLabel}>About this project</Text>
+          <Text style={styles.partnerProse}>{project.description}</Text>
         </View>
       ) : null}
 
       {skills.length > 0 ? (
-        <View style={styles.builderSection}>
-          <Text style={styles.builderSectionLabel}>Skills they're after</Text>
+        <View style={styles.partnerSection}>
+          <Text style={styles.partnerSectionLabel}>Skills they're after</Text>
           <View style={styles.skillRow}>
             {skills.map((s) => (
               <View key={s} style={styles.skillChip}>
@@ -707,9 +707,9 @@ const BuilderProjectBody = ({
       ) : null}
 
       {founder && (
-        <View style={styles.builderSection}>
-          <Text style={styles.builderSectionLabel}>The founder</Text>
-          <View style={styles.builderFounderCard}>
+        <View style={styles.partnerSection}>
+          <Text style={styles.partnerSectionLabel}>The founder</Text>
+          <View style={styles.partnerFounderCard}>
             {founderUrl ? (
               <Image source={{ uri: founderUrl }} style={styles.avatar} />
             ) : (
@@ -743,9 +743,9 @@ const BuilderProjectBody = ({
       )}
 
       {/* Sticky CTA cluster: focus toggle (when saved) + Message
-          founder primary action. The builder's first message creates
+          founder primary action. The partner's first message creates
           the pending request. */}
-      <View style={styles.builderCtaWrap}>
+      <View style={styles.partnerCtaWrap}>
         {isSaved ? (
           <Pressable
             onPress={onToggleFocus}
@@ -768,11 +768,11 @@ const BuilderProjectBody = ({
         <Pressable
           onPress={onMessageFounder}
           style={({ pressed }) => [
-            styles.builderApplyBtn,
+            styles.partnerApplyBtn,
             pressed && { opacity: 0.85 },
           ]}
         >
-          <Text style={styles.builderApplyText}>
+          <Text style={styles.partnerApplyText}>
             Message {founder?.fullName.split(" ")[0] || "founder"}
           </Text>
         </Pressable>
@@ -1100,15 +1100,15 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 5,
   },
-  // Builder POV: body sections, founder card, apply CTA / status pill
-  builderBody: {
+  // Partner POV: body sections, founder card, apply CTA / status pill
+  partnerBody: {
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 28,
   },
-  builderSection: { marginBottom: 22 },
-  builderSectionLabel: {
+  partnerSection: { marginBottom: 22 },
+  partnerSectionLabel: {
     color: theme.gold,
     fontFamily: fonts.mono,
     fontSize: 10,
@@ -1116,12 +1116,12 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     letterSpacing: 1.8,
     marginBottom: 8,
   },
-  builderProse: {
+  partnerProse: {
     color: theme.text,
     fontSize: 14,
     lineHeight: 21,
   },
-  builderFounderCard: {
+  partnerFounderCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -1131,7 +1131,7 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     borderColor: theme.border,
     borderRadius: 12,
   },
-  builderCtaWrap: {
+  partnerCtaWrap: {
     marginTop: "auto",
     gap: 10,
   },
@@ -1157,7 +1157,7 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     letterSpacing: 1.4,
     textTransform: "uppercase",
   },
-  builderApplyBtn: {
+  partnerApplyBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1166,20 +1166,20 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
     backgroundColor: theme.gold,
     borderRadius: 12,
   },
-  builderApplyText: {
+  partnerApplyText: {
     color: theme.textOnPrimary,
     fontSize: 15,
     fontWeight: "700",
     letterSpacing: 0.2,
   },
-  builderStatus: {
+  partnerStatus: {
     height: 50,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  builderStatusText: {
+  partnerStatusText: {
     fontFamily: fonts.mono,
     fontSize: 12,
     fontWeight: "600",

@@ -61,7 +61,7 @@ const Privacy = () => {
   usePageMeta({
     title: "Privacy Policy | Polln8 Cofounder Matchmaking",
     description:
-      "How Polln8 collects, uses, and protects data from founders and builders on our cofounder matchmaking platform. Plain-language privacy policy.",
+      "How Polln8 collects, uses, and protects data from founders and partners on our cofounder matchmaking platform. Plain-language privacy policy.",
     path: "/privacy",
   });
   return (

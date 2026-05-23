@@ -23,7 +23,7 @@ import {
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
-type Role = "founder" | "builder";
+type Role = "founder" | "partner";
 
 export type Rect = { x: number; y: number; width: number; height: number };
 

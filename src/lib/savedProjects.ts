@@ -1,12 +1,12 @@
 /**
  * Saved-projects store (web). Cross-device, persisted on the server
  * in public.saved_projects (migration 0030). Mirrors the mobile
- * store so a builder who saves a project on their laptop sees it on
+ * store so a partner who saves a project on their laptop sees it on
  * their phone.
  *
  * State shape per user:
  *   1. items     - list of saved PublicProject rows, deduped by id
- *   2. activeId  - the one project the builder marks as their
+ *   2. activeId  - the one project the partner marks as their
  *                  "current focus" (at most one).
  *
  * Reads: hydrate from `list_saved_projects()` RPC on user bind.

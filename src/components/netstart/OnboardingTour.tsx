@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   {
     badge: "Step 2 of 3",
     title: "Fill in the essentials.",
-    body: "Headline, bio, skills, and either a project (founders) or what you're looking to join (builders). Add a LinkedIn URL and a resume so reviewers can verify you. Skip nothing the form marks as required.",
+    body: "Headline, bio, skills, and either a project (founders) or what you're looking to join (partners). Add a LinkedIn URL and a resume so reviewers can verify you. Skip nothing the form marks as required.",
     cta: "Next",
   },
   {

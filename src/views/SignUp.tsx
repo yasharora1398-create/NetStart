@@ -206,7 +206,7 @@ const SignUp = () => {
         </div>
 
         <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-          Â© Polln8 Â· A network for builders
+          Â© Polln8 Â· A network for partners
         </p>
       </aside>
 
@@ -387,11 +387,11 @@ const SignUp = () => {
                                 {
                                   value: "founder",
                                   label: "I'm a founder",
-                                  hint: "Building something. Need builders.",
+                                  hint: "Building something. Need partners.",
                                 },
                                 {
-                                  value: "builder",
-                                  label: "I'm a builder",
+                                  value: "partner",
+                                  label: "I'm a partner",
                                   hint: "Looking for a project to join.",
                                 },
                               ] as const

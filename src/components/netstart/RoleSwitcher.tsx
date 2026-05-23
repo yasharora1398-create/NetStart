@@ -1,10 +1,10 @@
 /**
  * Role switcher for the MyNet page. Two-segment toggle (Founder /
- * Builder); clicking the *other* role opens a confirmation dialog
+ * Partner); clicking the *other* role opens a confirmation dialog
  * before committing the change. The change goes through
  * `setRole`, which writes to `user_metadata.role` on the auth user.
  *
- * Switching never touches the profile row - a builder's headline,
+ * Switching never touches the profile row - a partner's headline,
  * bio, skills, location, etc. all survive a trip through founder and
  * come back exactly as they were when the user switches back.
  */
@@ -25,7 +25,7 @@ import {
 import { setRole } from "@/lib/mynet-storage";
 import { cn } from "@/lib/utils";
 
-export type Role = "founder" | "builder";
+export type Role = "founder" | "partner";
 
 type Props = {
   currentRole: Role;
@@ -47,7 +47,7 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
     try {
       await setRole(pending);
       toast.success(
-        pending === "founder" ? "Switched to Founder." : "Switched to Builder.",
+        pending === "founder" ? "Switched to Founder." : "Switched to Partner.",
       );
       const next = pending;
       setPending(null);
@@ -63,11 +63,11 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
     <>
       <div className="inline-flex items-center rounded-full border border-border bg-card p-1">
         <RoleButton
-          label="Builder"
+          label="Partner"
           icon={<Telescope className="h-3.5 w-3.5" />}
-          active={currentRole === "builder"}
+          active={currentRole === "partner"}
           onClick={() => {
-            if (currentRole !== "builder") setPending("builder");
+            if (currentRole !== "partner") setPending("partner");
           }}
         />
         <RoleButton
@@ -89,19 +89,19 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Switch to {pending === "founder" ? "Founder" : "Builder"} mode?
+              Switch to {pending === "founder" ? "Founder" : "Partner"} mode?
             </AlertDialogTitle>
             <AlertDialogDescription>
               {pending === "founder" ? (
                 <>
                   You'll see the founder dashboard: post projects, review
-                  applications, and search for builders. Your builder profile
+                  applications, and search for partners. Your partner profile
                   (headline, bio, skills, resume) stays exactly where you left
                   it - switching back later restores all of it untouched.
                 </>
               ) : (
                 <>
-                  You'll go back to being matched as an builder. Your existing
+                  You'll go back to being matched as a partner. Your existing
                   projects stay where they are (still published unless you
                   unpublish them); switching to Founder later puts you right
                   back on top of them.
@@ -124,7 +124,7 @@ export const RoleSwitcher = ({ currentRole, onSwitched }: Props) => {
               {working ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : null}
-              Switch to {pending === "founder" ? "Founder" : "Builder"}
+              Switch to {pending === "founder" ? "Founder" : "Partner"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

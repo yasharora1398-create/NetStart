@@ -107,7 +107,7 @@ export default function EditProjectScreen() {
 
     // Edit-criteria warning: when the project is already published
     // and the criteria string actually changed, warn the founder
-    // that builders' decks + match rankings shift accordingly.
+    // that partners' decks + match rankings shift accordingly.
     const criteriaChanged =
       editing &&
       originalCriteriaRef.current !== "" &&
@@ -116,7 +116,7 @@ export default function EditProjectScreen() {
       confirm({
         title: "Re-rank your matches?",
         message:
-          "You've changed the project's criteria. Saving will re-rank Match against the new skills, commitment, and location. Builders who already applied stay where they are.",
+          "You've changed the project's criteria. Saving will re-rank Match against the new skills, commitment, and location. Partners who already applied stay where they are.",
         confirmLabel: "Save",
         onConfirm: () => void performSave(criteria),
       });
@@ -145,13 +145,13 @@ export default function EditProjectScreen() {
           businessType: businessType.trim(),
         });
         // First-time projects are draft by default. Nudge the founder
-        // to publish so builders can actually apply - otherwise they
+        // to publish so partners can actually apply - otherwise they
         // post a project, get no applications, and assume the app
         // is broken.
         confirm({
           title: "Project saved",
           message:
-            "Publish it so builders can find it? You can unpublish anytime.",
+            "Publish it so partners can find it? You can unpublish anytime.",
           confirmLabel: "Publish",
           cancelLabel: "Later",
           onConfirm: async () => {
@@ -275,7 +275,7 @@ export default function EditProjectScreen() {
 
           <Field
             label="Business type"
-            hint="Pick the closest match. Builders filter by this in Search."
+            hint="Pick the closest match. Partners filter by this in Search."
           >
             <OptionPicker
               value={businessType}

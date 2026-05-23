@@ -1245,12 +1245,12 @@ export const listChatContacts = async (): Promise<
 
 // ---- Role -----------------------------------------------------------
 
-// Founder vs builder is stored on auth user_metadata so it rides with
+// Founder vs partner is stored on auth user_metadata so it rides with
 // the account across devices. Switching doesn't touch the profile row,
-// so a builder's headline / bio / skills survive a round-trip through
+// so a partner's headline / bio / skills survive a round-trip through
 // the founder role and come back intact on switch-back.
 export const setRole = async (
-  role: "founder" | "builder",
+  role: "founder" | "partner",
 ): Promise<void> => {
   const supabase = getSupabase();
   // Same idle-tab guard as every other auth.updateUser call site.

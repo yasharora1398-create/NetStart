@@ -1,8 +1,8 @@
-import type { Builder } from "./builders";
+import type { Partner } from "./partners";
 import type { Candidate, ProjectCriteria } from "./mynet-types";
 
 export type MatchResult = {
-  builder: Builder;
+  partner: Partner;
   score: number;
   matchedSkills: string[];
 };
@@ -52,18 +52,18 @@ const score = (target: Scorable, criteria: ProjectCriteria) => {
   };
 };
 
-export const scoreMatch = (builder: Builder, criteria: ProjectCriteria): MatchResult => {
+export const scoreMatch = (partner: Partner, criteria: ProjectCriteria): MatchResult => {
   const result = score(
     {
-      skills: builder.skills,
-      commitment: builder.commitment,
-      location: builder.location,
+      skills: partner.skills,
+      commitment: partner.commitment,
+      location: partner.location,
       haystack:
-        `${builder.role} ${builder.proof} ${builder.building}`.toLowerCase(),
+        `${partner.role} ${partner.proof} ${partner.building}`.toLowerCase(),
     },
     criteria,
   );
-  return { builder, score: result.score, matchedSkills: result.matchedSkills };
+  return { partner, score: result.score, matchedSkills: result.matchedSkills };
 };
 
 export const scoreCandidate = (

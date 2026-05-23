@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Check, X, Bookmark, Zap, Target, Clock } from "lucide-react";
-import { BUILDERS } from "@/lib/builders";
+import { PARTNERS } from "@/lib/partners";
 
 export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
   const [index, setIndex] = useState(0);
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
 
-  const current = BUILDERS[index % BUILDERS.length];
-  const next = BUILDERS[(index + 1) % BUILDERS.length];
+  const current = PARTNERS[index % PARTNERS.length];
+  const next = PARTNERS[(index + 1) % PARTNERS.length];
 
   const decide = (dir: "left" | "right") => {
     setExitDir(dir);

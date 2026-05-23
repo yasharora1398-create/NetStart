@@ -30,7 +30,7 @@ export type CandidateProfile = {
 export type Profile = {
   linkedinUrl: string;
   resume: ResumeMeta | null;
-  // Founder-specific. Both empty for builders.
+  // Founder-specific. Both empty for partners.
   websiteUrl: string;
   proof: ProofMeta | null;
   // Founder's currently-focused project. Used to pick which project's

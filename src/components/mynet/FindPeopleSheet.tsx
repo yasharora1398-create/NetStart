@@ -142,7 +142,7 @@ export const FindPeopleSheet = ({
               </SheetTitle>
               <SheetDescription className="text-left text-sm text-muted-foreground">
                 {project && !hasAnyCriteria(project.criteria)
-                  ? "No criteria set. Showing every builder open to work."
+                  ? "No criteria set. Showing every partner open to work."
                   : "Tap a candidate for the full profile."}
               </SheetDescription>
             </SheetHeader>
@@ -159,7 +159,7 @@ export const FindPeopleSheet = ({
                   <MothEmptyState
                     variant="platform"
                     title="No candidates yet."
-                    sub="Be early. Once accepted builders flip Open to work, they'll show up here ranked against your project."
+                    sub="Be early. Once accepted partners flip Open to work, they'll show up here ranked against your project."
                   />
                 ) : (
                   <MothEmptyState

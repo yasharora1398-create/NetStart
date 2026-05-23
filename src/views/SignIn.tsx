@@ -66,7 +66,7 @@ const SignIn = () => {
   usePageMeta({
     title: "Sign In to Polln8 | Find a Cofounder or a Startup",
     description:
-      "Sign in to Polln8 to view your cofounder matches and startup matches, send pitches, and message your network of vetted founders and builders.",
+      "Sign in to Polln8 to view your cofounder matches and startup matches, send pitches, and message your network of vetted founders and partners.",
     path: "/signin",
   });
   const { signIn, user, loading } = useAuth();
@@ -169,13 +169,13 @@ const SignIn = () => {
             </span>
           </div>
           <h2 className="font-display text-5xl leading-[0.95] mb-8">
-            Work with builders,<br />
+            Work with partners,<br />
             <em className="text-gradient-gold not-italic">not talkers.</em>
           </h2>
         </div>
 
         <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-          Â© Polln8 Â· A network for builders
+          Â© Polln8 Â· A network for partners
         </p>
       </aside>
 
@@ -199,7 +199,7 @@ const SignIn = () => {
                 Pick up where<br />you left off.
               </h1>
               <p className="text-muted-foreground text-sm">
-                Continue building with the builders in your network.
+                Continue building with the partners in your network.
               </p>
             </div>
 

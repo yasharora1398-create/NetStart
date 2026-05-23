@@ -18,7 +18,7 @@ export const HEADLINE_OPTIONS: string[] = [
   "Sales Lead",
   "Operations Lead",
   "Business Development",
-  "Community Builder",
+  "Community Partner",
   "Content Creator",
   "Founder Looking for Cofounder",
   "Generalist (Wears Many Hats)",
@@ -238,7 +238,7 @@ export const LOCATION_OPTIONS: string[] = [
 ];
 
 // Comprehensive skills catalog. Used for both founder criteria
-// (skills they need on a project) and builder profiles (skills they
+// (skills they need on a project) and partner profiles (skills they
 // have). Grouped loosely by area so the search-as-you-type experience
 // surfaces related items.
 export const SKILLS_OPTIONS: string[] = [
@@ -498,7 +498,7 @@ export const SKILLS_OPTIONS: string[] = [
 ];
 
 // Business / project type taxonomy. Founders pick one when posting a
-// project; builders can filter Browse by it. Mixes business model
+// project; partners can filter Browse by it. Mixes business model
 // (SaaS, Marketplace, etc.) with industry verticals so the founder
 // can describe the venture however reads most naturally to them.
 export const BUSINESS_TYPE_OPTIONS: string[] = [

@@ -2,7 +2,7 @@
 /**
  * Applications page. Wraps the existing ApplicationsPanel inside the
  * standard AppLayout so it has its own first-class route. Both
- * incoming (founder) and outgoing (builder) applications surface here.
+ * incoming (founder) and outgoing (partner) applications surface here.
  *
  * The panel itself loads the founder's owned projects to drive the
  * incoming list; if the user has no owned projects, the panel still

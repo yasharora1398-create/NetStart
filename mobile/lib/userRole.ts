@@ -1,4 +1,4 @@
-// User role state — "founder" or "builder". Picked at sign-up, stored
+// User role state — "founder" or "partner". Picked at sign-up, stored
 // on the Supabase auth user's user_metadata so it survives reinstalls
 // and rides with the account on every device.
 //
@@ -9,13 +9,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import { useAuth } from "./auth";
 
-export type Role = "founder" | "builder";
+export type Role = "founder" | "partner";
 
 export const readMetadataRole = (
   user: { user_metadata?: Record<string, unknown> } | null,
 ): Role | null => {
   const r = user?.user_metadata?.role;
-  return r === "founder" || r === "builder" ? r : null;
+  return r === "founder" || r === "partner" ? r : null;
 };
 
 export const updateRole = async (role: Role): Promise<void> => {
@@ -24,7 +24,7 @@ export const updateRole = async (role: Role): Promise<void> => {
 
 // Convenience hook — returns the user's current role, with a default
 // fallback for users created before the picker shipped.
-export const useUserRole = (fallback: Role = "builder"): Role => {
+export const useUserRole = (fallback: Role = "partner"): Role => {
   const { user } = useAuth();
   const [role, setRole] = useState<Role>(
     readMetadataRole(user) ?? fallback,

@@ -61,7 +61,7 @@ const STEPS: {
     title: "Sign up",
     body: "Create your account in under a minute. Pick your path: founder or cofounder.",
     detail:
-      "Founders post real startups and look for the technical cofounders, founding engineers, or builders they need next to them. Builders fill out a candidate profile and get matched into early-stage startups worth joining. The two flows diverge from here.",
+      "Founders post real startups and look for the technical cofounders, founding engineers, or partners they need next to them. Partners fill out a candidate profile and get matched into early-stage startups worth joining. The two flows diverge from here.",
     visual: <StepSignup />,
   },
   {
@@ -77,7 +77,7 @@ const STEPS: {
     title: "Get verified",
     body: "A short manual review confirms shipped work. Usually under 24 hours.",
     detail:
-      "We check references, public projects, and the basics of the resume so every founder you meet on Polln8 is a vetted, real builder. Rejected? You'll get a reviewer note and a path to resubmit.",
+      "We check references, public projects, and the basics of the resume so every founder you meet on Polln8 is a vetted, real partner. Rejected? You'll get a reviewer note and a path to resubmit.",
     visual: <StepAccepted />,
   },
   {
@@ -102,7 +102,7 @@ const HowItWorks = () => {
   usePageMeta({
     title: "How Polln8 Works | Cofounders found efficiently",
     description:
-      "How Polln8 matches founders with vetted technical cofounders, and builders with early-stage startups worth joining. Verify, rank, connect in two clicks.",
+      "How Polln8 matches founders with vetted technical cofounders, and partners with early-stage startups worth joining. Verify, rank, connect in two clicks.",
     path: "/how",
   });
   // Land at the top of the page when the user navigates here from
@@ -129,9 +129,9 @@ const HowItWorks = () => {
             </h1>
             <p className="text-base text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-20 leading-relaxed">
               Five steps from signup to your first match. Polln8 verifies
-              startup builders, ranks them against what you're building or
+              startup partners, ranks them against what you're building or
               what you'd want to join, and connects founders with vetted
-              technical cofounders or builders with early-stage startups
+              technical cofounders or partners with early-stage startups
               worth joining.
             </p>
           </div>

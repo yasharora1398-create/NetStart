@@ -303,8 +303,8 @@ const MyNet = () => {
       );
       if (transitionedIntoPending) {
         const role =
-          (user?.user_metadata?.role as "founder" | "builder" | undefined) ??
-          "builder";
+          (user?.user_metadata?.role as "founder" | "partner" | undefined) ??
+          "partner";
         trackMynetSubmitted(role);
       }
     } catch (err) {
@@ -542,7 +542,7 @@ const MyNet = () => {
             {[
               { t: "Profile + credentials", b: "LinkedIn, resume or proof of work, and the candidate fields founders rank against." },
               { t: "Projects", b: "Founders post what they're building. Publish to enter the deck; unpublish anytime." },
-              { t: "Open to Work", b: "Builders flip the switch when they want founders to see them. Off by default." },
+              { t: "Open to Work", b: "Partners flip the switch when they want founders to see them. Off by default." },
               { t: "Find People", b: "Run a focused search against a specific project's criteria." },
             ].map((d) => (
               <div
@@ -575,7 +575,7 @@ const MyNet = () => {
               onSubmitComplete={() => setEditingPending(false)}
               preselectedRole={(() => {
                 const r = user?.user_metadata?.role;
-                return r === "founder" || r === "builder" ? r : undefined;
+                return r === "founder" || r === "partner" ? r : undefined;
               })()}
             />
           </main>
@@ -683,9 +683,9 @@ const MyNet = () => {
               onSetActiveProject={handleSetActiveProject}
               role={(() => {
                 const r = user?.user_metadata?.role;
-                // Default to builder for legacy users with no role
+                // Default to partner for legacy users with no role
                 // stamp; the founder side requires a deliberate flip.
-                return r === "founder" ? "founder" : "builder";
+                return r === "founder" ? "founder" : "partner";
               })() as Role}
               onRoleSwitched={handleRoleSwitched}
             />
@@ -698,14 +698,14 @@ const MyNet = () => {
                 </h1>
                 <p className="text-muted-foreground max-w-xl">
                   Manage your credentials, run searches by project, and save the
-                  builders worth talking to.
+                  partners worth talking to.
                 </p>
               </header>
 
               <section className="mb-12">
                 <ProfileCard
                   profile={displayProfile}
-                  role="builder"
+                  role="partner"
                   onSubmit={handleSubmitProfile}
                 />
               </section>

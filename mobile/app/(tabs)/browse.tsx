@@ -1,5 +1,5 @@
 /**
- * Builder-side Match: swipe through published projects.
+ * Partner-side Match: swipe through published projects.
  *
  *   - One card per project. Big square founder avatar fills the top
  *     of the card; meta + title + pitch live below.
@@ -72,7 +72,7 @@ const SWIPE_THRESHOLD = SCREEN_W * 0.28;
 
 type RankedCandidate = Candidate & {
   similarity: number;
-  role?: "founder" | "builder";
+  role?: "founder" | "partner";
   projectTitle?: string;
   projectDescription?: string;
 };
@@ -304,7 +304,7 @@ export default function BrowseScreen() {
       {selected && (
         <CandidateDetail
           candidate={selected}
-          role="builder"
+          role="partner"
           onClose={() => setSelected(null)}
           onCtaPress={() => {
             const target = selected;

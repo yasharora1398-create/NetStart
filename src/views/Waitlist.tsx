@@ -29,13 +29,13 @@ import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
 import { logPageView } from "@/lib/analytics";
 import WhySection from "@/components/marketing/WhySection";
 
-type Persona = "founder" | "builder";
+type Persona = "founder" | "partner";
 
 const Waitlist = () => {
   usePageMeta({
     title: "Polln8 | Cofounders found efficiently",
     description:
-      "Cofounders found efficiently. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
+      "Cofounders found efficiently. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches partners with early-stage startups worth joining.",
     path: "/",
   });
   const { mode, toggle } = useTheme();
@@ -178,7 +178,7 @@ const Waitlist = () => {
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary mb-5 mt-8">
               {persona === "founder"
                 ? "For founders · Free"
-                : "For builders · Free"}
+                : "For partners · Free"}
             </p>
             <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[6.25rem] leading-[0.95] tracking-[-0.035em] text-foreground mb-6">
               {persona === "founder" ? (
@@ -198,7 +198,7 @@ const Waitlist = () => {
             <p className="text-base sm:text-lg md:text-xl max-w-xl leading-relaxed text-muted-foreground mb-10">
               {persona === "founder"
                 ? "Cofounder matchmaking for serious startups. Post your venture, set the equity, and meet vetted technical cofounders and founding engineers ranked by AI against what you're building. Quality candidates only."
-                : "Cofounder matchmaking for serious builders. Show your shipping history, find an early-stage startup worth joining as a cofounder or founding engineer, and meet founders with real ventures and real equity."}
+                : "Cofounder matchmaking for serious partners. Show your shipping history, find an early-stage startup worth joining as a cofounder or founding engineer, and meet founders with real ventures and real equity."}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
@@ -256,13 +256,13 @@ const Waitlist = () => {
               details={[
                 "Stage of the startup: idea, prototype, MVP, or revenue.",
                 "What's already shipped: product links, repos, traction.",
-                "Whether you need a technical cofounder, founding engineer, or builder.",
+                "Whether you need a technical cofounder, founding engineer, or partner.",
                 "Equity offered, stated up front.",
               ]}
             />
             <Pillar
               accent="02"
-              title="Builders show real work."
+              title="Partners show real work."
               body="Shipping history, skills, what they're looking to cofound."
               details={[
                 "Verified resume or LinkedIn at signup.",
@@ -303,7 +303,7 @@ const Waitlist = () => {
         {/* WHO IT'S FOR --------------------------------------------- */}
         <Section eyebrow="Who it's for">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-[-0.025em] leading-[1.05] text-foreground mb-12 md:mb-16">
-            Built for serious founders and builders.
+            Built for serious founders and partners.
           </h2>
           <div className="grid md:grid-cols-2 gap-8 md:gap-10">
             <RoleCard
@@ -322,7 +322,7 @@ const Waitlist = () => {
               }}
             />
             <RoleCard
-              kind="Builders"
+              kind="Partners"
               tagline="You have skill. You have a job. You're ready to cofound something real."
               signals={[
                 "Has shipping history",
@@ -613,16 +613,16 @@ const PersonaToggle = ({
     </button>
     <button
       type="button"
-      onClick={() => onChange("builder")}
-      aria-pressed={persona === "builder"}
+      onClick={() => onChange("partner")}
+      aria-pressed={persona === "partner"}
       className={`relative z-10 inline-flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors ${
-        persona === "builder"
+        persona === "partner"
           ? "text-primary-foreground"
           : "text-muted-foreground hover:text-foreground"
       }`}
     >
       <Telescope className="h-3.5 w-3.5" />
-      I'm a builder
+      I'm a partner
     </button>
   </div>
 );

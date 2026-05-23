@@ -252,7 +252,7 @@ export const ChatConversation = ({
     void reload();
   }, [reload]);
 
-  // Counterparty profile â€” we don't know if the contact is a builder
+  // Counterparty profile â€” we don't know if the contact is a partner
   // or founder, so try the founder RPC first (cheap; returns null
   // fast when not a founder), then fall back to the candidate row.
   // Extracted so the realtime subscription below can re-fire it when

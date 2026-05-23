@@ -16,7 +16,7 @@ const ITEMS: Item[] = [
   {
     n: "02",
     title: "Skill, not surface",
-    body: "Matching prioritizes complementary capability over background, school, or city. Builders find counterweights.",
+    body: "Matching prioritizes complementary capability over background, school, or city. Partners find counterweights.",
   },
   {
     n: "03",

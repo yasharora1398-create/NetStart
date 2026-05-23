@@ -4,7 +4,7 @@ import { useInView } from "@/hooks/useInView";
 
 // ─── Types & data ────────────────────────────────────────────────
 type MockupKind = "review" | "matches" | "request" | "placeholder";
-export type Persona = "founder" | "builder";
+export type Persona = "founder" | "partner";
 
 const WHY: {
   title: string;
@@ -74,10 +74,10 @@ const Reveal = ({
 // (`hidden lg:flex`); text-only on small screens.
 //
 // `persona` flips rows 2 and 3 to a founder POV: Matches deck shows
-// builders looking to join startups, Request mockup targets an
+// partners looking to join startups, Request mockup targets an
 // operator and the pitch reads as the founder writing to them.
-// Defaults to "builder" (the original deck content).
-const WhySection = ({ persona = "builder" }: { persona?: Persona }) => {
+// Defaults to "partner" (the original deck content).
+const WhySection = ({ persona = "partner" }: { persona?: Persona }) => {
   return (
     <section className="mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28 space-y-20 md:space-y-28">
       {WHY.map((w, i) => (
@@ -618,11 +618,11 @@ const RAVI: ProfileEntry = {
     "Solo founder. AI scheduling for outpatient clinics, $8K MRR after 4 months. Looking for a design partner to own the product surface.",
 };
 
-// Founder-side cards: people looking to JOIN startups (builders).
+// Founder-side cards: people looking to JOIN startups (partners).
 const LIAM: ProfileEntry = {
   id: "liam",
   name: "Liam P.",
-  pills: ["Full-time", "NYC", "Builder"],
+  pills: ["Full-time", "NYC", "Partner"],
   skills: ["Backend", "Distributed Sys", "Rust"],
   headline:
     "Senior backend engineer, ex-Stripe payments. Looking to join a venture with real customers and meaningful equity.",
@@ -630,15 +630,15 @@ const LIAM: ProfileEntry = {
 const ZARA: ProfileEntry = {
   id: "zara",
   name: "Zara R.",
-  pills: ["30 hrs/week", "Remote", "Builder"],
+  pills: ["30 hrs/week", "Remote", "Partner"],
   skills: ["Frontend", "Design", "Product"],
   headline:
     "Product designer with two YC launches. Looking to own the product surface for a small team that's already shipping.",
 };
 
 // Info-sheet content shown when the secondary card is right-swiped.
-// Builder POV: Maya (founder) shows her shipped projects.
-// Founder POV: Zara (builder) shows her recent shipped work.
+// Partner POV: Maya (founder) shows her shipped projects.
+// Founder POV: Zara (partner) shows her recent shipped work.
 type DeckInfoSheet = {
   name: string;
   role: string;
@@ -669,7 +669,7 @@ const MAYA_INFO: DeckInfoSheet = {
 };
 const ZARA_INFO: DeckInfoSheet = {
   name: "Zara R.",
-  role: "Builder · Remote · 30 hrs/week",
+  role: "Partner · Remote · 30 hrs/week",
   sectionLabel: "Recently shipped",
   rows: [
     {
@@ -691,8 +691,8 @@ const ZARA_INFO: DeckInfoSheet = {
 
 const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
   const isFounder = persona === "founder";
-  // Builder POV (original): cards are founders posting projects.
-  // Founder POV: cards are builders looking to join startups.
+  // Partner POV (original): cards are founders posting projects.
+  // Founder POV: cards are partners looking to join startups.
   const primary = isFounder ? LIAM : RAVI;
   const secondary = isFounder ? ZARA : MAYA;
   const info = isFounder ? ZARA_INFO : MAYA_INFO;
@@ -1251,8 +1251,8 @@ const LinkRow = ({
 //   2 sent      - sheet drops, status pill "Request sent" + glow
 //   3 accepted  - pill flips green "Accepted", solid ring on
 //                 avatar, Open chat reveals
-// Builder POV (original): pitch operator → founder asking to join.
-const REQUEST_PROFILE_BUILDER = {
+// Partner POV (original): pitch operator → founder asking to join.
+const REQUEST_PROFILE_PARTNER = {
   monogram: "JK",
   name: "Jamie K.",
   firstName: "Jamie",
@@ -1261,7 +1261,7 @@ const REQUEST_PROFILE_BUILDER = {
   headline:
     "Building a B2B platform for restaurant operators. $40K MRR, looking for a technical cofounder to lead engineering.",
 };
-const REQUEST_PITCH_BUILDER =
+const REQUEST_PITCH_PARTNER =
   "I've shipped two B2B products in restaurant tech. Saw your MRR growth - I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";
 
 // Founder POV: target is an operator. The "pitch" reads as the
@@ -1271,7 +1271,7 @@ const REQUEST_PROFILE_FOUNDER = {
   monogram: "TP",
   name: "Taylor P.",
   firstName: "Taylor",
-  pills: ["Full-time", "Remote", "Builder"],
+  pills: ["Full-time", "Remote", "Partner"],
   skills: ["Backend", "Devtools", "Postgres"],
   headline:
     "Senior engineer, ex-Stripe payments and Linear. Looking for a venture with real users and meaningful equity.",
@@ -1281,8 +1281,8 @@ const REQUEST_PITCH_FOUNDER =
 
 const RequestCardMockup = ({ persona }: { persona: Persona }) => {
   const isFounder = persona === "founder";
-  const profile = isFounder ? REQUEST_PROFILE_FOUNDER : REQUEST_PROFILE_BUILDER;
-  const pitch = isFounder ? REQUEST_PITCH_FOUNDER : REQUEST_PITCH_BUILDER;
+  const profile = isFounder ? REQUEST_PROFILE_FOUNDER : REQUEST_PROFILE_PARTNER;
+  const pitch = isFounder ? REQUEST_PITCH_FOUNDER : REQUEST_PITCH_PARTNER;
   const ctaLabel = isFounder ? "Request chat" : "Apply";
   const placeholder = isFounder
     ? `Tell ${profile.firstName} why they'd be a great fit for what you're building…`

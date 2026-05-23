@@ -16,7 +16,7 @@ const STORAGE_PREFIX = "vettd_sent_requests_v2:";
 
 // Two flavors of outgoing thread state:
 //   • "chat"        — a Request-chat CTA tap. Opens a chat directly.
-//   • "application" — an Apply CTA tap. Builder pitched themselves
+//   • "application" — an Apply CTA tap. Partner pitched themselves
 //                      to this founder's project (mirrors the web's
 //                      ApplyDialog flow). The pitch text is stored
 //                      so it can render under the row in Threads.

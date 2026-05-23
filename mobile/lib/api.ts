@@ -842,7 +842,7 @@ export const listReceivedApplications = async (): Promise<
   }));
 };
 
-// Per-side archive. Builders archive their own view (the founder
+// Per-side archive. Partners archive their own view (the founder
 // still sees the application on theirs, and vice-versa).
 export const archiveApplicationForCandidate = async (
   applicationId: string,
@@ -1025,7 +1025,7 @@ export const matchCandidatesForProject = async (
   }));
 };
 
-// Search-tab use: list every accepted, open-to-work builder. Founders
+// Search-tab use: list every accepted, open-to-work partner. Founders
 // filter the results client-side. The SECURITY DEFINER RPC scrubs
 // fields so we only get safe public columns.
 type OpenCandidateRow = {

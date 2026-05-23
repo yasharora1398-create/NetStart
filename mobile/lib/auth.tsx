@@ -30,7 +30,7 @@ type AuthValue = {
     email: string,
     password: string,
     name: string,
-    role: "founder" | "builder",
+    role: "founder" | "partner",
   ) => Promise<{ error: Error | null; duplicate: boolean }>;
   signOut: (scope?: "local" | "global") => Promise<void>;
   requestPasswordReset: (

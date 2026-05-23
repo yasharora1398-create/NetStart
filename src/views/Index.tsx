@@ -55,7 +55,7 @@ const Index = () => {
   usePageMeta({
     title: "Polln8 | Cofounders found efficiently",
     description:
-      "Cofounders found efficiently. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches builders with early-stage startups worth joining.",
+      "Cofounders found efficiently. Polln8 matches founders with vetted technical cofounders and founding engineers, and matches partners with early-stage startups worth joining.",
     path: "/",
   });
   const { user } = useAuth();
@@ -75,14 +75,14 @@ const Index = () => {
           <Reveal>
           <section className="pt-6 md:pt-12 pb-12 md:pb-16 max-w-3xl">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] mb-5 text-primary">
-              polln8 / for builders
+              polln8 / for partners
             </p>
             <h1 className="font-display text-4xl md:text-6xl lg:text-[6rem] leading-[0.92] tracking-[-0.03em] mb-5 text-foreground font-bold">
               The mobile app for people who actually
               <span className="italic text-primary"> build.</span>
             </h1>
             <p className="text-base md:text-lg max-w-md mb-8 leading-relaxed text-muted-foreground">
-              Vetted founders and builders. Matches ranked by AI. Connect, pass,
+              Vetted founders and partners. Matches ranked by AI. Connect, pass,
               or save. No maybes.
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -152,7 +152,7 @@ const Index = () => {
                     Apply to join
                   </p>
                   <h2 className="font-display text-3xl md:text-5xl tracking-[-0.025em] leading-[1] mb-3 text-foreground font-bold">
-                    Builders,
+                    Partners,
                     <br />
                     <span className="italic text-muted-foreground">
                       not talkers.
@@ -1298,7 +1298,7 @@ const REQUEST_PROFILE = {
   pills: ["Full-time", "SF", "Founder"],
   skills: ["Product", "Sales", "Fundraising"],
   headline:
-    "Building a B2B platform for restaurant builders. $40K MRR, looking for a technical cofounder to lead engineering.",
+    "Building a B2B platform for restaurant partners. $40K MRR, looking for a technical cofounder to lead engineering.",
 };
 const REQUEST_PITCH =
   "I've shipped two B2B products in restaurant tech. Saw your MRR growth - I think I can help you cross $100K and lead the engineering build-out. Free to talk this week.";

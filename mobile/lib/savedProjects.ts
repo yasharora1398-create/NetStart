@@ -1,19 +1,19 @@
 /**
- * Saved-projects store (mobile, builder side). Cross-device, persisted
+ * Saved-projects store (mobile, partner side). Cross-device, persisted
  * on the server in public.saved_projects (migration 0030). Same shape
- * as the web store so a builder who saves on their phone sees it on
+ * as the web store so a partner who saves on their phone sees it on
  * their laptop.
  *
  * Two pieces of per-user state:
  *   1. `items`     — list of saved PublicProject rows, deduped by id
- *   2. `activeId`  — id of the project the builder picked as their
+ *   2. `activeId`  — id of the project the partner picked as their
  *                    "current focus" (one or none).
  *
  * Reads: hydrate from `list_saved_projects()` RPC on user bind.
  * Writes: optimistic — update memory + emit, then await the round
  *         trip; on failure, undo and log.
  *
- * Saving a project bumps the Saved-tab unread badge so the builder
+ * Saving a project bumps the Saved-tab unread badge so the partner
  * notices new items land even when they're on a different tab.
  */
 import { useEffect, useState } from "react";

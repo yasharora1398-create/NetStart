@@ -10,12 +10,12 @@ import {
   User,
 } from "lucide-react";
 import { SwipeDeck } from "./SwipeDeck";
-import { BUILDERS } from "@/lib/builders";
+import { PARTNERS } from "@/lib/partners";
 
 type BottomTab = "match" | "browse" | "threads" | "you";
 type MatchTab = "foryou" | "saved" | "startups";
 
-const SAMPLE_THREADS = BUILDERS.map((b, i) => ({
+const SAMPLE_THREADS = PARTNERS.map((b, i) => ({
   id: b.id,
   name: b.name,
   image: b.image,
@@ -200,7 +200,7 @@ const NotifItem = ({ title, body }: { title: string; body: string }) => (
 
 const SavedScreen = () => (
   <div className="px-4 pt-4 space-y-2.5">
-    {BUILDERS.map((b) => (
+    {PARTNERS.map((b) => (
       <article
         key={b.id}
         className="rounded-sm border border-border bg-card p-3 flex gap-3 items-center"
@@ -232,7 +232,7 @@ const SavedScreen = () => (
 
 const StartupsScreen = () => (
   <div className="px-4 pt-4 space-y-3">
-    {BUILDERS.map((b) => (
+    {PARTNERS.map((b) => (
       <article
         key={b.id}
         className="rounded-sm border border-border bg-card p-4"
@@ -307,7 +307,7 @@ const BrowseScreen = () => (
       )}
     </div>
     <div className="space-y-2.5">
-      {BUILDERS.map((b) => (
+      {PARTNERS.map((b) => (
         <article
           key={b.id}
           className="rounded-sm border border-border bg-card p-3"
@@ -391,7 +391,7 @@ const ThreadsScreen = () => (
 );
 
 const YouScreen = () => {
-  const me = BUILDERS[0];
+  const me = PARTNERS[0];
   return (
     <div className="px-4 pt-5 pb-4">
       <div className="flex items-center gap-3 mb-5">

@@ -192,7 +192,7 @@ export const MyNetDashboard = ({
           section header so users can flip discoverability without
           having to enter edit mode. */}
       <Section
-        title="How builders find you"
+        title="How partners find you"
         eyebrow="02"
         icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
         action={
@@ -275,7 +275,7 @@ export const MyNetDashboard = ({
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
               {isPending
                 ? "We're reviewing your credentials. The moment you're in, this section unlocks."
-                : "Add what you're building so builders can find and apply to your venture."}
+                : "Add what you're building so partners can find and apply to your venture."}
             </p>
             {!isPending && (
               <span className="inline-flex items-center gap-2 text-sm text-gold group-hover:gap-3 transition-all">
@@ -337,7 +337,7 @@ const Section = ({
   </section>
 );
 
-// Standalone Open-to-Work toggle. Lives in the "How builders find you"
+// Standalone Open-to-Work toggle. Lives in the "How partners find you"
 // section header so users can flip discoverability on/off without
 // having to enter edit mode. Both directions are always allowed â€” the
 // parent handler is permissive, and forcing eligibility checks here
@@ -565,9 +565,9 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
 };
 
 // Renders the user's profile / project the way the OTHER side of
-// the network sees it on Match. Builders see their own candidate
+// the network sees it on Match. Partners see their own candidate
 // card (what founders flip through); founders see their active
-// project card (what builders see). Helps the user catch missing
+// project card (what partners see). Helps the user catch missing
 // fields, weak copy, or a stale photo before going live.
 const MyCardPreview = ({
   profile,
@@ -578,7 +578,7 @@ const MyCardPreview = ({
   projects: Project[];
   role: Role;
 }) => {
-  if (role === "builder") {
+  if (role === "partner") {
     return <CandidatePreviewCard profile={profile} />;
   }
   // Founder POV: prefer the active project, fall back to the first.
@@ -589,7 +589,7 @@ const MyCardPreview = ({
       <div className="rounded-sm border border-dashed border-border bg-card/40 p-8 text-center">
         <h3 className="font-display text-xl mb-2">No project to preview</h3>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Post a project below and it'll appear here as builders will see it
+          Post a project below and it'll appear here as partners will see it
           on Match.
         </p>
       </div>
@@ -713,7 +713,7 @@ const ProjectPreviewCard = ({
           </p>
         ) : (
           <p className="text-sm italic text-muted-foreground/60">
-            No description yet. Builders see a blank pitch here.
+            No description yet. Partners see a blank pitch here.
           </p>
         )}
       </div>

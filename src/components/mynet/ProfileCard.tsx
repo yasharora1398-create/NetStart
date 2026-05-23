@@ -264,7 +264,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
             ) : null}
           </div>
 
-          {/* Resume (builders) or Website (founders) */}
+          {/* Resume (partners) or Website (founders) */}
           {!isFounder ? (
             <div>
               <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">

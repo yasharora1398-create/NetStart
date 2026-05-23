@@ -104,20 +104,20 @@ const Match = () => {
 
   const isAuthed = Boolean(user) && !loading;
   const isAccepted = profile?.reviewStatus === "accepted";
-  // Auth role is the primary signal: a builder swipes projects, a
+  // Auth role is the primary signal: a partner swipes projects, a
   // founder swipes candidates. Fall back to project ownership only
   // for legacy users who pre-date the role stamp on user_metadata.
-  // (Naming is unfortunate: userMode "builder" = founder-side view;
-  // "looker" = builder-side view. Kept for now since both branches
+  // (Naming is unfortunate: userMode "partner" = founder-side view;
+  // "looker" = partner-side view. Kept for now since both branches
   // below already use those names.)
   const role = user?.user_metadata?.role as string | undefined;
-  const userMode: "builder" | "looker" =
-    role === "builder"
+  const userMode: "partner" | "looker" =
+    role === "partner"
       ? "looker"
       : role === "founder"
-        ? "builder"
+        ? "partner"
         : hasProjects
-          ? "builder"
+          ? "partner"
           : "looker";
 
   const Locked = (
@@ -148,8 +148,8 @@ const Match = () => {
             </h1>
             <div className="text-base sm:text-lg text-muted-foreground leading-relaxed space-y-4">
               <p>
-                The ranked deck. Founders see builders ordered against
-                their active project&apos;s criteria. Builders see
+                The ranked deck. Founders see partners ordered against
+                their active project&apos;s criteria. Partners see
                 projects ordered against what they&apos;ve built and the
                 work they&apos;d want to ship next.
               </p>
@@ -203,13 +203,13 @@ const Match = () => {
         <div className="container">
           <header className="mb-6 md:mb-10">
             <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-3 md:mb-4">
-              {userMode === "builder"
-                ? "Find your builder."
+              {userMode === "partner"
+                ? "Find your partner."
                 : "Find a project."}
             </h1>
             <p className="text-muted-foreground max-w-xl text-sm md:text-base">
-              {userMode === "builder"
-                ? "Vetted builders, one at a time. Accept the ones you want to talk to and pass the rest."
+              {userMode === "partner"
+                ? "Vetted partners, one at a time. Accept the ones you want to talk to and pass the rest."
                 : "Founders building right now. Browse one by one and apply when something fits."}
             </p>
           </header>
@@ -218,8 +218,8 @@ const Match = () => {
             <Loading />
           ) : isAuthed && !isAccepted ? (
             Locked
-          ) : userMode === "builder" ? (
-            <BuilderView />
+          ) : userMode === "partner" ? (
+            <PartnerView />
           ) : (
             <LookerView />
           )}
@@ -230,20 +230,20 @@ const Match = () => {
   );
 };
 
-// ============= Builder view: swipe through lookers ===================
+// ============= Partner view: swipe through lookers ===================
 
 const MATCH_CANDIDATES_CACHE_KEY = "polln8.match.candidates";
-const MATCH_BUILDER_DECIDED_KEY = "polln8.match.builder.decided";
+const MATCH_PARTNER_DECIDED_KEY = "polln8.match.partner.decided";
 
 // Read the persisted "already decided" set so a refresh on /match
 // drops the user back on the same card instead of restarting from
 // the top of the deck. Keyed off the auth user id so two people
 // sharing a browser don't merge sets.
-const readBuilderDecided = (uid: string | undefined): Set<string> => {
+const readPartnerDecided = (uid: string | undefined): Set<string> => {
   if (typeof window === "undefined" || !uid) return new Set();
   try {
     const raw = window.localStorage.getItem(
-      `${MATCH_BUILDER_DECIDED_KEY}.${uid}`,
+      `${MATCH_PARTNER_DECIDED_KEY}.${uid}`,
     );
     if (!raw) return new Set();
     const arr = JSON.parse(raw) as string[];
@@ -253,7 +253,7 @@ const readBuilderDecided = (uid: string | undefined): Set<string> => {
   }
 };
 
-const BuilderView = () => {
+const PartnerView = () => {
   const { user } = useAuth();
   // Hydrate from localStorage so revisiting /match shows the deck
   // instantly; the network fetch below overwrites with fresh data.
@@ -270,14 +270,14 @@ const BuilderView = () => {
   // user to the first card. Persisted on every change via the
   // effect below.
   const [decided, setDecided] = useState<Set<string>>(() =>
-    readBuilderDecided(user?.id),
+    readPartnerDecided(user?.id),
   );
 
   // Rehydrate when the auth user finishes loading (initial render
   // may not have user.id yet).
   useEffect(() => {
     if (!user?.id) return;
-    const stored = readBuilderDecided(user.id);
+    const stored = readPartnerDecided(user.id);
     if (stored.size > 0) setDecided(stored);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
@@ -287,7 +287,7 @@ const BuilderView = () => {
     if (typeof window === "undefined" || !user?.id) return;
     try {
       window.localStorage.setItem(
-        `${MATCH_BUILDER_DECIDED_KEY}.${user.id}`,
+        `${MATCH_PARTNER_DECIDED_KEY}.${user.id}`,
         JSON.stringify(Array.from(decided)),
       );
     } catch {
@@ -489,7 +489,7 @@ const BuilderView = () => {
           sub={
             hasFilters
               ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
-              : "You've worked through every builder that's open right now. New ones will land here as they sign up."
+              : "You've worked through every partner that's open right now. New ones will land here as they sign up."
           }
         />
       ) : (
@@ -741,7 +741,7 @@ const CandidateActions = ({
     if (!activeProjectId) {
       toast.error("Finish your active project in MyNet first", {
         description:
-          "Builders are ranked against your active project's criteria â€” and saves attach to it. Publish a project in MyNet, then mark it active.",
+          "Partners are ranked against your active project's criteria â€” and saves attach to it. Publish a project in MyNet, then mark it active.",
       });
       return;
     }
@@ -853,7 +853,7 @@ const CandidateActions = ({
   );
 };
 
-// ============= Looker view: arrows through builders ==================
+// ============= Looker view: arrows through partners ==================
 
 const MATCH_PROJECTS_CACHE_KEY = "polln8.match.projects";
 const MATCH_LOOKER_DECIDED_KEY = "polln8.match.looker.decided";
@@ -1275,10 +1275,10 @@ const LookerView = () => {
   );
 };
 
-// Builder-side info panel â€” the founder's full public profile
+// Partner-side info panel â€” the founder's full public profile
 // rendered inline beside the project card on accept. Bio, skills,
 // website, LinkedIn â€” same content as /u/<founder> but laid out as
-// a side panel so the builder can read it without leaving the
+// a side panel so the partner can read it without leaving the
 // deck. The icon-only action column on the founder side is
 // intentionally different because it's framing a person, not a
 // project; this surface frames a person.
@@ -1501,7 +1501,7 @@ const ProjectInfoPanel = ({
 
         <div className="mt-5 flex items-center gap-2 border-t border-border pt-4">
           {/* Back to previous card. Sits next to Request chat as a
-              small icon button so the builder can rewind one card
+              small icon button so the partner can rewind one card
               without leaving the panel. */}
           <button
             type="button"
@@ -1542,8 +1542,8 @@ const ProjectInfoPanel = ({
   );
 };
 
-// Builder-side project card. Visual twin of MatchCandidateCard so
-// builders and founders see the same deck shape â€” full-width 1:1
+// Partner-side project card. Visual twin of MatchCandidateCard so
+// partners and founders see the same deck shape â€” full-width 1:1
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
   const avatar = getAvatarUrl(project.founderAvatarPath);

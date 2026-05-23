@@ -26,8 +26,8 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // Founder = has a startup, looking for people to join.
-  // Builder = looking for a startup to join.
-  const [role, setRole] = useState<Role>("builder");
+  // Partner = looking for a startup to join.
+  const [role, setRole] = useState<Role>("partner");
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
@@ -77,7 +77,7 @@ export default function SignUp() {
           <Text style={styles.eyebrow}>Create account</Text>
           <Text style={styles.h1}>Join Polln8.</Text>
           <Text style={styles.body}>
-            Founders and builders who actually ship.
+            Founders and partners who actually ship.
           </Text>
 
           <View style={styles.field}>
@@ -121,7 +121,7 @@ export default function SignUp() {
             />
           </View>
 
-          {/* Role picker — founder vs builder. Drives Match filtering
+          {/* Role picker — founder vs partner. Drives Match filtering
               and the Apply / Request-chat CTA semantics throughout the
               app. Stored on the auth user's user_metadata.role. */}
           <View style={styles.field}>
@@ -154,25 +154,25 @@ export default function SignUp() {
                 </View>
               </Pressable>
               <Pressable
-                onPress={() => setRole("builder")}
+                onPress={() => setRole("partner")}
                 style={({ pressed }) => [
                   styles.roleBtn,
-                  role === "builder" && styles.roleBtnActive,
+                  role === "partner" && styles.roleBtnActive,
                   pressed && { opacity: 0.85 },
                 ]}
               >
                 <Users
                   size={16}
-                  color={role === "builder" ? theme.gold : theme.textMuted}
+                  color={role === "partner" ? theme.gold : theme.textMuted}
                 />
                 <View style={{ flex: 1 }}>
                   <Text
                     style={[
                       styles.roleTitle,
-                      role === "builder" && { color: theme.gold },
+                      role === "partner" && { color: theme.gold },
                     ]}
                   >
-                    Builder
+                    Partner
                   </Text>
                   <Text style={styles.roleHint}>
                     I'm looking for a startup to join.

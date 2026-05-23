@@ -69,7 +69,7 @@ export default function Welcome() {
         <View style={styles.copyBlock}>
           <Text style={styles.headline}>Find your person.</Text>
           <Text style={styles.body}>
-            Polln8 is where founders find cofounders and builders find startups
+            Polln8 is where founders find cofounders and partners find startups
             to join for equity. Vetted profiles, real shipping history, no spam.
           </Text>
         </View>

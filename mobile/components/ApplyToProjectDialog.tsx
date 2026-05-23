@@ -1,5 +1,5 @@
 /**
- * Builder-side application modal. Replaces the native Alert.prompt
+ * Partner-side application modal. Replaces the native Alert.prompt
  * that the Browse tab used to fall back on - that surface had no
  * project context, no character counter, and looked like a system
  * dialog instead of part of the app.
@@ -7,7 +7,7 @@
  * Props:
  *   project   - the public project being applied to. The header pulls
  *               title, founder name, commitment, and location from it
- *               so the builder can see what they're committing to as
+ *               so the partner can see what they're committing to as
  *               they write the pitch.
  *   onClose   - dismiss the modal (Cancel button or backdrop tap).
  *   onSent    - called after createApplication() succeeds. Parent
@@ -160,7 +160,7 @@ export const ApplyToProjectDialog = ({
             <X size={18} color={theme.textMuted} />
           </Pressable>
 
-          {/* Project context — builder sees what they're applying to. */}
+          {/* Project context — partner sees what they're applying to. */}
           <Text style={styles.eyebrow}>Apply to</Text>
           <Text style={styles.title} numberOfLines={2}>
             {project.title}

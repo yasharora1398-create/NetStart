@@ -3,9 +3,9 @@
  * tab. Filters tighten criteria for THIS search only - they don't
  * persist to the user's profile or affect Browse defaults.
  *
- *   Founder POV  - searches builders (open candidates).
+ *   Founder POV  - searches partners (open candidates).
  *                  Filters: commitment, location, skills.
- *   Builder POV  - searches projects (published projects).
+ *   Partner POV  - searches projects (published projects).
  *                  Filters: business type, commitment, location, skills.
  *
  * Skills are multi-select via TagInput; a result must include at least
@@ -69,7 +69,7 @@ export default function SearchScreen() {
   const router = useRouter();
   const { user } = useAuth();
 
-  const role: Role = readMetadataRole(user) ?? "builder";
+  const role: Role = readMetadataRole(user) ?? "partner";
   const isFounder = role === "founder";
 
   const [query, setQuery] = useState("");
@@ -277,7 +277,7 @@ export default function SearchScreen() {
                 sub={
                   hasFilters
                     ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
-                    : "Builders are still finishing their profiles. Check back soon."
+                    : "Partners are still finishing their profiles. Check back soon."
                 }
               />
             }

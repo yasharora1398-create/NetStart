@@ -2,14 +2,14 @@
 /**
  * Saved page. Role-aware:
  *
- *   Builder POV  â†’ list of projects bookmarked from Match / Talent /
+ *   Partner POV  â†’ list of projects bookmarked from Match / Talent /
  *                  project detail. Source: local saved-projects store
  *                  (`useSavedProjects`).
  *   Founder POV  â†’ list of candidates the founder saved across their
  *                  projects. Source: each project's `savedPersonIds`
  *                  joined with `getCandidatesByIds`.
  *
- * Builders can star one saved project as their current focus â€” same
+ * Partners can star one saved project as their current focus â€” same
  * semantic as the founder-side active-project picker.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -52,7 +52,7 @@ import type { Candidate, PublicProject } from "@/lib/mynet-types";
 import { cn } from "@/lib/utils";
 import { readCache, writeCache } from "@/lib/cache";
 
-type Role = "founder" | "builder";
+type Role = "founder" | "partner";
 
 const initials = (name: string): string => {
   if (!name.trim()) return "?";
@@ -68,7 +68,7 @@ const readMetadataRole = (
   user: { user_metadata?: Record<string, unknown> } | null,
 ): Role | null => {
   const r = user?.user_metadata?.role;
-  return r === "founder" || r === "builder" ? r : null;
+  return r === "founder" || r === "partner" ? r : null;
 };
 
 const SAVED_CANDIDATES_CACHE_KEY = "polln8.saved.candidates";
@@ -103,7 +103,7 @@ const Saved = () => {
   }, [user?.id]);
 
   const role: Role = useMemo(
-    () => readMetadataRole(user) ?? (hasProjects ? "founder" : "builder"),
+    () => readMetadataRole(user) ?? (hasProjects ? "founder" : "partner"),
     [user, hasProjects],
   );
 
@@ -158,7 +158,7 @@ const Saved = () => {
           <div className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-10 max-w-2xl space-y-4">
             <p>
               Saved is where everything you bookmarked from Match ends up.
-              Builders save projects they want to circle back to.
+              Partners save projects they want to circle back to.
               Founders save candidates they want to revisit before
               sending a chat request.
             </p>
@@ -177,7 +177,7 @@ const Saved = () => {
             </p>
             <p className="text-sm text-foreground/90 leading-relaxed">
               <span className="font-semibold">Star one as your focus.</span>{" "}
-              Builders can pick one saved project as their current focus,
+              Partners can pick one saved project as their current focus,
               same as the founder-side active project.
             </p>
           </div>
@@ -213,14 +213,14 @@ const Saved = () => {
               Your shortlist.
             </h1>
             <p className="max-w-xl text-muted-foreground">
-              {role === "builder"
+              {role === "partner"
                 ? "Projects you bookmarked. Star one to mark it as your current focus."
-                : "Builders you saved across your projects. Tap any to revisit."}
+                : "Partners you saved across your projects. Tap any to revisit."}
             </p>
           </header>
 
-          {role === "builder" ? (
-            <BuilderSaved />
+          {role === "partner" ? (
+            <PartnerSaved />
           ) : (
             <FounderSaved
               candidates={savedCandidates}
@@ -233,9 +233,9 @@ const Saved = () => {
   );
 };
 
-// â”€â”€â”€ builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ partner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const BuilderSaved = () => {
+const PartnerSaved = () => {
   const projects = useSavedProjects();
   const activeId = useActiveSavedProjectId();
 
@@ -383,7 +383,7 @@ const FounderSaved = ({
   if (loading && candidates.length === 0) {
     return (
       <div className="rounded-sm border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-        Loading saved builders...
+        Loading saved partners...
       </div>
     );
   }
@@ -392,7 +392,7 @@ const FounderSaved = ({
       <EmptyCard
         variant="saves"
         title="No saves yet."
-        body="Use Match to swipe-save builders you want to revisit. They'll show up here grouped by project."
+        body="Use Match to swipe-save partners you want to revisit. They'll show up here grouped by project."
       />
     );
   }

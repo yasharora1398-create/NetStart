@@ -1,13 +1,13 @@
-import builder1 from "@/assets/builder-1.jpg";
-import builder2 from "@/assets/builder-2.jpg";
-import builder3 from "@/assets/builder-3.jpg";
+import partner1 from "@/assets/partner-1.jpg";
+import partner2 from "@/assets/partner-2.jpg";
+import partner3 from "@/assets/partner-3.jpg";
 import { assetUrl } from "@/lib/asset-url";
 
-const builder1Url = assetUrl(builder1);
-const builder2Url = assetUrl(builder2);
-const builder3Url = assetUrl(builder3);
+const partner1Url = assetUrl(partner1);
+const partner2Url = assetUrl(partner2);
+const partner3Url = assetUrl(partner3);
 
-export type Builder = {
+export type Partner = {
   id: string;
   name: string;
   role: string;
@@ -21,13 +21,13 @@ export type Builder = {
   building: string;
 };
 
-export const BUILDERS: Builder[] = [
+export const PARTNERS: Partner[] = [
   {
     id: "marcus-vey",
     name: "Marcus Vey",
     role: "Founding Engineer · ex-Stripe",
     location: "San Francisco",
-    image: builder1Url,
+    image: partner1Url,
     match: 94,
     ships: "0 to 1 in 21 days",
     commitment: "Full-time · No salary",
@@ -40,7 +40,7 @@ export const BUILDERS: Builder[] = [
     name: "Elena Rusk",
     role: "Product & Growth · 2x Founder",
     location: "New York",
-    image: builder2Url,
+    image: partner2Url,
     match: 91,
     ships: "0 to 1 in 30 days",
     commitment: "Full-time · Equity-first",
@@ -53,7 +53,7 @@ export const BUILDERS: Builder[] = [
     name: "Kai Nakamura",
     role: "Design Engineer · ex-Linear",
     location: "Remote · EU",
-    image: builder3Url,
+    image: partner3Url,
     match: 88,
     ships: "0 to 1 in 14 days",
     commitment: "Part-time · Open to FT",
@@ -63,5 +63,5 @@ export const BUILDERS: Builder[] = [
   },
 ];
 
-export const builderById = (id: string): Builder | undefined =>
-  BUILDERS.find((b) => b.id === id);
+export const partnerById = (id: string): Partner | undefined =>
+  PARTNERS.find((b) => b.id === id);

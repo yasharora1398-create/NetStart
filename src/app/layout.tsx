@@ -174,7 +174,7 @@ const FAQ_LD = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Post what you're building on Polln8. We surface vetted technical builders (engineers, CTOs, founding engineers) whose skills and commitment actually match your project, not a list of names you have to cold-DM.",
+          "Post what you're building on Polln8. We surface vetted technical partners (engineers, CTOs, founding engineers) whose skills and commitment actually match your project, not a list of names you have to cold-DM.",
       },
     },
     {
@@ -192,7 +192,7 @@ const FAQ_LD = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Sign up at polln8.com, tell us who you are, and we review you in under 24 hours. Once you're in you can browse founders and builders, accept the ones who fit, and chat as soon as the other side accepts back.",
+          "Sign up at polln8.com, tell us who you are, and we review you in under 24 hours. Once you're in you can browse founders and partners, accept the ones who fit, and chat as soon as the other side accepts back.",
       },
     },
     {
@@ -201,7 +201,7 @@ const FAQ_LD = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Polln8 is built for this. Post your project once and we route it to vetted technical builders (engineers, CTOs, founding engineers) who are actively looking for a startup to join.",
+          "Polln8 is built for this. Post your project once and we route it to vetted technical partners (engineers, CTOs, founding engineers) who are actively looking for a startup to join.",
       },
     },
     {
@@ -210,7 +210,7 @@ const FAQ_LD = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Post your project on Polln8. We match founders with builders who are CTO-level and looking for equity-aligned startups to join, not contractors, not freelancers.",
+          "Post your project on Polln8. We match founders with partners who are CTO-level and looking for equity-aligned startups to join, not contractors, not freelancers.",
       },
     },
     {
@@ -219,7 +219,7 @@ const FAQ_LD = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Polln8 matches both sides. Builders can browse vetted non-technical founders with real go-to-market, sales, design, or operations chops who are looking for a technical partner.",
+          "Polln8 matches both sides. Partners can browse vetted non-technical founders with real go-to-market, sales, design, or operations chops who are looking for a technical partner.",
       },
     },
     {
@@ -264,7 +264,7 @@ const FAQ_LD = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Sign up on Polln8 as a builder. We vet your background, surface you to founders whose project fits your skills, and open a chat the moment both sides accept. No DMing strangers, no cold pitches.",
+          "Sign up on Polln8 as a partner. We vet your background, surface you to founders whose project fits your skills, and open a chat the moment both sides accept. No DMing strangers, no cold pitches.",
       },
     },
   ],
@@ -351,7 +351,7 @@ export default function RootLayout({
             </h1>
             <p style={{ fontSize: 16, lineHeight: 1.5, color: "#444" }}>
               Polln8 is a private network of vetted founders and
-              technical builders. Every profile is reviewed by a
+              technical partners. Every profile is reviewed by a
               human, every chat starts with mutual interest, and the
               deck is ranked against what you actually want to build.
             </p>

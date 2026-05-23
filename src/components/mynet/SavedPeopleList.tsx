@@ -148,7 +148,7 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
           Empty
         </p>
         <p className="text-sm text-muted-foreground">
-          Tap Find people on this project to start saving builders.
+          Tap Find people on this project to start saving partners.
         </p>
       </div>
     );

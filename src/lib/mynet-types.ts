@@ -51,7 +51,7 @@ export type Profile = {
   linkedinUrl: string;
   resume: ResumeMeta | null;
   // Founder fields. websiteUrl is what they're building; proof is a
-  // file showing prior shipped work. Both empty for builders.
+  // file showing prior shipped work. Both empty for partners.
   websiteUrl: string;
   proof: ProofMeta | null;
   reviewStatus: ReviewStatus;

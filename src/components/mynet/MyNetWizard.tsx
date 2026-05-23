@@ -75,7 +75,7 @@ type Props = {
    * the mode-pick step and goes straight to "looking" or "building"
    * after credentials. Comes from `user_metadata.role`.
    */
-  preselectedRole?: "founder" | "builder";
+  preselectedRole?: "founder" | "partner";
 };
 
 const isValidLinkedIn = (url: string): boolean => {
@@ -277,7 +277,7 @@ export const MyNetWizard = ({
       await onProfileRefresh();
       // If sign-up already captured the role, skip the mode pick
       // and go straight into the matching half-of-the-wizard.
-      if (preselectedRole === "builder") {
+      if (preselectedRole === "partner") {
         setStage("looking");
       } else if (preselectedRole === "founder") {
         setStage("building");
@@ -385,7 +385,7 @@ export const MyNetWizard = ({
           title="Drop your credentials."
           subtitle={
             preselectedRole === "founder"
-              ? "LinkedIn helps builders verify you when they consider applying."
+              ? "LinkedIn helps partners verify you when they consider applying."
               : "LinkedIn or a resume helps us verify you. We strongly recommend both, but either one will do."
           }
         >
@@ -404,7 +404,7 @@ export const MyNetWizard = ({
               />
             </Field>
 
-            {/* Resume only matters for builders. Founders pitch via
+            {/* Resume only matters for partners. Founders pitch via
                 their project page, not via a resume upload. */}
             {preselectedRole !== "founder" ? (
               <Field
@@ -530,12 +530,12 @@ export const MyNetWizard = ({
               icon={<Hammer className="h-6 w-6" />}
               tag="I'm a founder"
               title="I have a project."
-              body="You're building a venture and you need a builder, builder, or co-founder next to you. We'll set up the project."
+              body="You're building a venture and you need a partner, partner, or co-founder next to you. We'll set up the project."
               onClick={() => setStage("building")}
             />
             <ModeCard
               icon={<Telescope className="h-6 w-6" />}
-              tag="I'm a builder"
+              tag="I'm a partner"
               title="I want to join one."
               body="You're open to joining a project that fits your skills, your time, and the kind of work you want to do. We'll set up your candidate profile."
               onClick={() => setStage("looking")}
@@ -660,7 +660,7 @@ export const MyNetWizard = ({
         <StepShell
           eyebrow="Step 03 of 03"
           title="Tell us what you're building."
-          subtitle="Set up your project so the right builders can find it."
+          subtitle="Set up your project so the right partners can find it."
           onBack={() => setStage("mode")}
         >
           <div className="space-y-6 mb-10">
@@ -747,7 +747,7 @@ export const MyNetWizard = ({
               <div className="grid md:grid-cols-2 gap-6 mt-5">
                 <Field
                   label="Business type"
-                  hint="Optional. Helps builders filter."
+                  hint="Optional. Helps partners filter."
                 >
                   <Autocomplete
                     value={projectBusinessType}
@@ -802,12 +802,12 @@ const Intro = ({
     {
       num: "02",
       title: "Mode",
-      body: "Founder or builder - tell us which side of the network you're on.",
+      body: "Founder or partner - tell us which side of the network you're on.",
     },
     {
       num: "03",
       title: "Details",
-      body: "Founders set up a project. Builders fill out a candidate profile.",
+      body: "Founders set up a project. Partners fill out a candidate profile.",
     },
   ];
 

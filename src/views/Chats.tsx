@@ -402,7 +402,7 @@ const Chats = () => {
                 className={cn(
                   "min-h-0 flex-col",
                   selected ? "hidden md:flex" : "flex md:flex",
-                  // When the builder collapsed the list on desktop,
+                  // When the partner collapsed the list on desktop,
                   // hide the pane entirely so the conversation takes
                   // the full width. Mobile rules still control visibility
                   // based on whether a thread is selected.

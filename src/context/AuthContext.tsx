@@ -35,7 +35,7 @@ type AuthContextValue = {
     email: string,
     password: string,
     name: string,
-    role: "founder" | "builder",
+    role: "founder" | "partner",
     captchaToken?: string,
   ) => Promise<SignUpResult>;
   // "tab"    - sign out of THIS tab only. Other tabs of the same

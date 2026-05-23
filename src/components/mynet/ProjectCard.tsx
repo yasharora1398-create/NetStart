@@ -117,7 +117,7 @@ export const ProjectCard = ({
                 ) : (
                   <>
                     <Eye className="h-4 w-4" />
-                    Publish to builders
+                    Publish to partners
                   </>
                 )}
               </DropdownMenuItem>

@@ -50,7 +50,7 @@ const DownloadPage = () => (
       <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
         <Reveal>
           <h1 className="font-display text-5xl md:text-7xl lg:text-[6rem] tracking-[-0.04em] leading-[0.92] mb-8 max-w-3xl">
-            Builders,<br />
+            Partners,<br />
             <span className="text-primary">not talkers.</span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-xl mb-12 leading-relaxed">

@@ -21,8 +21,8 @@ export const signUpSchema = z.object({
   // Role picked at sign-up so we can skip the wizard's mode question
   // and route post-verification users straight to the right setup
   // path. Stored on user_metadata.role.
-  role: z.enum(["founder", "builder"], {
-    required_error: "Pick founder or builder",
+  role: z.enum(["founder", "partner"], {
+    required_error: "Pick founder or partner",
   }),
 });
 

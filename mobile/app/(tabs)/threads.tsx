@@ -178,7 +178,7 @@ export default function ThreadsScreen() {
         <MothEmptyState
           variant="threads"
           title="No threads yet."
-          sub="Open a chat with a founder or builder from Match or Search. Their first message lands here."
+          sub="Open a chat with a founder or partner from Match or Search. Their first message lands here."
         />
       ) : (
         <FlatList

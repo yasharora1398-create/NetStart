@@ -18,7 +18,7 @@ export const HEADLINE_OPTIONS: string[] = [
   "Sales Lead",
   "Operations Lead",
   "Business Development",
-  "Community Builder",
+  "Community Partner",
   "Content Creator",
   "Founder Looking for Cofounder",
   "Generalist (Wears Many Hats)",

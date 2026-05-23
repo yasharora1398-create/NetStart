@@ -14,7 +14,7 @@ const STEPS: Step[] = [
   {
     label: "1 of 4",
     title: "Meet the app",
-    body: "The iPhone on the right is a live preview. Tap the blue target to connect with a builder you like, or the X to pass. Swipe through a few while you read.",
+    body: "The iPhone on the right is a live preview. Tap the blue target to connect with a partner you like, or the X to pass. Swipe through a few while you read.",
   },
   {
     label: "2 of 4",

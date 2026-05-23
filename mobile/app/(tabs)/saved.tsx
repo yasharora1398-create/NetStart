@@ -4,9 +4,9 @@
  *   Founder POV  → list of candidates the user saved while matching.
  *                  Source: local saved-people store + Supabase merge
  *                  from each project's savedPersonIds.
- *   Builder POV  → list of projects the user bookmarked from Search /
+ *   Partner POV  → list of projects the user bookmarked from Search /
  *                  Project Detail. Source: local saved-projects store.
- *                  Builders can also star ONE project as their current
+ *                  Partners can also star ONE project as their current
  *                  focus, which mirrors the founder-side active-project
  *                  picker semantically: it's the project they'd point
  *                  somebody at if asked "what are you working on?".
@@ -80,7 +80,7 @@ export default function SavedScreen() {
   // no role set, fall back to projects.length > 0 ⇒ founder.
   const [hasProjects, setHasProjects] = useState(false);
   const userRole: Role = useMemo(
-    () => readMetadataRole(user) ?? (hasProjects ? "founder" : "builder"),
+    () => readMetadataRole(user) ?? (hasProjects ? "founder" : "partner"),
     [user, hasProjects],
   );
 
@@ -112,8 +112,8 @@ export default function SavedScreen() {
     };
   }, [user]);
 
-  return userRole === "builder" ? (
-    <BuilderSavedView styles={styles} theme={theme} />
+  return userRole === "partner" ? (
+    <PartnerSavedView styles={styles} theme={theme} />
   ) : (
     <FounderSavedView
       styles={styles}
@@ -125,10 +125,10 @@ export default function SavedScreen() {
 }
 
 // ────────────────────────────────────────────────────────────────
-// Builder POV — saved projects.
+// Partner POV — saved projects.
 // ────────────────────────────────────────────────────────────────
 
-const BuilderSavedView = ({
+const PartnerSavedView = ({
   styles,
   theme,
 }: {
@@ -385,7 +385,7 @@ const FounderSavedView = ({
           onClose={() => setSelected(null)}
           onCtaPress={() => {
             const target = selected;
-            if (userRole === "builder") {
+            if (userRole === "partner") {
               setSelected(null);
               setApplyTo(target);
               return;

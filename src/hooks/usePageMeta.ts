@@ -11,7 +11,7 @@
  * Usage:
  *   usePageMeta({
  *     title: "How Polln8 Works",
- *     description: "Polln8 verifies builders, ranks them...",
+ *     description: "Polln8 verifies partners, ranks them...",
  *     path: "/how",
  *   });
  */

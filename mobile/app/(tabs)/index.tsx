@@ -61,12 +61,12 @@ export default function MatchScreen() {
   // using the light-mode static export from "@/lib/theme".
   const { theme } = useTheme();
   const styles = useMemo(() => makeStyles(theme), [theme]);
-  // Builders shouldn't see the candidate swipe deck. The tab bar
+  // Partners shouldn't see the candidate swipe deck. The tab bar
   // hides this screen for them, but a stale router state or a
   // direct deep link could still land them here — bounce to Browse.
   const role = user?.user_metadata?.role as string | undefined;
   useEffect(() => {
-    if (role === "builder") {
+    if (role === "partner") {
       router.replace("/(tabs)/browse" as never);
     }
   }, [role, router]);
@@ -150,7 +150,7 @@ export default function MatchScreen() {
     setLastSwipe({ candidate: current, status });
     if (direction === "right") {
       // Saving = "I want to learn more about them". Open the detail
-      // sheet so the user lands on the builder's full info right
+      // sheet so the user lands on the partner's full info right
       // after the swipe.
       setSelected(current);
     }
@@ -281,7 +281,7 @@ export default function MatchScreen() {
           <MothEmptyState
             variant="blank"
             title="No projects yet."
-            sub="Create a project on the web to unlock matching. Match ranks builders against your project's criteria."
+            sub="Create a project on the web to unlock matching. Match ranks partners against your project's criteria."
           />
         ) : loading ? (
           <View style={styles.center}>
@@ -290,7 +290,7 @@ export default function MatchScreen() {
         ) : remaining === 0 ? (
           <MothEmptyState
             variant="caught"
-            sub="No more candidates ranked against this project. Lower the criteria or wait for new builders to join."
+            sub="No more candidates ranked against this project. Lower the criteria or wait for new partners to join."
           />
         ) : (
           <View style={styles.deckInner}>

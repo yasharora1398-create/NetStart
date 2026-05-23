@@ -79,10 +79,10 @@ export const track = (
   }
 };
 
-export const trackSignupCompleted = (role: "founder" | "builder"): void =>
+export const trackSignupCompleted = (role: "founder" | "partner"): void =>
   track("signup_completed", { role });
 
-export const trackMynetSubmitted = (role: "founder" | "builder"): void =>
+export const trackMynetSubmitted = (role: "founder" | "partner"): void =>
   track("mynet_submitted", { role });
 
 export const trackFirstMatchAction = (

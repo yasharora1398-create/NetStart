@@ -74,10 +74,10 @@ export default function EditCredentialsScreen() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Role drives which fields render. Defaults to builder for legacy
+  // Role drives which fields render. Defaults to partner for legacy
   // users without a role in metadata; once they have a project the
   // app considers them a founder anyway.
-  const role: Role = readMetadataRole(user) ?? "builder";
+  const role: Role = readMetadataRole(user) ?? "partner";
   const isFounder = role === "founder";
 
   useEffect(() => {
@@ -288,7 +288,7 @@ export default function EditCredentialsScreen() {
 
     // Role-aware required fields:
     //   founder -> proof file (mandatory). Website + LinkedIn optional.
-    //   builder -> at least one of LinkedIn or resume.
+    //   partner -> at least one of LinkedIn or resume.
     if (isFounder) {
       if (!profile.proof) {
         Alert.alert(
@@ -418,7 +418,7 @@ export default function EditCredentialsScreen() {
             ) : null}
           </Field>
 
-          {/* Founder-only: website + proof. Builders see resume. */}
+          {/* Founder-only: website + proof. Partners see resume. */}
           {isFounder ? (
             <>
               <Field

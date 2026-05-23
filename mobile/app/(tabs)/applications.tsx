@@ -1,7 +1,7 @@
 /**
  * Applications tab — role-aware list of applications.
  *
- *   • Builder: applications you sent. Each row shows the project +
+ *   • Partner: applications you sent. Each row shows the project +
  *     status (Pending / Accepted / Declined). Once a row is resolved
  *     (accepted or declined), swipe left to dismiss it from your list.
  *
@@ -107,7 +107,7 @@ export default function ApplicationsScreen() {
   // Determine role: metadata first, projects-existence as fallback.
   const [hasProjects, setHasProjects] = useState(false);
   const role: Role = useMemo(
-    () => readMetadataRole(user) ?? (hasProjects ? "founder" : "builder"),
+    () => readMetadataRole(user) ?? (hasProjects ? "founder" : "partner"),
     [user, hasProjects],
   );
 
@@ -228,7 +228,7 @@ export default function ApplicationsScreen() {
         </Text>
         <Text style={styles.sub}>
           {isFounder
-            ? "Builders applying to your projects. Accept the ones you want to talk to."
+            ? "Partners applying to your projects. Accept the ones you want to talk to."
             : "Projects you've applied to. Swipe left on a resolved one to clear it."}
         </Text>
       </View>
@@ -272,7 +272,7 @@ export default function ApplicationsScreen() {
 }
 
 // ────────────────────────────────────────────────────────────────
-// Builder row: outgoing application
+// Partner row: outgoing application
 // ────────────────────────────────────────────────────────────────
 
 const SentRow = ({
@@ -591,7 +591,7 @@ const EmptyState = ({ role }: { role: Role }) => (
     title={role === "founder" ? "No applications yet." : "Nothing sent yet."}
     sub={
       role === "founder"
-        ? "Once builders apply to your projects, you'll see them here."
+        ? "Once partners apply to your projects, you'll see them here."
         : "Open Browse to find a project that fits, then send your first pitch."
     }
   />

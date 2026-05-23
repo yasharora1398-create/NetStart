@@ -5,18 +5,18 @@
  * background, rust accent, and Inter typography matching the warm
  * earth palette used across the rest of the site.
  */
-import builder1 from "@/assets/builder-1.jpg";
-import builder2 from "@/assets/builder-2.jpg";
-import builder3 from "@/assets/builder-3.jpg";
+import partner1 from "@/assets/partner-1.jpg";
+import partner2 from "@/assets/partner-2.jpg";
+import partner3 from "@/assets/partner-3.jpg";
 import { assetUrl } from "@/lib/asset-url";
 
 // Next.js returns StaticImageData objects from static image imports
 // while Vite returned plain URL strings. Normalize at the top of the
 // module so downstream code (which threads these through as
 // `string | undefined`) keeps working.
-const builder1Url = assetUrl(builder1);
-const builder2Url = assetUrl(builder2);
-const builder3Url = assetUrl(builder3);
+const partner1Url = assetUrl(partner1);
+const partner2Url = assetUrl(partner2);
+const partner3Url = assetUrl(partner3);
 
 // Shared design tokens - now theme-aware. Each token maps to a global
 // CSS variable so the mockups swap colors automatically when the
@@ -131,7 +131,7 @@ export const StepSignup = () => (
         marginTop: 14,
       }}
     >
-      <Choice selected={false} name="Builder" sub="Ship every day" />
+      <Choice selected={false} name="Partner" sub="Ship every day" />
       <Choice selected={true} name="Founder" sub="Set the direction" />
     </div>
 
@@ -535,7 +535,7 @@ export const StepAccepted = () => (
 // ============= 4. MATCH ==============================================
 
 // Two optional knobs:
-//   • `portraits` - override the defaults (builder-1/2/3) with a
+//   • `portraits` - override the defaults (partner-1/2/3) with a
 //     specific trio of image URLs. Used when you want different
 //     people on the marketing surface.
 //   • `anonymous` - render the deck with silhouette fallbacks instead
@@ -553,7 +553,7 @@ export const StepMatch = ({
   const photos: [string | undefined, string | undefined, string | undefined] =
     anonymous
       ? [undefined, undefined, undefined]
-      : (portraits ?? [builder1Url, builder2Url, builder3Url]);
+      : (portraits ?? [partner1Url, partner2Url, partner3Url]);
   const [front, back1, back2] = photos;
   // When anonymous, also suppress the % MATCH pill - without a
   // specific person it has nothing to anchor to.

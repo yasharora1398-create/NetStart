@@ -103,9 +103,9 @@ export default function MyNetScreen() {
 
   // Role chosen at signup (lives on the auth user's user_metadata).
   // Existing users without a role fall back to a heuristic: owning a
-  // project means they're a founder, otherwise builder.
+  // project means they're a founder, otherwise partner.
   const role: Role =
-    readMetadataRole(user) ?? (projects.length > 0 ? "founder" : "builder");
+    readMetadataRole(user) ?? (projects.length > 0 ? "founder" : "partner");
 
   // Toggle role with confirmation. Persists to user_metadata so it
   // survives sign-out / reinstall. The warning copy spells out what
@@ -116,15 +116,15 @@ export default function MyNetScreen() {
   // confirmSignOut.ts). Fall back to window.confirm so the role
   // switch actually fires on polln8.com/m.
   const toggleRole = () => {
-    const next: Role = role === "founder" ? "builder" : "founder";
+    const next: Role = role === "founder" ? "partner" : "founder";
     const title =
-      next === "founder" ? "Switch to Founder?" : "Switch to Builder?";
+      next === "founder" ? "Switch to Founder?" : "Switch to Partner?";
     const body =
       next === "founder"
-        ? "You'll see builders in Match instead of projects. Builders apply to your projects, and you'll need at least one project posted to start matching."
+        ? "You'll see partners in Match instead of projects. Partners apply to your projects, and you'll need at least one project posted to start matching."
         : projects.length > 0
-          ? `You have ${projects.length} project${projects.length === 1 ? "" : "s"} that will stay saved, but Match will switch to showing founders looking for builders. Switch back anytime.`
-          : "You'll see founders posting projects in Match instead of builders. Switch back anytime.";
+          ? `You have ${projects.length} project${projects.length === 1 ? "" : "s"} that will stay saved, but Match will switch to showing founders looking for partners. Switch back anytime.`
+          : "You'll see founders posting projects in Match instead of partners. Switch back anytime.";
 
     if (Platform.OS === "web") {
       const ok =
@@ -138,7 +138,7 @@ export default function MyNetScreen() {
     Alert.alert(title, body, [
       { text: "Cancel", style: "cancel" },
       {
-        text: `Switch to ${next === "founder" ? "Founder" : "Builder"}`,
+        text: `Switch to ${next === "founder" ? "Founder" : "Partner"}`,
         onPress: () => {
           void updateRole(next);
         },
@@ -213,16 +213,16 @@ export default function MyNetScreen() {
           <Users size={12} color={theme.gold} />
         )}
         <Text style={styles.roleBadgeText}>
-          {role === "founder" ? "Founder" : "Builder"}
+          {role === "founder" ? "Founder" : "Partner"}
         </Text>
         <Text style={styles.roleBadgeHint}>tap to switch</Text>
       </Pressable>
 
       {/* Open-to-work toggle — PINNED AT THE TOP of MyNet so the
           user can flip it from the main screen without entering
-          Edit profile. Builder-only; founders don't have a
+          Edit profile. Partner-only; founders don't have a
           candidate profile to flip on/off. */}
-      {role === "builder" ? (
+      {role === "partner" ? (
         <View style={styles.openCard}>
           <OpenToWorkRow
             value={profile.candidate.isOpenToWork}
@@ -264,7 +264,7 @@ export default function MyNetScreen() {
         </View>
       ) : null}
 
-      {/* Credentials block. Founders see Website + Proof; builders
+      {/* Credentials block. Founders see Website + Proof; partners
           see Resume. LinkedIn shows for both. */}
       <Section
         title="Credentials"
@@ -297,9 +297,9 @@ export default function MyNetScreen() {
         )}
       </Section>
 
-      {/* Candidate profile only applies to builders. Founders are
+      {/* Candidate profile only applies to partners. Founders are
           represented by their projects, not a candidate bio. */}
-      {role === "builder" ? (
+      {role === "partner" ? (
         <Section
           title="Candidate profile"
           onEdit={() => router.push("/edit-candidate" as never)}
@@ -346,9 +346,9 @@ export default function MyNetScreen() {
               <Rocket size={20} color={theme.gold} />
               <Text style={styles.onboardTitle}>Post your first project</Text>
               <Text style={styles.onboardBody}>
-                Tell builders what you're building, the skills you need, and the
+                Tell partners what you're building, the skills you need, and the
                 commitment level. Takes about a minute. Once it's live,
-                builders can apply.
+                partners can apply.
               </Text>
               <View style={styles.onboardCta}>
                 <Text style={styles.onboardCtaText}>Create project</Text>
@@ -447,7 +447,7 @@ export default function MyNetScreen() {
       </Section>
 
       {/* Preview your card - shows the user how their card looks
-          to the OTHER side. Founder sees their project; builder sees
+          to the OTHER side. Founder sees their project; partner sees
           their candidate profile. */}
       <Pressable
         onPress={() => router.push("/preview-card" as never)}

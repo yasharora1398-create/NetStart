@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -6,101 +6,101 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Homepage — Primary landing, highest priority -->
+  <!-- Homepage â€” Primary landing, highest priority -->
   <!-- Target keywords: co-founder matching, find a co-founder, startup co-founder app,
        co-founder network, founder matching platform, meet your co-founder -->
   <url>
     <loc>https://polln8.com/</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- How It Works — High SEO value, explains the product -->
+  <!-- How It Works â€” High SEO value, explains the product -->
   <!-- Target keywords: how to find a co-founder, co-founder matching app, startup matching,
        swipe for co-founders, find startup partners, founder networking app -->
   <url>
     <loc>https://polln8.com/how</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Download — High conversion priority -->
+  <!-- Download â€” High conversion priority -->
   <!-- Target keywords: download co-founder app, founder matching app download,
        Polln8 app, startup networking app iOS Android -->
   <url>
     <loc>https://polln8.com/download</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Standards — Trust signal, important for brand authority -->
+  <!-- Standards â€” Trust signal, important for brand authority -->
   <!-- Target keywords: co-founder vetting, startup community standards,
        professional founder network, quality co-founder matching -->
   <url>
     <loc>https://polln8.com/standards</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
-  <!-- Sign Up — Key conversion page -->
+  <!-- Sign Up â€” Key conversion page -->
   <!-- Target keywords: join co-founder network, find a co-founder free,
        startup founder signup, create founder profile -->
   <url>
     <loc>https://polln8.com/signup</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Sign In — Returning users -->
+  <!-- Sign In â€” Returning users -->
   <url>
     <loc>https://polln8.com/signin</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 
-  <!-- My Net — Authenticated, lower SEO priority -->
+  <!-- My Net â€” Authenticated, lower SEO priority -->
   <url>
     <loc>https://polln8.com/mynet</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
 
-  <!-- Match — Core product feature -->
+  <!-- Match â€” Core product feature -->
   <!-- Target keywords: co-founder match, swipe founders, match with startup co-founder -->
   <url>
     <loc>https://polln8.com/match</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
-  <!-- Saved — Authenticated feature page -->
+  <!-- Saved â€” Authenticated feature page -->
   <url>
     <loc>https://polln8.com/saved</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.4</priority>
   </url>
 
-  <!-- Chats — Authenticated feature page -->
+  <!-- Chats â€” Authenticated feature page -->
   <url>
     <loc>https://polln8.com/chats</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.4</priority>
   </url>
 
-  <!-- Applications — Authenticated feature page -->
+  <!-- Applications â€” Authenticated feature page -->
   <url>
     <loc>https://polln8.com/applications</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -109,7 +109,7 @@
   <!-- Terms of Service -->
   <url>
     <loc>https://polln8.com/terms</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -117,9 +117,10 @@
   <!-- Privacy Policy -->
   <url>
     <loc>https://polln8.com/privacy</loc>
-    <lastmod>2025-05-11</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
 </urlset>
+

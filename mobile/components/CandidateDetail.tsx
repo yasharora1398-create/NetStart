@@ -49,14 +49,14 @@ import type { Candidate } from "@/lib/types";
 
 type RankedCandidate = Candidate & {
   similarity: number;
-  role?: "founder" | "builder";
+  role?: "founder" | "partner";
   projectTitle?: string;
   projectDescription?: string;
 };
 
 const SWIPE_DOWN_THRESHOLD = 80;
 
-export type Role = "founder" | "builder";
+export type Role = "founder" | "partner";
 
 export const CandidateDetail = ({
   candidate,
@@ -290,9 +290,9 @@ export const CandidateDetail = ({
           </ScrollView>
 
           {/* Role-aware CTA pinned to the bottom of the sheet.
-              Builder viewing a founder → "Apply" (apply to their
+              Partner viewing a founder → "Apply" (apply to their
                 startup project — mirrors the web ApplyDialog).
-              Founder viewing a builder → "Request chat" (open a thread
+              Founder viewing a partner → "Request chat" (open a thread
                 to recruit them). */}
           <View style={styles.ctaWrap}>
             <Pressable
@@ -302,13 +302,13 @@ export const CandidateDetail = ({
                 pressed && { backgroundColor: theme.goldDeep },
               ]}
             >
-              {role === "builder" ? (
+              {role === "partner" ? (
                 <Send size={16} color={theme.textOnPrimary} strokeWidth={2.2} />
               ) : (
                 <MessageCircle size={16} color={theme.textOnPrimary} strokeWidth={2.2} />
               )}
               <Text style={styles.ctaText}>
-                {role === "builder" ? "Apply" : "Request chat"}
+                {role === "partner" ? "Apply" : "Request chat"}
               </Text>
             </Pressable>
           </View>
