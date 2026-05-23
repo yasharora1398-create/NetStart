@@ -75,7 +75,7 @@ const config: NextConfig = {
           {
             type: "header",
             key: "user-agent",
-            value: "(?i).*(Mobi|Android|iPhone|iPad|iPod).*",
+            value: ".*(Mobi|Android|iPhone|iPad|iPod).*",
           },
         ],
         destination: "/m/",
@@ -89,7 +89,7 @@ const config: NextConfig = {
           {
             type: "header",
             key: "user-agent",
-            value: "(?i).*(Mobi|Android|iPhone|iPad|iPod).*",
+            value: ".*(Mobi|Android|iPhone|iPad|iPod).*",
           },
         ],
         destination: "/",
