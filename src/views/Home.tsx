@@ -234,18 +234,17 @@ const Hero = () => {
   const { user } = useAuth();
   const isAuthed = !!user;
 
-  // Per-word fade on first paint. Tiny mount-tick so the first
-  // frame renders in the hidden state; otherwise React paints
-  // already-visible and the transition is skipped.
-  const [mounted, setMounted] = useState(false);
+  // Per-word fade on first paint. Default to mounted=true so the
+  // SSR'd HTML has visible text (Googlebot reads SSR output for
+  // its snippet, and opacity-0 spans were hiding the headline).
+  // On the client we briefly toggle to hidden so the animation
+  // still plays after hydration.
+  const [mounted, setMounted] = useState(true);
   useEffect(() => {
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduce) {
-      setMounted(true);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
+    setMounted(false);
     const t = window.setTimeout(() => setMounted(true), 40);
     return () => window.clearTimeout(t);
   }, []);

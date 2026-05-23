@@ -278,6 +278,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Explicit meta tags as defence in depth - Next.js already
+            emits these from the metadata export above, but adding
+            them inline here makes absolutely sure they exist in the
+            served HTML even if anything upstream strips the
+            generated ones. Google's snippet selector reads from
+            <meta name="description"> first. */}
+        <meta name="description" content={SITE_DESCRIPTION} />
+        <meta name="title" content={SITE_TITLE} />
+        <meta property="og:title" content={SITE_TITLE} />
+        <meta property="og:description" content={SITE_DESCRIPTION} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={SITE_URL} />
+        <meta name="twitter:title" content={SITE_TITLE} />
+        <meta name="twitter:description" content={SITE_DESCRIPTION} />
+
         {/* JSON-LD structured data. Three separate blobs so each shows
             up as its own entity in Google's parser instead of a single
             graph (FAQPage especially needs to be standalone to be
@@ -322,28 +337,27 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Fallback content for crawlers (and the rare user) that
-            don't execute JavaScript. The site is a client-rendered
-            React app under the hood, but the SSR pass already paints
-            real HTML — this is belt-and-braces so if anything ever
-            falls back to the no-JS shell, the visible text is Polln8
-            copy instead of an "enable JavaScript" stub from the
-            previous deployment that Google indexed. */}
+        {/* Fallback content for the rare crawler that doesn't run
+            JavaScript. Intentionally avoids the literal phrase
+            "JavaScript" anywhere - Google's older indexer was
+            grabbing the legacy CRA "You need to enable JavaScript to
+            run this app" string as the page description, and we
+            don't want a re-crawl to grab a new copy of that wording
+            from our own fallback. */}
         <noscript>
           <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 640, margin: "48px auto", padding: 24 }}>
             <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>
-              Polln8
+              Polln8 - Cofounders found efficiently.
             </h1>
             <p style={{ fontSize: 16, lineHeight: 1.5, color: "#444" }}>
-              Cofounders found efficiently. Polln8 is a private network of
-              vetted founders and technical builders. Every profile is
-              reviewed by a human, every chat starts with mutual interest,
-              and the deck is ranked against what you actually want to
-              build.
+              Polln8 is a private network of vetted founders and
+              technical builders. Every profile is reviewed by a
+              human, every chat starts with mutual interest, and the
+              deck is ranked against what you actually want to build.
             </p>
             <p style={{ fontSize: 14, marginTop: 16, color: "#666" }}>
-              Polln8 needs JavaScript enabled to run. Most browsers turn
-              it on by default.
+              Open Polln8 in any modern browser to see the full
+              experience.
             </p>
           </div>
         </noscript>
