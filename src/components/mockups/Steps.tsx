@@ -178,9 +178,11 @@ const Choice = ({
  gap: 6,
  padding: "14px 14px 13px",
  borderRadius: 10,
- background: selected ? "hsl(var(--accent))" : FIELD_BG,
+ // Selected: solid primary green card with white type + white
+ // indicator circle. Unselected: neutral field bg with green ring.
+ background: selected ? "hsl(var(--primary))" : FIELD_BG,
  border: selected
- ? `1.5px solid ${RUST}`
+ ? `1.5px solid hsl(var(--primary))`
  : `1px solid ${LINE_STRONG}`,
  boxShadow: "none",
  }}
@@ -193,8 +195,10 @@ const Choice = ({
  width: 14,
  height: 14,
  borderRadius: "50%",
- border: selected ? `1.5px solid ${RUST}` : `1px solid hsl(var(--border))`,
- background: selected ? RUST : CARD_BG_OPAQUE,
+ border: selected
+ ? `1.5px solid #ffffff`
+ : `1px solid hsl(var(--border))`,
+ background: selected ? "#ffffff" : CARD_BG_OPAQUE,
  boxShadow: "none",
  }}
  />
@@ -202,7 +206,7 @@ const Choice = ({
  style={{
  fontSize: 13.5,
  fontWeight: 600,
- color: selected ? INK : INK_DIM,
+ color: selected ? "#ffffff" : INK_DIM,
  letterSpacing: "-0.005em",
  }}
  >
@@ -211,7 +215,7 @@ const Choice = ({
  <span
  style={{
  fontSize: 11,
- color: selected ? INK_DIM : INK_MUTED,
+ color: selected ? "#ffffff" : INK_MUTED,
  letterSpacing: "0.005em",
  }}
  >
