@@ -702,8 +702,8 @@ const DeckCard = ({
  viewBox="0 0 64 64"
  fill="none"
  aria-hidden
- style={{ opacity: 0.32 }}
  >
+
  {/* Head */}
  <circle cx="32" cy="22" r="11" fill={INK} />
  {/* Shoulders */}
@@ -796,7 +796,7 @@ const DeckCard = ({
  strokeWidth={2}
  strokeLinecap="round"
  strokeLinejoin="round"
- style={{ flexShrink: 0, opacity: 0.7 }}
+ style={{ flexShrink: 0 }}
  >
  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
  <circle cx="12" cy="10" r="3" />
@@ -816,7 +816,7 @@ const DeckCard = ({
  strokeWidth={2}
  strokeLinecap="round"
  strokeLinejoin="round"
- style={{ flexShrink: 0, opacity: 0.7 }}
+ style={{ flexShrink: 0 }}
  >
  <circle cx="12" cy="12" r="9" />
  <polyline points="12 7 12 12 15 14" />

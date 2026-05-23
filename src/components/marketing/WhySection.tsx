@@ -453,7 +453,6 @@ const ThreadRow = ({
  border: `1.5px solid ${
  pulseTone === "accent" ? "var(--rc-accent)" : "var(--rc-rest)"
  }`,
- opacity: 0.85,
  }}
  />
  )}
@@ -1057,19 +1056,11 @@ const ProfileCardMockup = ({
  }}
  aria-hidden
  >
- <div
- className="absolute inset-0"
- style={{
- backgroundImage:
- "repeating-linear-gradient(45deg, transparent 0 8px, currentColor 8px 9px)",
- opacity: 0.18,
- }}
- />
  <svg
  className="relative z-[1]"
  viewBox="0 0 64 64"
  fill="none"
- style={{ width: "46%", opacity: 0.55 }}
+ style={{ width: "46%" }}
  >
  <circle cx="32" cy="22" r="11" fill="currentColor" />
  <path
