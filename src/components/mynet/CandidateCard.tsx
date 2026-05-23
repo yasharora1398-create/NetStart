@@ -282,27 +282,16 @@ export const CandidateCard = ({
  <UserCheck className="h-3.5 w-3.5 text-gold" />
  Headline
  </Label>
- <Select
+ <Autocomplete
+ id="headline"
  value={headline}
- onValueChange={(v) => {
+ onChange={(v) => {
  setHeadline(v);
  markDirty();
  }}
- >
- <SelectTrigger
- id="headline"
- className="h-11 bg-background border-border focus:border-gold focus:ring-gold"
- >
- <SelectValue placeholder="Pick the role you fit best" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border max-h-72">
- {HEADLINE_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ options={HEADLINE_OPTIONS}
+ placeholder="Type or pick the role you fit best..."
+ />
  </div>
  </div>
 
@@ -344,27 +333,16 @@ export const CandidateCard = ({
  <Briefcase className="h-3.5 w-3.5 text-gold" />
  Commitment
  </Label>
- <Select
+ <Autocomplete
+ id="commitment"
  value={commitment}
- onValueChange={(v) => {
+ onChange={(v) => {
  setCommitment(v);
  markDirty();
  }}
- >
- <SelectTrigger
- id="commitment"
- className="h-11 bg-background border-border focus:border-gold focus:ring-gold"
- >
- <SelectValue placeholder="How much can you give?" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- {COMMITMENT_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ options={COMMITMENT_OPTIONS}
+ placeholder="Type or pick how much you can give..."
+ />
  </div>
  <div>
  <Label

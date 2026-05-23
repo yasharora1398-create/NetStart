@@ -208,21 +208,12 @@ export const ProjectDialog = ({
  Commitment
  </FormLabel>
  <FormControl>
- <Select
+ <Autocomplete
  value={field.value}
- onValueChange={field.onChange}
- >
- <SelectTrigger className="h-11 bg-background border-border focus:border-gold focus:ring-gold">
- <SelectValue placeholder="What you need from them" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- {COMMITMENT_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ onChange={field.onChange}
+ options={COMMITMENT_OPTIONS}
+ placeholder="Type or pick what you need from them..."
+ />
  </FormControl>
  <FormMessage />
  </FormItem>

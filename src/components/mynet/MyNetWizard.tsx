@@ -571,18 +571,12 @@ export const MyNetWizard = ({
  />
  </Field>
  <Field label="Best fit headline" required>
- <Select value={headline} onValueChange={setHeadline}>
- <SelectTrigger className="h-11 bg-background border-border focus:border-gold">
- <SelectValue placeholder="Pick the role you fit best" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- {HEADLINE_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ <Autocomplete
+ value={headline}
+ onChange={setHeadline}
+ options={HEADLINE_OPTIONS}
+ placeholder="Type or pick the role you fit best..."
+ />
  </Field>
  </div>
 
@@ -602,21 +596,12 @@ export const MyNetWizard = ({
 
  <div className="grid md:grid-cols-2 gap-6">
  <Field label="Commitment" required>
- <Select
+ <Autocomplete
  value={lookingCommitment}
- onValueChange={setLookingCommitment}
- >
- <SelectTrigger className="h-11 bg-background border-border focus:border-gold">
- <SelectValue placeholder="How much can you give?" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- {COMMITMENT_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ onChange={setLookingCommitment}
+ options={COMMITMENT_OPTIONS}
+ placeholder="Type or pick how much you can give..."
+ />
  </Field>
  <Field
  label="Location"
@@ -714,21 +699,12 @@ export const MyNetWizard = ({
 
  <div className="grid md:grid-cols-2 gap-6 mt-5">
  <Field label="Commitment" required>
- <Select
+ <Autocomplete
  value={projectCommitment}
- onValueChange={setProjectCommitment}
- >
- <SelectTrigger className="h-11 bg-background border-border focus:border-gold">
- <SelectValue placeholder="What you need from them" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- {COMMITMENT_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ onChange={setProjectCommitment}
+ options={COMMITMENT_OPTIONS}
+ placeholder="Type or pick what you need from them..."
+ />
  </Field>
  <Field
  label="Location"

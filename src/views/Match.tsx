@@ -1668,22 +1668,13 @@ const Filters = ({
  placeholder="Filter by location"
  allowCustom
  />
- <Select
- value={commitment || "any"}
- onValueChange={(v) => setCommitment(v === "any" ? "" : v)}
- >
- <SelectTrigger className="h-11 bg-background border-border focus:border-gold focus:ring-gold">
- <SelectValue placeholder="Any commitment" />
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- <SelectItem value="any">Any commitment</SelectItem>
- {COMMITMENT_OPTIONS.map((opt) => (
- <SelectItem key={opt} value={opt}>
- {opt}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
+ <Autocomplete
+ value={commitment}
+ onChange={setCommitment}
+ options={COMMITMENT_OPTIONS}
+ placeholder="Any commitment (type to filter)"
+ allowCustom
+ />
  </div>
  {hasFilters && (
  <button
