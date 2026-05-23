@@ -31,7 +31,7 @@ import {
  TextInput,
  View,
 } from "react-native";
-import { BlurView } from "expo-";
+import { BlurView } from "expo-blur";
 import { Briefcase, MapPin, Send, User, X } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 

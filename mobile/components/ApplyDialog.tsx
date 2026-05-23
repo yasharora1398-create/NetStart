@@ -24,7 +24,7 @@ import {
  TextInput,
  View,
 } from "react-native";
-import { BlurView } from "expo-";
+import { BlurView } from "expo-blur";
 import { Send, User, X } from "lucide-react-native";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";

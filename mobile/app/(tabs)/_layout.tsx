@@ -7,7 +7,7 @@ import {
  StyleSheet,
  View,
 } from "react-native";
-import { BlurView } from "expo-";
+import { BlurView } from "expo-blur";
 import Animated, {
  interpolate,
  useAnimatedStyle,

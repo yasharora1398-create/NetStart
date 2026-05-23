@@ -26,7 +26,7 @@ import {
  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BlurView } from "expo-";
+import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import { ArrowRight, Check, ChevronDown, LogOut, Pencil, X } from "lucide-react-native";
 

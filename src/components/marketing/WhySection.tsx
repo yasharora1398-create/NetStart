@@ -45,7 +45,7 @@ const WHY: {
 ];
 
 // ─── Reveal wrapper ──────────────────────────────────────────────
-// Fade-up + un- as the wrapped block enters the viewport. Uses
+// Fade-up as the wrapped block enters the viewport. Uses
 // the shared .reveal / .reveal-on classes from index.css so all
 // reveals across the site share one motion language.
 const Reveal = ({
