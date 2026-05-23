@@ -237,8 +237,8 @@ const Waitlist = () => {
               look.
             </Paragraph>
             <Paragraph>
-              Most founders quit before they meet their cofounder. The ones
-              who don't ship faster, raise easier, and last longer.
+              Most founders quit before they meet their cofounder. The
+              ones who find one ship faster, raise easier, and last longer.
             </Paragraph>
           </div>
         </Section>

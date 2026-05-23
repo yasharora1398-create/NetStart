@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/netstart/Sidebar";
 const PRINCIPLES = [
   {
     title: "Vetted, not viral.",
-    body: "Every member is reviewed for shipped work, references, and a track record of execution. We don't grow off engagement metrics or referral chains. The network shrinks if it has to.",
+    body: "Every member is reviewed for shipped work, references, and a track record of execution. We grow through reputation, kept tight on purpose. The network shrinks if it has to.",
     detail: [
       "Resume or LinkedIn required at signup.",
       "Manual review by the Polln8 team before access.",

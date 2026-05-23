@@ -40,7 +40,7 @@ const schema = z
   })
   .refine((d) => d.password === d.confirm, {
     path: ["confirm"],
-    message: "Passwords don't match.",
+    message: "Both fields must match.",
   });
 
 type ResetValues = z.infer<typeof schema>;

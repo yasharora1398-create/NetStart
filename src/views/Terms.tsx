@@ -13,7 +13,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "2. Eligibility",
     body:
-      "You must be at least 18 years old and able to enter into a binding contract. Don't sign up on behalf of someone else without their permission.",
+      "Members must be at least 18 and able to enter into a binding contract. Sign up for yourself; act on someone else's behalf only with their explicit written permission.",
   },
   {
     title: "3. Your account",
@@ -28,12 +28,12 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "5. Conduct",
     body:
-      "Don't spam, harass, scrape, or impersonate. Don't use the platform to discriminate. Don't post anything illegal. Don't try to break the system. Founders who notify candidates in bulk should keep messages personal and relevant.",
+      "Use Polln8 honestly: stay in your own identity, treat every recipient like a real person, respect the law, and let the platform work as designed. Founders sending bulk outreach should keep every message personal and relevant. Harassment, impersonation, scraping, discrimination, and illegal content end an account on sight.",
   },
   {
     title: "6. AI matching",
     body:
-      "We use a Google embeddings model to compute semantic similarity between profiles and projects. Your profile text is sent to that model to generate a vector. We don't sell your data. The model provider's policies apply to that one API call.",
+      "We use a Google embeddings model to compute semantic similarity between profiles and projects. Your profile text is sent to that model to generate a vector. Your data stays with us. The model provider's policies apply to that one API call.",
   },
   {
     title: "7. Termination",
@@ -43,7 +43,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
   {
     title: "8. No guarantees",
     body:
-      "We provide the platform as-is. We don't guarantee a match, a hire, a fit, or any specific outcome. Choose your collaborators with care.",
+      "We provide the platform as-is. Outcomes — a match, a hire, a long partnership — depend on the work you put in. Choose your collaborators with care.",
   },
   {
     title: "9. Changes",
