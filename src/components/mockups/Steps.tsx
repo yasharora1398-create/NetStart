@@ -178,9 +178,7 @@ const Choice = ({
  gap: 6,
  padding: "14px 14px 13px",
  borderRadius: 10,
- background: selected
- ? "linear-gradient(180deg, rgba(31, 95, 62,0.10), rgba(31, 95, 62,0.04))"
- : FIELD_BG,
+ background: selected ? "hsl(var(--accent))" : FIELD_BG,
  border: selected
  ? `1.5px solid ${RUST}`
  : `1px solid ${LINE_STRONG}`,
@@ -238,8 +236,7 @@ const CTA = ({ label }: { label: string }) => (
  fontWeight: 500,
  letterSpacing: "0.005em",
  cursor: "default",
- boxShadow:
- "0 1px 0 rgba(255,255,255,0.25) inset, 0 -6px 14px rgba(0,0,0,0.10) inset, 0 4px 14px rgba(31, 95, 62,0.30)",
+ boxShadow: "var(--shadow-card)",
  }}
  >
  {label}

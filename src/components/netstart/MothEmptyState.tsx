@@ -58,6 +58,7 @@ const SCENE_H = 168;
 type SceneProps = {
  accent: string;
  accentBg: string;
+ onAccent: string;
  muted: string;
 };
 
@@ -188,26 +189,8 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeLinejoin="round"
  d="M 92 6 H 168 V 162 L 130 138 L 92 162 Z"
  />
- <line
- x1={106}
- y1={60}
- x2={154}
- y2={60}
- stroke={p.accent}
- strokeWidth={1}
- strokeDasharray="2 3"
-
- />
- <line
- x1={106}
- y1={78}
- x2={142}
- y2={78}
- stroke={p.accent}
- strokeWidth={1}
- strokeDasharray="2 3"
-
- />
+ <line x1={106} y1={60} x2={154} y2={60} stroke={p.onAccent} strokeWidth={1.4} strokeLinecap="round" />
+ <line x1={106} y1={78} x2={142} y2={78} stroke={p.onAccent} strokeWidth={1.4} strokeLinecap="round" />
  </svg>
  ),
  },
@@ -223,14 +206,14 @@ const VARIANTS: Record<MothVariant, Variant> = {
  viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
  style={{ position: "absolute", inset: 0, overflow: "visible" }}
  >
+ <rect x={44} y={84} width={152} height={74} rx={3} fill={p.accentBg} stroke={p.accent} strokeWidth={1.6} />
  <g
- stroke={p.accent}
+ stroke={p.onAccent}
  strokeWidth={1.6}
  fill="none"
  strokeLinecap="round"
  strokeLinejoin="round"
  >
- <rect x={44} y={84} width={152} height={74} rx={3} fill={p.accentBg} />
  <path d="M 44 92 L 120 138 L 196 92" />
  <path d="M 44 158 L 96 122" />
  <path d="M 196 158 L 144 122" />
@@ -258,17 +241,21 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeLinecap="round"
  d="M 4 152 Q 80 130 130 100"
  />
- <g
+ <path
  stroke={p.accent}
+ strokeWidth={1.6}
+ fill={p.accentBg}
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ d="M 60 122 L 224 32 L 162 102 L 132 138 L 122 108 L 60 122 Z"
+ />
+ <g
+ stroke={p.onAccent}
  strokeWidth={1.6}
  fill="none"
  strokeLinecap="round"
  strokeLinejoin="round"
  >
- <path
- fill={p.accentBg}
- d="M 60 122 L 224 32 L 162 102 L 132 138 L 122 108 L 60 122 Z"
- />
  <path d="M 162 102 L 132 138" />
  <path d="M 162 102 L 122 108" />
  </g>
@@ -376,23 +363,23 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeLinejoin="round"
  d="M 40 28 H 168 L 188 48 V 156 H 40 Z"
  />
- {/* folded corner */}
+ {/* folded corner (inside page) */}
  <path
- stroke={p.accent}
+ stroke={p.onAccent}
  strokeWidth={1.4}
  fill="none"
  strokeLinecap="round"
  strokeLinejoin="round"
  d="M 168 28 V 48 H 188"
  />
- {/* writing lines */}
- <line x1={56} y1={70} x2={170} y2={70} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
- <line x1={56} y1={88} x2={160} y2={88} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
- <line x1={56} y1={106} x2={172} y2={106} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
- <line x1={56} y1={124} x2={130} y2={124} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
- {/* quill */}
+ {/* writing lines (inside page) */}
+ <line x1={56} y1={70} x2={170} y2={70} stroke={p.onAccent} strokeWidth={1.2} strokeDasharray="2 3" />
+ <line x1={56} y1={88} x2={160} y2={88} stroke={p.onAccent} strokeWidth={1.2} strokeDasharray="2 3" />
+ <line x1={56} y1={106} x2={172} y2={106} stroke={p.onAccent} strokeWidth={1.2} strokeDasharray="2 3" />
+ <line x1={56} y1={124} x2={130} y2={124} stroke={p.onAccent} strokeWidth={1.2} strokeDasharray="2 3" />
+ {/* quill (inside page) */}
  <path
- stroke={p.accent}
+ stroke={p.onAccent}
  strokeWidth={1.6}
  fill="none"
  strokeLinecap="round"
@@ -400,9 +387,9 @@ const VARIANTS: Record<MothVariant, Variant> = {
  d="M 56 152 L 142 78"
  />
  <path
- stroke={p.accent}
+ stroke={p.onAccent}
  strokeWidth={1.4}
- fill={p.accentBg}
+ fill="none"
  strokeLinecap="round"
  strokeLinejoin="round"
  d="M 142 78 q 10 -4 16 4 q -6 10 -16 -4 Z"
@@ -443,8 +430,8 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeWidth={1.6}
  fill={p.accentBg}
  />
- <circle cx={42} cy={63} r={2.2} fill={p.accent} />
- <line x1={50} y1={63} x2={82} y2={63} stroke={p.accent} strokeWidth={1.2} strokeLinecap="round" />
+ <circle cx={42} cy={63} r={2.2} fill={p.onAccent} />
+ <line x1={50} y1={63} x2={82} y2={63} stroke={p.onAccent} strokeWidth={1.2} strokeLinecap="round" />
  {/* chip 2 (middle) */}
  <rect
  className="moth-breathe"
@@ -457,8 +444,8 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeWidth={1.6}
  fill={p.accentBg}
  />
- <circle cx={120} cy={95} r={2.2} fill={p.accent} />
- <line x1={128} y1={95} x2={168} y2={95} stroke={p.accent} strokeWidth={1.2} strokeLinecap="round" />
+ <circle cx={120} cy={95} r={2.2} fill={p.onAccent} />
+ <line x1={128} y1={95} x2={168} y2={95} stroke={p.onAccent} strokeWidth={1.2} strokeLinecap="round" />
  {/* chip 3 (bottom-right) */}
  <rect
  x={156}
@@ -470,8 +457,8 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeWidth={1.6}
  fill={p.accentBg}
  />
- <circle cx={170} cy={131} r={2.2} fill={p.accent} />
- <line x1={178} y1={131} x2={212} y2={131} stroke={p.accent} strokeWidth={1.2} strokeLinecap="round" />
+ <circle cx={170} cy={131} r={2.2} fill={p.onAccent} />
+ <line x1={178} y1={131} x2={212} y2={131} stroke={p.onAccent} strokeWidth={1.2} strokeLinecap="round" />
  </svg>
  ),
  },
@@ -499,10 +486,10 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeLinejoin="round"
  d="M 120 44 C 92 44 76 70 76 112 L 76 128 L 164 128 L 164 112 C 164 70 148 44 120 44 Z"
  />
- {/* bell rim */}
- <line x1={70} y1={128} x2={170} y2={128} stroke={p.accent} strokeWidth={1.6} strokeLinecap="round" />
- {/* clapper */}
- <circle className="moth-breathe" cx={120} cy={138} r={5} stroke={p.accent} strokeWidth={1.4} fill={p.accentBg} />
+ {/* bell rim (sits across the bottom of the bell fill - white reads) */}
+ <line x1={70} y1={128} x2={170} y2={128} stroke={p.onAccent} strokeWidth={1.6} strokeLinecap="round" />
+ {/* clapper - small white dot under the bell */}
+ <circle className="moth-breathe" cx={120} cy={138} r={5} stroke={p.accent} strokeWidth={1.4} fill={p.onAccent} />
  {/* soft sound waves */}
  <path stroke={p.accent} strokeWidth={1} fill="none" strokeDasharray="1 4" strokeLinecap="round" d="M 48 90 Q 36 86 28 78" />
  <path stroke={p.accent} strokeWidth={1} fill="none" strokeDasharray="1 4" strokeLinecap="round" d="M 192 90 Q 204 86 212 78" />
@@ -544,12 +531,12 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeWidth={1.6}
  fill={p.accentBg}
  />
- {/* rows */}
+ {/* rows (inside clipboard - white marks on green) */}
  {[78, 102, 126].map((y) => (
  <g key={y}>
- <circle className="moth-breathe" cx={80} cy={y} r={5.5} stroke={p.accent} strokeWidth={1.4} fill={p.accentBg} />
- <path d={`M 76 ${y} l 3 3 l 6 -6`} stroke={p.accent} strokeWidth={1.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
- <line x1={94} y1={y} x2={162} y2={y} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
+ <circle className="moth-breathe" cx={80} cy={y} r={5.5} stroke={p.onAccent} strokeWidth={1.4} fill="none" />
+ <path d={`M 76 ${y} l 3 3 l 6 -6`} stroke={p.onAccent} strokeWidth={1.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+ <line x1={94} y1={y} x2={162} y2={y} stroke={p.onAccent} strokeWidth={1.2} strokeDasharray="2 3" />
  </g>
  ))}
  </svg>
@@ -588,19 +575,19 @@ const VARIANTS: Record<MothVariant, Variant> = {
  strokeWidth={1.6}
  fill={p.accentBg}
  />
- {/* broken N axis */}
- <line x1={108} y1={50} x2={108} y2={70} stroke={p.accent} strokeWidth={1.4} strokeLinecap="round" />
- <line x1={108} y1={108} x2={108} y2={126} stroke={p.accent} strokeWidth={1.4} strokeLinecap="round" />
- {/* broken E axis */}
- <line x1={70} y1={88} x2={88} y2={88} stroke={p.accent} strokeWidth={1.4} strokeLinecap="round" />
- <line x1={128} y1={88} x2={146} y2={88} stroke={p.accent} strokeWidth={1.4} strokeLinecap="round" />
- {/* off-center pivot */}
- <circle cx={108} cy={88} r={3} fill={p.accent} />
- {/* drifting needle pointing offscreen */}
+ {/* broken N axis (inside compass) */}
+ <line x1={108} y1={50} x2={108} y2={70} stroke={p.onAccent} strokeWidth={1.4} strokeLinecap="round" />
+ <line x1={108} y1={108} x2={108} y2={126} stroke={p.onAccent} strokeWidth={1.4} strokeLinecap="round" />
+ {/* broken E axis (inside compass) */}
+ <line x1={70} y1={88} x2={88} y2={88} stroke={p.onAccent} strokeWidth={1.4} strokeLinecap="round" />
+ <line x1={128} y1={88} x2={146} y2={88} stroke={p.onAccent} strokeWidth={1.4} strokeLinecap="round" />
+ {/* off-center pivot (inside compass) */}
+ <circle cx={108} cy={88} r={3} fill={p.onAccent} />
+ {/* drifting needle - white triangle on the green compass face */}
  <path
- stroke={p.accent}
+ stroke={p.onAccent}
  strokeWidth={1.6}
- fill={p.accentBg}
+ fill={p.onAccent}
  strokeLinejoin="round"
  d="M 108 88 L 152 60 L 142 78 Z"
  />
@@ -632,12 +619,16 @@ export const MothEmptyState = ({
 }: MothEmptyStateProps) => {
  const v = VARIANTS[variant];
 
- // Solid token-based palette. accentBg was a translucent color-mix
- // tint; switched to solid hsl(var(--accent)) so every scene reads
- // fully opaque instead of see-through.
+ // Solid token-based palette. accentBg is now the same solid primary
+ // green as the strokes, so every filled scene shape (bookmark, bell,
+ // envelope, etc.) reads as a consistent green block in both modes.
+ // onAccent is used for marks that sit ON TOP of those filled shapes
+ // (interior lines, dots, glyphs) so they stay legible against the
+ // green fill.
  const palette: SceneProps = {
  accent: "hsl(var(--gold, 38 92% 50%))",
- accentBg: "hsl(var(--accent))",
+ accentBg: "hsl(var(--gold, 38 92% 50%))",
+ onAccent: "#ffffff",
  muted: "hsl(var(--muted-foreground, 215 16% 47%))",
  };
 
