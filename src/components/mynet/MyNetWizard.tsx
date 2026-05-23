@@ -57,6 +57,7 @@ import {
  COMMITMENT_OPTIONS,
  HEADLINE_OPTIONS,
  LOCATION_OPTIONS,
+ SKILLS_OPTIONS,
 } from "@/lib/options";
 
 const MAX_RESUME_BYTES = 4 * 1024 * 1024;
@@ -625,7 +626,8 @@ export const MyNetWizard = ({
  <TagInput
  value={lookingSkills}
  onChange={setLookingSkills}
- placeholder="React, Solidity, Go... (Enter to add)"
+ options={SKILLS_OPTIONS}
+ placeholder="Type to filter, click to add..."
  />
  </Field>
  </div>
@@ -693,7 +695,8 @@ export const MyNetWizard = ({
  <TagInput
  value={projectSkills}
  onChange={setProjectSkills}
- placeholder="e.g. Rust, Marketplaces, B2B GTM (Enter to add)"
+ options={SKILLS_OPTIONS}
+ placeholder="Type to filter, click to add..."
  />
  </Field>
 

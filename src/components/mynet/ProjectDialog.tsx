@@ -35,6 +35,7 @@ import {
  BUSINESS_TYPE_OPTIONS,
  COMMITMENT_OPTIONS,
  LOCATION_OPTIONS,
+ SKILLS_OPTIONS,
 } from "@/lib/options";
 import { type Project, type ProjectCriteria, emptyCriteria } from "@/lib/mynet-types";
 
@@ -193,7 +194,8 @@ export const ProjectDialog = ({
  <TagInput
  value={field.value}
  onChange={field.onChange}
- placeholder="e.g. Rust, Marketplaces, B2B GTM (Enter to add)"
+ options={SKILLS_OPTIONS}
+ placeholder="Type to filter, click to add..."
  />
  </FormItem>
  )}

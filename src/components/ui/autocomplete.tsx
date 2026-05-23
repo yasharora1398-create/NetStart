@@ -12,6 +12,11 @@ type AutocompleteProps = {
  className?: string;
  inputClassName?: string;
  allowCustom?: boolean;
+ /**
+  * Max matches the dropdown will render. Defaults to 500 (effectively
+  * the whole curated option list) so the user can scroll through every
+  * country / role / skill instead of being capped at 8.
+  */
  maxResults?: number;
 };
 
@@ -24,7 +29,7 @@ export const Autocomplete = ({
  className,
  inputClassName,
  allowCustom = true,
- maxResults = 8,
+ maxResults = 500,
 }: AutocompleteProps) => {
  const generatedId = useId();
  const fieldId = id ?? generatedId;
@@ -112,7 +117,7 @@ export const Autocomplete = ({
  <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
  </div>
  {open && matches.length > 0 && (
- <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-64 overflow-y-auto rounded-sm border border-border bg-card shadow-lg">
+ <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-80 overflow-y-auto overscroll-contain rounded-sm border border-border bg-card shadow-lg">
  <ul role="listbox" aria-labelledby={fieldId}>
  {matches.map((opt, i) => {
  const isActive = i === highlightIdx;

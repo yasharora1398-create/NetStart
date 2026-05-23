@@ -28,6 +28,7 @@ import {
  COMMITMENT_OPTIONS,
  HEADLINE_OPTIONS,
  LOCATION_OPTIONS,
+ SKILLS_OPTIONS,
 } from "@/lib/options";
 import {
  CANDIDATE_BIO_MIN,
@@ -388,7 +389,8 @@ export const CandidateCard = ({
  setSkills(next);
  markDirty();
  }}
- placeholder="React, Solidity, Go... (Enter to add)"
+ options={SKILLS_OPTIONS}
+ placeholder="Type to filter, click to add..."
  />
  </div>
 
