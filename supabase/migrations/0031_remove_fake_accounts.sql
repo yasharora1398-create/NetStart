@@ -28,12 +28,16 @@ where email in (
 );
 
 -- Pass 2: catch any variant where the seed was tweaked. Anything
--- with a polln8.com plus-tag of +founder or +builder is by
--- definition seed data, because real users sign up with their own
--- email domain, not polln8.com plus-tags.
+-- with a polln8.com plus-tag (+founder / +builder / +test) is by
+-- definition seed/synthetic data - real users sign up with their
+-- own email domain (gmail, outlook, work, etc.), never with
+-- @polln8.com plus-tags. This pass catches the synthetic accounts
+-- (Alex Chen, Diego Ramirez, Marcus Okonkwo, Priya Singh, Aisha
+-- Williams) sitting at *+test@polln8.com.
 delete from auth.users
 where email like '%+founder@polln8.com'
-   or email like '%+builder@polln8.com';
+   or email like '%+builder@polln8.com'
+   or email like '%+test@polln8.com';
 
 -- Pass 3: nuke by full name. The original seed (seed_fake_users.sql)
 -- shipped with 10 names, but more synthetic accounts have appeared
@@ -61,6 +65,7 @@ where id in (
     'Marcus Vey',
     'Ravi Sharma',
     -- Additional synthetic accounts discovered in Match
+    'Alex Chen',
     'Marcus Okonkwo',
     'Priya Singh',
     'Diego Ramirez',
