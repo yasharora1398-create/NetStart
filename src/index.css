@@ -195,12 +195,12 @@
  transform: translateY(-28px);
  }
  }
- @supports (animation-timeline: view()) {
+ /* Scroll-driven animation removed: autoprefixer in this repo's
+ webpack version chokes on the view() function and animation-timeline
+ with "Unknown node type in node creation". The deck just stays static
+ - no fallback needed. */
  .step-match-scroll {
- animation: deck-scroll linear both;
- animation-timeline: view();
- animation-range: cover 0% cover 100%;
- }
+ animation: none;
  }
 
  /* Warm liquid glass - semi-transparent frosted surface that floats
