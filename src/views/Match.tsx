@@ -585,7 +585,7 @@ const PartnerView = () => {
  aria-label="Approve"
  disabled={Boolean(approving)}
  className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm hover:bg-gold transition-all duration-500",
+ "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-white transition-all duration-500",
  approving &&
  "opacity-0 pointer-events-none scale-75 -ml-[80px]",
  )}
@@ -773,7 +773,7 @@ const CandidateActions = ({
  rel="noopener noreferrer"
  aria-label="Open LinkedIn"
  title="LinkedIn"
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm transition-all hover:bg-gold hover:border-gold hover:shadow-md"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-white hover:border-gold hover:shadow-md"
  >
  <Linkedin className="h-6 w-6" />
  </a>
@@ -795,7 +795,7 @@ const CandidateActions = ({
  rel="noopener noreferrer"
  aria-label="Open resume"
  title={candidate.resumeName}
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm transition-all hover:bg-gold hover:border-gold hover:shadow-md"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-white hover:border-gold hover:shadow-md"
  >
  <FileText className="h-6 w-6" />
  </a>
@@ -818,7 +818,7 @@ const CandidateActions = ({
  disabled={working}
  aria-label={saved ? "Remove from saved" : "Save"}
  title={saved ? "Saved" : "Save"}
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm transition-all hover:bg-gold hover:border-gold hover:shadow-md disabled:"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-white hover:border-gold hover:shadow-md disabled:"
  >
  {saved ? (
  <BookmarkCheck className="h-6 w-6 fill-current" />
@@ -1118,7 +1118,7 @@ const LookerView = () => {
  onClick={goBack}
  disabled={!lastDecided}
  aria-label="Previous card"
- className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-white shadow-sm transition-colors hover:bg-gold hover:border-gold disabled: disabled:cursor-not-allowed"
+ className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-gold hover:text-white hover:border-gold disabled: disabled:cursor-not-allowed"
  >
  <Undo2 className="h-4 w-4" />
  </button>
@@ -1181,7 +1181,7 @@ const LookerView = () => {
  aria-label="Approve"
  disabled={Boolean(approving)}
  className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-white shadow-sm hover:bg-gold transition-all duration-500",
+ "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-white transition-all duration-500",
  approving &&
  "opacity-0 pointer-events-none scale-75 -ml-[80px]",
  )}
@@ -1528,7 +1528,7 @@ const ProjectInfoPanel = ({
  onClick={handleToggleSave}
  aria-label={saved ? "Remove from saved" : "Save"}
  title={saved ? "Saved" : "Save"}
- className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-white transition-all hover:bg-gold hover:border-gold"
+ className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold transition-all hover:bg-gold hover:text-white hover:border-gold"
  >
  {saved ? (
  <BookmarkCheck className="h-5 w-5 fill-current" />

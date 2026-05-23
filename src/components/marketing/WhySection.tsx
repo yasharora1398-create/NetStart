@@ -1400,7 +1400,7 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
  border: "1px solid hsl(var(--border))",
  boxShadow:
  phase === 2
- ? "0 0 0 1px hsl(var(--primary)), 0 0 60px hsl(var(--primary))"
+ ? "0 0 0 1px hsl(var(--primary))"
  : "none",
  transition: "box-shadow 500ms ease",
  }}

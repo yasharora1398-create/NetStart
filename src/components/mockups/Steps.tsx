@@ -184,10 +184,7 @@ const Choice = ({
  border: selected
  ? `1.5px solid ${RUST}`
  : `1px solid ${LINE_STRONG}`,
- boxShadow: selected
- ? `0 0 0 3px rgba(31, 95, 62,0.15), 0 4px 12px rgba(31, 95, 62,0.10)`
- : undefined,
- opacity: selected ? 1 : 0.78,
+ boxShadow: "none",
  }}
  >
  <span
@@ -200,9 +197,7 @@ const Choice = ({
  borderRadius: "50%",
  border: selected ? `1.5px solid ${RUST}` : `1px solid hsl(var(--border))`,
  background: selected ? RUST : CARD_BG_OPAQUE,
- boxShadow: selected
- ? "0 0 0 3px rgba(31, 95, 62,0.18)"
- : undefined,
+ boxShadow: "none",
  }}
  />
  <span
@@ -375,7 +370,7 @@ const CredRow = ({
  background: "hsl(var(--accent))",
  border: `1px solid hsl(var(--primary))`,
  color: GREEN,
- boxShadow: `0 0 0 3px rgba(31, 95, 62,0.06)`,
+ boxShadow: "none",
  flexShrink: 0,
  }}
  >
@@ -874,13 +869,9 @@ const ActionBtn = ({ variant }: { variant: "pass" | "connect" | "save" }) => {
  borderRadius: "50%",
  display: "grid",
  placeItems: "center",
- background: isConnect
- ? `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`
- : CARD_BG_OPAQUE,
+ background: isConnect ? RUST : CARD_BG_OPAQUE,
  color: isConnect ? "#fff" : INK_DIM,
- boxShadow: isConnect
- ? `0 1px 0 rgba(255,255,255,0.3) inset, 0 -8px 14px rgba(0,0,0,0.10) inset, 0 6px 18px ${RUST_GLOW}, 0 2px 4px rgba(21, 23, 26,0.18)`
- : "0 1px 4px rgba(21, 23, 26,0.06)",
+ boxShadow: "var(--shadow-card)",
  }}
  >
  {variant === "pass" && (
@@ -962,9 +953,9 @@ export const StepChat = () => (
  borderRadius: "50%",
  display: "grid",
  placeItems: "center",
- background: `linear-gradient(180deg, rgba(31, 95, 62,0.22), rgba(31, 95, 62,0.10))`,
+ background: "hsl(var(--accent))",
  border: `1px solid hsl(var(--primary))`,
- boxShadow: `0 0 0 3px rgba(31, 95, 62,0.08)`,
+ boxShadow: "none",
  color: RUST_DEEP,
  fontSize: 12,
  fontWeight: 700,
@@ -1012,7 +1003,7 @@ export const StepChat = () => (
  height: 6,
  borderRadius: "50%",
  background: GREEN,
- boxShadow: `0 0 0 2px rgba(31, 95, 62,0.18), 0 0 8px ${GREEN_GLOW}`,
+ boxShadow: "none",
  }}
  />
  ONLINE
@@ -1076,10 +1067,10 @@ export const StepChat = () => (
  fontSize: 13.5,
  lineHeight: 1.4,
  letterSpacing: "0.005em",
- background: `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`,
+ background: RUST,
  border: `1px solid ${RUST_DEEP}`,
  color: "#FFFFFF",
- boxShadow: `0 4px 12px -4px ${RUST_GLOW}`,
+ boxShadow: "var(--shadow-card)",
  }}
  >
  Yeah sure, that sounds great. When are you free?
@@ -1130,9 +1121,9 @@ export const StepChat = () => (
  borderRadius: "50%",
  display: "grid",
  placeItems: "center",
- background: `linear-gradient(180deg, ${RUST_LIGHT} 0%, ${RUST} 100%)`,
+ background: RUST,
  color: "#fff",
- boxShadow: `0 1px 0 rgba(255,255,255,0.25) inset, 0 -6px 12px rgba(0,0,0,0.10) inset, 0 4px 12px ${RUST_GLOW}, 0 2px 4px rgba(21, 23, 26,0.18)`,
+ boxShadow: "var(--shadow-card)",
  flexShrink: 0,
  }}
  >

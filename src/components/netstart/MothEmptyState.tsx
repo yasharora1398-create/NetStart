@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hummingbird hawk-moth empty states.
  *
  * Twelve scene variants, every one paired with the same dark-moth
@@ -68,7 +68,7 @@ type Variant = {
  Scene: (p: SceneProps) => JSX.Element;
 };
 
-// ─── per-variant defaults ──────────────────────────────────────────
+// â”€â”€â”€ per-variant defaults â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const VARIANTS: Record<MothVariant, Variant> = {
  blank: {
@@ -196,7 +196,7 @@ const VARIANTS: Record<MothVariant, Variant> = {
  stroke={p.accent}
  strokeWidth={1}
  strokeDasharray="2 3"
- opacity={0.6}
+
  />
  <line
  x1={106}
@@ -206,7 +206,7 @@ const VARIANTS: Record<MothVariant, Variant> = {
  stroke={p.accent}
  strokeWidth={1}
  strokeDasharray="2 3"
- opacity={0.6}
+
  />
  </svg>
  ),
@@ -386,10 +386,10 @@ const VARIANTS: Record<MothVariant, Variant> = {
  d="M 168 28 V 48 H 188"
  />
  {/* writing lines */}
- <line x1={56} y1={70} x2={170} y2={70} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" opacity={0.55} />
- <line x1={56} y1={88} x2={160} y2={88} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" opacity={0.55} />
- <line x1={56} y1={106} x2={172} y2={106} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" opacity={0.55} />
- <line x1={56} y1={124} x2={130} y2={124} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" opacity={0.55} />
+ <line x1={56} y1={70} x2={170} y2={70} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
+ <line x1={56} y1={88} x2={160} y2={88} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
+ <line x1={56} y1={106} x2={172} y2={106} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
+ <line x1={56} y1={124} x2={130} y2={124} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
  {/* quill */}
  <path
  stroke={p.accent}
@@ -549,7 +549,7 @@ const VARIANTS: Record<MothVariant, Variant> = {
  <g key={y}>
  <circle className="moth-breathe" cx={80} cy={y} r={5.5} stroke={p.accent} strokeWidth={1.4} fill={p.accentBg} />
  <path d={`M 76 ${y} l 3 3 l 6 -6`} stroke={p.accent} strokeWidth={1.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
- <line x1={94} y1={y} x2={162} y2={y} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" opacity={0.5} />
+ <line x1={94} y1={y} x2={162} y2={y} stroke={p.accent} strokeWidth={1} strokeDasharray="2 3" />
  </g>
  ))}
  </svg>
@@ -609,7 +609,7 @@ const VARIANTS: Record<MothVariant, Variant> = {
  },
 };
 
-// ─── component ─────────────────────────────────────────────────────
+// â”€â”€â”€ component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type MothEmptyStateProps = {
  variant: MothVariant;
@@ -632,12 +632,12 @@ export const MothEmptyState = ({
 }: MothEmptyStateProps) => {
  const v = VARIANTS[variant];
 
- // Use the existing token CSS vars. `gold` is the accent in both
- // modes; `gold/12` is the soft-fill we use as accentBg; `muted`
- // text colour reads as the dashed-line tone.
+ // Solid token-based palette. accentBg was a translucent color-mix
+ // tint; switched to solid hsl(var(--accent)) so every scene reads
+ // fully opaque instead of see-through.
  const palette: SceneProps = {
  accent: "hsl(var(--gold, 38 92% 50%))",
- accentBg: "color-mix(in oklab, hsl(var(--gold, 38 92% 50%)) 12%, transparent)",
+ accentBg: "hsl(var(--accent))",
  muted: "hsl(var(--muted-foreground, 215 16% 47%))",
  };
 
@@ -707,3 +707,4 @@ export const MothEmptyState = ({
  </div>
  );
 };
+
