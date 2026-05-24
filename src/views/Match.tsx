@@ -19,6 +19,7 @@ import {
  Search,
  Sparkles,
  Undo2,
+ User,
  X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -631,8 +632,12 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  const avatar = getAvatarUrl(candidate.avatarPath);
  return (
  <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
- {/* Picture square "" full-width, 1:1 aspect, dominates the card. */}
- <div className="relative w-full aspect-square bg-gold">
+ {/* Picture square "" full-width, 1:1 aspect, dominates the card.
+ Falls back to a grey field with a silhouette User icon when the
+ candidate has no avatar - matches the anonymous silhouette in
+ the How-it-works StepMatch mockup so the same visual reads
+ across the marketing + product surfaces. */}
+ <div className="relative w-full aspect-square bg-muted">
  {avatar ? (
  <img
  src={avatar}
@@ -641,9 +646,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  />
  ) : (
  <div className="absolute inset-0 flex items-center justify-center">
- <span className="font-display text-7xl text-gold">
- {initials(candidate.fullName)}
- </span>
+ <User className="h-32 w-32 text-muted-foreground" strokeWidth={1.4} />
  </div>
  )}
  </div>
@@ -1553,8 +1556,11 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  const avatar = getAvatarUrl(project.founderAvatarPath);
  return (
  <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
- {/* Picture square "" full-width, 1:1 aspect, dominates the card. */}
- <div className="relative w-full aspect-square bg-gold">
+ {/* Picture square "" full-width, 1:1 aspect. Grey field with
+ silhouette icon when the founder has no avatar - matches the
+ partner-card fallback above and the StepMatch anonymous
+ silhouette on the How-it-works page. */}
+ <div className="relative w-full aspect-square bg-muted">
  {avatar ? (
  <img
  src={avatar}
@@ -1563,9 +1569,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  />
  ) : (
  <div className="absolute inset-0 flex items-center justify-center">
- <span className="font-display text-7xl text-gold">
- {initials(project.founderFullName)}
- </span>
+ <User className="h-32 w-32 text-muted-foreground" strokeWidth={1.4} />
  </div>
  )}
  </div>
