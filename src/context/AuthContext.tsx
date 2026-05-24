@@ -228,6 +228,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
  // sessionStorage (which survives reload but not new tabs).
  writeTabSignedOut(true);
  setTabSignedOut(true);
+ // Also clear the in-memory rawSession copy so any consumer
+ // that derives state from it sees a no-session state on the
+ // very next render (belt-and-braces; the `session =
+ // tabSignedOut ? null : rawSession` derivation already covers
+ // this in theory, but a render that hits between the two
+ // setState calls could still show stale auth).
+ setRawSession(null);
+ setIsAdmin(false);
+ // Per-user local caches keyed by uid get cleared so the
+ // signed-out tab doesn't keep saved lists / unread counts
+ // for the user it just dropped.
+ setSavedProjectsUser(null);
+ setThreadUnreadUser(null);
  return;
  }
  // Any real Supabase sign-out invalidates the shared session,
