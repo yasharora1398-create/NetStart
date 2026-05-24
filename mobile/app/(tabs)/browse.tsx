@@ -564,7 +564,7 @@ const makeStyles = (theme: ThemePalette) =>
  },
  hero: {
  width: "100%",
- aspectRatio: 1,
+ aspectRatio: 1.1,
  backgroundColor: theme.border,
  alignItems: "center",
  justifyContent: "center",
