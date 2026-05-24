@@ -1039,7 +1039,7 @@ const ResumeRow = ({
  {pending && (
  <span className="text-gold normal-case tracking-normal">
  {" "}
- Â· Ready to upload
+ · Ready to upload
  </span>
  )}
  </p>

@@ -206,7 +206,7 @@ const SignUp = () => {
  </div>
 
  <p className="relative z-10 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
- Â© Polln8 Â· A network for partners
+ © Polln8 · A network for partners
  </p>
  </aside>
 

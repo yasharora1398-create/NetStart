@@ -218,7 +218,7 @@ export const MyNetDashboard = ({
  <div className="flex items-center justify-between gap-4">
  <div>
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
- Find projects Â· Coming soon
+ Find projects · Coming soon
  </p>
  <h3 className="font-display text-2xl mb-1">
  Browse open projects
@@ -265,7 +265,7 @@ export const MyNetDashboard = ({
  className="w-full rounded-sm border border-dashed border-border hover:border-gold disabled:hover:border-border disabled:cursor-not-allowed disabled: bg-card hover:bg-card disabled:hover:bg-card transition-colors p-8 text-left group"
  >
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
- {isPending ? "Locked Â· Review pending" : "Empty"}
+ {isPending ? "Locked · Review pending" : "Empty"}
  </p>
  <h3 className="font-display text-2xl mb-2">
  {isPending
@@ -339,7 +339,7 @@ const Section = ({
 
 // Standalone Open-to-Work toggle. Lives in the "How partners find you"
 // section header so users can flip discoverability on/off without
-// having to enter edit mode. Both directions are always allowed â€” the
+// having to enter edit mode. Both directions are always allowed "” the
 // parent handler is permissive, and forcing eligibility checks here
 // turned the switch into a one-way trap when a profile was incomplete.
 const OpenToWorkToggle = ({

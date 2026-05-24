@@ -260,7 +260,7 @@ export const Sidebar = () => {
 // â”€â”€â”€ Collapsed-state floating top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // When the user clicks the chevron to collapse the sidebar, the
 // full panel disappears and this strip floats at the top-right
-// instead â€” mirroring HomeAuthStrip's layout exactly (user pill /
+// instead "” mirroring HomeAuthStrip's layout exactly (user pill /
 // sign-in/up controls + theme toggle) plus an extra "expand
 // sidebar" button so they can bring the nav back.
 
@@ -409,7 +409,7 @@ const userDisplayName = (user: { email?: string | null; user_metadata?: Record<s
  const meta = user.user_metadata as { name?: string } | undefined;
  const raw = meta?.name?.trim() ?? user.email?.split("@")[0] ?? "you";
  const first = raw.split(/\s+/)[0] ?? raw;
- return first.length > 12 ? `${first.slice(0, 11)}â€¦` : first;
+ return first.length > 12 ? `${first.slice(0, 11)}"¦` : first;
 };
 
 // ============== ICONS - verbatim paths from Sidebar.html ==============

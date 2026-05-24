@@ -243,7 +243,7 @@
  /* GLASS-SIDEBAR - exact spec from Sidebar.html design handoff.
  Frosted-glass panel with a sub-pixel chromatic edge that hugs the
  22px-rounded perimeter. Sits 12px in from top/left/bottom; 224px
- wide. Body is a translucent whiteâ†’sand gradient with strong
+ wide. Body is a translucent white->sand gradient with strong
  so the page beneath shows through. Bevel via inset highlights.
  The rainbow ::before is masked to only show on the rim. */
  .glass-sidebar {
@@ -505,16 +505,17 @@
  }
  /* Right-aligned pill inside a sidebar item (used for the user's
  name next to MyNet). Squashes long names with ellipsis so it
- never breaks the sidebar layout. */
+ never breaks the sidebar layout. Opaque primary-green chip with
+ white text so it reads as a real status pill in both themes. */
  .glass-sidebar .gs-pill {
  margin-left: auto;
  padding: 2px 8px;
  border-radius: 999px;
- background: rgba(0, 0, 0, 0.06);
+ background: hsl(var(--primary));
  font-size: 11px;
  font-weight: 500;
  line-height: 1.4;
- color: #6b6b6b;
+ color: hsl(var(--primary-foreground));
  white-space: nowrap;
  max-width: 90px;
  overflow: hidden;
@@ -523,8 +524,8 @@
  text-transform: none;
  }
  .glass-sidebar .gs-item.gs-active .gs-pill {
- background: rgba(0, 0, 0, 0.08);
- color: #1a1a1a;
+ background: hsl(var(--primary));
+ color: hsl(var(--primary-foreground));
  }
  .glass-sidebar .gs-theme {
  position: relative;
@@ -623,12 +624,12 @@
  color: hsl(var(--gold));
  }
  .dark .glass-sidebar .gs-pill {
- background: rgba(255, 255, 255, 0.08);
- color: hsl(60 4% 64%);
+ background: hsl(var(--primary));
+ color: hsl(var(--primary-foreground));
  }
  .dark .glass-sidebar .gs-item.gs-active .gs-pill {
- background: rgba(79, 165, 114, 0.20);
- color: hsl(142 33% 70%);
+ background: hsl(var(--primary));
+ color: hsl(var(--primary-foreground));
  }
  .dark .glass-sidebar .gs-toggle {
  background: rgba(255, 255, 255, 0.06);

@@ -240,7 +240,7 @@ const StartupsScreen = () => (
  <div className="flex items-start justify-between gap-2 mb-2">
  <div>
  <p className="text-[10px] font-mono uppercase tracking-widest text-gold mb-0.5">
- Hiring Â· {b.commitment}
+ Hiring · {b.commitment}
  </p>
  <h3 className="font-display text-base leading-tight">
  {b.building}
@@ -322,7 +322,7 @@ const BrowseScreen = () => (
  </div>
  <p className="text-[10px] text-muted-foreground mb-2 truncate">
  <Briefcase className="inline h-2.5 w-2.5 mr-1 text-gold" />
- {b.commitment} Â· {b.location}
+ {b.commitment} · {b.location}
  </p>
  <div className="flex items-center justify-between">
  <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
@@ -332,7 +332,7 @@ const BrowseScreen = () => (
  type="button"
  className="text-[10px] text-gold font-mono uppercase tracking-widest"
  >
- Open â€º
+ Open "º
  </button>
  </div>
  </article>

@@ -259,7 +259,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
  </p>
  ) : profile.linkedinUrl ? (
  <p className="text-[11px] text-muted-foreground mt-2">
- Saved Â· <span className="text-foreground">{profile.linkedinUrl}</span>
+ Saved · <span className="text-foreground">{profile.linkedinUrl}</span>
  </p>
  ) : null}
  </div>
@@ -334,7 +334,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
  </p>
  ) : profile.websiteUrl ? (
  <p className="text-[11px] text-muted-foreground mt-2">
- Saved Â· <span className="text-foreground">{profile.websiteUrl}</span>
+ Saved · <span className="text-foreground">{profile.websiteUrl}</span>
  </p>
  ) : (
  <p className="text-[11px] text-muted-foreground mt-2">
@@ -345,7 +345,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
  )}
  </div>
 
- {/* Founder proof of work â€” full-width row beneath the grid. */}
+ {/* Founder proof of work "” full-width row beneath the grid. */}
  {isFounder && (
  <div className="mb-8">
  <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
@@ -453,7 +453,7 @@ const FileRow = ({
  {pending && (
  <span className="text-gold normal-case tracking-normal">
  {" "}
- Â· Ready to save
+ · Ready to save
  </span>
  )}
  </p>

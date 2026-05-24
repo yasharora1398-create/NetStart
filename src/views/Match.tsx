@@ -299,7 +299,7 @@ const PartnerView = () => {
  }
  }, [decided, user?.id]);
  const [detail, setDetail] = useState<Candidate | null>(null);
- // Founder's active/first project â€” drives where Save lands plus
+ // Founder's active/first project "” drives where Save lands plus
  // the "Matching for [project]" banner. Title kept alongside the
  // id so we can show it without a second fetch.
  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -547,7 +547,7 @@ const PartnerView = () => {
  </button>
  </div>
 
- {/* Deck stage â€” single flex row, justify-center. The card
+ {/* Deck stage "” single flex row, justify-center. The card
  + side buttons (or action buttons when approving) move
  together as a unit. No absolute positioning, no big
  gaps; the card visibly slides left as the action
@@ -560,7 +560,7 @@ const PartnerView = () => {
  : "min-h-[760px] py-6",
  )}
  >
- {/* X button â€” collapses out of the flex layout when the
+ {/* X button "” collapses out of the flex layout when the
  user approves so the row doesn't keep dead space. */}
  <button
  type="button"
@@ -575,14 +575,14 @@ const PartnerView = () => {
  <X className="h-6 w-6" strokeWidth={2.2} />
  </button>
 
- {/* The card itself â€” fixed width, never shifts on its
+ {/* The card itself "” fixed width, never shifts on its
  own. Justify-center on the parent does the visual
  slide as the action column grows on the right. */}
  <div className="w-full max-w-[520px] flex-shrink-0">
  <MatchCandidateCard candidate={current} />
  </div>
 
- {/* âœ“ button â€” same collapse trick on the other side. */}
+ {/* âœ“ button "” same collapse trick on the other side. */}
  <button
  type="button"
  onClick={accept}
@@ -597,7 +597,7 @@ const PartnerView = () => {
  <Check className="h-6 w-6" strokeWidth={2.4} />
  </button>
 
- {/* Action column â€” only the LinkedIn / resume / save /
+ {/* Action column "” only the LinkedIn / resume / save /
  message buttons. No box, no headings. Width animates
  from 0 to auto so the card recenters smoothly. */}
  <div
@@ -631,7 +631,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  const avatar = getAvatarUrl(candidate.avatarPath);
  return (
  <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
- {/* Picture square â€” full-width, 1:1 aspect, dominates the card. */}
+ {/* Picture square "” full-width, 1:1 aspect, dominates the card. */}
  <div className="relative w-full aspect-square bg-gold">
  {avatar ? (
  <img
@@ -648,7 +648,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  )}
  </div>
 
- {/* Body â€” name, pills, bio. */}
+ {/* Body "” name, pills, bio. */}
  <div className="p-5">
  <h2 className="mb-2 font-display text-2xl leading-tight text-foreground">
  {candidate.fullName || "Unnamed"}
@@ -701,7 +701,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
 // headline; the only thing this column adds is the actions you'd
 // take after deciding to engage: open LinkedIn, open the resume,
 // save the candidate, message them, or back out. No surrounding
-// box â€” the buttons themselves stand free next to the card.
+// box "” the buttons themselves stand free next to the card.
 const CandidateActions = ({
  candidate,
  activeProjectId,
@@ -739,13 +739,13 @@ const CandidateActions = ({
  const handleSave = async () => {
  if (working) return;
  // Saves attach to a project. Without one published & marked
- // active in MyNet, there's nowhere to store the save â€” so the
+ // active in MyNet, there's nowhere to store the save "” so the
  // old behavior silently lost data. Block the action and tell the
  // founder exactly what to do.
  if (!activeProjectId) {
  toast.error("Finish your active project in MyNet first", {
  description:
- "Partners are ranked against your active project's criteria â€” and saves attach to it. Publish a project in MyNet, then mark it active.",
+ "Partners are ranked against your active project's criteria "” and saves attach to it. Publish a project in MyNet, then mark it active.",
  });
  return;
  }
@@ -831,7 +831,7 @@ const CandidateActions = ({
  )}
  </button>
 
- {/* Message â€” primary action */}
+ {/* Message "” primary action */}
  <button
  type="button"
  onClick={handleMessage}
@@ -974,7 +974,7 @@ const LookerView = () => {
  );
 
  // `current` is the next undecided project in the deck. `displayed`
- // is what's actually on screen â€” usually `current`, but when the
+ // is what's actually on screen "” usually `current`, but when the
  // user taps a sibling project in the info panel we override it so
  // they can browse the founder's other work in place.
  const current = filtered[0] ?? null;
@@ -1104,7 +1104,7 @@ const LookerView = () => {
  </button>
  </div>
 
- {/* MOBILE top-bar â€” two icons pinned to the very top-
+ {/* MOBILE top-bar "” two icons pinned to the very top-
  right of the viewport, above the page header. Previous
  rewinds the deck by one card; Search opens the filter
  bottom sheet (same Filters component the desktop
@@ -1141,7 +1141,7 @@ const LookerView = () => {
  </button>
  </div>
 
- {/* DESKTOP deck stage â€” X | Card | âœ“ row with a slide-in
+ {/* DESKTOP deck stage "” X | Card | âœ“ row with a slide-in
  info panel on accept. Hidden under 768px in favour of
  the swipe deck below. */}
  <div
@@ -1215,7 +1215,7 @@ const LookerView = () => {
  </div>
  </div>
 
- {/* MOBILE deck â€” swipe-left = pass, swipe-right = save +
+ {/* MOBILE deck "” swipe-left = pass, swipe-right = save +
  open the info sheet. Mirrors the Expo Match feel:
  one card, stacked under-card peeking, no buttons. */}
  <div className="md:hidden mx-auto w-full max-w-[520px] px-3 py-4">
@@ -1232,7 +1232,7 @@ const LookerView = () => {
  />
  </div>
 
- {/* MOBILE info sheet â€” bottom sheet (~85dvh) that slides
+ {/* MOBILE info sheet "” bottom sheet (~85dvh) that slides
  up on swipe-right. The card behind stays visible in
  the gap at the top. Drag the handle down to dismiss
  and the deck moves on (the project was already
@@ -1256,7 +1256,7 @@ const LookerView = () => {
  </BottomSheet>
  </div>
 
- {/* MOBILE filter sheet â€” same Filters component the
+ {/* MOBILE filter sheet "” same Filters component the
  desktop renders inline, surfaced via the search icon
  in the mobile top bar. */}
  <div className="md:hidden">
@@ -1279,9 +1279,9 @@ const LookerView = () => {
  );
 };
 
-// Partner-side info panel â€” the founder's full public profile
+// Partner-side info panel "” the founder's full public profile
 // rendered inline beside the project card on accept. Bio, skills,
-// website, LinkedIn â€” same content as /u/<founder> but laid out as
+// website, LinkedIn "” same content as /u/<founder> but laid out as
 // a side panel so the partner can read it without leaving the
 // deck. The icon-only action column on the founder side is
 // intentionally different because it's framing a person, not a
@@ -1368,7 +1368,7 @@ const ProjectInfoPanel = ({
  About the founder
  </p>
  <h3 className="mb-1 font-display text-xl leading-tight text-foreground">
- {founder?.fullName || project.founderFullName || "Loadingâ€¦"}
+ {founder?.fullName || project.founderFullName || "Loading"¦"}
  </h3>
  {founder?.headline || project.founderHeadline ? (
  <p className="mb-4 text-xs text-muted-foreground">
@@ -1547,13 +1547,13 @@ const ProjectInfoPanel = ({
 };
 
 // Partner-side project card. Visual twin of MatchCandidateCard so
-// partners and founders see the same deck shape â€” full-width 1:1
+// partners and founders see the same deck shape "” full-width 1:1
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  const avatar = getAvatarUrl(project.founderAvatarPath);
  return (
  <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
- {/* Picture square â€” full-width, 1:1 aspect, dominates the card. */}
+ {/* Picture square "” full-width, 1:1 aspect, dominates the card. */}
  <div className="relative w-full aspect-square bg-gold">
  {avatar ? (
  <img
@@ -1570,7 +1570,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  )}
  </div>
 
- {/* Body â€” title, byline, pills, description. */}
+ {/* Body "” title, byline, pills, description. */}
  <div className="p-5">
  <h2 className="mb-1 font-display text-2xl leading-tight text-foreground">
  {project.title}
@@ -1580,7 +1580,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  <span className="text-foreground">
  {project.founderFullName || "Anonymous"}
  </span>
- {project.founderHeadline ? ` Â· ${project.founderHeadline}` : null}
+ {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
  </p>
 
  {(project.criteria.commitment ||

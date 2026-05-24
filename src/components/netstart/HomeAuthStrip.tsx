@@ -23,7 +23,7 @@ const displayName = (
  const meta = user.user_metadata as { name?: string } | undefined;
  const raw = meta?.name?.trim() || user.email?.split("@")[0] || "you";
  const first = raw.split(/\s+/)[0] ?? raw;
- return first.length > 14 ? `${first.slice(0, 13)}â€¦` : first;
+ return first.length > 14 ? `${first.slice(0, 13)}"¦` : first;
 };
 
 export const HomeAuthStrip = () => {

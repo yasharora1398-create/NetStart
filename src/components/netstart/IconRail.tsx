@@ -42,7 +42,7 @@ type RailItem = {
 };
 
 // Mirrors the desktop Sidebar's nav structure. Logged-out users
-// who click an app route still hit it â€” the underlying page just
+// who click an app route still hit it "” the underlying page just
 // renders its own AuthGate, which is the same affordance the
 // Sidebar gives them.
 const ITEMS: RailItem[] = [
@@ -113,7 +113,7 @@ export const IconRail = () => {
  }
  >
  {item.icon}
- {/* Tooltip â€” slides in from the icon's right edge on hover.
+ {/* Tooltip "” slides in from the icon's right edge on hover.
  Pointer-events disabled so it never blocks the click. */}
  <span
  aria-hidden

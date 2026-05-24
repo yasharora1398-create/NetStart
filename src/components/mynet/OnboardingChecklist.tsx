@@ -132,7 +132,7 @@ export const OnboardingChecklist = ({
  </p>
  <p className="text-sm">
  {completedCount} of {total} done
- <span className="text-muted-foreground"> Â· {pct}%</span>
+ <span className="text-muted-foreground"> · {pct}%</span>
  </p>
  </div>
  <div className="flex items-center gap-2 flex-shrink-0">

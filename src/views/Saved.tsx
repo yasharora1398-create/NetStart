@@ -2,14 +2,14 @@
 /**
  * Saved page. Role-aware:
  *
- * Partner POV â†’ list of projects bookmarked from Match / Talent /
+ * Partner POV -> list of projects bookmarked from Match / Talent /
  * project detail. Source: local saved-projects store
  * (`useSavedProjects`).
- * Founder POV â†’ list of candidates the founder saved across their
+ * Founder POV -> list of candidates the founder saved across their
  * projects. Source: each project's `savedPersonIds`
  * joined with `getCandidatesByIds`.
  *
- * Partners can star one saved project as their current focus â€” same
+ * Partners can star one saved project as their current focus "” same
  * semantic as the founder-side active-project picker.
  */
 import { useEffect, useMemo, useState } from "react";

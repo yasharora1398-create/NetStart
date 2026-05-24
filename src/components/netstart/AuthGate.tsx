@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 /**
  * AuthGate has two modes:
  *
- * â€¢ Standalone overlay (legacy): `<AuthGate />` floats above the
+ * "¢ Standalone overlay (legacy): `<AuthGate />` floats above the
  * current page. Used by /mynet, /match, /u/:id which manage
  * their own visibility ({!loading && !user && <AuthGate />}).
  *
- * â€¢ Wrapper (preferred for new pages): pass `authLoading`,
+ * "¢ Wrapper (preferred for new pages): pass `authLoading`,
  * `signedIn`, and optionally `needsSetup` plus children. The
  * gate decides which of three things to render:
- * â€“ authLoading â†’ a quiet placeholder (no flash of gate)
- * â€“ !signedIn â†’ "Members only" overlay with Sign in / Sign up
- * â€“ needsSetup â†’ "Finish setting up MyNet" overlay with a
+ * "“ authLoading -> a quiet placeholder (no flash of gate)
+ * "“ !signedIn -> "Members only" overlay with Sign in / Sign up
+ * "“ needsSetup -> "Finish setting up MyNet" overlay with a
  * single Go-to-MyNet CTA
- * â€“ otherwise â†’ children (the page itself)
+ * "“ otherwise -> children (the page itself)
  *
  * Copy can be overridden via `authTitle`/`authBody` (unauth state)
  * and `setupTitle`/`setupBody` (signed-in-but-pending state).
@@ -37,7 +37,7 @@ type AuthGateProps = {
  setupTitle?: string;
  setupBody?: string;
 
- // Legacy aliases â€” old call sites use `title`/`body` to override
+ // Legacy aliases "” old call sites use `title`/`body` to override
  // the unauth copy. Keep working.
  title?: string;
  body?: string;

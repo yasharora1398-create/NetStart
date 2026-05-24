@@ -28,7 +28,7 @@ import { useAuth } from "@/context/AuthContext";
 // Sidebar mounts on every render; CSS hides it under 768px so on
 // mobile the bottom nav (rendered below) takes over. The
 // `SHOW_SIDEBAR = !PROD` gate this used to carry was deleted when
-// the app became publicly accessible â€” sidebar is just the
+// the app became publicly accessible "” sidebar is just the
 // desktop chrome now.
 
 import { MobileBottomNav } from "@/components/netstart/MobileBottomNav";
@@ -88,7 +88,7 @@ const SAMPLE_PROJECTS: Project[] = [
  criteria: {
  skills: ["Distributed systems", "Rust", "B2B GTM"],
  commitment: "Full-time",
- location: "Remote Â· NA / EU",
+ location: "Remote · NA / EU",
  keywords: "infra, logistics, ex-faang",
  },
  savedPersonIds: [],
@@ -321,14 +321,14 @@ const MyNet = () => {
  await getSupabase().auth.refreshSession();
  await refreshAll();
  } catch {
- // ignore â€” onAuthStateChange usually fires on its own
+ // ignore "” onAuthStateChange usually fires on its own
  }
  };
 
  const handleSetActiveProject = async (projectId: string | null) => {
  if (!uid) return;
  const previous = profile.activeProjectId;
- // Optimistic update â€” flip the star immediately, revert on error.
+ // Optimistic update "” flip the star immediately, revert on error.
  setProfile((p) => ({ ...p, activeProjectId: projectId }));
  try {
  await setActiveProject(uid, projectId);

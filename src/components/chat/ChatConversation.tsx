@@ -4,12 +4,12 @@
  * and read receipts, and exposes a composer that obeys the Stage 4
  * pending-thread send rules:
  *
- * - state="inbound" â†’ big Accept/Decline banner; sending blocked
+ * - state="inbound" -> big Accept/Decline banner; sending blocked
  * until the recipient acts.
- * - state="outbound" â†’ composer enabled but capped at 2 messages
+ * - state="outbound" -> composer enabled but capped at 2 messages
  * per 48h. Counter shown above the composer.
- * - state="accepted" â†’ unrestricted send.
- * - state="declined" â†’ messages + a Delete-thread CTA. Send
+ * - state="accepted" -> unrestricted send.
+ * - state="declined" -> messages + a Delete-thread CTA. Send
  * is hidden.
  *
  * Read-receipt + delivered ticks are upserted by the realtime UPDATE
@@ -144,7 +144,7 @@ export const ChatConversation = ({
  const [muted, setMuted] = useState(false);
  const [mutingBusy, setMutingBusy] = useState(false);
  const scrollRef = useRef<HTMLDivElement | null>(null);
- // Track whether we should auto-scroll on the next message â€” only
+ // Track whether we should auto-scroll on the next message "” only
  // when the user is already near the bottom of the thread.
  const stickToBottomRef = useRef(true);
 
@@ -252,7 +252,7 @@ export const ChatConversation = ({
  void reload();
  }, [reload]);
 
- // Counterparty profile â€” we don't know if the contact is a partner
+ // Counterparty profile "” we don't know if the contact is a partner
  // or founder, so try the founder RPC first (cheap; returns null
  // fast when not a founder), then fall back to the candidate row.
  // Extracted so the realtime subscription below can re-fire it when
@@ -290,7 +290,7 @@ export const ChatConversation = ({
  });
  }
  } catch {
- // silent â€” the initialProfile (from the thread list) carries us
+ // silent "” the initialProfile (from the thread list) carries us
  }
  }, [contactId]);
 
@@ -436,7 +436,7 @@ export const ChatConversation = ({
  };
  }, [contactId, currentUserId, loadProfile, onThreadsChanged]);
 
- // Auto-scroll to bottom when messages change â€” but only if the
+ // Auto-scroll to bottom when messages change "” but only if the
  // user was already near the bottom (don't yank them down while
  // they're scrolling up to read history).
  useEffect(() => {
@@ -459,7 +459,7 @@ export const ChatConversation = ({
  setSending(true);
  try {
  const result = await requestOrSendChatMessage(contactId, body);
- // Optimistic insert â€” realtime will dedupe via the id check.
+ // Optimistic insert "” realtime will dedupe via the id check.
  setMessages((prev) =>
  prev.some((m) => m.id === result.messageId)
  ? prev

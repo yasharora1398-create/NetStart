@@ -105,7 +105,7 @@ export const ApplyDialog = ({ project, onClose, onApplied }: ApplyDialogProps) =
  {project.founderHeadline && (
  <span className="text-muted-foreground">
  {" "}
- Â· {project.founderHeadline}
+ · {project.founderHeadline}
  </span>
  )}
  </p>
