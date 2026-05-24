@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { TagInput } from "@/components/mynet/TagInput";
@@ -135,6 +136,12 @@ export const MyNetWizard = ({
  const [lookingLocation, setLookingLocation] = useState(
  profile.candidate.location,
  );
+ // Location is optional - default the toggle ON only if the user
+ // already has a saved location, otherwise OFF so the wizard reads
+ // as "not required" out of the box.
+ const [lookingLocationEnabled, setLookingLocationEnabled] = useState(
+ () => Boolean(profile.candidate.location.trim()),
+ );
  const [lookingCommitment, setLookingCommitment] = useState(
  profile.candidate.commitment,
  );
@@ -146,6 +153,9 @@ export const MyNetWizard = ({
  const [projectSkills, setProjectSkills] = useState<string[]>([]);
  const [projectCommitment, setProjectCommitment] = useState("");
  const [projectLocation, setProjectLocation] = useState("");
+ // Same opt-in toggle as the candidate side: defaults ON only if
+ // a project location was already set.
+ const [projectLocationEnabled, setProjectLocationEnabled] = useState(false);
  const [projectKeywords, setProjectKeywords] = useState("");
 
  const [working, setWorking] = useState(false);
@@ -227,12 +237,14 @@ export const MyNetWizard = ({
 
  const hasAvatar = Boolean(pendingAvatar || profile.avatarPath);
 
+ // Location is intentionally optional - if the user disabled it,
+ // skip the non-empty check so submit isn't blocked.
  const lookingValid =
  fullName.trim() !== "" &&
  headline.trim() !== "" &&
  bio.trim().length >= CANDIDATE_BIO_MIN &&
  lookingSkills.length >= CANDIDATE_SKILLS_MIN &&
- lookingLocation.trim() !== "" &&
+ (!lookingLocationEnabled || lookingLocation.trim() !== "") &&
  lookingCommitment.trim() !== "" &&
  hasAvatar;
 
@@ -241,7 +253,7 @@ export const MyNetWizard = ({
  projectDesc.trim() !== "" &&
  projectSkills.length >= 1 &&
  projectCommitment.trim() !== "" &&
- projectLocation.trim() !== "" &&
+ (!projectLocationEnabled || projectLocation.trim() !== "") &&
  hasAvatar;
 
  const goCredentials = async () => {
@@ -604,18 +616,15 @@ export const MyNetWizard = ({
  placeholder="Type or pick how much you can give..."
  />
  </Field>
- <Field
- label="Location"
- required
- icon={<MapPin className="h-3.5 w-3.5 text-gold" />}
- >
- <Autocomplete
+ <LocationField
+ enabled={lookingLocationEnabled}
+ onToggle={(next) => {
+ setLookingLocationEnabled(next);
+ if (!next) setLookingLocation("");
+ }}
  value={lookingLocation}
  onChange={setLookingLocation}
- options={LOCATION_OPTIONS}
- placeholder="Type a city or pick remote..."
  />
- </Field>
  </div>
 
  <Field
@@ -709,18 +718,15 @@ export const MyNetWizard = ({
  placeholder="Type or pick what you need from them..."
  />
  </Field>
- <Field
- label="Location"
- required
- icon={<MapPin className="h-3.5 w-3.5 text-gold" />}
- >
- <Autocomplete
+ <LocationField
+ enabled={projectLocationEnabled}
+ onToggle={(next) => {
+ setProjectLocationEnabled(next);
+ if (!next) setProjectLocation("");
+ }}
  value={projectLocation}
  onChange={setProjectLocation}
- options={LOCATION_OPTIONS}
- placeholder="Type a city or pick remote..."
  />
- </Field>
  </div>
 
  <div className="grid md:grid-cols-2 gap-6 mt-5">
@@ -947,6 +953,61 @@ const Field = ({
  {hint && (
  <p className="text-[11px] text-muted-foreground mt-2">{hint}</p>
  )}
+ </div>
+);
+
+// Optional-by-design Location field. Header label sits next to a
+// toggle: ON shows the full country Autocomplete, OFF hides the
+// picker entirely and the value is cleared. Submit validation
+// skips the non-empty check when the toggle is OFF so the user
+// can ship without picking a location.
+const LocationField = ({
+ enabled,
+ onToggle,
+ value,
+ onChange,
+}: {
+ enabled: boolean;
+ onToggle: (next: boolean) => void;
+ value: string;
+ onChange: (next: string) => void;
+}) => (
+ <div>
+ <div className="flex items-center justify-between mb-2 gap-3">
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+ <MapPin className="h-3.5 w-3.5 text-gold" />
+ Location
+ </Label>
+ <div className="flex items-center gap-2">
+ <span
+ className={`text-[11px] font-mono uppercase tracking-[0.18em] ${
+ enabled ? "text-gold" : "text-muted-foreground"
+ }`}
+ >
+ {enabled ? "On" : "Off"}
+ </span>
+ <Switch
+ checked={enabled}
+ onCheckedChange={onToggle}
+ aria-label="Toggle location field"
+ />
+ </div>
+ </div>
+ {enabled ? (
+ <Autocomplete
+ value={value}
+ onChange={onChange}
+ options={LOCATION_OPTIONS}
+ placeholder="Pick a country..."
+ />
+ ) : (
+ <div className="h-11 rounded-sm border border-dashed border-border bg-background px-3 flex items-center text-[12px] text-muted-foreground">
+ Location off - turn on to pick a country.
+ </div>
+ )}
+ <p className="text-[11px] text-muted-foreground mt-2">
+ Adding a location is beneficial but not required.
+ </p>
  </div>
 );
 

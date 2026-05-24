@@ -21,6 +21,8 @@ import {
  FormMessage,
 } from "@/components/ui/form";
 import { Autocomplete } from "@/components/ui/autocomplete";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
  Select,
@@ -45,7 +47,9 @@ const schema = z.object({
  businessType: z.string().trim(),
  skills: z.array(z.string()),
  commitment: z.string().trim(),
- location: z.string().trim(),
+ // Optional: an empty string is fine (the toggle next to the
+ // field defaults to OFF for new projects).
+ location: z.string().trim().optional().default(""),
  keywords: z.string().trim(),
 });
 
@@ -225,22 +229,56 @@ export const ProjectDialog = ({
  <FormField
  control={form.control}
  name="location"
- render={({ field }) => (
+ render={({ field }) => {
+ const enabled = Boolean(field.value?.trim());
+ return (
  <FormItem className="mb-5">
- <FormLabel className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ <div className="flex items-center justify-between gap-3 mb-2">
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
  Location
- </FormLabel>
+ </Label>
+ <div className="flex items-center gap-2">
+ <span
+ className={`text-[11px] font-mono uppercase tracking-[0.18em] ${
+ enabled ? "text-gold" : "text-muted-foreground"
+ }`}
+ >
+ {enabled ? "On" : "Off"}
+ </span>
+ <Switch
+ checked={enabled}
+ onCheckedChange={(next) => {
+ // Toggle drives the value: turning off clears the
+ // string, turning on opens the picker with the
+ // value empty until the user picks.
+ if (!next) field.onChange("");
+ else field.onChange(field.value || " ");
+ }}
+ aria-label="Toggle location field"
+ />
+ </div>
+ </div>
  <FormControl>
+ {enabled ? (
  <Autocomplete
- value={field.value}
+ value={field.value?.trim() ?? ""}
  onChange={field.onChange}
  options={LOCATION_OPTIONS}
- placeholder="Type a city or pick remote..."
+ placeholder="Pick a country..."
  />
+ ) : (
+ <div className="h-11 rounded-sm border border-dashed border-border bg-background px-3 flex items-center text-[12px] text-muted-foreground">
+ Location off - turn on to pick a country.
+ </div>
+ )}
  </FormControl>
+ <p className="text-[11px] text-muted-foreground mt-2">
+ Adding a location is beneficial but not required.
+ </p>
  <FormMessage />
  </FormItem>
- )}
+ );
+ }}
  />
 
  <FormField

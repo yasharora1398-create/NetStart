@@ -14,6 +14,7 @@ import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
  Select,
  SelectContent,
@@ -70,6 +71,12 @@ export const CandidateCard = ({
  const [bio, setBio] = useState(profile.candidate.bio);
  const [skills, setSkills] = useState<string[]>(profile.candidate.skills);
  const [location, setLocation] = useState(profile.candidate.location);
+ // Optional-by-design location: toggle defaults ON only if a value
+ // is already saved, otherwise OFF so existing users keep their
+ // pick while new users can ship without one.
+ const [locationEnabled, setLocationEnabled] = useState(() =>
+ Boolean(profile.candidate.location.trim()),
+ );
  const [commitment, setCommitment] = useState(profile.candidate.commitment);
  const [saving, setSaving] = useState(false);
  const [dirty, setDirty] = useState(false);
@@ -84,6 +91,7 @@ export const CandidateCard = ({
  setBio(profile.candidate.bio);
  setSkills(profile.candidate.skills);
  setLocation(profile.candidate.location);
+ setLocationEnabled(Boolean(profile.candidate.location.trim()));
  setCommitment(profile.candidate.commitment);
  }, [profile, dirty]);
 
@@ -346,13 +354,36 @@ export const CandidateCard = ({
  />
  </div>
  <div>
+ <div className="flex items-center justify-between mb-2 gap-3">
  <Label
  htmlFor="location"
- className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2"
+ className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2"
  >
  <MapPin className="h-3.5 w-3.5 text-gold" />
  Location
  </Label>
+ <div className="flex items-center gap-2">
+ <span
+ className={`text-[11px] font-mono uppercase tracking-[0.18em] ${
+ locationEnabled ? "text-gold" : "text-muted-foreground"
+ }`}
+ >
+ {locationEnabled ? "On" : "Off"}
+ </span>
+ <Switch
+ checked={locationEnabled}
+ onCheckedChange={(next) => {
+ setLocationEnabled(next);
+ if (!next) {
+ setLocation("");
+ markDirty();
+ }
+ }}
+ aria-label="Toggle location field"
+ />
+ </div>
+ </div>
+ {locationEnabled ? (
  <Autocomplete
  id="location"
  value={location}
@@ -361,8 +392,16 @@ export const CandidateCard = ({
  markDirty();
  }}
  options={LOCATION_OPTIONS}
- placeholder="Type a city or pick remote..."
+ placeholder="Pick a country..."
  />
+ ) : (
+ <div className="h-11 rounded-sm border border-dashed border-border bg-background px-3 flex items-center text-[12px] text-muted-foreground">
+ Location off - turn on to pick a country.
+ </div>
+ )}
+ <p className="text-[11px] text-muted-foreground mt-2">
+ Adding a location is beneficial but not required.
+ </p>
  </div>
  </div>
 

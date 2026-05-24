@@ -405,15 +405,17 @@ const PartnerView = () => {
  return () => window.removeEventListener("keydown", onKey);
  }, [fullscreen]);
 
- // Last candidate we decided on (passed or sent to info pane).
- // Drives the undo button so a stray click on X doesn't lose
- // someone permanently.
- const [lastDecided, setLastDecided] = useState<Candidate | null>(null);
+ // History stack of decided candidates in decide-order. Drives the
+ // Previous / undo button: each undo pops the most-recent decision,
+ // and the stack lets the user walk all the way back through the
+ // session's decisions instead of being capped at one undo.
+ const [history, setHistory] = useState<Candidate[]>([]);
+ const lastDecided = history.length > 0 ? history[history.length - 1] : null;
 
  const decline = () => {
  if (!current) return;
  setApproving(null);
- setLastDecided(current);
+ setHistory((prev) => [...prev, current]);
  setDecided((prev) => new Set(prev).add(current.userId));
  };
  const accept = () => {
@@ -423,21 +425,22 @@ const PartnerView = () => {
  const closeInfo = (decideThem: boolean) => {
  const target = approving ?? detail;
  if (decideThem && target) {
- setLastDecided(target);
+ setHistory((prev) => [...prev, target]);
  setDecided((prev) => new Set(prev).add(target.userId));
  }
  setApproving(null);
  setDetail(null);
  };
  const undo = () => {
- if (!lastDecided) return;
+ if (history.length === 0) return;
+ const top = history[history.length - 1];
+ setHistory((prev) => prev.slice(0, -1));
  setDecided((prev) => {
  const next = new Set(prev);
- next.delete(lastDecided.userId);
+ next.delete(top.userId);
  return next;
  });
  setApproving(null);
- setLastDecided(null);
  };
 
  return (
@@ -933,7 +936,10 @@ const LookerView = () => {
  }
  }, [decided, user?.id]);
  const [approving, setApproving] = useState<PublicProject | null>(null);
- const [lastDecided, setLastDecided] = useState<PublicProject | null>(null);
+ // History stack of decided projects in decide-order so the user
+ // can walk back through multiple decisions, not just one.
+ const [history, setHistory] = useState<PublicProject[]>([]);
+ const lastDecided = history.length > 0 ? history[history.length - 1] : null;
  const [fullscreen, setFullscreen] = useState(false);
 
  // ESC exits full-screen. Listener only attaches when fullscreen
@@ -1009,7 +1015,7 @@ const LookerView = () => {
  const decline = () => {
  if (!displayed) return;
  setApproving(null);
- setLastDecided(displayed);
+ setHistory((prev) => [...prev, displayed]);
  setDecided((prev) => new Set(prev).add(displayed.id));
  };
  const accept = () => {
@@ -1017,7 +1023,7 @@ const LookerView = () => {
  // Swipe-right is a decision: stamp it into the deck so when the
  // info sheet is dismissed the deck has already advanced. The
  // info sheet stays visible until the user drags it down.
- setLastDecided(displayed);
+ setHistory((prev) => [...prev, displayed]);
  setDecided((prev) => new Set(prev).add(displayed.id));
  setApproving(displayed);
  };
@@ -1025,14 +1031,15 @@ const LookerView = () => {
  setApproving(null);
  };
  const goBack = () => {
- if (!lastDecided) return;
+ if (history.length === 0) return;
+ const top = history[history.length - 1];
+ setHistory((prev) => prev.slice(0, -1));
  setDecided((prev) => {
  const next = new Set(prev);
- next.delete(lastDecided.id);
+ next.delete(top.id);
  return next;
  });
  setApproving(null);
- setLastDecided(null);
  };
 
  const filtersNode = (
