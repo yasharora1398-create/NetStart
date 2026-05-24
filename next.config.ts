@@ -61,28 +61,15 @@ const config: NextConfig = {
 
   async redirects() {
     return [
-      // Phone-shaped UAs hitting the main site get pushed into /m/
-      // (the Expo web bundle). The negative lookahead keeps static
-      // assets, the Expo bundle itself, favicons, robots, sitemap,
-      // and the `chats/<id>` deep-link path (which we email out as
-      // the Reply CTA) from being redirected. Without `chats/` in
-      // the exclusion list, every Reply button tap on a phone got
-      // shunted to /m/ instead of opening the conversation.
-      {
-        source:
-          "/((?!m/|m$|_expo/|_next/|assets/|favicon|robots\\.txt|sitemap\\.xml|polln8-|apple-touch-icon|site\\.webmanifest|chats/).*)",
-        has: [
-          {
-            type: "header",
-            key: "user-agent",
-            value: ".*(Mobi|Android|iPhone|iPad|iPod).*",
-          },
-        ],
-        destination: "/m/",
-        permanent: false,
-      },
       // Desktop UAs poking at /m/* get sent home so they don't load
       // the mobile bundle on a laptop.
+      //
+      // The phone-UA -> /m/ blanket redirect that used to live here
+      // was removed: polln8.com / now renders a dedicated mobile home
+      // page (Home.tsx renders MobileHome at narrow viewports) so
+      // first-time phone visitors get a marketing surface before the
+      // app shell. After they sign in, the homepage CTAs route them
+      // into /m/; the /m/ MyNet tab links back to /.
       {
         source: "/m/:path*",
         missing: [

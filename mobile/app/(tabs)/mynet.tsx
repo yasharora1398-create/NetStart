@@ -17,6 +17,7 @@ import {
  CheckCircle2,
  Clock,
  Eye,
+ Home as HomeIcon,
  LogOut,
  Moon,
  Pencil,
@@ -459,6 +460,25 @@ export default function MyNetScreen() {
  <Eye size={16} color={theme.gold} />
  <Text style={styles.previewBtnText}>Preview your card</Text>
  </Pressable>
+
+ {/* Visit the marketing homepage. Web-only - native builds skip
+ the link since polln8.com is a web property. Sits above the
+ Tutorial/Settings/Sign-out row so it reads as an "exit to the
+ site" action, not another in-app utility. */}
+ {Platform.OS === "web" && (
+ <Pressable
+ onPress={() => {
+ if (typeof window !== "undefined") window.location.href = "/";
+ }}
+ style={({ pressed }) => [
+ styles.homepageBtn,
+ pressed && { opacity: 0.7 },
+ ]}
+ >
+ <HomeIcon size={16} color={theme.gold} />
+ <Text style={styles.homepageBtnText}>Visit homepage</Text>
+ </Pressable>
+ )}
 
  <View style={styles.bottomRow}>
  <Pressable
@@ -1078,6 +1098,27 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
  fontSize: 14,
  fontWeight: "600",
  letterSpacing: 0.2,
+ },
+ // Visit-homepage button (web-only). Full-width like modeBtn so it
+ // reads as a peer action, sits above the bottom utility row.
+ homepageBtn: {
+ flexDirection: "row",
+ alignItems: "center",
+ justifyContent: "center",
+ gap: 8,
+ width: "100%",
+ borderWidth: 1,
+ borderColor: theme.gold,
+ backgroundColor: theme.bgElev,
+ borderRadius: 4,
+ paddingVertical: 12,
+ marginTop: 8,
+ marginBottom: 8,
+ },
+ homepageBtnText: {
+ color: theme.gold,
+ fontSize: 14,
+ fontWeight: "500",
  },
  // Dark / Light mode toggle — full width, sits below the three-button row.
  modeBtn: {

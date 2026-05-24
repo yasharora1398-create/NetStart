@@ -25,6 +25,7 @@ import { IconRail } from "@/components/netstart/IconRail";
 import { HomeAuthStrip } from "@/components/netstart/HomeAuthStrip";
 import { FadeUp } from "@/components/netstart/FadeUp";
 import WhySection from "@/components/marketing/WhySection";
+import MobileHome from "@/components/marketing/MobileHome";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -207,7 +208,16 @@ const Home = () => {
  useTheme();
 
  return (
- <div className="min-h-dvh bg-background text-foreground overflow-x-clip">
+ <>
+ {/* Mobile: dedicated condensed home page. Renders for narrow
+ viewports (<768px) and stays out of the way on tablet/desktop
+ via md:hidden inside MobileHome itself. */}
+ <MobileHome />
+
+ {/* Tablet + desktop: the full marketing site. Hidden on phones
+ so the mobile layout owns the viewport without competing
+ sections fighting for space. */}
+ <div className="hidden md:block min-h-dvh bg-background text-foreground overflow-x-clip">
  <IconRail />
  <HomeAuthStrip />
 
@@ -226,6 +236,7 @@ const Home = () => {
 
  <Footer />
  </div>
+ </>
  );
 };
 
