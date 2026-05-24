@@ -1005,7 +1005,14 @@ const LookerView = () => {
  const skill = skillFilter.trim().toLowerCase();
  const loc = locationFilter.trim().toLowerCase();
  const com = commitmentFilter.trim().toLowerCase();
+ const uid = user?.id;
  return projects.filter((p) => {
+ // Hide projects the current user owns - including Polln8
+ // recommendations the admin posted on behalf of someone else.
+ // Those rows have owner_id = admin's uid even though the card
+ // displays the recommended founder's name, so this single
+ // ownership check covers both cases.
+ if (uid && p.ownerId === uid) return false;
  if (decided.has(p.id)) return false;
  if (q) {
  const hay = `${p.title} ${p.description} ${p.criteria.skills.join(
@@ -1023,7 +1030,7 @@ const LookerView = () => {
  return false;
  return true;
  });
- }, [projects, query, skillFilter, locationFilter, commitmentFilter, decided]);
+ }, [projects, query, skillFilter, locationFilter, commitmentFilter, decided, user?.id]);
 
  const allSkills = useMemo(() => {
  const set = new Set<string>();
