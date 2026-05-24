@@ -48,6 +48,7 @@ import {
  LOCATION_OPTIONS,
  SKILLS_OPTIONS,
 } from "@/lib/options";
+import { readIntroOpened, writeIntroOpened } from "@/lib/introGate";
 import {
  getAvatarUrl,
  getProfile,
@@ -78,9 +79,16 @@ const initials = (name: string): string => {
 };
 
 const Match = () => {
- // Intro gate: every visit lands on a brief explainer screen.
- // Click CTA -> render real page (gated by AuthGate downstream).
- const [opened, setOpened] = useState(false);
+ // Intro gate: only shown the first time the user opens Match on
+ // this device. The dismissal is sticky in localStorage so reloads
+ // and new tabs land straight on the deck.
+ const [opened, setOpenedState] = useState<boolean>(() =>
+ readIntroOpened("match"),
+ );
+ const setOpened = (next: boolean) => {
+ writeIntroOpened("match", next);
+ setOpenedState(next);
+ };
  const { user, loading } = useAuth();
  const [profile, setProfile] = useState<Profile | null>(null);
  const [hasProjects, setHasProjects] = useState(false);

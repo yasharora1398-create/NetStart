@@ -21,6 +21,7 @@ import { AppLayout } from "@/components/netstart/AppLayout";
 import { StepCredentials } from "@/components/mockups/Steps";
 import { OnboardingTour } from "@/components/netstart/OnboardingTour";
 import { trackMynetSubmitted } from "@/lib/analytics";
+import { readIntroOpened, writeIntroOpened } from "@/lib/introGate";
 import { Sidebar } from "@/components/netstart/Sidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -124,10 +125,16 @@ const errorMessage = (err: unknown): string => {
 };
 
 const MyNet = () => {
- // Intro gate: every visit to /mynet starts on a brief explainer
- // screen with a CTA. Clicking it flips this to true and renders
- // the real page (which still shows AuthGate when not signed in).
- const [opened, setOpened] = useState(false);
+ // Intro gate: only shown the first time the user opens MyNet on
+ // this device. Stored in localStorage so reloads and new tabs land
+ // straight on the dashboard.
+ const [opened, setOpenedState] = useState<boolean>(() =>
+ readIntroOpened("mynet"),
+ );
+ const setOpened = (next: boolean) => {
+ writeIntroOpened("mynet", next);
+ setOpenedState(next);
+ };
  const { user, loading } = useAuth();
  const uid = user?.id ?? null;
 

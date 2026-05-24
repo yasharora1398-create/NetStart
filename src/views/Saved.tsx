@@ -51,6 +51,7 @@ import {
 import type { Candidate, PublicProject } from "@/lib/mynet-types";
 import { cn } from "@/lib/utils";
 import { readCache, writeCache } from "@/lib/cache";
+import { readIntroOpened, writeIntroOpened } from "@/lib/introGate";
 
 type Role = "founder" | "partner";
 
@@ -74,11 +75,16 @@ const readMetadataRole = (
 const SAVED_CANDIDATES_CACHE_KEY = "polln8.saved.candidates";
 
 const Saved = () => {
- // Intro gate: every visit to /saved starts on a brief explainer
- // screen with a CTA. Clicking the CTA flips this to true and
- // renders the real page (which still shows AuthGate when the
- // visitor isn't signed in).
- const [opened, setOpened] = useState(false);
+ // Intro gate: only shown the first time the user opens Saved on
+ // this device. Stored in localStorage so reloads and new tabs
+ // land straight on the list.
+ const [opened, setOpenedState] = useState<boolean>(() =>
+ readIntroOpened("saved"),
+ );
+ const setOpened = (next: boolean) => {
+ writeIntroOpened("saved", next);
+ setOpenedState(next);
+ };
  const { user, loading } = useAuth();
  const reviewStatus = useReviewStatus();
  const needsSetup =

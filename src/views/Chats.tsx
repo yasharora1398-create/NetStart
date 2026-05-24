@@ -38,30 +38,17 @@ import {
 import { ChatConversation } from "@/components/chat/ChatConversation";
 import { cn } from "@/lib/utils";
 
-// sessionStorage key for the intro-gate dismissal so navigating from
-// /chats -> /chats/:id (which remounts the Chats component under
-// Next.js App Router) doesn't reset the gate and bounce the user
-// back to the title page.
-const CHATS_INTRO_OPENED_KEY = "polln8.chats.introOpened.v1";
+import {
+ readIntroOpened as readIntroOpenedRaw,
+ writeIntroOpened as writeIntroOpenedRaw,
+} from "@/lib/introGate";
 
-const readIntroOpened = (): boolean => {
- if (typeof window === "undefined") return false;
- try {
- return window.sessionStorage.getItem(CHATS_INTRO_OPENED_KEY) === "1";
- } catch {
- return false;
- }
-};
-
-const writeIntroOpened = (value: boolean) => {
- if (typeof window === "undefined") return;
- try {
- if (value) window.sessionStorage.setItem(CHATS_INTRO_OPENED_KEY, "1");
- else window.sessionStorage.removeItem(CHATS_INTRO_OPENED_KEY);
- } catch {
- // storage disabled/quota - non-fatal
- }
-};
+// Per-device intro gate (localStorage). Pre-bound to the 'chats'
+// surface so the rest of the file calls readIntroOpened() /
+// writeIntroOpened() without repeating the surface name.
+const readIntroOpened = () => readIntroOpenedRaw("chats");
+const writeIntroOpened = (value: boolean) =>
+ writeIntroOpenedRaw("chats", value);
 
 const Chats = () => {
  const { user, loading } = useAuth();
