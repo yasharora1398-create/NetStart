@@ -357,7 +357,7 @@ const MyNetBadge = ({ row }: { row: SignupRow }) => {
  }
  if (row.reviewStatus === "accepted") {
  return (
- <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary bg-primary text-[11px] text-primary">
+ <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary bg-primary text-[11px] text-primary-foreground">
  Accepted
  </span>
  );
