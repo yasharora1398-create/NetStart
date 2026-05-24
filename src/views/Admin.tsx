@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "@/lib/router-compat";
 import {
  ArrowLeft,
+ Camera,
  Check,
  ChevronDown,
  ExternalLink,
@@ -24,6 +25,8 @@ import {
  Linkedin,
  Loader2,
  ShieldCheck,
+ Trash2,
+ User,
  X,
 } from "lucide-react";
 import {
@@ -50,12 +53,15 @@ import {
 import {
  createPolln8RecommendedProject,
  deleteProject,
+ getAvatarUrl,
  getResumeSignedUrl,
  listProjects,
+ removePolln8RecommendationAvatar,
  reviewProfile,
  setProjectPublished,
  updatePolln8RecommendedProject,
  updateProject,
+ uploadPolln8RecommendationAvatar,
 } from "@/lib/mynet-storage";
 import type { Project } from "@/lib/mynet-types";
 import {
@@ -792,6 +798,8 @@ const RecommendTab = () => {
  const [founderName, setFounderName] = useState("");
  const [founderHeadline, setFounderHeadline] = useState("");
  const [founderWebsite, setFounderWebsite] = useState("");
+ const [pendingFile, setPendingFile] = useState<File | null>(null);
+ const [pendingPreview, setPendingPreview] = useState<string | null>(null);
  const [title, setTitle] = useState("");
  const [description, setDescription] = useState("");
  const [businessType, setBusinessType] = useState("");
@@ -806,6 +814,8 @@ const RecommendTab = () => {
  setFounderName("");
  setFounderHeadline("");
  setFounderWebsite("");
+ setPendingFile(null);
+ setPendingPreview(null);
  setTitle("");
  setDescription("");
  setBusinessType("");
@@ -827,7 +837,7 @@ const RecommendTab = () => {
  if (!valid || submitting) return;
  setSubmitting(true);
  try {
- await createPolln8RecommendedProject({
+ const newId = await createPolln8RecommendedProject({
  title,
  description,
  criteria: {
@@ -842,6 +852,20 @@ const RecommendTab = () => {
  founderHeadline,
  founderWebsite,
  });
+ // If the admin picked a logo, upload it now that the row has an
+ // id. Failure here doesn't undo the post - the recommendation
+ // still ships, just without the photo (admin can edit + re-upload).
+ if (pendingFile) {
+ try {
+ await uploadPolln8RecommendationAvatar(newId, pendingFile, null);
+ } catch (avatarErr) {
+ toast.error(
+ avatarErr instanceof Error
+ ? `Posted, but photo upload failed: ${avatarErr.message}`
+ : "Posted, but photo upload failed.",
+ );
+ }
+ }
  toast.success("Recommendation posted. It's live in the deck.");
  reset();
  } catch (err) {
@@ -901,6 +925,18 @@ const RecommendTab = () => {
  deck.
  </p>
  </Field>
+ <LogoField
+ label="Founder photo / logo (optional)"
+ previewUrl={pendingPreview}
+ onPick={(file, dataUrl) => {
+ setPendingFile(file);
+ setPendingPreview(dataUrl);
+ }}
+ onRemove={() => {
+ setPendingFile(null);
+ setPendingPreview(null);
+ }}
+ />
  </section>
 
  <section className="space-y-5 border-t border-border pt-8">
@@ -1049,6 +1085,95 @@ const Field = ({
  {children}
  </div>
 );
+
+// Photo picker for the founder logo on Polln8 recommendations.
+// Shows the existing/preview image (or a silhouette fallback) +
+// an upload button. Reads the picked file as a data URL so the
+// preview swaps in immediately; the actual storage upload happens
+// later when the caller submits the form.
+const AVATAR_MAX_MB = 2;
+const LogoField = ({
+ label,
+ previewUrl,
+ onPick,
+ onRemove,
+}: {
+ label: string;
+ previewUrl: string | null;
+ onPick: (file: File, dataUrl: string) => void;
+ onRemove: () => void;
+}) => {
+ const [inputKey, setInputKey] = useState(0);
+
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const file = e.target.files?.[0];
+ if (!file) return;
+ if (file.size > AVATAR_MAX_MB * 1024 * 1024) {
+ toast.error(`Photo too large. Max ${AVATAR_MAX_MB} MB.`);
+ setInputKey((k) => k + 1);
+ return;
+ }
+ const reader = new FileReader();
+ reader.onload = () => {
+ const dataUrl = typeof reader.result === "string" ? reader.result : "";
+ onPick(file, dataUrl);
+ setInputKey((k) => k + 1);
+ };
+ reader.readAsDataURL(file);
+ };
+
+ return (
+ <div>
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
+ {label}
+ </Label>
+ <div className="flex items-center gap-4">
+ <div className="h-20 w-20 rounded-md border border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
+ {previewUrl ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={previewUrl}
+ alt=""
+ className="h-full w-full object-cover"
+ />
+ ) : (
+ <User
+ strokeWidth={1.4}
+ className="h-10 w-10 text-muted-foreground"
+ />
+ )}
+ </div>
+ <div className="flex items-center gap-2">
+ <label className="inline-flex items-center gap-2 rounded-full border border-primary bg-card px-4 py-1.5 text-xs font-medium text-primary cursor-pointer transition-colors hover:bg-primary hover:text-primary-foreground">
+ <Camera className="h-3.5 w-3.5" />
+ {previewUrl ? "Change photo" : "Upload photo"}
+ <input
+ key={inputKey}
+ type="file"
+ accept="image/*"
+ className="hidden"
+ onChange={handleChange}
+ />
+ </label>
+ {previewUrl ? (
+ <button
+ type="button"
+ onClick={onRemove}
+ className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+ >
+ <Trash2 className="h-3.5 w-3.5" />
+ Remove
+ </button>
+ ) : null}
+ </div>
+ </div>
+ <p className="text-[11px] text-muted-foreground mt-2">
+ Square works best. Max {AVATAR_MAX_MB} MB. Replaces the silhouette
+ fallback on the partner Match card.
+ </p>
+ </div>
+ );
+};
 
 // ────────────────────────────────────────────────────────────────
 // My posts tab - admin sees every project owned by their account
@@ -1254,6 +1379,12 @@ const EditPostDialog = ({
  const [founderName, setFounderName] = useState("");
  const [founderHeadline, setFounderHeadline] = useState("");
  const [founderWebsite, setFounderWebsite] = useState("");
+ const [existingPhotoPath, setExistingPhotoPath] = useState<string>("");
+ const [pendingFile, setPendingFile] = useState<File | null>(null);
+ const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+ // True when the user clicked Remove on the existing photo - on save
+ // we wipe the storage object + clear the row column.
+ const [photoRemoved, setPhotoRemoved] = useState(false);
  const [title, setTitle] = useState("");
  const [description, setDescription] = useState("");
  const [businessType, setBusinessType] = useState("");
@@ -1267,20 +1398,13 @@ const EditPostDialog = ({
  // Re-seed the form whenever a new project lands in the dialog.
  useEffect(() => {
  if (!project) return;
- const recommended = project.isPolln8Recommended;
- // The PublicProject mapping in listPublishedProjects swaps the
- // founder fields when recommended, but this dialog reads off the
- // raw Project row (listProjects) which doesn't expose those
- // overrides. Read them directly from the criteria-style fields we
- // store on the row when available, otherwise leave empty.
- const raw = project as Project & {
- polln8FounderName?: string;
- polln8FounderHeadline?: string;
- polln8FounderWebsite?: string;
- };
- setFounderName(raw.polln8FounderName ?? "");
- setFounderHeadline(raw.polln8FounderHeadline ?? "");
- setFounderWebsite(raw.polln8FounderWebsite ?? "");
+ setFounderName(project.polln8FounderName);
+ setFounderHeadline(project.polln8FounderHeadline);
+ setFounderWebsite(project.polln8FounderWebsite);
+ setExistingPhotoPath(project.polln8FounderAvatarPath);
+ setPendingFile(null);
+ setPendingPreview(null);
+ setPhotoRemoved(false);
  setTitle(project.title);
  setDescription(project.description);
  setBusinessType(project.businessType);
@@ -1289,8 +1413,6 @@ const EditPostDialog = ({
  setLocation(project.criteria.location);
  setLocationEnabled(Boolean(project.criteria.location?.trim()));
  setKeywords(project.criteria.keywords);
- // Track which mode we're editing in (recommendation vs plain).
- void recommended;
  }, [project]);
 
  if (!project) return null;
@@ -1324,6 +1446,36 @@ const EditPostDialog = ({
  founderHeadline,
  founderWebsite,
  });
+ // Photo: upload-new wins over removal. Both swallow their own
+ // errors so a failed avatar doesn't block the field update.
+ if (pendingFile) {
+ try {
+ await uploadPolln8RecommendationAvatar(
+ project.id,
+ pendingFile,
+ existingPhotoPath || null,
+ );
+ } catch (avatarErr) {
+ toast.error(
+ avatarErr instanceof Error
+ ? `Saved, but photo upload failed: ${avatarErr.message}`
+ : "Saved, but photo upload failed.",
+ );
+ }
+ } else if (photoRemoved && existingPhotoPath) {
+ try {
+ await removePolln8RecommendationAvatar(
+ project.id,
+ existingPhotoPath,
+ );
+ } catch (avatarErr) {
+ toast.error(
+ avatarErr instanceof Error
+ ? `Saved, but photo removal failed: ${avatarErr.message}`
+ : "Saved, but photo removal failed.",
+ );
+ }
+ }
  } else {
  await updateProject(project.id, {
  title,
@@ -1380,6 +1532,23 @@ const EditPostDialog = ({
  className="h-11 bg-background border-border focus-visible:border-primary"
  />
  </Field>
+ <LogoField
+ label="Founder photo / logo (optional)"
+ previewUrl={
+ pendingPreview ??
+ (photoRemoved ? null : getAvatarUrl(existingPhotoPath))
+ }
+ onPick={(file, dataUrl) => {
+ setPendingFile(file);
+ setPendingPreview(dataUrl);
+ setPhotoRemoved(false);
+ }}
+ onRemove={() => {
+ setPendingFile(null);
+ setPendingPreview(null);
+ setPhotoRemoved(true);
+ }}
+ />
  </section>
  ) : null}
 

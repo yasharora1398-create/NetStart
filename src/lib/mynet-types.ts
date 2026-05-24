@@ -29,7 +29,16 @@ export type Project = {
  polln8FounderName: string;
  polln8FounderHeadline: string;
  polln8FounderWebsite: string;
+ // Admin-uploaded logo / founder photo for a recommendation. Path
+ // into the 'avatars' bucket; resolve via getAvatarUrl. Empty when
+ // no photo has been uploaded for the post.
+ polln8FounderAvatarPath: string;
 };
+
+// NOTE: PublicProject.polln8FounderAvatarPath is `string | null`
+// (defined further down) while Project.polln8FounderAvatarPath is
+// `string` (always present, "" when empty) - keep both shapes in
+// sync with their respective call sites.
 
 export type ResumeMeta = {
  name: string;
@@ -162,6 +171,10 @@ export type PublicProject = {
  polln8FounderName: string;
  polln8FounderHeadline: string;
  polln8FounderWebsite: string;
+ // Path to the admin-uploaded founder photo for the recommendation;
+ // resolve with getAvatarUrl. Null when none was uploaded - card
+ // falls back to the silhouette icon.
+ polln8FounderAvatarPath: string | null;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({

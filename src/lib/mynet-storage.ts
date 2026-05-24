@@ -525,6 +525,9 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
  polln8FounderWebsite:
  ((p as ProjectRow & { polln8_founder_website?: string })
  .polln8_founder_website ?? "").trim(),
+ polln8FounderAvatarPath:
+ ((p as ProjectRow & { polln8_founder_avatar_path?: string })
+ .polln8_founder_avatar_path ?? "").trim(),
  };
  });
 };
@@ -586,6 +589,9 @@ export const createProject = async (
  polln8FounderWebsite:
  ((r as ProjectRow & { polln8_founder_website?: string })
  .polln8_founder_website ?? "").trim(),
+ polln8FounderAvatarPath:
+ ((r as ProjectRow & { polln8_founder_avatar_path?: string })
+ .polln8_founder_avatar_path ?? "").trim(),
  };
 };
 
@@ -845,6 +851,7 @@ type PublishedRpcRow = {
  polln8_founder_name: string | null;
  polln8_founder_headline: string | null;
  polln8_founder_website: string | null;
+ polln8_founder_avatar_path: string | null;
 };
 
 export const listPublishedProjects = async (): Promise<PublicProject[]> => {
@@ -856,6 +863,7 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  const recommended = Boolean(p.is_polln8_recommended);
  const polln8Name = (p.polln8_founder_name ?? "").trim();
  const polln8Headline = (p.polln8_founder_headline ?? "").trim();
+ const polln8Avatar = (p.polln8_founder_avatar_path ?? "").trim();
  return {
  id: p.id,
  ownerId: p.owner_id,
@@ -866,19 +874,22 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  lifecycleState: lifecycleFrom(p.lifecycle_state),
  createdAt: p.created_at,
  // When the post is a Polln8 recommendation, swap the displayed
- // founder name + headline to the admin-supplied values. The real
- // owner stays in ownerId so chat / save / etc still work.
+ // founder name + headline + avatar to the admin-supplied values.
+ // The real owner stays in ownerId so chat / save / etc still work.
  founderFullName: recommended && polln8Name
  ? polln8Name
  : p.founder_full_name ?? "",
  founderHeadline: recommended && polln8Headline
  ? polln8Headline
  : p.founder_headline ?? "",
- founderAvatarPath: p.founder_avatar ?? null,
+ founderAvatarPath: recommended && polln8Avatar
+ ? polln8Avatar
+ : p.founder_avatar ?? null,
  isPolln8Recommended: recommended,
  polln8FounderName: polln8Name,
  polln8FounderHeadline: polln8Headline,
  polln8FounderWebsite: (p.polln8_founder_website ?? "").trim(),
+ polln8FounderAvatarPath: polln8Avatar || null,
  };
  });
 };
@@ -922,7 +933,8 @@ export const updatePolln8RecommendedProject = async (
 // Admin-only: create a Polln8-recommended project on behalf of a
 // founder. The project is owned by the admin (so chat / save / etc
 // route to a real account), but renders in the Match deck under the
-// supplied founder name + a 'Recommended by Polln8' badge.
+// supplied founder name + a 'Recommended by Polln8' badge. Returns
+// the new project id so the caller can chain an avatar upload.
 export const createPolln8RecommendedProject = async (input: {
  title: string;
  description: string;
@@ -931,12 +943,14 @@ export const createPolln8RecommendedProject = async (input: {
  founderName: string;
  founderHeadline: string;
  founderWebsite: string;
-}): Promise<void> => {
+}): Promise<string> => {
  const supabase = getSupabase();
  const { data: userResp } = await supabase.auth.getUser();
  const uid = userResp.user?.id;
  if (!uid) throw new Error("Sign in required.");
- const { error } = await supabase.from("projects").insert({
+ const { data: row, error } = await supabase
+ .from("projects")
+ .insert({
  owner_id: uid,
  title: input.title.trim(),
  description: input.description.trim(),
@@ -947,7 +961,68 @@ export const createPolln8RecommendedProject = async (input: {
  polln8_founder_name: input.founderName.trim(),
  polln8_founder_headline: input.founderHeadline.trim(),
  polln8_founder_website: input.founderWebsite.trim(),
+ })
+ .select("id")
+ .single();
+ if (error) throw error;
+ return (row as { id: string }).id;
+};
+
+// Admin-only: upload (or replace) the founder photo for a Polln8-
+// recommended project. The file lives in the existing 'avatars'
+// bucket under <adminUserId>/polln8/<projectId>-<ts>.<ext> so the
+// public URL pipeline (getAvatarUrl) just works. Returns the new
+// storage path.
+export const uploadPolln8RecommendationAvatar = async (
+ projectId: string,
+ file: File,
+ previousPath: string | null,
+): Promise<string> => {
+ if (file.size > AVATAR_MAX_BYTES) {
+ throw new Error("Photo too large. Max 2 MB.");
+ }
+ const supabase = getSupabase();
+ const { data: userResp } = await supabase.auth.getUser();
+ const uid = userResp.user?.id;
+ if (!uid) throw new Error("Sign in required.");
+ const ext = (file.name.split(".").pop() ?? "png").toLowerCase();
+ const path = `${uid}/polln8/${projectId}-${Date.now()}.${ext}`;
+ const { error: uploadError } = await supabase.storage
+ .from(AVATARS_BUCKET)
+ .upload(path, file, {
+ cacheControl: "3600",
+ upsert: false,
+ contentType: file.type || undefined,
  });
+ if (uploadError) throw uploadError;
+ const { error: rowError } = await supabase
+ .from("projects")
+ .update({ polln8_founder_avatar_path: path })
+ .eq("id", projectId);
+ if (rowError) {
+ await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+ throw rowError;
+ }
+ if (previousPath) {
+ await supabase.storage.from(AVATARS_BUCKET).remove([previousPath]);
+ }
+ return path;
+};
+
+// Admin-only: remove the recommendation's founder photo. Clears the
+// column on the project row and deletes the storage object.
+export const removePolln8RecommendationAvatar = async (
+ projectId: string,
+ path: string | null,
+): Promise<void> => {
+ const supabase = getSupabase();
+ if (path) {
+ await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+ }
+ const { error } = await supabase
+ .from("projects")
+ .update({ polln8_founder_avatar_path: "" })
+ .eq("id", projectId);
  if (error) throw error;
 };
 
