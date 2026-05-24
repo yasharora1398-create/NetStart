@@ -264,7 +264,6 @@ export default function BrowseScreen() {
  : "Check back soon. Founders are spinning things up."
  }
  />
- {projects.length > 0 ? (
  <View style={styles.reviewSeenWrap}>
  <Pressable
  onPress={() => setIndex(0)}
@@ -279,7 +278,6 @@ export default function BrowseScreen() {
  </Text>
  </Pressable>
  </View>
- ) : null}
  </>
  ) : (
  <View style={styles.deckInner}>

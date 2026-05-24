@@ -293,7 +293,6 @@ export default function MatchScreen() {
  variant="caught"
  sub="No more candidates ranked against this project. Lower the criteria or wait for new partners to join."
  />
- {candidates.length > 0 ? (
  <View style={styles.reviewSeenWrap}>
  <Pressable
  onPress={() => setIndex(0)}
@@ -308,7 +307,6 @@ export default function MatchScreen() {
  </Text>
  </Pressable>
  </View>
- ) : null}
  </>
  ) : (
  <View style={styles.deckInner}>
