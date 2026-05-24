@@ -1644,8 +1644,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  )}
  >
  {recommended ? (
- <div className="flex items-center gap-1.5 bg-primary px-4 py-2 text-[11px] font-mono uppercase tracking-[0.18em] text-primary-foreground">
- <Sparkles className="h-3.5 w-3.5" />
+ <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
  Recommended by Polln8
  </div>
  ) : null}
