@@ -488,15 +488,29 @@ const PartnerView = () => {
  {loadingData ? (
  <Loading />
  ) : !current ? (
+ <div className="flex flex-col items-center">
  <MothEmptyState
  variant={hasFilters ? "filters" : "caught"}
  title={hasFilters ? "No matches." : "You're caught up."}
  sub={
  hasFilters
  ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
+ : decided.size > 0
+ ? "You've worked through every partner that's open right now. Review the ones you've already seen, or wait for new sign-ups to land."
  : "You've worked through every partner that's open right now. New ones will land here as they sign up."
  }
  />
+ {!hasFilters && decided.size > 0 ? (
+ <button
+ type="button"
+ onClick={() => setDecided(new Set())}
+ className="mt-2 inline-flex items-center justify-center gap-2 rounded-full border border-gold bg-card px-6 py-3 text-sm font-medium text-gold transition-colors hover:bg-gold hover:text-primary-foreground hover:border-gold"
+ >
+ <Undo2 className="h-4 w-4" />
+ Review already seen ({decided.size})
+ </button>
+ ) : null}
+ </div>
  ) : (
  <div
  className={cn(
@@ -1044,15 +1058,41 @@ const LookerView = () => {
  {loadingData ? (
  <Loading />
  ) : !current ? (
+ <div className="flex flex-col items-center">
  <MothEmptyState
- variant={hasFilters ? "filters" : "platform"}
- title={hasFilters ? "No matches." : "No projects right now."}
+ variant={
+ hasFilters
+ ? "filters"
+ : decided.size > 0
+ ? "caught"
+ : "platform"
+ }
+ title={
+ hasFilters
+ ? "No matches."
+ : decided.size > 0
+ ? "You're caught up."
+ : "No projects right now."
+ }
  sub={
  hasFilters
  ? "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up."
+ : decided.size > 0
+ ? "You've worked through every project on the deck. Review the ones you've already seen, or wait for new ones to land."
  : "Be early. Once founders publish projects, they'll show up here."
  }
  />
+ {!hasFilters && decided.size > 0 ? (
+ <button
+ type="button"
+ onClick={() => setDecided(new Set())}
+ className="mt-2 inline-flex items-center justify-center gap-2 rounded-full border border-gold bg-card px-6 py-3 text-sm font-medium text-gold transition-colors hover:bg-gold hover:text-primary-foreground hover:border-gold"
+ >
+ <Undo2 className="h-4 w-4" />
+ Review already seen ({decided.size})
+ </button>
+ ) : null}
+ </div>
  ) : (
  <div
  className={cn(
