@@ -586,11 +586,21 @@ const PartnerView = () => {
  <X className="h-6 w-6" strokeWidth={2.2} />
  </button>
 
- {/* The card itself "" fixed width, never shifts on its
- own. Justify-center on the parent does the visual
- slide as the action column grows on the right. */}
- <div className="w-full max-w-[480px] flex-shrink-0">
+ {/* Card + Previous button stack. Same layout as the
+ founder-side LookerView deck so both sides have a
+ Previous control under the card. */}
+ <div className="w-full max-w-[480px] flex-shrink-0 flex flex-col gap-3">
  <MatchCandidateCard candidate={current} />
+ <button
+ type="button"
+ onClick={undo}
+ disabled={!lastDecided}
+ aria-label="Previous card"
+ className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card disabled:hover:text-gold disabled:hover:border-gold"
+ >
+ <ChevronLeft className="h-4 w-4" />
+ Previous
+ </button>
  </div>
 
  {/* Ã¢Å" button "" same collapse trick on the other side. */}
