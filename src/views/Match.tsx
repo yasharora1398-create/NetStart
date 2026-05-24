@@ -573,72 +573,33 @@ const PartnerView = () => {
  </button>
  </div>
 
- {/* Deck stage "" single flex row, justify-center. The card
- + side buttons (or action buttons when approving) move
- together as a unit. */}
- <div
- className={cn(
- "relative mx-auto flex items-center justify-center gap-6 px-4 py-6",
- fullscreen ? "h-[calc(100dvh-72px)]" : "min-h-[720px]",
- )}
- >
- {/* X button "" collapses out of the flex layout when the
- user approves so the row doesn't keep dead space. */}
- <button
- type="button"
- onClick={decline}
- aria-label="Pass"
- className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-destructive bg-card text-destructive shadow-sm hover:bg-destructive hover:border-destructive transition-all duration-500",
- approving &&
- "opacity-0 pointer-events-none scale-75 -mr-[80px]",
- )}
- >
- <X className="h-6 w-6" strokeWidth={2.2} />
- </button>
-
- {/* Card + Previous button stack. Same layout as the
- founder-side LookerView deck so both sides have a
- Previous control under the card. */}
- <div className="w-full max-w-[480px] flex-shrink-0 flex flex-col gap-3">
- <MatchCandidateCard candidate={current} />
- <button
- type="button"
- onClick={undo}
- disabled={!lastDecided}
- aria-label="Previous card"
- className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card disabled:hover:text-gold disabled:hover:border-gold"
- >
- <ChevronLeft className="h-4 w-4" />
- Previous
- </button>
+ {/* Deck stage - just the card, swipe to decide. Drag right
+ to accept (opens the action sheet below), drag left to
+ pass. Same layout mobile + desktop so the founder-side
+ deck reads like the partner-side. No X/Check buttons,
+ no side panels; the card stands alone. */}
+ <div className="mx-auto flex w-full max-w-[480px] flex-col items-center px-3 py-4">
+ <MobileSwipeCard
+ top={<MatchCandidateCard candidate={current} />}
+ under={
+ filtered[1] ? (
+ <MatchCandidateCard candidate={filtered[1]} />
+ ) : null
+ }
+ resetKey={current.userId}
+ onSwipeLeft={decline}
+ onSwipeRight={accept}
+ />
  </div>
 
- {/* Ã¢Å" button "" same collapse trick on the other side. */}
- <button
- type="button"
- onClick={accept}
- aria-label="Approve"
- disabled={Boolean(approving)}
- className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-primary-foreground transition-all duration-500",
- approving &&
- "opacity-0 pointer-events-none scale-75 -ml-[80px]",
- )}
+ {/* Action sheet - LinkedIn / Resume / Save / Message.
+ Opens as a bottom sheet on accept (mobile + desktop).
+ Replaces the old desktop side-column. */}
+ <BottomSheet
+ open={Boolean(approving)}
+ onClose={() => closeInfo(true)}
  >
- <Check className="h-6 w-6" strokeWidth={2.4} />
- </button>
-
- {/* Action column "" only the LinkedIn / resume / save /
- message buttons. No box, no headings. Width animates
- from 0 to auto so the card recenters smoothly. */}
- <div
- className={cn(
- "transition-all duration-500 ease-out overflow-hidden",
- approving ? "max-w-[120px] opacity-100" : "max-w-0 opacity-0 -ml-6",
- )}
- >
- <div className="w-[88px]">
+ <div className="p-4 pb-12">
  {approving ? (
  <CandidateActions
  candidate={approving}
@@ -647,8 +608,7 @@ const PartnerView = () => {
  />
  ) : null}
  </div>
- </div>
- </div>
+ </BottomSheet>
  </div>
  )}
  </>
@@ -668,7 +628,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  candidate has no avatar - matches the anonymous silhouette in
  the How-it-works StepMatch mockup so the same visual reads
  across the marketing + product surfaces. */}
- <div className="relative w-full aspect-[4/3] bg-muted">
+ <div className="relative w-full aspect-[3/2] bg-muted">
  {avatar ? (
  <img
  src={avatar}
@@ -683,7 +643,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  </div>
 
  {/* Body "" name, pills, bio. */}
- <div className="p-5">
+ <div className="p-4">
  <h2 className="mb-2 font-display text-2xl leading-tight text-foreground">
  {candidate.fullName || "Unnamed"}
  </h2>
@@ -722,7 +682,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  ) : null}
 
  {candidate.bio ? (
- <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+ <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
  {candidate.bio}
  </p>
  ) : null}
@@ -802,7 +762,7 @@ const CandidateActions = ({
  };
 
  return (
- <div className="flex flex-col items-center gap-3">
+ <div className="flex flex-row items-center justify-center gap-4 flex-wrap">
  {/* LinkedIn */}
  {candidate.linkedinUrl ? (
  <a
@@ -1205,87 +1165,11 @@ const LookerView = () => {
  </button>
  </div>
 
- {/* DESKTOP deck stage "" X | Card | Ã¢Å" row with a slide-in
- info panel on accept. Hidden under 768px in favour of
- the swipe deck below. */}
- <div
- className={cn(
- "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4 py-6",
- fullscreen ? "h-[calc(100dvh-72px)]" : "min-h-[760px]",
- )}
- >
- <button
- type="button"
- onClick={decline}
- aria-label="Pass"
- className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-destructive bg-card text-destructive shadow-sm hover:bg-destructive hover:border-destructive transition-all duration-500",
- approving &&
- "opacity-0 pointer-events-none scale-75 -mr-[80px]",
- )}
- >
- <X className="h-6 w-6" strokeWidth={2.2} />
- </button>
-
- {/* Card + Previous button stack. Width fixed at 480px so the
- 4:3 picture (480x360) + body (~220) + Previous button
- (~50) + gaps (~24) totals ~654px - comfortably inside
- 720-760px viewports normal-mode, and inside any laptop
- viewport in fullscreen mode. */}
- <div className="w-full max-w-[480px] flex-shrink-0 flex flex-col gap-3">
- <MatchProjectCard project={displayed!} />
- <button
- type="button"
- onClick={goBack}
- disabled={!lastDecided}
- aria-label="Previous card"
- className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card disabled:hover:text-gold disabled:hover:border-gold"
- >
- <ChevronLeft className="h-4 w-4" />
- Previous
- </button>
- </div>
-
- <button
- type="button"
- onClick={accept}
- aria-label="Approve"
- disabled={Boolean(approving)}
- className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-primary-foreground transition-all duration-500",
- approving &&
- "opacity-0 pointer-events-none scale-75 -ml-[80px]",
- )}
- >
- <Check className="h-6 w-6" strokeWidth={2.4} />
- </button>
-
- <div
- className={cn(
- "transition-all duration-500 ease-out overflow-hidden",
- approving
- ? "max-w-[540px] opacity-100"
- : "max-w-0 opacity-0 -ml-6",
- )}
- >
- <div className="w-[520px]">
- {approving ? (
- <ProjectInfoPanel
- project={approving}
- canGoBack={Boolean(lastDecided)}
- onClose={() => closeInfo()}
- onBack={goBack}
- onSwitchProject={(p) => setApproving(p)}
- />
- ) : null}
- </div>
- </div>
- </div>
-
- {/* MOBILE deck "" swipe-left = pass, swipe-right = save +
- open the info sheet. Mirrors the Expo Match feel:
- one card, stacked under-card peeking, no buttons. */}
- <div className="md:hidden mx-auto w-full max-w-[520px] px-3 py-4">
+ {/* Deck stage - card-only on every screen size. Swipe-left
+ = pass, swipe-right = save + open the info sheet. No
+ X/Check buttons, no side panels - the card stands alone
+ the way the partner-side mobile deck always has. */}
+ <div className="mx-auto w-full max-w-[480px] px-3 py-4">
  <MobileSwipeCard
  top={<MatchProjectCard project={displayed!} />}
  under={
@@ -1299,12 +1183,10 @@ const LookerView = () => {
  />
  </div>
 
- {/* MOBILE info sheet "" bottom sheet (~85dvh) that slides
- up on swipe-right. The card behind stays visible in
- the gap at the top. Drag the handle down to dismiss
- and the deck moves on (the project was already
- stamped decided by accept()). */}
- <div className="md:hidden">
+ {/* Info sheet - opens on swipe-right (accept) for both
+ mobile + desktop. Drag handle down to dismiss and the
+ deck moves on (project already stamped decided by
+ accept()). */}
  <BottomSheet
  open={Boolean(approving)}
  onClose={() => closeInfo()}
@@ -1321,7 +1203,6 @@ const LookerView = () => {
  ) : null}
  </div>
  </BottomSheet>
- </div>
 
  {/* MOBILE filter sheet "" same Filters component the
  desktop renders inline, surfaced via the search icon
@@ -1666,7 +1547,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  silhouette icon when the founder has no avatar - matches the
  partner-card fallback above and the StepMatch anonymous
  silhouette on the How-it-works page. */}
- <div className="relative w-full aspect-[4/3] bg-muted">
+ <div className="relative w-full aspect-[3/2] bg-muted">
  {avatar ? (
  <img
  src={avatar}
@@ -1681,7 +1562,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  </div>
 
  {/* Body "" title, byline, pills, description. */}
- <div className="p-5">
+ <div className="p-4">
  <h2 className="mb-1 font-display text-2xl leading-tight text-foreground">
  {project.title}
  </h2>
@@ -1721,7 +1602,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  ) : null}
 
  {project.description ? (
- <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+ <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
  {project.description}
  </p>
  ) : null}

@@ -117,13 +117,13 @@ export const MobileSwipeCard = ({
  const swipeColor = opacityRight >= opacityLeft
  ? "var(--primary)"
  : "var(--destructive)";
- // Outer ring grows from 0 to 6px as the user crosses the swipe
- // threshold, plus a soft halo that scales with intensity. Both
- // hsl() calls inline so we can multiply alpha against intensity.
- const ringWidth = (intensity * 6).toFixed(2);
- const haloAlpha = (intensity * 0.55).toFixed(3);
+ // Extremely slight per user instruction: thin 2px ring max, very
+ // faint halo. Just enough to read the swipe direction without
+ // shouting at the user.
+ const ringWidth = (intensity * 2).toFixed(2);
+ const haloAlpha = (intensity * 0.18).toFixed(3);
  const boxShadow = intensity > 0
- ? `0 0 0 ${ringWidth}px hsl(${swipeColor}), 0 0 44px 10px hsl(${swipeColor} / ${haloAlpha})`
+ ? `0 0 0 ${ringWidth}px hsl(${swipeColor} / 0.55), 0 0 22px 4px hsl(${swipeColor} / ${haloAlpha})`
  : "none";
 
  return (
