@@ -410,12 +410,18 @@ const SignUp = () => {
  >
  <p
  className={`font-display text-base mb-1 ${
- active ? "text-gold" : "text-foreground"
+ active ? "text-primary-foreground" : "text-foreground"
  }`}
  >
  {opt.label}
  </p>
- <p className="text-[11px] text-muted-foreground leading-snug">
+ <p
+ className={`text-[11px] leading-snug ${
+ active
+ ? "text-primary-foreground"
+ : "text-muted-foreground"
+ }`}
+ >
  {opt.hint}
  </p>
  </button>

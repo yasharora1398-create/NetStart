@@ -54,8 +54,16 @@ import {
  listProjects,
  reviewProfile,
  setProjectPublished,
+ updatePolln8RecommendedProject,
+ updateProject,
 } from "@/lib/mynet-storage";
 import type { Project } from "@/lib/mynet-types";
+import {
+ Dialog,
+ DialogContent,
+ DialogHeader,
+ DialogTitle,
+} from "@/components/ui/dialog";
 import { emptyCriteria } from "@/lib/mynet-types";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { TagInput } from "@/components/mynet/TagInput";
@@ -1052,6 +1060,7 @@ const MyPostsTab = ({ adminUserId }: { adminUserId: string }) => {
  const [items, setItems] = useState<Project[] | null>(null);
  const [error, setError] = useState<string | null>(null);
  const [busy, setBusy] = useState<string | null>(null);
+ const [editing, setEditing] = useState<Project | null>(null);
 
  const load = () => {
  setError(null);
@@ -1186,6 +1195,14 @@ const MyPostsTab = ({ adminUserId }: { adminUserId: string }) => {
  <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
  <button
  type="button"
+ onClick={() => setEditing(project)}
+ disabled={busy === project.id}
+ className="inline-flex items-center gap-2 rounded-full border border-primary bg-card px-4 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ Edit
+ </button>
+ <button
+ type="button"
  onClick={() => void togglePublished(project)}
  disabled={busy === project.id}
  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
@@ -1209,7 +1226,279 @@ const MyPostsTab = ({ adminUserId }: { adminUserId: string }) => {
  </div>
  </article>
  ))}
+ <EditPostDialog
+ project={editing}
+ onClose={() => setEditing(null)}
+ onSaved={() => {
+ setEditing(null);
+ load();
+ }}
+ />
  </div>
+ );
+};
+
+// Edit modal for an admin-owned post. Reuses every field the
+// RecommendTab form has so the same shape can edit a curated post
+// or a plain admin project. The polln8_* fields are skipped on save
+// for non-recommended posts.
+const EditPostDialog = ({
+ project,
+ onClose,
+ onSaved,
+}: {
+ project: Project | null;
+ onClose: () => void;
+ onSaved: () => void;
+}) => {
+ const [founderName, setFounderName] = useState("");
+ const [founderHeadline, setFounderHeadline] = useState("");
+ const [founderWebsite, setFounderWebsite] = useState("");
+ const [title, setTitle] = useState("");
+ const [description, setDescription] = useState("");
+ const [businessType, setBusinessType] = useState("");
+ const [skills, setSkills] = useState<string[]>([]);
+ const [commitment, setCommitment] = useState("");
+ const [location, setLocation] = useState("");
+ const [locationEnabled, setLocationEnabled] = useState(false);
+ const [keywords, setKeywords] = useState("");
+ const [submitting, setSubmitting] = useState(false);
+
+ // Re-seed the form whenever a new project lands in the dialog.
+ useEffect(() => {
+ if (!project) return;
+ const recommended = project.isPolln8Recommended;
+ // The PublicProject mapping in listPublishedProjects swaps the
+ // founder fields when recommended, but this dialog reads off the
+ // raw Project row (listProjects) which doesn't expose those
+ // overrides. Read them directly from the criteria-style fields we
+ // store on the row when available, otherwise leave empty.
+ const raw = project as Project & {
+ polln8FounderName?: string;
+ polln8FounderHeadline?: string;
+ polln8FounderWebsite?: string;
+ };
+ setFounderName(raw.polln8FounderName ?? "");
+ setFounderHeadline(raw.polln8FounderHeadline ?? "");
+ setFounderWebsite(raw.polln8FounderWebsite ?? "");
+ setTitle(project.title);
+ setDescription(project.description);
+ setBusinessType(project.businessType);
+ setSkills(project.criteria.skills);
+ setCommitment(project.criteria.commitment);
+ setLocation(project.criteria.location);
+ setLocationEnabled(Boolean(project.criteria.location?.trim()));
+ setKeywords(project.criteria.keywords);
+ // Track which mode we're editing in (recommendation vs plain).
+ void recommended;
+ }, [project]);
+
+ if (!project) return null;
+ const recommended = project.isPolln8Recommended;
+
+ const valid =
+ title.trim().length >= 2 &&
+ description.trim() !== "" &&
+ skills.length >= 1 &&
+ commitment.trim() !== "" &&
+ (!recommended || founderName.trim() !== "");
+
+ const submit = async () => {
+ if (!valid || submitting) return;
+ setSubmitting(true);
+ try {
+ const criteria = {
+ ...emptyCriteria(),
+ skills,
+ commitment: commitment.trim(),
+ location: locationEnabled ? location.trim() : "",
+ keywords: keywords.trim(),
+ };
+ if (recommended) {
+ await updatePolln8RecommendedProject(project.id, {
+ title,
+ description,
+ criteria,
+ businessType,
+ founderName,
+ founderHeadline,
+ founderWebsite,
+ });
+ } else {
+ await updateProject(project.id, {
+ title,
+ description,
+ criteria,
+ businessType,
+ });
+ }
+ toast.success("Post updated.");
+ onSaved();
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not update.");
+ } finally {
+ setSubmitting(false);
+ }
+ };
+
+ return (
+ <Dialog open onOpenChange={(open) => (open ? null : onClose())}>
+ <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+ <DialogHeader>
+ <DialogTitle>
+ {recommended ? "Edit Polln8 recommendation" : "Edit post"}
+ </DialogTitle>
+ </DialogHeader>
+ <div className="space-y-6 mt-4">
+ {recommended ? (
+ <section className="space-y-5">
+ <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+ Who is it from?
+ </h3>
+ <Field label="Founder name" required>
+ <Input
+ value={founderName}
+ onChange={(e) => setFounderName(e.target.value)}
+ placeholder="e.g. Owen Carter"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Founder headline (optional)">
+ <Input
+ value={founderHeadline}
+ onChange={(e) => setFounderHeadline(e.target.value)}
+ placeholder="e.g. Ex-payments lead"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Founder website (optional)">
+ <Input
+ type="url"
+ value={founderWebsite}
+ onChange={(e) => setFounderWebsite(e.target.value)}
+ placeholder="https://example.com"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ </section>
+ ) : null}
+
+ <section
+ className={
+ recommended ? "space-y-5 border-t border-border pt-6" : "space-y-5"
+ }
+ >
+ <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+ The startup
+ </h3>
+ <Field label="Project title" required>
+ <Input
+ value={title}
+ onChange={(e) => setTitle(e.target.value)}
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Description" required>
+ <Textarea
+ value={description}
+ onChange={(e) => setDescription(e.target.value)}
+ rows={3}
+ className="bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Business type">
+ <Autocomplete
+ value={businessType}
+ onChange={setBusinessType}
+ options={BUSINESS_TYPE_OPTIONS}
+ placeholder="SaaS, Marketplace..."
+ />
+ </Field>
+ <Field label="Skills" required>
+ <TagInput
+ value={skills}
+ onChange={setSkills}
+ options={SKILLS_OPTIONS}
+ placeholder="Type to filter, click to add..."
+ />
+ </Field>
+ <Field label="Commitment" required>
+ <Autocomplete
+ value={commitment}
+ onChange={setCommitment}
+ options={COMMITMENT_OPTIONS}
+ placeholder="Full-time, equity-only..."
+ />
+ </Field>
+ <div>
+ <div className="flex items-center justify-between mb-2 gap-3">
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ Location
+ </Label>
+ <button
+ type="button"
+ onClick={() => {
+ const next = !locationEnabled;
+ setLocationEnabled(next);
+ if (!next) setLocation("");
+ }}
+ className={`h-6 w-11 rounded-full border transition-colors ${
+ locationEnabled
+ ? "bg-primary border-primary"
+ : "bg-muted border-border"
+ }`}
+ >
+ <span
+ className={`block h-4 w-4 rounded-full bg-white transition-transform ${
+ locationEnabled ? "translate-x-6" : "translate-x-1"
+ }`}
+ />
+ </button>
+ </div>
+ {locationEnabled ? (
+ <Autocomplete
+ value={location}
+ onChange={setLocation}
+ options={LOCATION_OPTIONS}
+ placeholder="Pick a country..."
+ />
+ ) : (
+ <div className="h-11 rounded-sm border border-dashed border-border bg-background px-3 flex items-center text-[12px] text-muted-foreground">
+ Location off
+ </div>
+ )}
+ </div>
+ <Field label="Keywords (optional)">
+ <Input
+ value={keywords}
+ onChange={(e) => setKeywords(e.target.value)}
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ </section>
+
+ <div className="border-t border-border pt-5 flex items-center justify-end gap-3">
+ <button
+ type="button"
+ onClick={onClose}
+ disabled={submitting}
+ className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ Cancel
+ </button>
+ <button
+ type="button"
+ onClick={() => void submit()}
+ disabled={!valid || submitting}
+ className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+ Save changes
+ </button>
+ </div>
+ </div>
+ </DialogContent>
+ </Dialog>
  );
 };
 

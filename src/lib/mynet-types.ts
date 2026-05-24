@@ -24,6 +24,11 @@ export type Project = {
  // form. Used by the admin My-posts list to distinguish a curated
  // recommendation from a personal project.
  isPolln8Recommended: boolean;
+ // Admin-supplied display fields - only populated when
+ // isPolln8Recommended is true. Empty strings otherwise.
+ polln8FounderName: string;
+ polln8FounderHeadline: string;
+ polln8FounderWebsite: string;
 };
 
 export type ResumeMeta = {

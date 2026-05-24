@@ -516,6 +516,15 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
  (p as ProjectRow & { is_polln8_recommended?: boolean })
  .is_polln8_recommended,
  ),
+ polln8FounderName:
+ ((p as ProjectRow & { polln8_founder_name?: string })
+ .polln8_founder_name ?? "").trim(),
+ polln8FounderHeadline:
+ ((p as ProjectRow & { polln8_founder_headline?: string })
+ .polln8_founder_headline ?? "").trim(),
+ polln8FounderWebsite:
+ ((p as ProjectRow & { polln8_founder_website?: string })
+ .polln8_founder_website ?? "").trim(),
  };
  });
 };
@@ -568,6 +577,15 @@ export const createProject = async (
  (r as ProjectRow & { is_polln8_recommended?: boolean })
  .is_polln8_recommended,
  ),
+ polln8FounderName:
+ ((r as ProjectRow & { polln8_founder_name?: string })
+ .polln8_founder_name ?? "").trim(),
+ polln8FounderHeadline:
+ ((r as ProjectRow & { polln8_founder_headline?: string })
+ .polln8_founder_headline ?? "").trim(),
+ polln8FounderWebsite:
+ ((r as ProjectRow & { polln8_founder_website?: string })
+ .polln8_founder_website ?? "").trim(),
  };
 };
 
@@ -862,6 +880,42 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  polln8FounderHeadline: polln8Headline,
  polln8FounderWebsite: (p.polln8_founder_website ?? "").trim(),
  };
+ });
+};
+
+// Admin-only: update an existing Polln8-recommended project. Same
+// shape as the create input; the row is matched by id and overwritten
+// with the new values. is_published stays whatever the admin left it.
+export const updatePolln8RecommendedProject = async (
+ projectId: string,
+ input: {
+ title: string;
+ description: string;
+ criteria: ProjectCriteria;
+ businessType: string;
+ founderName: string;
+ founderHeadline: string;
+ founderWebsite: string;
+ },
+): Promise<void> => {
+ const supabase = getSupabase();
+ const { error } = await supabase
+ .from("projects")
+ .update({
+ title: input.title.trim(),
+ description: input.description.trim(),
+ criteria: input.criteria,
+ business_type: input.businessType.trim(),
+ polln8_founder_name: input.founderName.trim(),
+ polln8_founder_headline: input.founderHeadline.trim(),
+ polln8_founder_website: input.founderWebsite.trim(),
+ })
+ .eq("id", projectId);
+ if (error) throw error;
+ void refreshProjectEmbedding(projectId, {
+ title: input.title,
+ description: input.description,
+ criteria: input.criteria,
  });
 };
 
