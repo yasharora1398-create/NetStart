@@ -780,6 +780,13 @@ export const matchProjectsForMe = async (): Promise<
  founderFullName: p.founder_full_name ?? "",
  founderHeadline: p.founder_headline ?? "",
  founderAvatarPath: p.founder_avatar ?? null,
+ // match_projects_for_me RPC doesn't carry the polln8 flags
+ // (it's a vector-similarity match, not the public feed); default
+ // all four fields so the PublicProject contract is satisfied.
+ isPolln8Recommended: false,
+ polln8FounderName: "",
+ polln8FounderHeadline: "",
+ polln8FounderWebsite: "",
  }));
 };
 
@@ -808,6 +815,10 @@ type PublishedRpcRow = {
  founder_full_name: string;
  founder_headline: string;
  founder_avatar: string | null;
+ is_polln8_recommended: boolean | null;
+ polln8_founder_name: string | null;
+ polln8_founder_headline: string | null;
+ polln8_founder_website: string | null;
 };
 
 export const listPublishedProjects = async (): Promise<PublicProject[]> => {
@@ -815,7 +826,11 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  "list_published_projects_with_founder",
  );
  if (error) throw error;
- return ((data ?? []) as PublishedRpcRow[]).map((p) => ({
+ return ((data ?? []) as PublishedRpcRow[]).map((p) => {
+ const recommended = Boolean(p.is_polln8_recommended);
+ const polln8Name = (p.polln8_founder_name ?? "").trim();
+ const polln8Headline = (p.polln8_founder_headline ?? "").trim();
+ return {
  id: p.id,
  ownerId: p.owner_id,
  title: p.title,
@@ -824,10 +839,54 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  businessType: p.business_type ?? "",
  lifecycleState: lifecycleFrom(p.lifecycle_state),
  createdAt: p.created_at,
- founderFullName: p.founder_full_name ?? "",
- founderHeadline: p.founder_headline ?? "",
+ // When the post is a Polln8 recommendation, swap the displayed
+ // founder name + headline to the admin-supplied values. The real
+ // owner stays in ownerId so chat / save / etc still work.
+ founderFullName: recommended && polln8Name
+ ? polln8Name
+ : p.founder_full_name ?? "",
+ founderHeadline: recommended && polln8Headline
+ ? polln8Headline
+ : p.founder_headline ?? "",
  founderAvatarPath: p.founder_avatar ?? null,
- }));
+ isPolln8Recommended: recommended,
+ polln8FounderName: polln8Name,
+ polln8FounderHeadline: polln8Headline,
+ polln8FounderWebsite: (p.polln8_founder_website ?? "").trim(),
+ };
+ });
+};
+
+// Admin-only: create a Polln8-recommended project on behalf of a
+// founder. The project is owned by the admin (so chat / save / etc
+// route to a real account), but renders in the Match deck under the
+// supplied founder name + a 'Recommended by Polln8' badge.
+export const createPolln8RecommendedProject = async (input: {
+ title: string;
+ description: string;
+ criteria: ProjectCriteria;
+ businessType: string;
+ founderName: string;
+ founderHeadline: string;
+ founderWebsite: string;
+}): Promise<void> => {
+ const supabase = getSupabase();
+ const { data: userResp } = await supabase.auth.getUser();
+ const uid = userResp.user?.id;
+ if (!uid) throw new Error("Sign in required.");
+ const { error } = await supabase.from("projects").insert({
+ owner_id: uid,
+ title: input.title.trim(),
+ description: input.description.trim(),
+ criteria: input.criteria,
+ business_type: input.businessType.trim(),
+ is_published: true,
+ is_polln8_recommended: true,
+ polln8_founder_name: input.founderName.trim(),
+ polln8_founder_headline: input.founderHeadline.trim(),
+ polln8_founder_website: input.founderWebsite.trim(),
+ });
+ if (error) throw error;
 };
 
 export const setProjectPublished = async (
@@ -1080,6 +1139,10 @@ export const listPublishedProjectsForOwner = async (
  founderFullName: "",
  founderHeadline: "",
  founderAvatarPath: null,
+ isPolln8Recommended: false,
+ polln8FounderName: "",
+ polln8FounderHeadline: "",
+ polln8FounderWebsite: "",
  }));
 };
 

@@ -145,6 +145,14 @@ export type PublicProject = {
  founderFullName: string;
  founderHeadline: string;
  founderAvatarPath: string | null;
+ // Polln8-curated card: admin posted this on behalf of someone else.
+ // When true, the Match card renders with a green outline + a
+ // 'Recommended by Polln8' badge and uses polln8FounderName /
+ // polln8FounderHeadline in place of the owner's profile fields.
+ isPolln8Recommended: boolean;
+ polln8FounderName: string;
+ polln8FounderHeadline: string;
+ polln8FounderWebsite: string;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({

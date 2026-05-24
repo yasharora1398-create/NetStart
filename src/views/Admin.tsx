@@ -47,7 +47,23 @@ import {
  type SignupRow,
  type ViewCounts,
 } from "@/lib/admin-storage";
-import { getResumeSignedUrl, reviewProfile } from "@/lib/mynet-storage";
+import {
+ createPolln8RecommendedProject,
+ getResumeSignedUrl,
+ reviewProfile,
+} from "@/lib/mynet-storage";
+import { emptyCriteria } from "@/lib/mynet-types";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import { TagInput } from "@/components/mynet/TagInput";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+ BUSINESS_TYPE_OPTIONS,
+ COMMITMENT_OPTIONS,
+ LOCATION_OPTIONS,
+ SKILLS_OPTIONS,
+} from "@/lib/options";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 
 // ────────────────────────────────────────────────────────────────
@@ -81,7 +97,7 @@ const formatDayShort = (day: string): string => {
 // Page shell
 // ────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "review";
+type Tab = "overview" | "review" | "recommend";
 
 // Operator email gets admin access even if the profiles.is_admin
 // row isn't set - covers fresh installs and ensures the nav icons
@@ -139,9 +155,18 @@ const Admin = () => {
  <TabButton active={tab === "review"} onClick={() => setTab("review")}>
  Review queue
  </TabButton>
+ <TabButton active={tab === "recommend"} onClick={() => setTab("recommend")}>
+ Recommend a startup
+ </TabButton>
  </div>
 
- {tab === "overview" ? <OverviewTab /> : <ReviewTab />}
+ {tab === "overview" ? (
+ <OverviewTab />
+ ) : tab === "review" ? (
+ <ReviewTab />
+ ) : (
+ <RecommendTab />
+ )}
  </main>
  </div>
  );
@@ -735,6 +760,276 @@ const RejectDialog = ({
  </button>
  </div>
  </div>
+ </div>
+);
+
+// ────────────────────────────────────────────────────────────────
+// Recommend a startup tab - admin-only post-on-behalf-of form. The
+// created project is owned by the admin's user_id but renders in the
+// partner-side Match deck under the supplied founder name + a green
+// outline + a 'Recommended by Polln8' badge. Website URL renders
+// big and clickable above the card.
+// ────────────────────────────────────────────────────────────────
+
+const RecommendTab = () => {
+ const [founderName, setFounderName] = useState("");
+ const [founderHeadline, setFounderHeadline] = useState("");
+ const [founderWebsite, setFounderWebsite] = useState("");
+ const [title, setTitle] = useState("");
+ const [description, setDescription] = useState("");
+ const [businessType, setBusinessType] = useState("");
+ const [skills, setSkills] = useState<string[]>([]);
+ const [commitment, setCommitment] = useState("");
+ const [location, setLocation] = useState("");
+ const [locationEnabled, setLocationEnabled] = useState(false);
+ const [keywords, setKeywords] = useState("");
+ const [submitting, setSubmitting] = useState(false);
+
+ const reset = () => {
+ setFounderName("");
+ setFounderHeadline("");
+ setFounderWebsite("");
+ setTitle("");
+ setDescription("");
+ setBusinessType("");
+ setSkills([]);
+ setCommitment("");
+ setLocation("");
+ setLocationEnabled(false);
+ setKeywords("");
+ };
+
+ const valid =
+ founderName.trim() !== "" &&
+ title.trim().length >= 2 &&
+ description.trim() !== "" &&
+ skills.length >= 1 &&
+ commitment.trim() !== "";
+
+ const submit = async () => {
+ if (!valid || submitting) return;
+ setSubmitting(true);
+ try {
+ await createPolln8RecommendedProject({
+ title,
+ description,
+ criteria: {
+ ...emptyCriteria(),
+ skills,
+ commitment: commitment.trim(),
+ location: locationEnabled ? location.trim() : "",
+ keywords: keywords.trim(),
+ },
+ businessType,
+ founderName,
+ founderHeadline,
+ founderWebsite,
+ });
+ toast.success("Recommendation posted. It's live in the deck.");
+ reset();
+ } catch (err) {
+ toast.error(
+ err instanceof Error
+ ? err.message
+ : "Could not post recommendation.",
+ );
+ } finally {
+ setSubmitting(false);
+ }
+ };
+
+ return (
+ <div className="max-w-2xl space-y-8">
+ <div>
+ <h2 className="font-display text-2xl mb-2">Recommend a startup</h2>
+ <p className="text-sm text-muted-foreground leading-relaxed">
+ Posts a card in the partner-side Match deck under the founder
+ name you choose. The card shows a green outline and a
+ 'Recommended by Polln8' badge so partners know it's a
+ curated pick. The founder's website (optional) renders big +
+ clickable above the card.
+ </p>
+ </div>
+
+ <section className="space-y-5">
+ <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+ Who is it from?
+ </h3>
+ <Field label="Founder name" required>
+ <Input
+ value={founderName}
+ onChange={(e) => setFounderName(e.target.value)}
+ placeholder="e.g. Owen Carter"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Founder headline (optional)">
+ <Input
+ value={founderHeadline}
+ onChange={(e) => setFounderHeadline(e.target.value)}
+ placeholder="e.g. Ex-payments lead, building fintech infra"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Founder website (optional)">
+ <Input
+ type="url"
+ value={founderWebsite}
+ onChange={(e) => setFounderWebsite(e.target.value)}
+ placeholder="https://example.com"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ <p className="text-[11px] text-muted-foreground mt-2">
+ Shown big + clickable above the card on the partner Match
+ deck.
+ </p>
+ </Field>
+ </section>
+
+ <section className="space-y-5 border-t border-border pt-8">
+ <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+ The startup
+ </h3>
+ <Field label="Project title" required>
+ <Input
+ value={title}
+ onChange={(e) => setTitle(e.target.value)}
+ placeholder="e.g. Ledger Rails"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="What they're building" required>
+ <Textarea
+ value={description}
+ onChange={(e) => setDescription(e.target.value)}
+ rows={3}
+ placeholder="One or two sentences. Stage, market, what's shipped."
+ className="bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ <Field label="Business type">
+ <Autocomplete
+ value={businessType}
+ onChange={setBusinessType}
+ options={BUSINESS_TYPE_OPTIONS}
+ placeholder="SaaS, Marketplace, Hardware..."
+ />
+ </Field>
+ <Field label="Skills they need" required>
+ <TagInput
+ value={skills}
+ onChange={setSkills}
+ options={SKILLS_OPTIONS}
+ placeholder="Type to filter, click to add..."
+ />
+ </Field>
+ <Field label="Commitment" required>
+ <Autocomplete
+ value={commitment}
+ onChange={setCommitment}
+ options={COMMITMENT_OPTIONS}
+ placeholder="Full-time, equity-only..."
+ />
+ </Field>
+ <div>
+ <div className="flex items-center justify-between mb-2 gap-3">
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ Location
+ </Label>
+ <div className="flex items-center gap-2">
+ <span
+ className={`text-[11px] font-mono uppercase tracking-[0.18em] ${
+ locationEnabled ? "text-primary" : "text-muted-foreground"
+ }`}
+ >
+ {locationEnabled ? "On" : "Off"}
+ </span>
+ <button
+ type="button"
+ onClick={() => {
+ const next = !locationEnabled;
+ setLocationEnabled(next);
+ if (!next) setLocation("");
+ }}
+ aria-label="Toggle location"
+ className={`h-6 w-11 rounded-full border transition-colors ${
+ locationEnabled
+ ? "bg-primary border-primary"
+ : "bg-muted border-border"
+ }`}
+ >
+ <span
+ className={`block h-4 w-4 rounded-full bg-white transition-transform ${
+ locationEnabled ? "translate-x-6" : "translate-x-1"
+ }`}
+ />
+ </button>
+ </div>
+ </div>
+ {locationEnabled ? (
+ <Autocomplete
+ value={location}
+ onChange={setLocation}
+ options={LOCATION_OPTIONS}
+ placeholder="Pick a country..."
+ />
+ ) : (
+ <div className="h-11 rounded-sm border border-dashed border-border bg-background px-3 flex items-center text-[12px] text-muted-foreground">
+ Location off - turn on to pick a country.
+ </div>
+ )}
+ <p className="text-[11px] text-muted-foreground mt-2">
+ Adding a location is beneficial but not required.
+ </p>
+ </div>
+ <Field label="Keywords (optional)">
+ <Input
+ value={keywords}
+ onChange={(e) => setKeywords(e.target.value)}
+ placeholder="payments, fintech, ex-Stripe"
+ className="h-11 bg-background border-border focus-visible:border-primary"
+ />
+ </Field>
+ </section>
+
+ <div className="border-t border-border pt-6 flex items-center justify-end gap-3">
+ <button
+ type="button"
+ onClick={reset}
+ disabled={submitting}
+ className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ Clear
+ </button>
+ <button
+ type="button"
+ onClick={() => void submit()}
+ disabled={!valid || submitting}
+ className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+ Post recommendation
+ </button>
+ </div>
+ </div>
+ );
+};
+
+const Field = ({
+ label,
+ required,
+ children,
+}: {
+ label: string;
+ required?: boolean;
+ children: React.ReactNode;
+}) => (
+ <div>
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
+ {label}
+ {required && <span className="text-primary">*</span>}
+ </Label>
+ {children}
  </div>
 );
 

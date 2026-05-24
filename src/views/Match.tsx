@@ -1619,8 +1619,36 @@ const ProjectInfoPanel = ({
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  const avatar = getAvatarUrl(project.founderAvatarPath);
+ const recommended = project.isPolln8Recommended;
+ const website = project.polln8FounderWebsite;
  return (
- <article className="overflow-hidden rounded-2xl border border-gold bg-card shadow-sm">
+ <div className="flex flex-col gap-3">
+ {recommended && website ? (
+ <a
+ href={website}
+ target="_blank"
+ rel="noopener noreferrer"
+ className="inline-flex items-center gap-2 self-start font-display text-2xl md:text-3xl font-bold tracking-tight text-primary hover:underline break-all"
+ >
+ <Globe className="h-5 w-5 flex-shrink-0" />
+ {website.replace(/^https?:\/\//, "")}
+ <ExternalLink className="h-4 w-4 flex-shrink-0" />
+ </a>
+ ) : null}
+ <article
+ className={cn(
+ "overflow-hidden rounded-2xl bg-card shadow-sm",
+ // Polln8-recommended cards get a heavier green outline so
+ // partners can spot the curated picks at a glance.
+ recommended ? "border-2 border-primary" : "border border-gold",
+ )}
+ >
+ {recommended ? (
+ <div className="flex items-center gap-1.5 bg-primary px-4 py-2 text-[11px] font-mono uppercase tracking-[0.18em] text-primary-foreground">
+ <Sparkles className="h-3.5 w-3.5" />
+ Recommended by Polln8
+ </div>
+ ) : null}
  {/* Picture square "" full-width, 1:1 aspect. Grey field with
  silhouette icon when the founder has no avatar - matches the
  partner-card fallback above and the StepMatch anonymous
@@ -1686,6 +1714,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  ) : null}
  </div>
  </article>
+ </div>
  );
 };
 
