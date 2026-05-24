@@ -37,7 +37,10 @@ where email in (
 delete from auth.users
 where email like '%+founder@polln8.com'
    or email like '%+builder@polln8.com'
-   or email like '%+test@polln8.com';
+   or email like '%+test@polln8.com'
+   or email like '%+demofounder@polln8.com'
+   or email like '%+demo@polln8.com'
+   or email like '%+seed@polln8.com';
 
 -- Pass 3: nuke by full name. The original seed (seed_fake_users.sql)
 -- shipped with 10 names, but more synthetic accounts have appeared
@@ -77,8 +80,30 @@ where id in (
     'Mr. X',
     'Mister X',
     'MR X',
-    'MR. X'
+    'MR. X',
+    -- Demo founders seeded by supabase/scripts/seed_demo_founders.sql
+    -- (script has been removed but if the seed already ran, names
+    -- are still in the DB and need wiping).
+    'Owen Carter',
+    'Mila Brennan',
+    'Theo Lambert',
+    'Sofia Romano',
+    'Jasper Hale'
   )
+);
+
+-- Pass 5: belt-and-braces by fixed UUID. The demo-founder seed used
+-- deterministic UUIDs of the form 00000000-0000-4000-a000-d100f0000NNN.
+-- Even if the profile was edited or the name was renamed, the UUID
+-- stays the same - so this catches the demo accounts regardless of
+-- what got renamed.
+delete from auth.users
+where id in (
+  '00000000-0000-4000-a000-d100f0000001'::uuid,
+  '00000000-0000-4000-a000-d100f0000002'::uuid,
+  '00000000-0000-4000-a000-d100f0000003'::uuid,
+  '00000000-0000-4000-a000-d100f0000004'::uuid,
+  '00000000-0000-4000-a000-d100f0000005'::uuid
 );
 
 -- Pass 4: belt-and-braces. Any profile whose full_name is just the
