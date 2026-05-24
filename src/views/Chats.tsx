@@ -38,17 +38,61 @@ import {
 import { ChatConversation } from "@/components/chat/ChatConversation";
 import { cn } from "@/lib/utils";
 
+// sessionStorage key for the intro-gate dismissal so navigating from
+// /chats -> /chats/:id (which remounts the Chats component under
+// Next.js App Router) doesn't reset the gate and bounce the user
+// back to the title page.
+const CHATS_INTRO_OPENED_KEY = "polln8.chats.introOpened.v1";
+
+const readIntroOpened = (): boolean => {
+ if (typeof window === "undefined") return false;
+ try {
+ return window.sessionStorage.getItem(CHATS_INTRO_OPENED_KEY) === "1";
+ } catch {
+ return false;
+ }
+};
+
+const writeIntroOpened = (value: boolean) => {
+ if (typeof window === "undefined") return;
+ try {
+ if (value) window.sessionStorage.setItem(CHATS_INTRO_OPENED_KEY, "1");
+ else window.sessionStorage.removeItem(CHATS_INTRO_OPENED_KEY);
+ } catch {
+ // storage disabled/quota - non-fatal
+ }
+};
+
 const Chats = () => {
- // Intro gate: every visit lands on the explainer first.
- // Click CTA -> render real chat surface. AuthGate still handles
- // the unsigned-in case on the real surface.
- const [opened, setOpened] = useState(false);
  const { user, loading } = useAuth();
  const reviewStatus = useReviewStatus();
  const needsSetup =
  Boolean(user) && reviewStatus !== null && reviewStatus !== "accepted";
  const { id: routeContactId } = useParams<{ id: string }>();
  const navigate = useNavigate();
+ // Intro gate: every visit lands on the explainer first. After the
+ // user clicks "Open Chat", the dismissal is sticky for the rest of
+ // the browser tab session (sessionStorage). Without the persistence,
+ // navigating from /chats -> /chats/:id would remount Chats with
+ // opened=false and bounce the user back to the title page mid-click.
+ // The gate is also bypassed when the user lands directly on
+ // /chats/:id (a thread URL implies they've already accepted the
+ // intro on a prior visit, or arrived via a notification link).
+ const [opened, setOpenedState] = useState<boolean>(
+ () => readIntroOpened() || Boolean(routeContactId),
+ );
+ const setOpened = (next: boolean) => {
+ writeIntroOpened(next);
+ setOpenedState(next);
+ };
+ // If the URL changes to include a thread id while the component is
+ // mounted, treat that as "past the intro" too. (Covers the user
+ // clicking a thread link in a notification while still on /chats.)
+ useEffect(() => {
+ if (routeContactId && !opened) {
+ setOpened(true);
+ }
+ }, [routeContactId, opened]);
  // Hydrate from localStorage on mount so the thread list shows up
  // immediately on subsequent visits instead of waiting on the two
  // sequential Supabase RPCs (list_chat_threads + get_candidates_by_ids).
