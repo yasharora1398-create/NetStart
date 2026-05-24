@@ -42,7 +42,11 @@ import { BottomSheet } from "@/components/netstart/BottomSheet";
 import { cn } from "@/lib/utils";
 import { readCache, writeCache } from "@/lib/cache";
 import { useAuth } from "@/context/AuthContext";
-import { COMMITMENT_OPTIONS, LOCATION_OPTIONS } from "@/lib/options";
+import {
+ COMMITMENT_OPTIONS,
+ LOCATION_OPTIONS,
+ SKILLS_OPTIONS,
+} from "@/lib/options";
 import {
  getAvatarUrl,
  getProfile,
@@ -469,7 +473,7 @@ const PartnerView = () => {
  setLocation={setLocationFilter}
  commitment={commitmentFilter}
  setCommitment={setCommitmentFilter}
- skillOptions={allSkills}
+ skillOptions={SKILLS_OPTIONS}
  onClear={() => {
  setQuery("");
  setSkillFilter("");
@@ -1018,7 +1022,7 @@ const LookerView = () => {
  setLocation={setLocationFilter}
  commitment={commitmentFilter}
  setCommitment={setCommitmentFilter}
- skillOptions={allSkills}
+ skillOptions={SKILLS_OPTIONS}
  onClear={() => {
  setQuery("");
  setSkillFilter("");

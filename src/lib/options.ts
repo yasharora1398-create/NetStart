@@ -233,11 +233,58 @@ export const LOCATION_OPTIONS: string[] = [
  "Zimbabwe",
 ];
 
-// Curated skills list. Drives the typeahead Skills picker so candidates
-// and project criteria pick from a consistent vocabulary. Free-text
-// fallback is still allowed (allowCustom on the picker) so anything
-// niche can still be entered manually.
+// Broad business / startup skill categories. Drives the Skills
+// dropdown in the MyNet setup wizard, the MyNet edit view, the
+// project criteria, and the Match filters. Kept intentionally broad
+// (a couple dozen top-level functions, not 200 framework names) so
+// the picker reads as a quick "which side of the org do you cover?"
+// vs a long checklist. Free-text fallback is still on (allowCustom
+// on TagInput) so anything niche can be typed manually.
 export const SKILLS_OPTIONS: string[] = [
+ // Engineering & tech
+ "Engineering",
+ "Frontend Engineering",
+ "Backend Engineering",
+ "Full-Stack Engineering",
+ "Mobile Engineering",
+ "AI / Machine Learning",
+ "Data & Analytics",
+ "Data Engineering",
+ "DevOps / Infrastructure",
+ "Security",
+ "Hardware / Robotics",
+ // Product & design
+ "Product Management",
+ "Product Design",
+ "UX Research",
+ "Brand Design",
+ // Growth, marketing, community
+ "Marketing",
+ "Growth",
+ "Content",
+ "SEO",
+ "Performance Marketing",
+ "Community",
+ // Sales & revenue
+ "Sales",
+ "Business Development",
+ "Partnerships",
+ "Customer Success",
+ // Business & ops
+ "Operations",
+ "Strategy",
+ "Finance",
+ "Fundraising",
+ "Legal",
+ "Hiring / People",
+ "Project Management",
+];
+
+// Kept (but not exported) so referencing tools that scrape this file
+// for example skills still find values. The dropdown uses
+// SKILLS_OPTIONS above; this is a no-runtime-cost reference array.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _SKILLS_OPTIONS_GRANULAR_LEGACY: readonly string[] = [
  // Languages
  "JavaScript",
  "TypeScript",
