@@ -254,7 +254,7 @@ export default function BrowseScreen() {
  <MothLoader size={160} />
  </View>
  ) : !current ? (
- <View style={styles.caughtUp}>
+ <>
  <MothEmptyState
  variant={projects.length > 0 ? "caught" : "platform"}
  title={projects.length > 0 ? "You're caught up." : "Nothing here yet."}
@@ -265,6 +265,7 @@ export default function BrowseScreen() {
  }
  />
  {projects.length > 0 ? (
+ <View style={styles.reviewSeenWrap}>
  <Pressable
  onPress={() => setIndex(0)}
  style={({ pressed }) => [
@@ -277,8 +278,9 @@ export default function BrowseScreen() {
  Review already seen ({projects.length})
  </Text>
  </Pressable>
- ) : null}
  </View>
+ ) : null}
+ </>
  ) : (
  <View style={styles.deckInner}>
  {next ? (
@@ -709,11 +711,9 @@ const makeStyles = (theme: ThemePalette) =>
  justifyContent: "center",
  borderWidth: 1,
  },
- caughtUp: {
- flex: 1,
+ reviewSeenWrap: {
  alignItems: "center",
- justifyContent: "center",
- gap: 18,
+ paddingBottom: 32,
  },
  reviewSeenBtn: {
  flexDirection: "row",

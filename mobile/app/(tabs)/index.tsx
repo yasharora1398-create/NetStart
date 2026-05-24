@@ -288,12 +288,13 @@ export default function MatchScreen() {
  <MothLoader size={180} />
  </View>
  ) : remaining === 0 ? (
- <View style={styles.caughtUp}>
+ <>
  <MothEmptyState
  variant="caught"
  sub="No more candidates ranked against this project. Lower the criteria or wait for new partners to join."
  />
  {candidates.length > 0 ? (
+ <View style={styles.reviewSeenWrap}>
  <Pressable
  onPress={() => setIndex(0)}
  style={({ pressed }) => [
@@ -306,8 +307,9 @@ export default function MatchScreen() {
  Review already seen ({candidates.length})
  </Text>
  </Pressable>
- ) : null}
  </View>
+ ) : null}
+ </>
  ) : (
  <View style={styles.deckInner}>
  {next && (
@@ -768,11 +770,9 @@ const makeStyles = (theme: ThemePalette) =>
  borderColor: theme.gold,
  backgroundColor: theme.gold,
  },
- caughtUp: {
- flex: 1,
+ reviewSeenWrap: {
  alignItems: "center",
- justifyContent: "center",
- gap: 18,
+ paddingBottom: 32,
  },
  reviewSeenBtn: {
  flexDirection: "row",
