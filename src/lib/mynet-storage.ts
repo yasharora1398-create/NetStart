@@ -512,6 +512,10 @@ export const listProjects = async (userId: string): Promise<Project[]> => {
  isPublished: Boolean(p.is_published),
  createdAt: p.created_at,
  updatedAt: p.updated_at,
+ isPolln8Recommended: Boolean(
+ (p as ProjectRow & { is_polln8_recommended?: boolean })
+ .is_polln8_recommended,
+ ),
  };
  });
 };
@@ -560,6 +564,10 @@ export const createProject = async (
  isPublished: Boolean(r.is_published),
  createdAt: r.created_at,
  updatedAt: r.updated_at,
+ isPolln8Recommended: Boolean(
+ (r as ProjectRow & { is_polln8_recommended?: boolean })
+ .is_polln8_recommended,
+ ),
  };
 };
 

@@ -49,9 +49,13 @@ import {
 } from "@/lib/admin-storage";
 import {
  createPolln8RecommendedProject,
+ deleteProject,
  getResumeSignedUrl,
+ listProjects,
  reviewProfile,
+ setProjectPublished,
 } from "@/lib/mynet-storage";
+import type { Project } from "@/lib/mynet-types";
 import { emptyCriteria } from "@/lib/mynet-types";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { TagInput } from "@/components/mynet/TagInput";
@@ -97,7 +101,7 @@ const formatDayShort = (day: string): string => {
 // Page shell
 // ────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "review" | "recommend";
+type Tab = "overview" | "review" | "recommend" | "myposts";
 
 // Operator email gets admin access even if the profiles.is_admin
 // row isn't set - covers fresh installs and ensures the nav icons
@@ -158,14 +162,19 @@ const Admin = () => {
  <TabButton active={tab === "recommend"} onClick={() => setTab("recommend")}>
  Recommend a startup
  </TabButton>
+ <TabButton active={tab === "myposts"} onClick={() => setTab("myposts")}>
+ My posts
+ </TabButton>
  </div>
 
  {tab === "overview" ? (
  <OverviewTab />
  ) : tab === "review" ? (
  <ReviewTab />
- ) : (
+ ) : tab === "recommend" ? (
  <RecommendTab />
+ ) : (
+ <MyPostsTab adminUserId={user.id} />
  )}
  </main>
  </div>
@@ -1032,5 +1041,176 @@ const Field = ({
  {children}
  </div>
 );
+
+// ────────────────────────────────────────────────────────────────
+// My posts tab - admin sees every project owned by their account
+// (their own + every Polln8-recommended post they made) and can
+// publish / unpublish / delete each one.
+// ────────────────────────────────────────────────────────────────
+
+const MyPostsTab = ({ adminUserId }: { adminUserId: string }) => {
+ const [items, setItems] = useState<Project[] | null>(null);
+ const [error, setError] = useState<string | null>(null);
+ const [busy, setBusy] = useState<string | null>(null);
+
+ const load = () => {
+ setError(null);
+ listProjects(adminUserId)
+ .then((rows) => setItems(rows))
+ .catch((err: unknown) => {
+ setError(err instanceof Error ? err.message : "Could not load posts.");
+ setItems([]);
+ });
+ };
+
+ useEffect(() => {
+ load();
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [adminUserId]);
+
+ const togglePublished = async (project: Project) => {
+ setBusy(project.id);
+ try {
+ await setProjectPublished(project.id, !project.isPublished);
+ toast.success(project.isPublished ? "Hidden from deck." : "Live on deck.");
+ load();
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not update.");
+ } finally {
+ setBusy(null);
+ }
+ };
+
+ const remove = async (project: Project) => {
+ if (
+ !window.confirm(
+ `Delete "${project.title}"? This wipes the post and all saved / passed records attached to it. Cannot be undone.`,
+ )
+ ) {
+ return;
+ }
+ setBusy(project.id);
+ try {
+ await deleteProject(project.id);
+ toast.success("Post deleted.");
+ load();
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not delete.");
+ } finally {
+ setBusy(null);
+ }
+ };
+
+ if (items === null) {
+ return (
+ <div className="flex items-center justify-center py-24">
+ <Loader2 className="h-5 w-5 text-primary animate-spin" />
+ </div>
+ );
+ }
+
+ if (error) {
+ return (
+ <div className="rounded-sm border border-destructive bg-card p-6">
+ <p className="text-sm text-destructive mb-3">{error}</p>
+ <button
+ type="button"
+ onClick={load}
+ className="text-sm font-medium text-primary hover:underline"
+ >
+ Try again
+ </button>
+ </div>
+ );
+ }
+
+ if (items.length === 0) {
+ return (
+ <div className="rounded-sm border border-dashed border-border bg-card p-8 text-center">
+ <p className="text-sm text-muted-foreground">
+ You haven&apos;t posted anything yet. Open the &quot;Recommend a
+ startup&quot; tab to post one.
+ </p>
+ </div>
+ );
+ }
+
+ return (
+ <div className="space-y-4">
+ <div className="flex items-center justify-between mb-2">
+ <p className="text-sm text-muted-foreground">
+ {items.length} {items.length === 1 ? "post" : "posts"} owned by
+ your admin account.
+ </p>
+ <button
+ type="button"
+ onClick={load}
+ className="text-sm font-medium text-primary hover:underline"
+ >
+ Refresh
+ </button>
+ </div>
+ {items.map((project) => (
+ <article
+ key={project.id}
+ className="rounded-sm border border-border bg-card p-5"
+ >
+ <div className="flex items-start justify-between gap-4 mb-3">
+ <div className="min-w-0">
+ <div className="flex items-center gap-2 mb-1 flex-wrap">
+ <h3 className="font-display text-lg leading-tight">
+ {project.title}
+ </h3>
+ {project.isPolln8Recommended ? (
+ <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+ Recommended by Polln8
+ </span>
+ ) : null}
+ {project.isPublished ? (
+ <span className="rounded-full border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+ Live
+ </span>
+ ) : (
+ <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+ Hidden
+ </span>
+ )}
+ </div>
+ {project.description ? (
+ <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+ {project.description}
+ </p>
+ ) : null}
+ </div>
+ </div>
+ <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
+ <button
+ type="button"
+ onClick={() => void togglePublished(project)}
+ disabled={busy === project.id}
+ className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ {busy === project.id && (
+ <Loader2 className="h-3.5 w-3.5 animate-spin" />
+ )}
+ {project.isPublished ? "Unpublish" : "Publish"}
+ </button>
+ <button
+ type="button"
+ onClick={() => void remove(project)}
+ disabled={busy === project.id}
+ className="inline-flex items-center gap-2 rounded-full bg-destructive px-4 py-1.5 text-xs font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ {busy === project.id && (
+ <Loader2 className="h-3.5 w-3.5 animate-spin" />
+ )}
+ Delete
+ </button>
+ </div>
+ </article>
+ ))}
+ </div>
+ );
+};
 
 export default Admin;

@@ -10,7 +10,8 @@
 -- with what the auth session actually carries. New sign-ups already
 -- write 'partner' via the updated client code.
 --
--- Idempotent: re-running after rewrite matches zero rows because the
+-- Idempotent: re-running after rewrite matches zer
+o rows because the
 -- WHERE clause filters on the literal 'builder' string. Real accounts
 -- that picked 'founder' are untouched.
 

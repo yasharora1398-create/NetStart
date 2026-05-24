@@ -20,6 +20,10 @@ export type Project = {
  isPublished: boolean;
  createdAt: string;
  updatedAt: string;
+ // True when the row was inserted via the admin 'Recommend a startup'
+ // form. Used by the admin My-posts list to distinguish a curated
+ // recommendation from a personal project.
+ isPolln8Recommended: boolean;
 };
 
 export type ResumeMeta = {
