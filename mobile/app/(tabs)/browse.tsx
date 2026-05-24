@@ -296,31 +296,6 @@ export default function BrowseScreen() {
  )}
  </View>
 
- {remaining > 0 && (
- <View style={styles.actions}>
- <Pressable
- onPress={() => decide("left")}
- style={({ pressed }) => [
- styles.actionBtn,
- { borderColor: theme.border, backgroundColor: theme.bgElev },
- pressed && { opacity: 0.85 },
- ]}
- >
- <X size={22} color={theme.destructive} />
- </Pressable>
- <Pressable
- onPress={() => decide("right")}
- style={({ pressed }) => [
- styles.actionBtn,
- { borderColor: theme.gold, backgroundColor: theme.gold },
- pressed && { opacity: 0.85 },
- ]}
- >
- <Bookmark size={22} color={theme.bg} />
- </Pressable>
- </View>
- )}
-
  {selected && (
  <CandidateDetail
  candidate={selected}

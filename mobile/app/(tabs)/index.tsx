@@ -330,32 +330,6 @@ export default function MatchScreen() {
  )}
  </View>
 
- {/* Action buttons */}
- {remaining > 0 && projects.length > 0 && (
- <View style={styles.actions}>
- <Pressable
- onPress={() => decide("left")}
- style={({ pressed }) => [
- styles.actionBtn,
- styles.actionPass,
- pressed && { opacity: 0.85 },
- ]}
- >
- <X size={22} color={theme.destructive} />
- </Pressable>
- <Pressable
- onPress={() => decide("right")}
- style={({ pressed }) => [
- styles.actionBtn,
- styles.actionSave,
- pressed && { opacity: 0.85 },
- ]}
- >
- <Bookmark size={22} color={theme.bg} />
- </Pressable>
- </View>
- )}
-
  {selected && (
  <CandidateDetail
  candidate={selected}
@@ -634,7 +608,7 @@ const makeStyles = (theme: ThemePalette) =>
  borderBottomColor: theme.border,
  },
  pickerItemText: { color: theme.text, fontSize: 13 },
- deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 96 },
+ deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
  deckInner: { flex: 1, position: "relative" },
  // Shadow donor: matches the inner card's shape so iOS/web can
  // compute the colored swipe glow against a real silhouette. The
