@@ -60,26 +60,77 @@ const config: NextConfig = {
   },
 
   async redirects() {
+    const phoneUA = ".*(Mobi|Android|iPhone|iPad|iPod).*";
     return [
       // Desktop UAs poking at /m/* get sent home so they don't load
       // the mobile bundle on a laptop.
-      //
-      // The phone-UA -> /m/ blanket redirect that used to live here
-      // was removed: polln8.com / now renders a dedicated mobile home
-      // page (Home.tsx renders MobileHome at narrow viewports) so
-      // first-time phone visitors get a marketing surface before the
-      // app shell. After they sign in, the homepage CTAs route them
-      // into /m/; the /m/ MyNet tab links back to /.
       {
         source: "/m/:path*",
         missing: [
           {
             type: "header",
             key: "user-agent",
-            value: ".*(Mobi|Android|iPhone|iPad|iPod).*",
+            value: phoneUA,
           },
         ],
         destination: "/",
+        permanent: false,
+      },
+
+      // Phone UAs hitting the signed-in web app pages (match / saved /
+      // chats / mynet / applications) get bounced to the Expo mobile
+      // bundle, which is the real phone experience for those screens.
+      // `/` itself is NOT in this list: it renders MobileHome (the
+      // mobile marketing page) for first-time phone visitors. Marketing
+      // + auth pages (/how, /standards, /signin, /signup, etc.) also
+      // stay on web so the sign-up flow keeps working in a phone
+      // browser.
+      {
+        source: "/match",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/",
+        permanent: false,
+      },
+      {
+        source: "/saved",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/saved",
+        permanent: false,
+      },
+      {
+        source: "/chats",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/threads",
+        permanent: false,
+      },
+      {
+        source: "/chats/:id",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/chat/:id",
+        permanent: false,
+      },
+      {
+        source: "/mynet",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/mynet",
+        permanent: false,
+      },
+      {
+        source: "/applications",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/applications",
+        permanent: false,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/settings",
+        permanent: false,
+      },
+      {
+        source: "/u/:id",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/u/:id",
         permanent: false,
       },
     ];
