@@ -835,35 +835,55 @@ export const getCandidatesByIds = async (
 
 // ---- Public projects (candidate browsing) -------------------------
 
-type PublishedRpcRow = {
- id: string;
- owner_id: string;
- title: string;
- description: string;
- criteria: Partial<ProjectCriteria> | null;
- business_type: string | null;
- lifecycle_state: string | null;
- created_at: string;
- founder_full_name: string;
- founder_headline: string;
- founder_avatar: string | null;
- is_polln8_recommended: boolean | null;
- polln8_founder_name: string | null;
- polln8_founder_headline: string | null;
- polln8_founder_website: string | null;
- polln8_founder_avatar_path: string | null;
-};
-
 export const listPublishedProjects = async (): Promise<PublicProject[]> => {
- const { data, error } = await getSupabase().rpc(
- "list_published_projects_with_founder",
- );
+ // Query projects + profiles directly instead of going through the
+ // list_published_projects_with_founder RPC. The RPC's RETURNS TABLE
+ // is pinned to a specific column set, so any new project column
+ // (polln8_founder_avatar_path, etc.) requires the RPC to be rebuilt
+ // before it surfaces here. Doing the join in JS removes that
+ // coupling - as long as the columns exist on the projects table,
+ // every field flows to the client.
+ const supabase = getSupabase();
+ const { data: rows, error } = await supabase
+ .from("projects")
+ .select("*")
+ .eq("is_published", true)
+ .order("is_polln8_recommended", { ascending: false })
+ .order("created_at", { ascending: false });
  if (error) throw error;
- return ((data ?? []) as PublishedRpcRow[]).map((p) => {
+ const projectRows = (rows ?? []) as Array<
+ ProjectRow & {
+ is_polln8_recommended?: boolean | null;
+ polln8_founder_name?: string | null;
+ polln8_founder_headline?: string | null;
+ polln8_founder_website?: string | null;
+ polln8_founder_avatar_path?: string | null;
+ }
+ >;
+ const ownerIds = Array.from(new Set(projectRows.map((p) => p.owner_id)));
+ type FounderProfile = {
+ user_id: string;
+ full_name: string | null;
+ headline: string | null;
+ avatar_path: string | null;
+ };
+ let profileMap = new Map<string, FounderProfile>();
+ if (ownerIds.length > 0) {
+ const { data: profileRows, error: profileError } = await supabase
+ .from("profiles")
+ .select("user_id, full_name, headline, avatar_path")
+ .in("user_id", ownerIds);
+ if (profileError) throw profileError;
+ profileMap = new Map(
+ ((profileRows ?? []) as FounderProfile[]).map((pr) => [pr.user_id, pr]),
+ );
+ }
+ return projectRows.map((p) => {
  const recommended = Boolean(p.is_polln8_recommended);
  const polln8Name = (p.polln8_founder_name ?? "").trim();
  const polln8Headline = (p.polln8_founder_headline ?? "").trim();
  const polln8Avatar = (p.polln8_founder_avatar_path ?? "").trim();
+ const profile = profileMap.get(p.owner_id);
  return {
  id: p.id,
  ownerId: p.owner_id,
@@ -878,13 +898,13 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  // The real owner stays in ownerId so chat / save / etc still work.
  founderFullName: recommended && polln8Name
  ? polln8Name
- : p.founder_full_name ?? "",
+ : profile?.full_name ?? "",
  founderHeadline: recommended && polln8Headline
  ? polln8Headline
- : p.founder_headline ?? "",
+ : profile?.headline ?? "",
  founderAvatarPath: recommended && polln8Avatar
  ? polln8Avatar
- : p.founder_avatar ?? null,
+ : profile?.avatar_path ?? null,
  isPolln8Recommended: recommended,
  polln8FounderName: polln8Name,
  polln8FounderHeadline: polln8Headline,
@@ -1280,6 +1300,7 @@ export const listPublishedProjectsForOwner = async (
  polln8FounderName: "",
  polln8FounderHeadline: "",
  polln8FounderWebsite: "",
+ polln8FounderAvatarPath: null,
  }));
 };
 
