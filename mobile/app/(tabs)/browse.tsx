@@ -564,10 +564,12 @@ const makeStyles = (theme: ThemePalette) =>
  },
  hero: {
  width: "100%",
- aspectRatio: 1.4,
- backgroundColor: theme.bgElev,
+ aspectRatio: 1,
+ backgroundColor: theme.border,
  alignItems: "center",
  justifyContent: "center",
+ borderBottomWidth: 1,
+ borderBottomColor: theme.goldSoft,
  },
  heroImg: {
  width: "100%",
@@ -579,7 +581,7 @@ const makeStyles = (theme: ThemePalette) =>
  height: "100%",
  alignItems: "center",
  justifyContent: "center",
- backgroundColor: theme.bgElev,
+ backgroundColor: theme.border,
  },
  cardBody: {
  padding: 14,
