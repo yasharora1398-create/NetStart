@@ -28,6 +28,7 @@ import {
  Search,
  Sparkles,
  Undo2,
+ User,
  X,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
@@ -397,15 +398,18 @@ const SwipeCard = ({
 
  const gesture = Gesture.Exclusive(pan, tap);
 
- // Card transform + soft colored glow on the edges of the card.
- // Green when swiping right (save), red when swiping left (pass).
- // iOS / web render this as a true colored shadow on the card's
- // silhouette. Android falls back to no glow (elevation shadows
- // can't be tinted).
+ // Card transform + animated outline. No glow / shadow - just a
+ // colored border that swaps to green (right = save) or red
+ // (left = pass) and thickens as the drag progresses. Reverts to
+ // the resting gold outline when the card is centred.
  const cardStyle = useAnimatedStyle(() => {
  const t = Math.min(Math.abs(x.value) / SWIPE_THRESHOLD, 1);
- const shadowColor =
- x.value > 0.5 ? "#22c55e" : x.value < -0.5 ? "#ef4444" : "transparent";
+ const borderColor =
+ x.value > 0.5
+ ? "#22c55e"
+ : x.value < -0.5
+ ? "#ef4444"
+ : theme.goldSoft;
  return {
  transform: [
  { translateX: x.value },
@@ -418,10 +422,8 @@ const SwipeCard = ({
  )}deg`,
  },
  ],
- shadowColor,
- shadowOpacity: t * 0.85,
- shadowRadius: 20 + t * 8,
- shadowOffset: { width: 0, height: 0 },
+ borderWidth: 1 + t * 2,
+ borderColor,
  };
  });
 
@@ -468,9 +470,7 @@ const CandidateCard = ({
  <Image source={{ uri: url }} style={styles.heroImg} />
  ) : (
  <View style={styles.heroFallback}>
- <Text style={styles.heroInitials}>
- {(candidate.fullName[0] ?? "?").toUpperCase()}
- </Text>
+ <User size={88} color={theme.textDim} strokeWidth={1.4} />
  </View>
  )}
  {score > 0 ? (
@@ -484,44 +484,37 @@ const CandidateCard = ({
  <Text style={styles.cardName} numberOfLines={1}>
  {candidate.fullName || "Unnamed"}
  </Text>
- {candidate.headline ? (
- <Text style={styles.cardHeadline} numberOfLines={2}>
- {candidate.headline}
- </Text>
+
+ {/* Pills: commitment + location + skills, all under the name. */}
+ {(candidate.commitment ||
+ candidate.location ||
+ candidate.skills.length > 0) && (
+ <View style={styles.pillRow}>
+ {candidate.commitment ? (
+ <View style={styles.pillSolid}>
+ <Sparkles size={10} color={theme.bg} />
+ <Text style={styles.pillSolidText}>{candidate.commitment}</Text>
+ </View>
  ) : null}
+ {candidate.location ? (
+ <View style={styles.pillSolid}>
+ <MapPin size={10} color={theme.bg} />
+ <Text style={styles.pillSolidText}>{candidate.location}</Text>
+ </View>
+ ) : null}
+ {candidate.skills.slice(0, 5).map((s) => (
+ <View key={s} style={styles.pillOutline}>
+ <Text style={styles.pillOutlineText}>{s}</Text>
+ </View>
+ ))}
+ </View>
+ )}
 
  {candidate.bio ? (
  <Text style={styles.cardBio} numberOfLines={3}>
  {candidate.bio}
  </Text>
  ) : null}
-
- {(candidate.location || candidate.commitment) && (
- <View style={styles.metaRow}>
- {candidate.commitment ? (
- <View style={styles.metaInline}>
- <Sparkles size={10} color={theme.gold} />
- <Text style={styles.meta}>{candidate.commitment}</Text>
- </View>
- ) : null}
- {candidate.location ? (
- <View style={styles.metaInline}>
- <MapPin size={10} color={theme.gold} />
- <Text style={styles.meta}>{candidate.location}</Text>
- </View>
- ) : null}
- </View>
- )}
-
- {candidate.skills.length > 0 && (
- <View style={styles.skillRow}>
- {candidate.skills.slice(0, 6).map((s) => (
- <View key={s} style={styles.skillChip}>
- <Text style={styles.skillText}>{s}</Text>
- </View>
- ))}
- </View>
- )}
  </View>
  </View>
  );
@@ -614,7 +607,7 @@ const makeStyles = (theme: ThemePalette) =>
  borderBottomColor: theme.border,
  },
  pickerItemText: { color: theme.text, fontSize: 13 },
- deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 110 },
+ deck: { flex: 1, paddingHorizontal: 20, paddingTop: 0, paddingBottom: 110 },
  deckInner: { flex: 1, position: "relative" },
  // Shadow donor: matches the inner card's shape so iOS/web can
  // compute the colored swipe glow against a real silhouette. The
@@ -631,15 +624,13 @@ const makeStyles = (theme: ThemePalette) =>
  card: {
  flex: 1,
  backgroundColor: theme.bgElev,
- borderWidth: 1,
- borderColor: theme.goldSoft,
  borderRadius: 18,
  overflow: "hidden",
  },
  hero: {
  width: "100%",
- aspectRatio: 1,
- backgroundColor: theme.goldGlow,
+ aspectRatio: 1.4,
+ backgroundColor: theme.bgElev,
  alignItems: "center",
  justifyContent: "center",
  position: "relative",
@@ -654,22 +645,49 @@ const makeStyles = (theme: ThemePalette) =>
  height: "100%",
  alignItems: "center",
  justifyContent: "center",
- },
- heroInitials: {
- color: theme.gold,
- fontFamily: fonts.display,
- fontSize: 96,
+ backgroundColor: theme.bgElev,
  },
  cardBody: {
- padding: 18,
- gap: 6,
+ padding: 14,
+ gap: 8,
  flexShrink: 1,
  },
- cardName: { color: theme.text, fontFamily: fonts.display, fontSize: 24 },
+ cardName: { color: theme.text, fontFamily: fonts.display, fontSize: 22 },
  cardHeadline: {
  color: theme.textMuted,
  fontSize: 12,
  lineHeight: 17,
+ },
+ pillRow: {
+ flexDirection: "row",
+ flexWrap: "wrap",
+ gap: 6,
+ },
+ pillSolid: {
+ flexDirection: "row",
+ alignItems: "center",
+ gap: 5,
+ paddingHorizontal: 10,
+ paddingVertical: 4,
+ borderRadius: 999,
+ backgroundColor: theme.gold,
+ },
+ pillSolidText: {
+ color: theme.bg,
+ fontSize: 11,
+ fontWeight: "600",
+ },
+ pillOutline: {
+ paddingHorizontal: 10,
+ paddingVertical: 4,
+ borderRadius: 999,
+ borderWidth: 1,
+ borderColor: theme.border,
+ backgroundColor: theme.bg,
+ },
+ pillOutlineText: {
+ color: theme.textMuted,
+ fontSize: 11,
  },
  matchPill: {
  position: "absolute",

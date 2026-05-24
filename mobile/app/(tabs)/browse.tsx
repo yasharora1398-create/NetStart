@@ -45,6 +45,7 @@ import {
  Search,
  Sparkles,
  Undo2,
+ User,
  X,
 } from "lucide-react-native";
 
@@ -355,78 +356,63 @@ const ProjectCard = ({
  <Image source={{ uri: founderUrl }} style={styles.heroImg} />
  ) : (
  <View style={styles.heroFallback}>
- <Text style={styles.heroInitials}>
- {(project.founderFullName[0] ?? "?").toUpperCase()}
- </Text>
+ <User size={88} color={theme.textDim} strokeWidth={1.4} />
  </View>
  )}
  </View>
 
  <View style={styles.cardBody}>
- <Text style={styles.cardFounder} numberOfLines={1}>
- {project.founderFullName || "Anonymous"}
- </Text>
- {project.founderHeadline ? (
- <Text style={styles.cardHeadline} numberOfLines={1}>
- {project.founderHeadline}
- </Text>
- ) : null}
-
  <Text style={styles.cardTitle} numberOfLines={2}>
  {project.title}
  </Text>
+ <Text style={styles.cardFounder} numberOfLines={1}>
+ by {project.founderFullName || "Anonymous"}
+ {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
+ </Text>
+
+ {/* Pills: business type + commitment + location + skills,
+ all under the name. */}
+ {(project.businessType ||
+ project.criteria.commitment ||
+ project.criteria.location ||
+ project.criteria.skills.length > 0) && (
+ <View style={styles.pillRow}>
+ {project.businessType ? (
+ <View style={styles.pillSolid}>
+ <Text style={styles.pillSolidText}>
+ {project.businessType}
+ </Text>
+ </View>
+ ) : null}
+ {project.criteria.commitment ? (
+ <View style={styles.pillSolid}>
+ <Briefcase size={10} color={theme.bg} />
+ <Text style={styles.pillSolidText}>
+ {project.criteria.commitment}
+ </Text>
+ </View>
+ ) : null}
+ {project.criteria.location ? (
+ <View style={styles.pillSolid}>
+ <MapPin size={10} color={theme.bg} />
+ <Text style={styles.pillSolidText}>
+ {project.criteria.location}
+ </Text>
+ </View>
+ ) : null}
+ {project.criteria.skills.slice(0, 5).map((s) => (
+ <View key={s} style={styles.pillOutline}>
+ <Text style={styles.pillOutlineText}>{s}</Text>
+ </View>
+ ))}
+ </View>
+ )}
 
  {project.description ? (
  <Text style={styles.cardDesc} numberOfLines={3}>
  {project.description}
  </Text>
  ) : null}
-
- {(project.businessType ||
- project.criteria.commitment ||
- project.criteria.location) && (
- <View style={styles.metaRow}>
- {project.businessType ? (
- <View
- style={[
- styles.metaChip,
- {
- backgroundColor: theme.goldGlow,
- borderColor: theme.goldSoft,
- },
- ]}
- >
- <Text style={[styles.metaText, { color: theme.gold }]}>
- {project.businessType}
- </Text>
- </View>
- ) : null}
- {project.criteria.commitment ? (
- <View style={styles.metaChip}>
- <Briefcase size={10} color={theme.gold} />
- <Text style={styles.metaText}>
- {project.criteria.commitment}
- </Text>
- </View>
- ) : null}
- {project.criteria.location ? (
- <View style={styles.metaChip}>
- <MapPin size={10} color={theme.gold} />
- <Text style={styles.metaText}>{project.criteria.location}</Text>
- </View>
- ) : null}
- </View>
- )}
-
- {project.criteria.skills.length > 0 && (
- <View style={styles.skillRow}>
- {project.criteria.skills.slice(0, 5).map((s) => (
- <View key={s} style={styles.skillChip}>
- <Text style={styles.skillText}>{s}</Text>
- </View>
- ))}
- </View>
- )}
  </View>
  </View>
  );
@@ -473,14 +459,17 @@ const SwipeCard = ({
 
  const gesture = Gesture.Exclusive(pan, tap);
 
- // Card transform + soft colored glow on the edges of the card.
- // Green when swiping right (save), red when swiping left (pass).
- // Intensity tracks how far the user has dragged; resolves on its
- // own as x animates back to 0 or off-screen.
+ // Card transform + animated outline. No glow / shadow - just a
+ // colored border that swaps to green (right = save) or red
+ // (left = pass) and thickens as the drag progresses.
  const cardStyle = useAnimatedStyle(() => {
  const t = Math.min(Math.abs(x.value) / SWIPE_THRESHOLD, 1);
- const shadowColor =
- x.value > 0.5 ? "#22c55e" : x.value < -0.5 ? "#ef4444" : "transparent";
+ const borderColor =
+ x.value > 0.5
+ ? "#22c55e"
+ : x.value < -0.5
+ ? "#ef4444"
+ : theme.goldSoft;
  return {
  transform: [
  { translateX: x.value },
@@ -493,13 +482,8 @@ const SwipeCard = ({
  )}deg`,
  },
  ],
- shadowColor,
- shadowOpacity: t * 0.85,
- shadowRadius: 20 + t * 8,
- shadowOffset: { width: 0, height: 0 },
- // Android can't tint elevation shadows, so the glow there
- // gracefully degrades to nothing. iOS and web get the full
- // colored halo.
+ borderWidth: 1 + t * 2,
+ borderColor,
  };
  });
 
@@ -561,7 +545,7 @@ const makeStyles = (theme: ThemePalette) =>
  fontFamily: fonts.display,
  letterSpacing: -0.5,
  },
- deck: { flex: 1, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
+ deck: { flex: 1, paddingHorizontal: 20, paddingTop: 0, paddingBottom: 110 },
  deckInner: { flex: 1, position: "relative" },
  // Shadow donor: matches the inner card's shape so iOS/web can
  // compute the colored swipe glow against a real silhouette.
@@ -575,15 +559,13 @@ const makeStyles = (theme: ThemePalette) =>
  card: {
  flex: 1,
  backgroundColor: theme.bgElev,
- borderWidth: 1,
- borderColor: theme.goldSoft,
  borderRadius: 18,
  overflow: "hidden",
  },
  hero: {
  width: "100%",
- aspectRatio: 1,
- backgroundColor: theme.goldGlow,
+ aspectRatio: 1.4,
+ backgroundColor: theme.bgElev,
  alignItems: "center",
  justifyContent: "center",
  },
@@ -597,21 +579,16 @@ const makeStyles = (theme: ThemePalette) =>
  height: "100%",
  alignItems: "center",
  justifyContent: "center",
- },
- heroInitials: {
- color: theme.gold,
- fontFamily: fonts.display,
- fontSize: 96,
+ backgroundColor: theme.bgElev,
  },
  cardBody: {
- padding: 18,
- gap: 6,
+ padding: 14,
+ gap: 8,
  flexShrink: 1,
  },
  cardFounder: {
- color: theme.text,
- fontSize: 14,
- fontWeight: "600",
+ color: theme.textMuted,
+ fontSize: 12,
  },
  cardHeadline: {
  color: theme.textMuted,
@@ -623,7 +600,37 @@ const makeStyles = (theme: ThemePalette) =>
  fontSize: 22,
  lineHeight: 26,
  letterSpacing: -0.3,
- marginTop: 6,
+ },
+ pillRow: {
+ flexDirection: "row",
+ flexWrap: "wrap",
+ gap: 6,
+ },
+ pillSolid: {
+ flexDirection: "row",
+ alignItems: "center",
+ gap: 5,
+ paddingHorizontal: 10,
+ paddingVertical: 4,
+ borderRadius: 999,
+ backgroundColor: theme.gold,
+ },
+ pillSolidText: {
+ color: theme.bg,
+ fontSize: 11,
+ fontWeight: "600",
+ },
+ pillOutline: {
+ paddingHorizontal: 10,
+ paddingVertical: 4,
+ borderRadius: 999,
+ borderWidth: 1,
+ borderColor: theme.border,
+ backgroundColor: theme.bg,
+ },
+ pillOutlineText: {
+ color: theme.textMuted,
+ fontSize: 11,
  },
  cardDesc: {
  color: theme.textMuted,
