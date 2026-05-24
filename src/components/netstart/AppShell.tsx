@@ -219,7 +219,7 @@ const SavedScreen = () => (
  {b.location}
  </p>
  </div>
- <span className="px-1.5 py-0.5 rounded-sm border border-gold bg-gold text-[9px] font-mono uppercase tracking-widest text-white flex-shrink-0">
+ <span className="px-1.5 py-0.5 rounded-sm border border-gold bg-gold text-[9px] font-mono uppercase tracking-widest text-primary-foreground flex-shrink-0">
  Saved
  </span>
  </article>
@@ -246,7 +246,7 @@ const StartupsScreen = () => (
  {b.building}
  </h3>
  </div>
- <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[9px] text-white flex-shrink-0">
+ <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[9px] text-primary-foreground flex-shrink-0">
  {b.match}%
  </span>
  </div>
@@ -297,7 +297,7 @@ const BrowseScreen = () => (
  key={chip}
  className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest flex-shrink-0 ${
  i === 0
- ? "border-gold bg-gold text-white"
+ ? "border-gold bg-gold text-primary-foreground"
  : "border-border text-muted-foreground"
  }`}
  >
@@ -316,7 +316,7 @@ const BrowseScreen = () => (
  <h3 className="font-display text-sm leading-tight truncate">
  {b.building}
  </h3>
- <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[9px] text-white flex-shrink-0 ml-2">
+ <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[9px] text-primary-foreground flex-shrink-0 ml-2">
  {b.match}%
  </span>
  </div>
@@ -452,7 +452,7 @@ const YouScreen = () => {
 
  <button
  type="button"
- className="w-full py-2 rounded-sm border border-gold bg-gold text-white text-[11px] font-mono uppercase tracking-widest"
+ className="w-full py-2 rounded-sm border border-gold bg-gold text-primary-foreground text-[11px] font-mono uppercase tracking-widest"
  >
  Edit profile
  </button>

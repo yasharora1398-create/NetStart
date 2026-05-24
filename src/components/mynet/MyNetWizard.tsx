@@ -862,7 +862,7 @@ const Stepper = ({ active }: { active: number }) => (
  <div
  className={`flex h-7 w-7 items-center justify-center rounded-sm border text-[11px] font-mono ${
  current
- ? "border-gold bg-gold text-white"
+ ? "border-gold bg-gold text-primary-foreground"
  : done
  ? "border-gold bg-gold"
  : "border-border bg-card"
@@ -1074,7 +1074,7 @@ const ModeCard = ({
  >
  <div className="absolute inset-0 bg-gradient-to-br from-gold via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative">
- <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold text-white mb-6 group-hover:bg-gold transition-colors">
+ <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold text-primary-foreground mb-6 group-hover:bg-gold transition-colors">
  {icon}
  </div>
  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold mb-3">

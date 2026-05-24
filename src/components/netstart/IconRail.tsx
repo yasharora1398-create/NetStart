@@ -105,9 +105,9 @@ export const IconRail = () => {
  cn(
  "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-card ",
  "text-muted-foreground transition-all duration-200",
- "hover:scale-110 hover:bg-gold hover:text-white hover:border-gold",
+ "hover:scale-110 hover:bg-gold hover:text-primary-foreground hover:border-gold",
  isActive
- ? "border-gold bg-gold text-white"
+ ? "border-gold bg-gold text-primary-foreground"
  : "border-border",
  )
  }

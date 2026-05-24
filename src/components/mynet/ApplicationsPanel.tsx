@@ -54,7 +54,7 @@ const statusBadge = (status: ApplicationStatus) => {
  const config = {
  pending: {
  label: "Pending",
- className: "border-gold bg-gold text-white",
+ className: "border-gold bg-gold text-primary-foreground",
  },
  accepted: {
  label: "Accepted",

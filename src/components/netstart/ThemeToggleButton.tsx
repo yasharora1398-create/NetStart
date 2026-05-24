@@ -21,7 +21,7 @@ export const ThemeToggleButton = () => {
  onClick={toggle}
  aria-label={`Switch to ${goingTo} mode`}
  title={`Switch to ${goingTo} mode`}
- className="flex h-8 w-8 items-center justify-center rounded-full border border-gold bg-gold text-white transition-colors hover:bg-gold"
+ className="flex h-8 w-8 items-center justify-center rounded-full border border-gold bg-gold text-primary-foreground transition-colors hover:bg-gold"
  >
  {mode === "light" ? <MoonIcon /> : <SunIcon />}
  </button>

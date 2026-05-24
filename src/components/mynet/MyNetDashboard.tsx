@@ -732,7 +732,7 @@ const PreviewPill = ({
  className={
  muted
  ? "rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground"
- : "inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white"
+ : "inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground"
  }
  >
  {children}

@@ -906,7 +906,7 @@ const Bubble = ({
  className={cn(
  "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
  mine
- ? "rounded-br-sm bg-gold text-white-foreground"
+ ? "rounded-br-sm bg-gold text-primary-foreground"
  : "rounded-bl-sm bg-muted text-foreground",
  )}
  >

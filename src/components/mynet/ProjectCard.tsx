@@ -73,7 +73,7 @@ export const ProjectCard = ({
 
  <div className="flex flex-col gap-1 items-end flex-shrink-0">
  {isActive ? (
- <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-white">
+ <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-primary-foreground">
  <Star className="h-2.5 w-2.5 fill-gold text-white" />
  Match focus
  </span>
@@ -88,7 +88,7 @@ export const ProjectCard = ({
  {project.isPublished ? "Public" : "Draft"}
  </span>
  {lifecycle !== "active" ? (
- <span className="px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-white">
+ <span className="px-2 py-1 rounded-sm border border-gold bg-gold text-[10px] font-mono uppercase tracking-widest text-primary-foreground">
  {lifecycleLabel(lifecycle)}
  </span>
  ) : null}
@@ -224,7 +224,7 @@ export const ProjectCard = ({
  <button
  type="button"
  onClick={onOpen}
- className="relative w-full px-6 py-3 border-t border-border bg-background hover:bg-gold transition-colors flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-white"
+ className="relative w-full px-6 py-3 border-t border-border bg-background hover:bg-gold transition-colors flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-primary-foreground"
  aria-label={`View ${savedCount} saved profiles`}
  >
  <span className="flex items-center gap-2">

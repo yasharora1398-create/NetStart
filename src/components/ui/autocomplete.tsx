@@ -131,8 +131,8 @@ export const Autocomplete = ({
  className={cn(
  "w-full text-left px-3 py-2 text-sm flex items-center justify-between transition-colors",
  isActive
- ? "bg-gold text-foreground"
- : "text-muted-foreground hover:text-foreground",
+ ? "bg-gold text-primary-foreground"
+ : "text-foreground hover:bg-accent",
  )}
  >
  <span className="truncate">{opt}</span>

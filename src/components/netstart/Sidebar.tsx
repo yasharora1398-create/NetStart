@@ -325,7 +325,7 @@ const CollapsedRail = ({
  onClick={onExpand}
  aria-label="Expand sidebar"
  title="Expand sidebar"
- className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-gold bg-gold text-white transition-all duration-200 hover:scale-110"
+ className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-gold bg-gold text-primary-foreground transition-all duration-200 hover:scale-110"
  >
  <PanelLeftOpen className="h-4 w-4" />
  <span
@@ -345,7 +345,7 @@ const CollapsedRail = ({
  cn(
  "group relative flex h-11 w-11 items-center justify-center rounded-full border bg-card ",
  "text-muted-foreground transition-all duration-200",
- "hover:scale-110 hover:bg-gold hover:text-white hover:border-gold",
+ "hover:scale-110 hover:bg-gold hover:text-primary-foreground hover:border-gold",
  isActive
  ? "border-gold text-gold"
  : "border-border",

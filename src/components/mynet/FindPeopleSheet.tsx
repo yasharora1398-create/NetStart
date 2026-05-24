@@ -212,7 +212,7 @@ export const FindPeopleSheet = ({
  <h3 className="font-display text-base leading-tight truncate">
  {candidate.fullName || "Unnamed"}
  </h3>
- <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[10px] text-white flex-shrink-0">
+ <span className="px-1.5 py-0.5 rounded-sm bg-gold border border-gold font-mono text-[10px] text-primary-foreground flex-shrink-0">
  {score}%
  </span>
  </div>
@@ -386,7 +386,7 @@ const PublicProfileBody = ({
  </p>
  )}
  <div className="flex flex-wrap gap-2">
- <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-gold bg-gold font-mono text-[11px] text-white uppercase tracking-widest">
+ <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-gold bg-gold font-mono text-[11px] text-primary-foreground uppercase tracking-widest">
  {score}% match
  </span>
  {requiredCount > 0 && (

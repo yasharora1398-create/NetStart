@@ -139,7 +139,7 @@ export const MobileSwipeCard = ({
 
  <span
  aria-hidden
- className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-md border-2 border-gold bg-gold px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-white"
+ className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-md border-2 border-gold bg-gold px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-primary-foreground"
  style={{ opacity: opacityRight }}
  >
  Save

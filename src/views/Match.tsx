@@ -521,7 +521,7 @@ const PartnerView = () => {
  onClick={undo}
  aria-label={`Undo: bring back ${lastDecided.fullName}`}
  title={`Undo: bring back ${lastDecided.fullName || "last candidate"}`}
- className="inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-white hover:bg-gold hover:border-gold transition-colors"
+ className="inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-primary-foreground hover:bg-gold hover:border-gold transition-colors"
  >
  <Undo2 className="h-3.5 w-3.5" />
  Undo
@@ -589,7 +589,7 @@ const PartnerView = () => {
  aria-label="Approve"
  disabled={Boolean(approving)}
  className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-white transition-all duration-500",
+ "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-primary-foreground transition-all duration-500",
  approving &&
  "opacity-0 pointer-events-none scale-75 -ml-[80px]",
  )}
@@ -659,13 +659,13 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  candidate.skills.length > 0) ? (
  <div className="mb-3 flex flex-wrap gap-1.5">
  {candidate.commitment ? (
- <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
+ <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground">
  <Sparkles className="h-3 w-3" />
  {candidate.commitment}
  </span>
  ) : null}
  {candidate.location ? (
- <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
+ <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground">
  <MapPin className="h-3 w-3" />
  {candidate.location}
  </span>
@@ -777,7 +777,7 @@ const CandidateActions = ({
  rel="noopener noreferrer"
  aria-label="Open LinkedIn"
  title="LinkedIn"
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-white hover:border-gold hover:shadow-md"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold hover:shadow-md"
  >
  <Linkedin className="h-6 w-6" />
  </a>
@@ -799,7 +799,7 @@ const CandidateActions = ({
  rel="noopener noreferrer"
  aria-label="Open resume"
  title={candidate.resumeName}
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-white hover:border-gold hover:shadow-md"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold hover:shadow-md"
  >
  <FileText className="h-6 w-6" />
  </a>
@@ -822,7 +822,7 @@ const CandidateActions = ({
  disabled={working}
  aria-label={saved ? "Remove from saved" : "Save"}
  title={saved ? "Saved" : "Save"}
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-white hover:border-gold hover:shadow-md disabled:"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold hover:shadow-md disabled:"
  >
  {saved ? (
  <BookmarkCheck className="h-6 w-6 fill-current" />
@@ -838,7 +838,7 @@ const CandidateActions = ({
  disabled={working}
  aria-label="Message"
  title="Message"
- className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-gold text-white-foreground shadow-sm transition-all hover:bg-gold hover:shadow-md disabled:"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-gold text-primary-foreground shadow-sm transition-all hover:bg-gold hover:shadow-md disabled:"
  >
  <MessageCircle className="h-6 w-6" />
  </button>
@@ -1078,7 +1078,7 @@ const LookerView = () => {
  onClick={goBack}
  aria-label={`Undo: bring back ${lastDecided.title}`}
  title={`Undo: bring back "${lastDecided.title}"`}
- className="inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-white hover:bg-gold hover:border-gold transition-colors"
+ className="inline-flex items-center gap-1.5 rounded-sm border border-gold bg-gold px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-primary-foreground hover:bg-gold hover:border-gold transition-colors"
  >
  <Undo2 className="h-3.5 w-3.5" />
  Undo
@@ -1122,7 +1122,7 @@ const LookerView = () => {
  onClick={goBack}
  disabled={!lastDecided}
  aria-label="Previous card"
- className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-gold hover:text-white hover:border-gold disabled: disabled:cursor-not-allowed"
+ className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-gold hover:text-primary-foreground hover:border-gold disabled: disabled:cursor-not-allowed"
  >
  <Undo2 className="h-4 w-4" />
  </button>
@@ -1172,7 +1172,7 @@ const LookerView = () => {
  onClick={goBack}
  disabled={!lastDecided}
  aria-label="Previous card"
- className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-white transition-all hover:bg-gold hover:border-gold disabled: disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold"
+ className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-gold hover:border-gold disabled: disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold"
  >
  <ChevronLeft className="h-4 w-4" />
  Previous
@@ -1185,7 +1185,7 @@ const LookerView = () => {
  aria-label="Approve"
  disabled={Boolean(approving)}
  className={cn(
- "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-white transition-all duration-500",
+ "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm hover:bg-gold hover:text-primary-foreground transition-all duration-500",
  approving &&
  "opacity-0 pointer-events-none scale-75 -ml-[80px]",
  )}
@@ -1521,7 +1521,7 @@ const ProjectInfoPanel = ({
  <button
  type="button"
  onClick={handleMessage}
- className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-gold bg-gold px-4 py-2.5 text-sm font-semibold text-white-foreground transition-all hover:bg-gold hover:shadow-md"
+ className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-gold bg-gold px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-gold hover:shadow-md"
  >
  <MessageCircle className="h-4 w-4" />
  Request chat
@@ -1532,7 +1532,7 @@ const ProjectInfoPanel = ({
  onClick={handleToggleSave}
  aria-label={saved ? "Remove from saved" : "Save"}
  title={saved ? "Saved" : "Save"}
- className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold transition-all hover:bg-gold hover:text-white hover:border-gold"
+ className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gold bg-card text-gold transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold"
  >
  {saved ? (
  <BookmarkCheck className="h-5 w-5 fill-current" />
@@ -1588,13 +1588,13 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  project.criteria.skills.length > 0) ? (
  <div className="mb-3 flex flex-wrap gap-1.5">
  {project.criteria.commitment ? (
- <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
+ <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground">
  <Briefcase className="h-3 w-3" />
  {project.criteria.commitment}
  </span>
  ) : null}
  {project.criteria.location ? (
- <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-white">
+ <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground">
  <MapPin className="h-3 w-3" />
  {project.criteria.location}
  </span>

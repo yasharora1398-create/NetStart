@@ -37,7 +37,7 @@ export const HomeAuthStrip = () => {
  <div className="hidden md:flex fixed top-4 right-5 z-40 items-center gap-2">
  {user ? (
  <>
- <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-[11px] font-mono uppercase tracking-[0.18em] text-white">
+ <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-[11px] font-mono uppercase tracking-[0.18em] text-primary-foreground">
  {displayName(user)}
  </span>
  <Button

@@ -152,8 +152,8 @@ export const TagInput = ({
  className={cn(
  "w-full text-left px-3 py-2 text-sm flex items-center justify-between transition-colors",
  isActive
- ? "bg-gold text-foreground"
- : "text-muted-foreground hover:text-foreground",
+ ? "bg-gold text-primary-foreground"
+ : "text-foreground hover:bg-accent",
  )}
  >
  <span className="truncate">{opt}</span>
@@ -171,14 +171,14 @@ export const TagInput = ({
  {value.map((tag) => (
  <span
  key={tag}
- className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs border border-gold bg-gold rounded-sm text-white"
+ className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs border border-gold bg-gold rounded-sm text-primary-foreground"
  >
  {tag}
  <button
  type="button"
  onClick={() => remove(tag)}
  aria-label={`Remove ${tag}`}
- className="text-white hover:text-foreground transition-colors"
+ className="text-primary-foreground hover:opacity-80 transition-opacity"
  >
  <X className="h-3 w-3" />
  </button>

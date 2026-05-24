@@ -491,7 +491,7 @@ const StatusPill = ({ status }: { status: ReviewStatus }) => {
  },
  pending: {
  label: "Under review",
- className: "border-gold bg-gold text-white",
+ className: "border-gold bg-gold text-primary-foreground",
  Icon: Clock,
  },
  accepted: {

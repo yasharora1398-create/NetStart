@@ -435,7 +435,7 @@ const RoleSplit = () => {
  <div className="flex flex-wrap items-center gap-3">
  <Magnetic strength={6}>
  <Link to={isAuthed ? "/mynet" : "/signup"}>
- <Button variant="gold" size="lg" className="group/btn">
+ <Button variant="outlineGold" size="lg" className="group/btn">
  {isAuthed ? "Edit your project" : "Post a project"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
  </Button>
@@ -472,7 +472,7 @@ const RoleSplit = () => {
  <div className="flex flex-wrap items-center gap-3">
  <Magnetic strength={6}>
  <Link to={isAuthed ? "/match" : "/signup"}>
- <Button variant="gold" size="lg" className="group/btn">
+ <Button variant="outlineGold" size="lg" className="group/btn">
  {isAuthed ? "Open Match" : "Find a project"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
  </Button>
@@ -619,7 +619,7 @@ const HowItWorks = () => {
  <div className="mt-10 flex flex-wrap items-center gap-3">
  <Magnetic strength={6}>
  <Link to={isAuthed ? "/mynet" : "/signup"}>
- <Button variant="gold" size="lg" className="group/btn">
+ <Button variant="outlineGold" size="lg" className="group/btn">
  {isAuthed ? "Go to MyNet" : "Start step one"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
  </Button>
@@ -827,7 +827,7 @@ const FinalCTA = () => {
  <div className="flex flex-wrap justify-center gap-3">
  <Magnetic strength={10}>
  <Link to={isAuthed ? "/mynet" : "/signup"}>
- <Button variant="gold" size="xl" className="group">
+ <Button variant="outlineGold" size="xl" className="group">
  {isAuthed ? "Open MyNet" : "Get started"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
  </Button>

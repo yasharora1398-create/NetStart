@@ -142,7 +142,7 @@ export const Nav = () => {
  className={({ isActive }) =>
  `relative h-9 w-9 flex items-center justify-center rounded-sm border transition-colors ${
  isActive
- ? "border-gold text-white bg-gold"
+ ? "border-gold text-primary-foreground bg-gold"
  : "border-border text-muted-foreground hover:text-foreground hover:border-gold"
  }`
  }

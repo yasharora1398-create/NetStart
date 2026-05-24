@@ -480,7 +480,7 @@ const Pill = ({
  "inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[11px]",
  muted
  ? "border-border bg-muted text-muted-foreground"
- : "border-gold bg-gold text-white",
+ : "border-gold bg-gold text-primary-foreground",
  )}
  >
  {icon}

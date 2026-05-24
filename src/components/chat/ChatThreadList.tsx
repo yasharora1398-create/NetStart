@@ -267,7 +267,7 @@ const StateBadge = ({
  const label = state === "inbound" ? "Pending" : fromMe ? "Sent" : "Pending";
  const tone =
  state === "inbound"
- ? "border-gold bg-gold text-white"
+ ? "border-gold bg-gold text-primary-foreground"
  : "border-border bg-muted text-muted-foreground";
  return (
  <span
