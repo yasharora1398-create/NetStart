@@ -61,7 +61,7 @@ const colorFor = (type: NotificationType): string => {
  switch (type) {
  case "application_accepted":
  case "profile_accepted":
- return "text-emerald-400";
+ return "text-primary-foreground";
  case "application_rejected":
  case "profile_rejected":
  return "text-destructive";

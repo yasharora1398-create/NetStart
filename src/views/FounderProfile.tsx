@@ -150,7 +150,7 @@ const FounderProfile = () => {
  </span>
  )}
  {founder.isOpenToWork && (
- <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-emerald-500 bg-emerald-500 font-mono text-[11px] text-emerald-400 uppercase tracking-widest">
+ <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-primary bg-primary font-mono text-[11px] text-primary-foreground uppercase tracking-widest">
  Open to work
  </span>
  )}

@@ -734,7 +734,7 @@ const MyNet = () => {
  {displayProfile.reviewStatus === "accepted" && (
  <Link
  to="/match"
- className="block rounded-sm border border-gold bg-gradient-to-r from-gold to-transparent p-6 hover:border-gold transition-colors group"
+ className="block rounded-sm border border-gold bg-card p-6 hover:border-gold transition-colors group"
  >
  <div className="flex items-center justify-between gap-4">
  <div>

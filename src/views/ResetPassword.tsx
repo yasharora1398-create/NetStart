@@ -110,10 +110,10 @@ const ResetPassword = () => {
  <div className="w-full max-w-md">
  {done ? (
  <div className="rounded-sm border border-emerald-500 bg-card p-8 text-center">
- <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-emerald-500 bg-emerald-500 mb-4">
- <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+ <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-primary bg-primary mb-4">
+ <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
  </div>
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-emerald-400 mb-2">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary-foreground mb-2">
  Updated
  </p>
  <h1 className="font-display text-3xl mb-3">Password set.</h1>

@@ -57,7 +57,7 @@ export const ProjectCard = ({
  : "border-border hover:border-gold"
  }`}
  >
- <div className="absolute inset-0 bg-gradient-to-br from-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+ <div className="absolute inset-0 bg-card opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
  <div className="relative p-6">
  <div className="flex items-start justify-between gap-3 mb-3">
@@ -81,7 +81,7 @@ export const ProjectCard = ({
  <span
  className={`px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest ${
  project.isPublished
- ? "border-emerald-500 bg-emerald-500 text-emerald-400"
+ ? "border-primary bg-primary text-primary-foreground"
  : "border-border bg-background text-muted-foreground"
  }`}
  >
@@ -184,7 +184,7 @@ export const ProjectCard = ({
  project.criteria.skills.slice(0, 5).map((s) => (
  <span
  key={s}
- className="px-2 py-0.5 text-[11px] rounded-sm border border-gold bg-gold text-foreground"
+ className="px-2 py-0.5 text-[11px] rounded-sm border border-gold bg-gold text-primary-foreground"
  >
  {s}
  </span>

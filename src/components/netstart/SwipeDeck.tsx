@@ -46,7 +46,7 @@ export const SwipeDeck = ({ compact = false }: { compact?: boolean }) => {
  loading="lazy"
  className="absolute inset-0 w-full h-full object-cover"
  />
- <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian to-transparent" />
+ <div className="absolute inset-0 bg-background" />
 
  {/* Match badge */}
  <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-obsidian border border-gold">

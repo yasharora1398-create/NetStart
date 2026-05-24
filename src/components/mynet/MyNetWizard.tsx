@@ -1072,7 +1072,6 @@ const ModeCard = ({
  onClick={onClick}
  className="group relative rounded-sm border border-border bg-card p-8 text-left hover:border-gold hover:bg-card transition-all"
  >
- <div className="absolute inset-0 bg-gradient-to-br from-gold via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative">
  <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm border border-gold bg-gold text-primary-foreground mb-6 group-hover:bg-gold transition-colors">
  {icon}

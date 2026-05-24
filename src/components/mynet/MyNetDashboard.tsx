@@ -112,9 +112,9 @@ export const MyNetDashboard = ({
  </span>
  </div>
  ) : (
- <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500 bg-emerald-500 mb-6">
- <CheckCircle2 className="h-3 w-3 text-emerald-400" />
- <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-400">
+ <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-primary bg-primary mb-6">
+ <CheckCircle2 className="h-3 w-3 text-primary-foreground" />
+ <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-primary-foreground">
  Accepted
  </span>
  </div>
@@ -214,7 +214,7 @@ export const MyNetDashboard = ({
  )}
 
  {!editing && profile.candidate.isOpenToWork && (
- <div className="mt-6 block rounded-sm border border-gold bg-gradient-to-r from-gold to-transparent p-6">
+ <div className="mt-6 block rounded-sm border border-gold bg-card p-6">
  <div className="flex items-center justify-between gap-4">
  <div>
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">
@@ -507,7 +507,7 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
  <span
  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border text-[11px] font-mono uppercase tracking-widest ${
  c.isOpenToWork
- ? "border-emerald-500 bg-emerald-500 text-emerald-400"
+ ? "border-primary bg-primary text-primary-foreground"
  : "border-border bg-background text-muted-foreground"
  }`}
  >

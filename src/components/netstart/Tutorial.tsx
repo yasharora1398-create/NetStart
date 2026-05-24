@@ -133,7 +133,7 @@ export const Tutorial = () => {
  </button>
  <button
  onClick={next}
- className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium text-sm py-2.5 rounded-sm hover:from-blue-500 hover:to-blue-400 transition-all"
+ className="flex-1 bg-primary text-white font-medium text-sm py-2.5 rounded-sm hover:opacity-90 transition-all"
  >
  {isLast ? "Got it" : "Continue"}
  </button>

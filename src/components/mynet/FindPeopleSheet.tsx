@@ -360,7 +360,7 @@ const PublicProfileBody = ({
  return (
  <>
  <div className="relative px-8 pt-8 pb-6 border-b border-border">
- <div className="absolute inset-0 bg-gradient-to-br from-gold to-transparent pointer-events-none" />
+ <div className="absolute inset-0 bg-card pointer-events-none" />
  <div className="relative flex items-start gap-5">
  {avatarUrl ? (
  <img
@@ -445,7 +445,7 @@ const PublicProfileBody = ({
  key={s}
  className={`px-2.5 py-1 text-xs rounded-sm border ${
  isMatch
- ? "border-gold bg-gold text-foreground"
+ ? "border-gold bg-gold text-primary-foreground"
  : "border-border bg-background text-muted-foreground"
  }`}
  >

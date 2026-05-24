@@ -193,11 +193,11 @@ export const CandidateCard = ({
  </div>
  ) : !profileComplete ? (
  <div className="rounded-sm border border-gold bg-gold p-4 mb-6">
- <p className="text-[11px] font-mono uppercase tracking-widest text-white mb-1">
+ <p className="text-[11px] font-mono uppercase tracking-widest text-primary-foreground mb-1">
  Almost there
  </p>
- <p className="text-sm">
- Fill in <span className="text-foreground">{missing.join(", ")}</span>
+ <p className="text-sm text-primary-foreground">
+ Fill in <span className="font-semibold">{missing.join(", ")}</span>
  {" "}
  so founders see a strong profile when you go open.
  </p>
@@ -305,7 +305,7 @@ export const CandidateCard = ({
  <span
  className={`font-normal normal-case tracking-normal text-[11px] ${
  bio.trim().length >= CANDIDATE_BIO_MIN
- ? "text-emerald-400"
+ ? "text-primary-foreground"
  : "text-muted-foreground"
  }`}
  >
@@ -375,7 +375,7 @@ export const CandidateCard = ({
  <span
  className={`font-normal normal-case tracking-normal text-[11px] ${
  skills.length >= CANDIDATE_SKILLS_MIN
- ? "text-emerald-400"
+ ? "text-primary-foreground"
  : "text-muted-foreground"
  }`}
  >

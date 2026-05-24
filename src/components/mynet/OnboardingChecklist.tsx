@@ -109,7 +109,7 @@ export const OnboardingChecklist = ({
  const pct = Math.round((completedCount / total) * 100);
 
  return (
- <div className="relative rounded-sm border border-gold bg-gradient-to-br from-gold to-transparent overflow-hidden">
+ <div className="relative rounded-sm border border-gold bg-card overflow-hidden">
  <div
  className={
  allDone

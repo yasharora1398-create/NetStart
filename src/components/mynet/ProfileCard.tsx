@@ -496,7 +496,7 @@ const StatusPill = ({ status }: { status: ReviewStatus }) => {
  },
  accepted: {
  label: "Accepted",
- className: "border-emerald-500 bg-emerald-500 text-emerald-400",
+ className: "border-primary bg-primary text-primary-foreground",
  Icon: CheckCircle2,
  },
  rejected: {

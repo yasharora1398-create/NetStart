@@ -1461,7 +1461,7 @@ const ProjectInfoPanel = ({
  className={cn(
  "block w-full rounded-sm border bg-background p-3 text-left transition-colors",
  isActive
- ? "border-emerald-500 bg-emerald-500 cursor-default"
+ ? "border-primary bg-primary cursor-default"
  : "border-border hover:border-gold hover:bg-card",
  )}
  >
@@ -1470,7 +1470,7 @@ const ProjectInfoPanel = ({
  {p.title}
  </p>
  {isActive ? (
- <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500 bg-emerald-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
+ <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-primary-foreground">
  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
  Viewing
  </span>

@@ -58,7 +58,7 @@ const statusBadge = (status: ApplicationStatus) => {
  },
  accepted: {
  label: "Accepted",
- className: "border-emerald-500 bg-emerald-500 text-emerald-400",
+ className: "border-primary bg-primary text-primary-foreground",
  },
  rejected: {
  label: "Rejected",
@@ -365,8 +365,8 @@ export const ApplicationsPanel = ({
  )}
  {app.status === "accepted" &&
  (app.founderLinkedin || app.founderFullName) && (
- <div className="rounded-sm border border-emerald-500 bg-emerald-500 p-3 mt-2 mb-2">
- <p className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 mb-1 flex items-center gap-1.5">
+ <div className="rounded-sm border border-primary bg-primary p-3 mt-2 mb-2">
+ <p className="text-[11px] font-mono uppercase tracking-widest text-primary-foreground mb-1 flex items-center gap-1.5">
  <Handshake className="h-3 w-3" />
  You're in. Reach out:
  </p>
