@@ -5,25 +5,25 @@
  * via Reanimated. Each scene either advances on a Next/Done button
  * inside the bubble (M1-M4, M8) or waits for a swipe gesture (M5-M7).
  *
- * M1: Welcome — moth center, two buttons (Show me around / Skip)
- * M2: "this is the match page where you find your next cofounders…"
- * — no dim, full screen visible, Next button
- * M3: "these are the specifics of the people you are viewing…"
- * — dim with rounded spotlight on pills + headline group
- * M4: "if you like what you see, click this button…"
- * — dim with rounded spotlight on the Request chat button.
+ * M1: Welcome - moth center, two buttons (Show me around / Skip)
+ * M2: "this is the match page where you find your next cofounders..."
+ * - no dim, full screen visible, Next button
+ * M3: "these are the specifics of the people you are viewing..."
+ * - dim with rounded spotlight on pills + headline group
+ * M4: "if you like what you see, click this button..."
+ * - dim with rounded spotlight on the Request chat button.
  * Moth in the middle, bubble's tail points at moth.
- * M5: "swipe left to save the person and see more information…"
- * — full-screen dim (no spotlight). Hand gesture animates
+ * M5: "swipe left to save the person and see more information..."
+ * - full-screen dim (no spotlight). Hand gesture animates
  * RIGHT→LEFT only. Waits for the user's swipe-left on the card.
- * M6: "Once you are done reading their information…"
- * — fake profile detail panel slides in. Moth at the bottom.
+ * M6: "Once you are done reading their information..."
+ * - fake profile detail panel slides in. Moth at the bottom.
  * Waits for the user's swipe-right to close.
- * M7: "swipe to the right to pass…"
- * — full-screen dim. Hand gesture animates LEFT→RIGHT only.
+ * M7: "swipe to the right to pass..."
+ * - full-screen dim. Hand gesture animates LEFT→RIGHT only.
  * Waits for swipe-right; on swipe, the card is hidden via the
  * parent's `onCardHide` callback.
- * M8: "You are all caught up! …" — moth center, bubble with Done button.
+ * M8: "You are all caught up! ..." - moth center, bubble with Done button.
  *
  * Smooth dim cutout uses an SVG mask with a rounded inner Rect (rx=22).
  * Hand gesture is a single-direction loop with fade-out + invisible
@@ -68,7 +68,7 @@ const TWEEN = { duration: 700, easing: Easing.inOut(Easing.cubic) };
 // Base size for the moth SVG. Scale animates per moment.
 const MOTH_BASE = 280;
 
-// Swipe threshold — translation magnitude on the active axis.
+// Swipe threshold - translation magnitude on the active axis.
 const SWIPE_THRESHOLD = 40;
 
 export type Layout = { x: number; y: number; width: number; height: number };
@@ -125,15 +125,15 @@ const mothTargetFor = (
  };
  }
  if (moment === 5) {
- // Right side, top — for swipe-LEFT direction the moth points left.
+ // Right side, top - for swipe-LEFT direction the moth points left.
  return { cx: SCREEN_W - 100, cy: 140, scale: 0.55 };
  }
  if (moment === 6) {
- // Bottom of the screen, larger — moth peers up at the detail panel.
+ // Bottom of the screen, larger - moth peers up at the detail panel.
  return { cx: SCREEN_W / 2, cy: SCREEN_H - 170, scale: 0.85 };
  }
  if (moment === 7) {
- // Left side, top — for swipe-RIGHT direction.
+ // Left side, top - for swipe-RIGHT direction.
  return { cx: 100, cy: 140, scale: 0.55 };
  }
  if (moment === 8) {
@@ -199,7 +199,7 @@ const bubbleTargetFor = (
  };
  }
  if (moment === 6) {
- // Bubble REALLY close to the moth — bottom edge sits well into
+ // Bubble REALLY close to the moth - bottom edge sits well into
  // the moth's wrapper area so the tail visibly emerges from the
  // moth's head.
  const mothHalf = (MOTH_BASE * 0.85) / 2; // 119
@@ -291,7 +291,7 @@ export const TutorialOverlay = ({
  let halo = 0;
 
  if (moment === 2 || moment === 8) {
- // No dim — full-screen cutout.
+ // No dim - full-screen cutout.
  tx = 0;
  ty = 0;
  tw = SCREEN_W;
@@ -309,7 +309,7 @@ export const TutorialOverlay = ({
  th = Math.min(SCREEN_H - ty, ctaLayout.height + RECT_PAD * 2);
  halo = 1;
  }
- // Else: M1/M5/M6/M7 — full dim. tx/ty stay at center, tw/th=0.
+ // Else: M1/M5/M6/M7 - full dim. tx/ty stay at center, tw/th=0.
 
  sx.value = withTiming(tx, TWEEN);
  sy.value = withTiming(ty, TWEEN);
@@ -398,7 +398,7 @@ export const TutorialOverlay = ({
  style={[StyleSheet.absoluteFill, { zIndex: 9999, elevation: 9999 }]}
  pointerEvents="box-none"
  >
- {/* Animated dim layer — single rendered layer whose spotlight
+ {/* Animated dim layer - single rendered layer whose spotlight
  rect tweens between moments. M2/M8 = full-screen cutout (no
  dim visible). M3 = specs rect. M4 = CTA rect. M1/M5/M6/M7 =
  collapsed to a point (full dim). */}
@@ -442,7 +442,7 @@ export const TutorialOverlay = ({
  </GestureDetector>
  )}
 
- {/* M5/M7 hand-gesture animation — bigger, single-direction loop */}
+ {/* M5/M7 hand-gesture animation - bigger, single-direction loop */}
  {(moment === 5 || moment === 7) && cardLayout && (
  <HandGesture
  direction={moment === 5 ? "left" : "right"}
@@ -487,7 +487,7 @@ export const TutorialOverlay = ({
  />
  )}
 
- {/* Skip — animated morph from inside the M1 bubble (placeholder
+ {/* Skip - animated morph from inside the M1 bubble (placeholder
  slot) to a small pill at the top-right corner. Visible at all
  moments except M8 (Done button replaces it). */}
  {moment !== 8 && <AnimatedSkip skipT={skipT} onPress={finish} />}
@@ -509,7 +509,7 @@ const COPY: Record<2 | 3 | 4 | 5 | 6 | 7 | 8, string> = {
 };
 
 // ============================================================
-// ANIMATED DIM LAYER — full-screen black 75% with a rounded SVG-mask
+// ANIMATED DIM LAYER - full-screen black 75% with a rounded SVG-mask
 // cutout whose rect (sx, sy, sw, sh) is driven by shared values.
 // All transitions between moments tween smoothly.
 // ============================================================
@@ -624,7 +624,7 @@ const M1WelcomeBubble = ({
  >
  <Text style={styles.primaryBtnText}>Show me around</Text>
  </Pressable>
- {/* Placeholder slot — the AnimatedSkip overlays this exact spot
+ {/* Placeholder slot - the AnimatedSkip overlays this exact spot
  in M1, then morphs to the top-right when M2 starts. */}
  <View style={[styles.secondaryBtn, { opacity: 0 }]} />
  </View>
@@ -633,7 +633,7 @@ const M1WelcomeBubble = ({
 };
 
 // ============================================================
-// SCENE BUBBLE — generic bubble with copy + optional action button.
+// SCENE BUBBLE - generic bubble with copy + optional action button.
 // ============================================================
 const SceneBubble = ({
  target,
@@ -678,7 +678,7 @@ const SceneBubble = ({
 };
 
 // ============================================================
-// BUBBLE TAIL — small triangle pointing in one of four directions.
+// BUBBLE TAIL - small triangle pointing in one of four directions.
 // ============================================================
 const BubbleTail = ({
  tail,
@@ -766,7 +766,7 @@ const BubbleTail = ({
 };
 
 // ============================================================
-// HAND GESTURE — single-direction looping animation.
+// HAND GESTURE - single-direction looping animation.
 //
 // For "left" (swipe-left): the hand starts on the right side of the
 // card, slides left, fades out at the left edge, then teleports back
@@ -836,7 +836,7 @@ const HandGesture = ({
 };
 
 // ============================================================
-// PROFILE DETAIL — fake "more info" panel for M6.
+// PROFILE DETAIL - fake "more info" panel for M6.
 // ============================================================
 const ProfileDetailDemo = () => {
  const { theme } = useTheme();
@@ -871,7 +871,7 @@ const ProfileDetailDemo = () => {
  <View style={styles.detailSection}>
  <Text style={styles.detailLabel}>Looking for</Text>
  <Text style={styles.detailBody}>
- Co-founder. Equity 30–40%. Full-time within 60 days.
+ Co-founder. Equity 30-40%. Full-time within 60 days.
  </Text>
  </View>
  </View>
@@ -879,7 +879,7 @@ const ProfileDetailDemo = () => {
 };
 
 // ============================================================
-// ANIMATED SKIP — morphs between two positions:
+// ANIMATED SKIP - morphs between two positions:
 // skipT = 0 → inside the M1 bubble's right-half "secondary" slot
 // skipT = 1 → small dark pill at the top-right corner
 // Position, size, border, background, and text color all interpolate.

@@ -63,7 +63,7 @@ export default function MatchScreen() {
  const styles = useMemo(() => makeStyles(theme), [theme]);
  // Partners shouldn't see the candidate swipe deck. The tab bar
  // hides this screen for them, but a stale router state or a
- // direct deep link could still land them here — bounce to Browse.
+ // direct deep link could still land them here - bounce to Browse.
  const role = user?.user_metadata?.role as string | undefined;
  useEffect(() => {
  if (role === "partner") {
@@ -84,7 +84,7 @@ export default function MatchScreen() {
  status: "saved" | "passed";
  } | null>(null);
  // Detail-sheet state. Opens on tap or on right-swipe (save), slides
- // up the full candidate info — bio, skills, LinkedIn, resume.
+ // up the full candidate info - bio, skills, LinkedIn, resume.
  const [selected, setSelected] = useState<RankedCandidate | null>(null);
 
  // Load owned projects (user must own at least one to run Match).
@@ -158,7 +158,7 @@ export default function MatchScreen() {
  try {
  await setPersonStatus(activeProject.id, current.userId, status);
  } catch {
- // silent — user can re-decide on the web side
+ // silent - user can re-decide on the web side
  }
  };
 
@@ -174,7 +174,7 @@ export default function MatchScreen() {
  try {
  await removePerson(activeProject.id, candidate.userId);
  } catch {
- // silent — DB row may not exist if the previous save failed
+ // silent - DB row may not exist if the previous save failed
  }
  };
 
@@ -376,7 +376,7 @@ const SwipeCard = ({
  const x = useSharedValue(0);
 
  // Pan needs ~10px travel before activating, so a clean tap never
- // registers as a pan. Tap races against pan exclusively — first to
+ // registers as a pan. Tap races against pan exclusively - first to
  // win cancels the other.
  const pan = Gesture.Pan()
  .minDistance(10)

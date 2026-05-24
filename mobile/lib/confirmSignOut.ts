@@ -2,17 +2,17 @@
  * Sign-out confirmation for the mobile app.
  *
  * Two scopes:
- * "local" — sign out of this device only. Other devices stay
+ * "local" - sign out of this device only. Other devices stay
  * signed in. This is the default; it's what the casual
  * "Sign out" button at the bottom of MyNet does, and
  * what the locked-review overlay's escape hatch does.
- * "global" — sign out of every device. Reserved for the explicit
+ * "global" - sign out of every device. Reserved for the explicit
  * "Sign out everywhere" action in Settings, used when
  * the user thinks their account may be compromised.
  *
  * Native iOS / Android use Alert.alert. Web (polln8.com/m) falls
  * back to window.confirm because react-native-web's Alert.alert
- * polyfill silently drops the buttons on multi-button alerts —
+ * polyfill silently drops the buttons on multi-button alerts -
  * meaning the destructive onPress never fires.
  */
 import { Alert, Platform } from "react-native";

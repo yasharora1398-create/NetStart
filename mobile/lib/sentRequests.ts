@@ -11,12 +11,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Candidate } from "@/lib/types";
 
 // Bumped to v2 because the shape gained `kind` and `message`. Older
-// (v1) entries are silently dropped on hydrate — fine for local state.
+// (v1) entries are silently dropped on hydrate - fine for local state.
 const STORAGE_PREFIX = "vettd_sent_requests_v2:";
 
 // Two flavors of outgoing thread state:
-// • "chat" — a Request-chat CTA tap. Opens a chat directly.
-// • "application" — an Apply CTA tap. Partner pitched themselves
+// • "chat" - a Request-chat CTA tap. Opens a chat directly.
+// • "application" - an Apply CTA tap. Partner pitched themselves
 // to this founder's project (mirrors the web's
 // ApplyDialog flow). The pitch text is stored
 // so it can render under the row in Threads.
@@ -68,7 +68,7 @@ export const setSentRequestsUser = async (
  }
  }
  } catch {
- // ignore — fall through to empty
+ // ignore - fall through to empty
  }
  items = [];
  emit();

@@ -9,7 +9,7 @@
  * projects. Source: each project's `savedPersonIds`
  * joined with `getCandidatesByIds`.
  *
- * Partners can star one saved project as their current focus "” same
+ * Partners can star one saved project as their current focus " same
  * semantic as the founder-side active-project picker.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -233,7 +233,7 @@ const Saved = () => {
  );
 };
 
-// â”€â”€â”€ partner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// """ partner """""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 const PartnerSaved = () => {
  const projects = useSavedProjects();
@@ -371,7 +371,7 @@ const SavedProjectCard = ({
  );
 };
 
-// â”€â”€â”€ founder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// """ founder """""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 const FounderSaved = ({
  candidates,
@@ -464,7 +464,7 @@ const SavedCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  );
 };
 
-// â”€â”€â”€ shared bits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// """ shared bits """"""""""""""""""""""""""""""""""""""""""""""""""""
 
 const Pill = ({
  children,

@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 /**
  * Post-signup landing - shown after a user submits the SignUp form.
  * Replaces the old toast with a dedicated page that:
- * • tells them the email was sent
- * • shows the address it went to so they don't second-guess it
- * • offers a "Resend email" button with a 60s cooldown so the
+ * "¢ tells them the email was sent
+ * "¢ shows the address it went to so they don't second-guess it
+ * "¢ offers a "Resend email" button with a 60s cooldown so the
  * button can't be spammed against Supabase's rate limits
- * • has a quiet escape route back to the homepage
+ * "¢ has a quiet escape route back to the homepage
  *
  * The email address is passed via location.state from SignUp. If the
  * page is reached directly without state, we fall back to a generic
@@ -97,8 +97,8 @@ const CheckEmail = () => {
  type="button"
  onClick={handleResend}
  disabled={resending || cooldown > 0}
- className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover: disabled: disabled:cursor-not-allowed"
- style={{ boxShadow: "var(--)" }}
+ className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:cursor-not-allowed"
+ 
  >
  {resending ? (
  <Loader2 className="h-4 w-4 animate-spin" />
@@ -123,7 +123,7 @@ const CheckEmail = () => {
  Already verified?{" "}
  <Link
  to="/signin"
- className="text-primary transition-opacity hover:"
+ className="text-primary transition-opacity"
  >
  Sign in
  </Link>
@@ -135,3 +135,4 @@ const CheckEmail = () => {
 };
 
 export default CheckEmail;
+

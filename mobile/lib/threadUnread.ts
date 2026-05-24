@@ -1,5 +1,5 @@
 /**
- * Per-user "mark thread as unread" store. Local-only — Supabase has
+ * Per-user "mark thread as unread" store. Local-only - Supabase has
  * no concept of a user-flagged-unread thread, so we track it in
  * AsyncStorage with a tiny in-memory pub/sub for sync UI updates.
  *
@@ -31,7 +31,7 @@ const persist = async (): Promise<void> => {
  JSON.stringify(Array.from(flagged)),
  );
  } catch {
- // storage unavailable — non-fatal
+ // storage unavailable - non-fatal
  }
 };
 

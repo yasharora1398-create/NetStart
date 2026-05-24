@@ -150,7 +150,7 @@ export default function EditCandidateScreen() {
 
  const handleToggleOpen = async (next: boolean) => {
  if (!user) return;
- // No client-side gates — the switch is freely two-directional.
+ // No client-side gates - the switch is freely two-directional.
  // The status line below the toggle tells the user what their
  // current state means (locked / incomplete / live).
  const previous = open;
@@ -176,7 +176,7 @@ export default function EditCandidateScreen() {
  skills,
  location: location.trim(),
  commitment: commitment.trim(),
- // Honor whatever the toggle is — no longer forced to false
+ // Honor whatever the toggle is - no longer forced to false
  // for incomplete profiles. The user controls their own
  // visibility; if their profile is thin they just won't get
  // matched as often.
@@ -240,7 +240,7 @@ export default function EditCandidateScreen() {
  contentContainerStyle={styles.body}
  keyboardShouldPersistTaps="handled"
  >
- {/* Open to work — persistent label + always-visible
+ {/* Open to work - persistent label + always-visible
  description so the user knows what the switch does
  before tapping it. Switch is tappable even when
  gated; handleToggleOpen surfaces an Alert telling
@@ -256,7 +256,7 @@ export default function EditCandidateScreen() {
  ? "\n\nLocked until your profile is reviewed and accepted."
  : !profileComplete
  ? `\n\nFinish first: ${missing.join(", ")}.`
- : `\n\nCurrently ${open ? "on — visible to founders" : "off — hidden from match"}.`}
+ : `\n\nCurrently ${open ? "on - visible to founders" : "off - hidden from match"}.`}
  </Text>
  </View>
  <Switch

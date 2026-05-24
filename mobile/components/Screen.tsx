@@ -27,7 +27,7 @@ export const Screen = ({ children, scroll = true }: ScreenProps) => {
  if (max > 0) {
  const t = e.contentOffset.y / max;
  const clamped = t < 0 ? 0 : t > 1 ? 1 : t;
- // Direct mapping — no withTiming, so the sheen stops the
+ // Direct mapping - no withTiming, so the sheen stops the
  // instant scrolling stops. Visual speed is controlled by the
  // sheen's translation range in (tabs)/_layout.tsx.
  scrollProgress.value = clamped;

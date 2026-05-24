@@ -1119,7 +1119,7 @@ const Footer = ({
  type="button"
  onClick={onBack}
  disabled={working}
- className="inline-flex items-center gap-2 px-5 py-3 rounded-sm font-medium text-sm border border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary transition-colors disabled:"
+ className="inline-flex items-center gap-2 px-5 py-3 rounded-sm font-medium text-sm border border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary transition-colors"
  >
  <ArrowLeft className="h-4 w-4" />
  Back
@@ -1131,7 +1131,7 @@ const Footer = ({
  disabled={working}
  className={`inline-flex items-center gap-2 px-6 py-3 rounded-sm font-medium text-sm transition-all ${
  valid
- ? "bg-primary text-primary-foreground hover:"
+ ? "bg-primary text-primary-foreground"
  : "bg-neutral-800 text-muted-foreground border border-border cursor-pointer"
  } ${working ? " cursor-wait" : ""}`}
  >

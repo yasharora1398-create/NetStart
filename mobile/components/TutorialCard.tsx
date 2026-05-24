@@ -1,5 +1,5 @@
 /**
- * Tutorial card — implementation of the Profile Tutorial.html design
+ * Tutorial card - implementation of the Profile Tutorial.html design
  * handoff. Visually identical to a real profile card so a new user can
  * see exactly what they'll be looking at when matching.
  *
@@ -7,7 +7,7 @@
  * (commitment / location / skills) → headline → role-aware CTA.
  *
  * Pass / Save buttons live in the parent screen at the bottom of the
- * deck — kept off the card so it has room to be readable.
+ * deck - kept off the card so it has room to be readable.
  *
  * Tap the CTA to dismiss the tutorial.
  */

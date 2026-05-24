@@ -5,7 +5,7 @@
  * navigates to /chats/:contactId.
  *
  * The list is filterable by name via the small search input at the
- * top "” handy once a user has more than ~10 threads.
+ * top " handy once a user has more than ~10 threads.
  */
 import { useMemo, useState } from "react";
 import { Inbox, PanelLeftClose, Search } from "lucide-react";
@@ -112,7 +112,7 @@ export const ChatThreadList = ({
  )}
  </div>
  </div>
- {/* Search input "” desktop only. The native app has no
+ {/* Search input " desktop only. The native app has no
  per-thread search in the list, so mobile drops it too. */}
  <div className="hidden md:block border-b border-border px-3 py-2">
  <div className="relative">

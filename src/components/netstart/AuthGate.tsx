@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
  * "¢ Wrapper (preferred for new pages): pass `authLoading`,
  * `signedIn`, and optionally `needsSetup` plus children. The
  * gate decides which of three things to render:
- * "“ authLoading -> a quiet placeholder (no flash of gate)
- * "“ !signedIn -> "Members only" overlay with Sign in / Sign up
- * "“ needsSetup -> "Finish setting up MyNet" overlay with a
+ * " authLoading -> a quiet placeholder (no flash of gate)
+ * " !signedIn -> "Members only" overlay with Sign in / Sign up
+ * " needsSetup -> "Finish setting up MyNet" overlay with a
  * single Go-to-MyNet CTA
- * "“ otherwise -> children (the page itself)
+ * " otherwise -> children (the page itself)
  *
  * Copy can be overridden via `authTitle`/`authBody` (unauth state)
  * and `setupTitle`/`setupBody` (signed-in-but-pending state).
@@ -37,7 +37,7 @@ type AuthGateProps = {
  setupTitle?: string;
  setupBody?: string;
 
- // Legacy aliases "” old call sites use `title`/`body` to override
+ // Legacy aliases " old call sites use `title`/`body` to override
  // the unauth copy. Keep working.
  title?: string;
  body?: string;
@@ -103,7 +103,7 @@ export const AuthGate = ({
  );
 };
 
-// â”€â”€â”€ overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// """ overlay """""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 type OverlayVariant = "auth" | "setup";
 

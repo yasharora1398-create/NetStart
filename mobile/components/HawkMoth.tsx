@@ -1,5 +1,5 @@
 /**
- * Hummingbird hawk-moth mascot — implementation of the latest
+ * Hummingbird hawk-moth mascot - implementation of the latest
  * "Hummingbird Hawk Moth.html" design handoff.
  *
  * Symmetric top-down view: spherical head with side-mounted orange
@@ -16,7 +16,7 @@
  * Wing pivot is at the thorax (originX=500, originY=480).
  *
  * Wings are rendered with `rotation` + `scaleY` props on an animated
- * Group (not a transform string) — that's the path Reanimated +
+ * Group (not a transform string) - that's the path Reanimated +
  * react-native-svg actually animate reliably.
  */
 import { useEffect } from "react";
@@ -131,7 +131,7 @@ export const HawkMoth = ({
  </Defs>
 
  {/* Motion- trail: dimmed copy of each wing rendered behind
- the sharp copy. Pure opacity (no Gaussian — that doesn't
+ the sharp copy. Pure opacity (no Gaussian - that doesn't
  render reliably across iOS/Android in react-native-svg). */}
  <AnimatedG
  animatedProps={leftWingProps}
@@ -176,7 +176,7 @@ export const HawkMoth = ({
  />
  </AnimatedG>
 
- {/* LEFT WING — sharp copy */}
+ {/* LEFT WING - sharp copy */}
  <AnimatedG
  animatedProps={leftWingProps}
  originX={PVX}
@@ -203,7 +203,7 @@ export const HawkMoth = ({
  />
  </AnimatedG>
 
- {/* RIGHT WING — sharp copy */}
+ {/* RIGHT WING - sharp copy */}
  <AnimatedG
  animatedProps={rightWingProps}
  originX={PVX}
@@ -230,7 +230,7 @@ export const HawkMoth = ({
  />
  </AnimatedG>
 
- {/* ABDOMEN — grey cylinder with side gradient + segment lines */}
+ {/* ABDOMEN - grey cylinder with side gradient + segment lines */}
  <Ellipse
  cx="500"
  cy="640"
@@ -247,7 +247,7 @@ export const HawkMoth = ({
  </G>
  <Ellipse cx="487" cy="640" rx="8" ry="120" fill="#fff" opacity={0.08} />
 
- {/* THORAX — spherical */}
+ {/* THORAX - spherical */}
  <Ellipse
  cx="500"
  cy="480"
@@ -259,7 +259,7 @@ export const HawkMoth = ({
  />
  <Ellipse cx="478" cy="455" rx="20" ry="14" fill="#fff" opacity={0.1} />
 
- {/* HEAD — spherical */}
+ {/* HEAD - spherical */}
  <Circle
  cx="500"
  cy="370"
@@ -270,7 +270,7 @@ export const HawkMoth = ({
  />
  <Ellipse cx="485" cy="350" rx="12" ry="8" fill="#fff" opacity={0.12} />
 
- {/* SIDE EYES — orange */}
+ {/* SIDE EYES - orange */}
  <Ellipse
  cx="458"
  cy="370"

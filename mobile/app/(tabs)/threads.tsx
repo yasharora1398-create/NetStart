@@ -193,7 +193,7 @@ export default function ThreadsScreen() {
  accepting={acceptingId === item.contactId}
  markedUnread={unreadFlags.has(item.contactId)}
  onPress={() => {
- // Tapping the row clears the flag — same UX as web:
+ // Tapping the row clears the flag - same UX as web:
  // "I'm reading it now, so it's not unread anymore."
  clearThreadUnread(item.contactId);
  router.push(`/chat/${item.contactId}` as never);

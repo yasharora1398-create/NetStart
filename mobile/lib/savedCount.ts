@@ -52,7 +52,7 @@ export const setSavedUser = async (userId: string | null): Promise<void> => {
  }
  }
  } catch {
- // ignore — fall through to empty
+ // ignore - fall through to empty
  }
  items = [];
  emit();
@@ -111,7 +111,7 @@ export const useSavedItems = (): Candidate[] => {
 
 export const useSavedCount = (): number => useSavedItems().length;
 
-// Legacy export kept for compatibility — addSaved is the real API now.
+// Legacy export kept for compatibility - addSaved is the real API now.
 export const incrementSaved = (): void => {
  // no-op
 };

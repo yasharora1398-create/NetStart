@@ -46,7 +46,7 @@ const TABBAR_COLLAPSED_KEY = "polln8.tabbar.collapsed";
 
 const useTabBarCollapsed = () => {
  const [collapsed, setCollapsed] = useState(false);
- // Hydrate once on mount. We swallow errors quietly — falling
+ // Hydrate once on mount. We swallow errors quietly - falling
  // back to "expanded" is the safer default.
  useEffect(() => {
  AsyncStorage.getItem(TABBAR_COLLAPSED_KEY)
@@ -71,7 +71,7 @@ const useTabBarCollapsed = () => {
 const { width: SCREEN_W } = Dimensions.get("window");
 const BAR_W = SCREEN_W - 32; // tab bar inner width (16 each side margin)
 const SHEEN_W = 90;
-// Reduced travel — only ~40% of the bar's width per full scroll, so
+// Reduced travel - only ~40% of the bar's width per full scroll, so
 // the sheen drifts slowly and only travels a short distance.
 const TRAVEL_FACTOR = 0.4;
 
@@ -111,7 +111,7 @@ const TabBarBackground = ({ mode }: { mode: "light" | "dark" }) => {
  tint={mode === "dark" ? "dark" : "light"}
  style={StyleSheet.absoluteFill}
  />
- {/* Whisper-thin tint — much more transparent than before */}
+ {/* Whisper-thin tint - much more transparent than before */}
  <View
  style={[
  StyleSheet.absoluteFill,
@@ -137,7 +137,7 @@ const TabBarBackground = ({ mode }: { mode: "light" | "dark" }) => {
  borderColor: rimColor,
  }}
  />
- {/* Sheen — top edge (scroll-driven, near-transparent white) */}
+ {/* Sheen - top edge (scroll-driven, near-transparent white) */}
  <Animated.View
  pointerEvents="none"
  style={[
@@ -156,7 +156,7 @@ const TabBarBackground = ({ mode }: { mode: "light" | "dark" }) => {
  topSheenStyle,
  ]}
  />
- {/* Sheen — bottom edge, opposite direction (scroll-driven) */}
+ {/* Sheen - bottom edge, opposite direction (scroll-driven) */}
  <Animated.View
  pointerEvents="none"
  style={[
@@ -395,8 +395,8 @@ export default function TabLayout() {
  }}
  >
  {/* Match (the founder swipe deck through candidates) is the
- discovery tab for founders only. Partners see Browse — a
- project list — in the same slot. Whichever is not the
+ discovery tab for founders only. Partners see Browse - a
+ project list - in the same slot. Whichever is not the
  user's side is hidden from the tab bar via href:null but
  stays routable so old deep links don't break. */}
  <Tabs.Screen
@@ -479,7 +479,7 @@ export default function TabLayout() {
  {/* Tab-bar collapse handle. When the bar is expanded, the
  handle sits as a small chevron just above the bar's
  top-right edge (so it reads as part of the bar). When
- collapsed, it floats in the bottom-right corner — the
+ collapsed, it floats in the bottom-right corner - the
  only on-screen affordance to bring the bar back. */}
  <Pressable
  onPress={toggleTabBar}

@@ -767,7 +767,7 @@ const FAQ = () => {
  },
  {
  q: "What if I'm a partner, not a founder?",
- a: "That's most of our community. Bring the skills and the appetite to join the right team — that's all it takes. You browse projects the same way founders browse partners.",
+ a: "That's most of our community. Bring the skills and the appetite to join the right team - that's all it takes. You browse projects the same way founders browse partners.",
  },
  {
  q: "How long does review take?",

@@ -3,19 +3,19 @@
  * pair a hand-drawn SVG vignette with the moth.png mascot positioned
  * to suit the metaphor:
  *
- * blank — huge moth, tiny stem with bud (haven't started)
- * caught — wide horizon, branch curving across, far-perched moth
- * saves — oversized bookmark fills the frame, moth on its corner
- * threads — top-down envelope on a desk, moth rising out of it
- * apps — paper airplane angled up, moth riding the top wing
- * platform — almost pure negative space, one tiny moth drifting
- * filters — magnifying glass dominates, moth visible inside lens
+ * blank - huge moth, tiny stem with bud (haven't started)
+ * caught - wide horizon, branch curving across, far-perched moth
+ * saves - oversized bookmark fills the frame, moth on its corner
+ * threads - top-down envelope on a desk, moth rising out of it
+ * apps - paper airplane angled up, moth riding the top wing
+ * platform - almost pure negative space, one tiny moth drifting
+ * filters - magnifying glass dominates, moth visible inside lens
  *
  * Both light and dark theme palettes are honored. The moth PNG is a
  * dark silhouette by default; in dark mode we tint it with the
  * primary text color so it reads against the dark card.
  *
- * The component is just illustration + copy — no buttons or CTAs.
+ * The component is just illustration + copy - no buttons or CTAs.
  */
 import { useMemo } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
@@ -75,7 +75,7 @@ const VARIANTS: Record<
  scene: SceneRenderer;
  }
 > = {
- // 1. blank slate — huge moth, tiny bud
+ // 1. blank slate - huge moth, tiny bud
  blank: {
  title: "No projects yet.",
  sub: "Hawk-moths need flowers to hover over. Set up a project to plant the first.",
@@ -124,7 +124,7 @@ const VARIANTS: Record<
  ),
  },
 
- // 2. caught up — wide horizon, branch, tiny perched moth
+ // 2. caught up - wide horizon, branch, tiny perched moth
  caught: {
  title: "You're caught up.",
  sub: "Every project in your range has been visited. Wings up. New ones land here as founders post them.",
@@ -173,7 +173,7 @@ const VARIANTS: Record<
  ),
  },
 
- // 3. no saves — oversized bookmark, moth clipped to corner
+ // 3. no saves - oversized bookmark, moth clipped to corner
  saves: {
  title: "No saves yet.",
  sub: "Tap the star on a project and it stays here, easy to find when you're ready to revisit.",
@@ -217,7 +217,7 @@ const VARIANTS: Record<
  ),
  },
 
- // 4. no threads — top-down envelope, moth rising out
+ // 4. no threads - top-down envelope, moth rising out
  threads: {
  title: "No messages yet.",
  sub: "Quiet wings. When someone reaches out, their thread will land here.",
@@ -252,7 +252,7 @@ const VARIANTS: Record<
  ),
  },
 
- // 5. nothing sent — paper airplane, moth on top wing
+ // 5. nothing sent - paper airplane, moth on top wing
  apps: {
  title: "Nothing sent yet.",
  sub: "Hawk-moths cross continents, but only after they take off. Send a message to launch your first.",
@@ -290,7 +290,7 @@ const VARIANTS: Record<
  ),
  },
 
- // 6a. empty platform — almost pure negative space, drifting moth
+ // 6a. empty platform - almost pure negative space, drifting moth
  platform: {
  title: "Nothing here yet.",
  sub: "This corner is bare. Check back as more people and projects join.",
@@ -329,7 +329,7 @@ const VARIANTS: Record<
  ),
  },
 
- // 6b. no matches — magnifying glass with moth inside the lens
+ // 6b. no matches - magnifying glass with moth inside the lens
  filters: {
  title: "No matches.",
  sub: "Hawk-moths home in by scent, and your filters narrow the bouquet. Loosen a few and the field opens up.",
@@ -341,7 +341,7 @@ const VARIANTS: Record<
  viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
  style={{ position: "absolute", top: 0, left: 0 }}
  >
- <Defs>{/* clip not needed — moth visually sits inside */}</Defs>
+ <Defs>{/* clip not needed - moth visually sits inside */}</Defs>
  <Circle
  cx={100}
  cy={80}

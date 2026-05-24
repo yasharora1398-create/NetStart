@@ -75,13 +75,13 @@ export const MothLoader = ({
 }: MothLoaderProps) => {
  const { mode } = useTheme();
  // Per spec: white arc + white label in dark mode; near-black in
- // light. We don't use the gold/accent here — the loader sits
+ // light. We don't use the gold/accent here - the loader sits
  // mostly on background fills and needs maximum contrast.
  const ink = mode === "dark" ? "#FFFFFF" : "#161616";
 
  const computedMothSize = mothSize ?? Math.round(size * 0.38);
 
- // Two infinite Reanimated drivers — one for the orbit, one for the
+ // Two infinite Reanimated drivers - one for the orbit, one for the
  // wing flap. Both autoplay on mount and clean up on unmount.
  const spin = useSharedValue(0);
  const wing = useSharedValue(1);
@@ -115,7 +115,7 @@ export const MothLoader = ({
  transform: [{ scaleY: wing.value }],
  }));
 
- // ASCII dots animation for the label — same vibe as the web's
+ // ASCII dots animation for the label - same vibe as the web's
  // CSS keyframe content trick. Steps every 400ms.
  const [dots, setDots] = useState("");
  useEffect(() => {

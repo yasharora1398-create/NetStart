@@ -160,7 +160,7 @@ export const ApplyToProjectDialog = ({
  <X size={18} color={theme.textMuted} />
  </Pressable>
 
- {/* Project context — partner sees what they're applying to. */}
+ {/* Project context - partner sees what they're applying to. */}
  <Text style={styles.eyebrow}>Apply to</Text>
  <Text style={styles.title} numberOfLines={2}>
  {project.title}

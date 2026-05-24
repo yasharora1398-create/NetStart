@@ -1,5 +1,5 @@
 /**
- * Saved tab — role-aware list of bookmarked items.
+ * Saved tab - role-aware list of bookmarked items.
  *
  * Founder POV → list of candidates the user saved while matching.
  * Source: local saved-people store + Supabase merge
@@ -102,7 +102,7 @@ export default function SavedScreen() {
  const candidates = await getCandidatesByIds(Array.from(ids));
  if (!cancelled) addSavedMany(candidates);
  } catch {
- // silent — local items still render
+ // silent - local items still render
  } finally {
  if (!cancelled) setLoadingRemote(false);
  }
@@ -125,7 +125,7 @@ export default function SavedScreen() {
 }
 
 // ────────────────────────────────────────────────────────────────
-// Partner POV — saved projects.
+// Partner POV - saved projects.
 // ────────────────────────────────────────────────────────────────
 
 const PartnerSavedView = ({
@@ -318,7 +318,7 @@ const SavedProjectRow = ({
 };
 
 // ────────────────────────────────────────────────────────────────
-// Founder POV — saved candidates (existing behavior).
+// Founder POV - saved candidates (existing behavior).
 // ────────────────────────────────────────────────────────────────
 
 const FounderSavedView = ({

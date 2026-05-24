@@ -125,7 +125,7 @@ const Index = () => {
  <div className="grid md:grid-cols-[160px_1fr] gap-6 md:gap-12 items-baseline">
  <Link
  to="/how"
- className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-primary transition-colors hover:"
+ className="group inline-flex items-start gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-primary transition-colors"
  >
  How it works
  <ArrowRight className="h-3 w-3 mt-0.5 transition-transform group-hover:translate-x-0.5" />
@@ -1699,7 +1699,7 @@ const RequestCardMockup = () => {
  >
  {typed || (
  <span className="">
- Tell Jamie why you&apos;d be the right person to build this with…
+ Tell Jamie why you&apos;d be the right person to build this with...
  </span>
  )}
  {phase === 1 && typed.length < REQUEST_PITCH.length && (
@@ -1742,7 +1742,7 @@ const RequestCardMockup = () => {
 const PrimaryButton = ({ children }: { children: React.ReactNode }) => (
  <button
  type="button"
- className="group inline-flex items-center gap-2 text-sm font-medium px-6 py-3 rounded-lg bg-primary text-primary-foreground transition-opacity hover:"
+ className="group inline-flex items-center gap-2 text-sm font-medium px-6 py-3 rounded-lg bg-primary text-primary-foreground transition-opacity"
  style={{ boxShadow: "0 2px 8px hsl(var(--primary) / 0.3)" }}
  >
  {children}

@@ -5,12 +5,12 @@
  * their laptop.
  *
  * Two pieces of per-user state:
- * 1. `items` — list of saved PublicProject rows, deduped by id
- * 2. `activeId` — id of the project the partner picked as their
+ * 1. `items` - list of saved PublicProject rows, deduped by id
+ * 2. `activeId` - id of the project the partner picked as their
  * "current focus" (one or none).
  *
  * Reads: hydrate from `list_saved_projects()` RPC on user bind.
- * Writes: optimistic — update memory + emit, then await the round
+ * Writes: optimistic - update memory + emit, then await the round
  * trip; on failure, undo and log.
  *
  * Saving a project bumps the Saved-tab unread badge so the partner
@@ -148,7 +148,7 @@ export const removeSavedProject = async (
 };
 
 // Re-saving an already-saved project replaces the row in memory.
-// Server row stays the same — only the cached `PublicProject`
+// Server row stays the same - only the cached `PublicProject`
 // payload gets freshened with new title / description / etc.
 export const refreshSavedProject = (project: PublicProject): void => {
  const idx = items.findIndex((p) => p.id === project.id);

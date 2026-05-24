@@ -37,7 +37,7 @@ const hydrate = async () => {
  notify("saved");
  notify("threads");
  } catch {
- // silent — empty counts are fine
+ // silent - empty counts are fine
  }
 };
 

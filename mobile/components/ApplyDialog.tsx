@@ -1,5 +1,5 @@
 /**
- * Apply dialog — mirrors the web's ApplyDialog. A founder taps "Apply"
+ * Apply dialog - mirrors the web's ApplyDialog. A founder taps "Apply"
  * on a partner's card; this modal pops over a dimmed/blurred backdrop
  * with the partner summary at the top and a multi-line textarea for
  * the pitch ("why I'm reaching out, why this person is a fit"). On
@@ -8,7 +8,7 @@
  * sent" pill.
  *
  * For real (non-fake) candidates we *also* leave room to call into
- * Supabase — but for now there's no founder→partner application table
+ * Supabase - but for now there's no founder→partner application table
  * on the schema, so the local store is the source of truth. Real
  * partner→founder applications still go through createApplication()
  * in api.ts on the website side.

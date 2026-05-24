@@ -1,5 +1,5 @@
 /**
- * Polln8 theme system — forest-green accent on warm off-white (light)
+ * Polln8 theme system - forest-green accent on warm off-white (light)
  * and deep cool grey-green (dark). The palette follows a single-accent
  * model: the green is reserved for CTAs, focus rings, links, and brand
  * moments; everything else is neutral.
@@ -42,7 +42,7 @@ export type ThemePalette = {
  textDim: string;
  textOnPrimary: string;
 
- // Brand (legacy token names — `gold` = forest/sage accent,
+ // Brand (legacy token names - `gold` = forest/sage accent,
  // `marigold` = same accent, `goldGlow` = Accent Subtle bg)
  gold: string;
  goldDeep: string;
@@ -52,12 +52,12 @@ export type ThemePalette = {
  marigold: string;
  marigoldLight: string;
 
- // Old aliases (still referenced by existing components — repurposed)
+ // Old aliases (still referenced by existing components - repurposed)
  sage: string;
  sageDeep: string;
  cream: string;
 
- // Floating-element surface (speech bubbles, popovers — needs more
+ // Floating-element surface (speech bubbles, popovers - needs more
  // contrast against the page than `bgElev`/cards).
  bubble: string;
 
@@ -85,7 +85,7 @@ export const lightTheme: ThemePalette = {
  textDim: "#6B6E73",
  textOnPrimary: "#FFFFFF", // white on forest green button
 
- // Accent — forest green
+ // Accent - forest green
  gold: "#1F5F3E", // primary
  goldDeep: "#174A30", // primary hover
  goldLight: "#1F5F3E",

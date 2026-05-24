@@ -257,10 +257,10 @@ export const Sidebar = () => {
  );
 };
 
-// â”€â”€â”€ Collapsed-state floating top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// """ Collapsed-state floating top bar """""""""""""""""""""""""""""""
 // When the user clicks the chevron to collapse the sidebar, the
 // full panel disappears and this strip floats at the top-right
-// instead "” mirroring HomeAuthStrip's layout exactly (user pill /
+// instead " mirroring HomeAuthStrip's layout exactly (user pill /
 // sign-in/up controls + theme toggle) plus an extra "expand
 // sidebar" button so they can bring the nav back.
 

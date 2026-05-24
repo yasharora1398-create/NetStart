@@ -1,5 +1,5 @@
 /**
- * Welcome screen — the unauthenticated landing for the mobile app.
+ * Welcome screen - the unauthenticated landing for the mobile app.
  * Shown on first install, after every sign-out, and any time the
  * user isn't signed in (routed via RouteGuard in app/_layout.tsx).
  *

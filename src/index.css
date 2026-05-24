@@ -871,7 +871,7 @@
  }
 }
 
-/* â”€â”€â”€ Mobile breakpoint overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* """ Mobile breakpoint overrides """""""""""""""""""""""""""""""""
  On phone-sized viewports the desktop sidebar is replaced by the
  <MobileBottomNav> (rendered in AppLayout). The sidebar still
  mounts so its theme toggle wiring stays consistent across

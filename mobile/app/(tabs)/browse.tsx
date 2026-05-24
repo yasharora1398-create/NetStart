@@ -4,14 +4,14 @@
  * - One card per project. Big square founder avatar fills the top
  * of the card; meta + title + pitch live below.
  * - Swipe right to save (bookmark), swipe left to pass. No on-card
- * SAVE / PASS labels — the motion is the affordance.
+ * SAVE / PASS labels - the motion is the affordance.
  * - Tap the card to slide up the detail sheet (CandidateDetail).
- * Shows the founder's full info — bio, skills, LinkedIn, plus the
+ * Shows the founder's full info - bio, skills, LinkedIn, plus the
  * project title / description. Mirrors what /u/<founderId> shows
  * on the web.
  * - Bottom action row still has tap-to-decide buttons.
  *
- * Founders never see this screen — (tabs)/_layout hides it from
+ * Founders never see this screen - (tabs)/_layout hides it from
  * their tab bar; the redirect below catches stale router state.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -120,7 +120,7 @@ export default function BrowseScreen() {
  const [applyTo, setApplyTo] = useState<RankedCandidate | null>(null);
 
 
- // Founders shouldn't be on this screen — bounce them to their
+ // Founders shouldn't be on this screen - bounce them to their
  // own Match deck if they end up here via stale router state.
  const role = user?.user_metadata?.role as string | undefined;
  useEffect(() => {

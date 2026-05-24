@@ -186,7 +186,7 @@ const HowItWorks = () => {
  </p>
  <Link
  to="/signup"
- className="group inline-flex items-center gap-2 text-base font-medium text-primary transition-colors hover:"
+ className="group inline-flex items-center gap-2 text-base font-medium text-primary transition-colors"
  >
  Start the flow
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -198,8 +198,7 @@ const HowItWorks = () => {
  <div className="mt-16 flex justify-center">
  <Link
  to="/"
- className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:"
- style={{ boxShadow: "var(--)" }}
+ className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
  >
  <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
  Back to homepage

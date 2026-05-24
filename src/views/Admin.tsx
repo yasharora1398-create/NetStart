@@ -550,7 +550,7 @@ const ReviewTab = () => {
  type="button"
  onClick={() => openResume(sub.resume!.path)}
  disabled={openingPath === sub.resume.path}
- className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:"
+ className="inline-flex items-center gap-1.5 text-primary hover:underline"
  >
  <FileText className="h-3.5 w-3.5" />
  {sub.resume.name}
@@ -622,7 +622,7 @@ const ReviewTab = () => {
  type="button"
  onClick={() => handleAccept(sub)}
  disabled={busy}
- className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover: disabled:"
+ className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:"
  >
  {busy ? (
  <Loader2 className="h-4 w-4 animate-spin" />
@@ -638,7 +638,7 @@ const ReviewTab = () => {
  setRejectReason("");
  }}
  disabled={busy}
- className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-destructive hover:text-destructive disabled:"
+ className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-destructive hover:text-destructive"
  >
  <X className="h-4 w-4" />
  Decline
@@ -728,7 +728,7 @@ const RejectDialog = ({
  type="button"
  onClick={onSubmit}
  disabled={submitting}
- className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover: disabled:"
+ className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:"
  >
  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
  Decline

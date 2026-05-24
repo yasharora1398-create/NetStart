@@ -436,7 +436,7 @@ const Chats = () => {
  type="button"
  onClick={toggleList}
  aria-label="Show contacts"
- className="hidden md:inline-flex absolute left-3 top-3 z-10 h-8 w-8 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-card transition-colors "
+ className="hidden md:inline-flex absolute left-3 top-3 z-10 h-8 w-8 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
  >
  <PanelLeftOpen className="h-4 w-4" />
  </button>

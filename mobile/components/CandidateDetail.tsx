@@ -3,7 +3,7 @@
  * deck. Slides up from the bottom; user dismisses by swiping DOWN
  * (matching the M5 → M6 → close flow in the tutorial).
  *
- * Renders the candidate's full info — bio, skills, location,
+ * Renders the candidate's full info - bio, skills, location,
  * commitment, plus mock "past projects" and "looking for" sections so
  * the page feels like a real profile read.
  */
@@ -196,7 +196,7 @@ export const CandidateDetail = ({
  </View>
  ) : null}
 
- {/* Project — only when this person is a founder. Pulls
+ {/* Project - only when this person is a founder. Pulls
  from their MyNet project. */}
  {candidate.role === "founder" && candidate.projectTitle ? (
  <View style={styles.projectBlock}>
@@ -219,7 +219,7 @@ export const CandidateDetail = ({
  </View>
  ) : null}
 
- {/* Links — LinkedIn (always when present) and Resume (when
+ {/* Links - LinkedIn (always when present) and Resume (when
  the candidate uploaded one). Both open externally. */}
  {(candidate.linkedinUrl || candidate.resumePath) && (
  <View style={styles.section}>
@@ -291,7 +291,7 @@ export const CandidateDetail = ({
 
  {/* Role-aware CTA pinned to the bottom of the sheet.
  Partner viewing a founder → "Apply" (apply to their
- startup project — mirrors the web ApplyDialog).
+ startup project - mirrors the web ApplyDialog).
  Founder viewing a partner → "Request chat" (open a thread
  to recruit them). */}
  <View style={styles.ctaWrap}>
@@ -503,7 +503,7 @@ const makeStyles = (theme: ThemePalette) =>
  textTransform: "uppercase",
  },
 
- // Pinned CTA — lifted above the floating tab bar (which sits at
+ // Pinned CTA - lifted above the floating tab bar (which sits at
  // bottom: 24 with height 68 ⇒ tops out at bottom: 92). Sitting at
  // bottom: 110 keeps the button clear of the tab bar with ~18px
  // breathing room.

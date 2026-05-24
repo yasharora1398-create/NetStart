@@ -1,4 +1,4 @@
-// User role state — "founder" or "partner". Picked at sign-up, stored
+// User role state - "founder" or "partner". Picked at sign-up, stored
 // on the Supabase auth user's user_metadata so it survives reinstalls
 // and rides with the account on every device.
 //
@@ -22,7 +22,7 @@ export const updateRole = async (role: Role): Promise<void> => {
  await supabase.auth.updateUser({ data: { role } });
 };
 
-// Convenience hook — returns the user's current role, with a default
+// Convenience hook - returns the user's current role, with a default
 // fallback for users created before the picker shipped.
 export const useUserRole = (fallback: Role = "partner"): Role => {
  const { user } = useAuth();

@@ -43,7 +43,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
  {
  title: "8. No guarantees",
  body:
- "We provide the platform as-is. Outcomes — a match, a hire, a long partnership — depend on the work you put in. Choose your collaborators with care.",
+ "We provide the platform as-is. Outcomes - a match, a hire, a long partnership - depend on the work you put in. Choose your collaborators with care.",
  },
  {
  title: "9. Changes",

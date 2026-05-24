@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /**
  * Polln8 marketing waitlist landing - served at "/" in production
  * (Vercel) only. On localhost the original Index page renders instead
@@ -120,7 +120,7 @@ const Waitlist = () => {
  {isAdmin && (
  <Link
  to="/admin"
- className="text-sm font-medium text-primary transition-opacity hover:"
+ className="text-sm font-medium text-primary transition-opacity"
  >
  Admin
  </Link>
@@ -149,7 +149,7 @@ const Waitlist = () => {
  {user ? (
  <Link
  to="/mynet"
- className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity hover:"
+ className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity"
  >
  Edit MyNet
  <ArrowRight className="h-3.5 w-3.5" />
@@ -157,7 +157,7 @@ const Waitlist = () => {
  ) : (
  <Link
  to="/signup"
- className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity hover:"
+ className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity"
  >
  Get started
  <ArrowRight className="h-3.5 w-3.5" />
@@ -203,8 +203,8 @@ const Waitlist = () => {
  <div className="flex flex-wrap items-center gap-4">
  <Link
  to={user ? "/mynet" : "/signup"}
- className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover: hover:gap-3"
- style={{ boxShadow: "var(--)" }}
+ className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:gap-3"
+ 
  >
  {persona === "founder"
  ? "Post a project"
@@ -353,8 +353,8 @@ const Waitlist = () => {
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link
  to={user ? "/mynet" : "/signup"}
- className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover: hover:gap-3"
- style={{ boxShadow: "var(--)" }}
+ className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover:gap-3"
+ 
  >
  {user ? "Edit MyNet" : "Get started"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -413,7 +413,7 @@ const Waitlist = () => {
  );
 };
 
-// ─── Theme toggle: a circular button that swaps sun ↔ moon ───────
+// """ Theme toggle: a circular button that swaps sun â† moon """""""
 const ThemeToggle = ({
  mode,
  onToggle,
@@ -435,7 +435,7 @@ const ThemeToggle = ({
  </button>
 );
 
-// ─── Section wrapper with eyebrow + reveal-on-scroll ──────────────
+// """ Section wrapper with eyebrow + reveal-on-scroll """"""""""""""
 const Section = ({
  eyebrow,
  children,
@@ -565,7 +565,7 @@ const RoleCard = ({
  </article>
 );
 
-// ─── Hero: persona toggle + product mockup ──────────────────────
+// """ Hero: persona toggle + product mockup """"""""""""""""""""""
 // Cal.com-style segmented switch. Two pills, the active one swaps
 // to the gold (primary) treatment and the inactive sits flat. The
 // thumb slides via translate-x so the motion reads as one control,
@@ -586,7 +586,7 @@ const PersonaToggle = ({
  className="absolute inset-y-1 w-[calc(50%-4px)] rounded-full bg-primary transition-transform duration-300 ease-out"
  style={{
  transform: persona === "founder" ? "translateX(0)" : "translateX(100%)",
- boxShadow: "var(--)",
+ 
  }}
  aria-hidden
  />
@@ -625,3 +625,4 @@ const PersonaToggle = ({
 const BlurredBackdrop = () => null;
 
 export default Waitlist;
+

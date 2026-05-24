@@ -24,7 +24,7 @@ type AuthValue = {
  // (no error) with an empty `user.identities` array in that case,
  // so we map it explicitly here so the UI can show a real "already
  // registered" message instead of the generic "check your inbox"
- // (which wouldn't be true — Supabase doesn't send a confirmation
+ // (which wouldn't be true - Supabase doesn't send a confirmation
  // email to an already-existing account).
  signUp: (
  email: string,

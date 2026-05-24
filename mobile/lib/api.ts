@@ -1109,7 +1109,7 @@ export const getCandidatesByIds = async (
 // chat_request notification.
 // 2. Recipient taps Accept in Threads → accept_chat_request promotes
 // both sides into chat_contacts.
-// 3. Either side calls send_chat_message — RLS requires both users
+// 3. Either side calls send_chat_message - RLS requires both users
 // to be in chat_contacts together.
 // 4. UI subscribes to realtime inserts on chat_messages to render
 // incoming DMs live.
@@ -1301,7 +1301,7 @@ export const deleteChatThread = async (
 
 // Per-contact mute. When true, the chat_message email/in-app
 // notification trigger skips this sender (migration 0029).
-// One-sided — the other person isn't told.
+// One-sided - the other person isn't told.
 export const getChatMute = async (
  otherUserId: string,
 ): Promise<boolean> => {

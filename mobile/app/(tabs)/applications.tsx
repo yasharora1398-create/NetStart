@@ -1,5 +1,5 @@
 /**
- * Applications tab — role-aware list of applications.
+ * Applications tab - role-aware list of applications.
  *
  * • Partner: applications you sent. Each row shows the project +
  * status (Pending / Accepted / Declined). Once a row is resolved
@@ -9,7 +9,7 @@
  * Pending rows expose Accept / Decline buttons inline. Resolved
  * rows can be swiped left to dismiss.
  *
- * Dismissing only hides the row for the current user — the other
+ * Dismissing only hides the row for the current user - the other
  * side still sees their copy. Backed by archive_application_for_*
  * RPCs in migration 0016.
  */
@@ -136,7 +136,7 @@ export default function ApplicationsScreen() {
  setOutgoing(rows);
  }
  } catch {
- // Silent — empty state will render. Toast surface handled in
+ // Silent - empty state will render. Toast surface handled in
  // mutation paths where it matters.
  } finally {
  setLoading(false);
@@ -177,7 +177,7 @@ export default function ApplicationsScreen() {
  const dismiss = useCallback(
  async (id: string) => {
  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
- // Optimistic remove — the RPC is per-user so the other side is
+ // Optimistic remove - the RPC is per-user so the other side is
  // unaffected. If it fails we reload to restore.
  if (role === "founder") {
  setIncoming((prev) => prev.filter((a) => a.id !== id));

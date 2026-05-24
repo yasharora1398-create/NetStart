@@ -125,7 +125,7 @@ const Standards = () => (
  <div className="mt-32 pt-10 border-t border-border">
  <Link
  to="/signup"
- className="group inline-flex items-center gap-2 text-base font-medium text-primary transition-colors hover:"
+ className="group inline-flex items-center gap-2 text-base font-medium text-primary transition-colors"
  >
  Apply to join
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

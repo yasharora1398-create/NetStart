@@ -11,7 +11,7 @@
  *
  * The mobile app defaults to dark mode (see lib/themeMode.tsx), so the
  * default body bg here is dark. We use prefers-color-scheme as a hint
- * for users who flipped the OS toggle to light — they get the light bg
+ * for users who flipped the OS toggle to light - they get the light bg
  * during the brief moment before React mounts and the in-app theme
  * takes over.
  */

@@ -109,7 +109,7 @@ export default function ProjectDetailScreen() {
  project && user && project.ownerId === user.id,
  );
 
- // Saved-projects state — only meaningful for the partner POV. The
+ // Saved-projects state - only meaningful for the partner POV. The
  // hooks no-op cleanly for owners (they just won't render the
  // bookmark UI). Reading the active id keeps the focus star in sync
  // when set/cleared from the Saved tab.
@@ -147,7 +147,7 @@ export default function ProjectDetailScreen() {
  refreshSavedProject(toPublicProject(proj, f));
  }
  } catch {
- // silent — empty state will render
+ // silent - empty state will render
  } finally {
  setLoading(false);
  }
@@ -630,7 +630,7 @@ export default function ProjectDetailScreen() {
  </>
  )}
 
- {/* Partner POV — when the viewer is not the project owner. */}
+ {/* Partner POV - when the viewer is not the project owner. */}
  {!isOwner && (
  <PartnerProjectBody
  project={project}

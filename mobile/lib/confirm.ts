@@ -5,7 +5,7 @@
  * button when `destructive: true`. Cancel is default.
  * Web (polln8.com/m, react-native-web): falls back to
  * `window.confirm`. RNW's Alert.alert polyfill silently no-ops on
- * multi-button alerts — only the title gets rendered, the buttons
+ * multi-button alerts - only the title gets rendered, the buttons
  * drop, and the destructive `onPress` never fires. This wrapper
  * ensures every confirm/destroy flow actually works on web too.
  *

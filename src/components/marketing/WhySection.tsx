@@ -1280,8 +1280,8 @@ const RequestCardMockup = ({ persona }: { persona: Persona }) => {
  const pitch = isFounder ? REQUEST_PITCH_FOUNDER : REQUEST_PITCH_PARTNER;
  const ctaLabel = isFounder ? "Request chat" : "Apply";
  const placeholder = isFounder
- ? `Tell ${profile.firstName} why they'd be a great fit for what you're building…`
- : `Tell ${profile.firstName} why you'd be the right person to build this with…`;
+ ? `Tell ${profile.firstName} why they'd be a great fit for what you're building...`
+ : `Tell ${profile.firstName} why you'd be the right person to build this with...`;
  const composerLead = isFounder
  ? "First message. First impression."
  : "One pitch. One shot.";

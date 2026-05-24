@@ -345,7 +345,7 @@ export const ProfileCard = ({ profile, role, onSubmit }: ProfileCardProps) => {
  )}
  </div>
 
- {/* Founder proof of work "” full-width row beneath the grid. */}
+ {/* Founder proof of work " full-width row beneath the grid. */}
  {isFounder && (
  <div className="mb-8">
  <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">

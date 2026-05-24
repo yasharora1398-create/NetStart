@@ -113,7 +113,7 @@ export default function MyNetScreen() {
  // changes so a founder doesn't accidentally lose project context.
  //
  // Web detour: react-native-web's Alert.alert silently no-ops on
- // multi-button alerts (same gotcha that broke sign-out — see
+ // multi-button alerts (same gotcha that broke sign-out - see
  // confirmSignOut.ts). Fall back to window.confirm so the role
  // switch actually fires on polln8.com/m.
  const toggleRole = () => {
@@ -147,7 +147,7 @@ export default function MyNetScreen() {
  ]);
  };
 
- // Open to work — gating logic mirrors edit-candidate so behaviour
+ // Open to work - gating logic mirrors edit-candidate so behaviour
  // is identical whether the user flips it here or in edit mode.
  const candidate = profile.candidate;
  const isAccepted = profile.reviewStatus === "accepted";
@@ -164,7 +164,7 @@ export default function MyNetScreen() {
  const handleToggleOpenToWork = async (next: boolean) => {
  if (!user || openBusy) return;
  setOpenBusy(true);
- // Optimistic toggle — local profile reflects the new value
+ // Optimistic toggle - local profile reflects the new value
  // immediately, reverts on error. No client-side gating: the
  // user can flip the switch in either direction freely. If
  // their profile is incomplete or pending review, the status
@@ -200,7 +200,7 @@ export default function MyNetScreen() {
  <Text style={styles.h1}>{name}</Text>
  {user?.email ? <Text style={styles.email}>{user.email}</Text> : null}
 
- {/* Role badge — shows the role picked at sign-up. Tap to switch. */}
+ {/* Role badge - shows the role picked at sign-up. Tap to switch. */}
  <Pressable
  onPress={toggleRole}
  style={({ pressed }) => [
@@ -219,7 +219,7 @@ export default function MyNetScreen() {
  <Text style={styles.roleBadgeHint}>tap to switch</Text>
  </Pressable>
 
- {/* Open-to-work toggle — PINNED AT THE TOP of MyNet so the
+ {/* Open-to-work toggle - PINNED AT THE TOP of MyNet so the
  user can flip it from the main screen without entering
  Edit profile. Partner-only; founders don't have a
  candidate profile to flip on/off. */}
@@ -517,7 +517,7 @@ export default function MyNetScreen() {
  </Pressable>
  </View>
 
- {/* Dark / Light mode toggle — full-width below the three buttons. */}
+ {/* Dark / Light mode toggle - full-width below the three buttons. */}
  <Pressable
  onPress={toggle}
  style={({ pressed }) => [
@@ -663,7 +663,7 @@ const Row = ({
  );
 };
 
-// Inline toggle row for Open to work — lives on the candidate
+// Inline toggle row for Open to work - lives on the candidate
 // profile section so the user can flip it without entering Edit
 // mode. Always-visible description spells out what the switch
 // does + surfaces the current gate (locked / missing fields) or
@@ -690,8 +690,8 @@ const OpenToWorkRow = ({
  : !profileComplete
  ? `Finish first: ${missing.join(", ")}.`
  : value
- ? "Currently on — visible to founders running Find People."
- : "Currently off — hidden from match results.";
+ ? "Currently on - visible to founders running Find People."
+ : "Currently off - hidden from match results.";
  return (
  <View style={styles.openRow}>
  <View style={styles.openHeaderRow}>
@@ -1120,7 +1120,7 @@ const makeStyles = (theme: ThemePalette) => StyleSheet.create({
  fontSize: 14,
  fontWeight: "500",
  },
- // Dark / Light mode toggle — full width, sits below the three-button row.
+ // Dark / Light mode toggle - full width, sits below the three-button row.
  modeBtn: {
  flexDirection: "row",
  alignItems: "center",

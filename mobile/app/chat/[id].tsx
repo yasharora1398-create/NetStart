@@ -1,5 +1,5 @@
 /**
- * Chat detail screen — opened when the user taps "Request chat" or
+ * Chat detail screen - opened when the user taps "Request chat" or
  * "Apply" on a candidate's profile. Shows a normal messaging layout
  * (header → message list → composer) and, on first open via the CTA
  * (`?intro=1`), pops a dimmed/blurred intro modal explaining that
@@ -80,7 +80,7 @@ import { MothLoader } from "@/components/MothLoader";
 // read → 2 green ticks (recipient saw the chat)
 type MsgStatus = "sent" | "delivered" | "read";
 
-// Group threshold — consecutive same-sender messages within this many
+// Group threshold - consecutive same-sender messages within this many
 // ms get treated as one group. The tick only renders on the most
 // recent message of each group, so a burst of 5 messages 26s apart
 // shows a single tick at the bottom.
@@ -137,7 +137,7 @@ const formatDateLabel = (ts: number): string => {
  });
 };
 
-// "2:47 PM" — 12-hour clock, locale-friendly.
+// "2:47 PM" - 12-hour clock, locale-friendly.
 const formatTimeOfDay = (ts: number): string => {
  const d = new Date(ts);
  return d.toLocaleTimeString(undefined, {
@@ -149,7 +149,7 @@ const formatTimeOfDay = (ts: number): string => {
 // ─── Email auto-underline ──────────────────────────────────────────
 // Splits a string on email-shaped tokens. Each token is rendered with
 // an underline so it looks like a tap target (we don't actually open
-// the mail client — that's a future enhancement).
+// the mail client - that's a future enhancement).
 const EMAIL_REGEX = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,})/g;
 
 const renderTextWithEmails = (
@@ -184,7 +184,7 @@ type ListItem =
 // Build the rendered list from the messages array (newest first).
 // Walks through and injects a date header AFTER the last message of
 // each day. With the FlatList inverted, that puts each header visually
-// ABOVE the day's messages — the iMessage style.
+// ABOVE the day's messages - the iMessage style.
 //
 // Also computes isLastInGroup per message: true when the next-newer
 // neighbor is from a different sender or > GROUP_WINDOW_MS apart.
@@ -245,12 +245,12 @@ export default function ChatScreen() {
  pendingWindowStartAt: null,
  });
  const [accepting, setAccepting] = useState(false);
- // Intro modal — dimmed/blurred backdrop with "Send a DM" copy. Only
+ // Intro modal - dimmed/blurred backdrop with "Send a DM" copy. Only
  // shown when navigated in via `?intro=1` (the CTA flow).
  const [showIntro, setShowIntro] = useState(params.intro === "1");
- // Long-press context menu (Reply / Copy / Delete) — null = closed.
+ // Long-press context menu (Reply / Copy / Delete) - null = closed.
  const [menuFor, setMenuFor] = useState<Msg | null>(null);
- // Reply target — when set, the composer shows a "Replying to…" pill
+ // Reply target - when set, the composer shows a "Replying to..." pill
  // above it and the next sent message gets the quote prefixed.
  const [replyingTo, setReplyingTo] = useState<Msg | null>(null);
  // Locally hidden (Delete-for-me) message ids. Backend deletion is a
@@ -280,9 +280,9 @@ export default function ChatScreen() {
  if (!otherId) return;
  let cancelled = false;
  setLoading(true);
- // Fakes don't exist in Supabase — synthesize a placeholder so the
+ // Fakes don't exist in Supabase - synthesize a placeholder so the
  // chat header still renders something useful during testing.
- // New contact opened — drop any header search/menu state from the
+ // New contact opened - drop any header search/menu state from the
  // previous thread.
  setSearchOpen(false);
  setSearchQuery("");
@@ -352,7 +352,7 @@ export default function ChatScreen() {
  if (cancelled) return;
  // FlatList is `inverted`, so newest first.
  setMessages(rows.map((m) => toMsg(m, user.id)).reverse());
- // We're looking at the chat — bulk-mark anything they sent us
+ // We're looking at the chat - bulk-mark anything they sent us
  // as read (no-op if there's nothing unread).
  void markMessagesRead(otherId).catch(() => {});
  })
@@ -638,7 +638,7 @@ export default function ChatScreen() {
  const handleCopy = async (m: Msg) => {
  closeMenu();
  try {
- // expo-clipboard isn't a hard dep — fall back gracefully if the
+ // expo-clipboard isn't a hard dep - fall back gracefully if the
  // user hasn't installed it yet (`npx expo install expo-clipboard`).
  // eslint-disable-next-line @typescript-eslint/no-require-imports
  const Clipboard = require("expo-clipboard");
@@ -683,11 +683,11 @@ export default function ChatScreen() {
  candidate?.avatarPath?.startsWith("http")
  ? candidate.avatarPath
  : getAvatarUrl(candidate?.avatarPath ?? null);
- const name = candidate?.fullName || "Loading…";
+ const name = candidate?.fullName || "Loading...";
 
  return (
  <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
- {/* Header — back arrow + person summary */}
+ {/* Header - back arrow + person summary */}
  <View style={styles.header}>
  <Pressable
  onPress={() => router.back()}
@@ -713,7 +713,7 @@ export default function ChatScreen() {
  </Text>
  ) : null}
  </View>
- {/* Header overflow button — Mark unread / Search / Delete.
+ {/* Header overflow button - Mark unread / Search / Delete.
  Hidden for fake test contacts since none of those actions
  make sense without a real backend row. */}
  {!isFake && (
@@ -753,7 +753,7 @@ export default function ChatScreen() {
  )}
  </View>
 
- {/* Search bar — appears below the header when the user picks
+ {/* Search bar - appears below the header when the user picks
  "Search messages" from the overflow menu. Filters the
  visible bubbles by case-insensitive substring match. */}
  {searchOpen && (
@@ -954,7 +954,7 @@ export default function ChatScreen() {
  />
  )}
 
- {/* Reply preview — appears above the composer when the user
+ {/* Reply preview - appears above the composer when the user
  picked Reply from the long-press menu. Shows a one-line
  preview of the original message; the X clears the reply. */}
  {replyingTo ? (
@@ -982,7 +982,7 @@ export default function ChatScreen() {
  ref={inputRef}
  value={draft}
  onChangeText={setDraft}
- placeholder="Send a message…"
+ placeholder="Send a message..."
  placeholderTextColor={theme.textDim}
  style={styles.input}
  multiline
@@ -1006,7 +1006,7 @@ export default function ChatScreen() {
  </View>
  </KeyboardAvoidingView>
 
- {/* Long-press context menu — shows Reply / Copy / (Delete if
+ {/* Long-press context menu - shows Reply / Copy / (Delete if
  the message is mine). Tapping the backdrop dismisses. */}
  <Modal
  visible={menuFor !== null}
@@ -1064,7 +1064,7 @@ export default function ChatScreen() {
  </Pressable>
  </Modal>
 
- {/* Chat header overflow menu — Search messages / Mark unread /
+ {/* Chat header overflow menu - Search messages / Mark unread /
  Delete chat. Same Modal pattern as the bubble long-press
  menu above so visuals stay consistent. */}
  <Modal
@@ -1142,7 +1142,7 @@ export default function ChatScreen() {
  </Pressable>
  </Modal>
 
- {/* Intro modal — dimmed + blurred backdrop with chat icon, copy,
+ {/* Intro modal - dimmed + blurred backdrop with chat icon, copy,
  and an OK button. Shown only when navigated in via the CTA. */}
  {showIntro && (
  <View
@@ -1316,7 +1316,7 @@ const makeStyles = (theme: ThemePalette) =>
  borderWidth: 1,
  borderColor: theme.border,
  },
- // The corner that anchors the speech-bubble tail — only applied
+ // The corner that anchors the speech-bubble tail - only applied
  // to the most recent bubble of each group.
  tailMe: {
  borderBottomRightRadius: 4,
@@ -1624,7 +1624,7 @@ const makeStyles = (theme: ThemePalette) =>
  fontWeight: "700",
  letterSpacing: 0.2,
  },
- // Long-press menu — centered card with Reply / Copy / (Delete).
+ // Long-press menu - centered card with Reply / Copy / (Delete).
  menuBackdrop: {
  flex: 1,
  backgroundColor: "rgba(0,0,0,0.45)",

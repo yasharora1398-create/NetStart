@@ -121,11 +121,11 @@ export default function SignUp() {
  />
  </View>
 
- {/* Role picker — founder vs partner. Drives Match filtering
+ {/* Role picker - founder vs partner. Drives Match filtering
  and the Apply / Request-chat CTA semantics throughout the
  app. Stored on the auth user's user_metadata.role. */}
  <View style={styles.field}>
- <Text style={styles.label}>I am a…</Text>
+ <Text style={styles.label}>I am a...</Text>
  <View style={styles.roleRow}>
  <Pressable
  onPress={() => setRole("founder")}

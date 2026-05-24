@@ -171,7 +171,7 @@ export const Turnstile = ({
  className="absolute inset-0 flex items-center justify-center gap-2 rounded-md border border-border bg-card text-xs text-muted-foreground"
  >
  <Loader2 className="h-3.5 w-3.5 animate-spin" />
- <span>Checking you're human…</span>
+ <span>Checking you're human...</span>
  </div>
  )}
  </div>

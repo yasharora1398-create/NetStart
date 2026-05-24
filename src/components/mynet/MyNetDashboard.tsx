@@ -339,7 +339,7 @@ const Section = ({
 
 // Standalone Open-to-Work toggle. Lives in the "How partners find you"
 // section header so users can flip discoverability on/off without
-// having to enter edit mode. Both directions are always allowed "” the
+// having to enter edit mode. Both directions are always allowed " the
 // parent handler is permissive, and forcing eligibility checks here
 // turned the switch into a one-way trap when a profile was incomplete.
 const OpenToWorkToggle = ({

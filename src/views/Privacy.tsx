@@ -28,7 +28,7 @@ const SECTIONS: Array<{ title: string; body: string }> = [
  {
  title: "5. Sharing",
  body:
- "Your data stays with us. We share embeddings with Google when computing matches (text only, no PII attached beyond what's in your profile fields). The product is ad-free, by design. Analytics, when enabled, use a privacy-friendly provider whose model is single-site only — your behavior on Polln8 stays on Polln8.",
+ "Your data stays with us. We share embeddings with Google when computing matches (text only, no PII attached beyond what's in your profile fields). The product is ad-free, by design. Analytics, when enabled, use a privacy-friendly provider whose model is single-site only - your behavior on Polln8 stays on Polln8.",
  },
  {
  title: "6. Your rights",
