@@ -1014,14 +1014,51 @@ export const uploadPolln8RecommendationAvatar = async (
  upsert: false,
  contentType: file.type || undefined,
  });
- if (uploadError) throw uploadError;
+ if (uploadError) {
+ // eslint-disable-next-line no-console
+ console.error("[polln8 avatar] storage upload failed", uploadError);
+ throw new Error(`Storage upload failed: ${uploadError.message}`);
+ }
  const { error: rowError } = await supabase
  .from("projects")
  .update({ polln8_founder_avatar_path: path })
  .eq("id", projectId);
  if (rowError) {
+ // eslint-disable-next-line no-console
+ console.error("[polln8 avatar] row update failed", rowError);
  await supabase.storage.from(AVATARS_BUCKET).remove([path]);
- throw rowError;
+ // Most common cause here is the column not existing yet - run
+ // migration 0036 in the Supabase SQL editor.
+ throw new Error(
+ `Could not save photo path on row: ${rowError.message}. ` +
+ `If this says 'column "polln8_founder_avatar_path" does not exist', ` +
+ `run supabase/migrations/0036_polln8_recommendation_avatar.sql.`,
+ );
+ }
+ // Read back to verify the column was actually written - catches
+ // silent column-doesn't-exist bugs that Postgrest might swallow.
+ const { data: verifyRow, error: verifyError } = await supabase
+ .from("projects")
+ .select("polln8_founder_avatar_path")
+ .eq("id", projectId)
+ .single();
+ if (verifyError) {
+ // eslint-disable-next-line no-console
+ console.error("[polln8 avatar] verify read failed", verifyError);
+ throw new Error(`Could not verify photo path: ${verifyError.message}`);
+ }
+ const written = (
+ verifyRow as { polln8_founder_avatar_path?: string | null } | null
+ )?.polln8_founder_avatar_path;
+ if (written !== path) {
+ // eslint-disable-next-line no-console
+ console.error("[polln8 avatar] write/read mismatch", { expected: path, got: written });
+ await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+ throw new Error(
+ `Photo path did not persist on the row (got "${written ?? "null"}"). ` +
+ `The polln8_founder_avatar_path column likely does not exist - ` +
+ `run supabase/migrations/0036_polln8_recommendation_avatar.sql.`,
+ );
  }
  if (previousPath) {
  await supabase.storage.from(AVATARS_BUCKET).remove([previousPath]);

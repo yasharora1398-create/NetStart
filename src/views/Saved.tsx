@@ -275,7 +275,13 @@ const SavedProjectCard = ({
  project: PublicProject;
  isActive: boolean;
 }) => {
- const founderUrl = getAvatarUrl(project.founderAvatarPath);
+ // Polln8 recommendations show the admin-uploaded founder photo
+ // instead of the (admin's) profile avatar.
+ const founderUrl = getAvatarUrl(
+ project.isPolln8Recommended && project.polln8FounderAvatarPath
+ ? project.polln8FounderAvatarPath
+ : project.founderAvatarPath,
+ );
  return (
  <li
  className={cn(

@@ -853,18 +853,10 @@ const RecommendTab = () => {
  founderWebsite,
  });
  // If the admin picked a logo, upload it now that the row has an
- // id. Failure here doesn't undo the post - the recommendation
- // still ships, just without the photo (admin can edit + re-upload).
+ // id. We let upload errors throw so the user sees the real
+ // reason in a toast (most often: migration 0036 not run yet).
  if (pendingFile) {
- try {
  await uploadPolln8RecommendationAvatar(newId, pendingFile, null);
- } catch (avatarErr) {
- toast.error(
- avatarErr instanceof Error
- ? `Posted, but photo upload failed: ${avatarErr.message}`
- : "Posted, but photo upload failed.",
- );
- }
  }
  toast.success("Recommendation posted. It's live in the deck.");
  reset();
@@ -1437,6 +1429,21 @@ const EditPostDialog = ({
  keywords: keywords.trim(),
  };
  if (recommended) {
+ // Photo first, then fields. Photo failures throw - the save
+ // halts and the toast carries the real reason (most often a
+ // missing column, which means migration 0036 wasn't run).
+ if (pendingFile) {
+ await uploadPolln8RecommendationAvatar(
+ project.id,
+ pendingFile,
+ existingPhotoPath || null,
+ );
+ } else if (photoRemoved && existingPhotoPath) {
+ await removePolln8RecommendationAvatar(
+ project.id,
+ existingPhotoPath,
+ );
+ }
  await updatePolln8RecommendedProject(project.id, {
  title,
  description,
@@ -1446,36 +1453,6 @@ const EditPostDialog = ({
  founderHeadline,
  founderWebsite,
  });
- // Photo: upload-new wins over removal. Both swallow their own
- // errors so a failed avatar doesn't block the field update.
- if (pendingFile) {
- try {
- await uploadPolln8RecommendationAvatar(
- project.id,
- pendingFile,
- existingPhotoPath || null,
- );
- } catch (avatarErr) {
- toast.error(
- avatarErr instanceof Error
- ? `Saved, but photo upload failed: ${avatarErr.message}`
- : "Saved, but photo upload failed.",
- );
- }
- } else if (photoRemoved && existingPhotoPath) {
- try {
- await removePolln8RecommendationAvatar(
- project.id,
- existingPhotoPath,
- );
- } catch (avatarErr) {
- toast.error(
- avatarErr instanceof Error
- ? `Saved, but photo removal failed: ${avatarErr.message}`
- : "Saved, but photo removal failed.",
- );
- }
- }
  } else {
  await updateProject(project.id, {
  title,

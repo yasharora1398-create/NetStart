@@ -1626,8 +1626,14 @@ const ProjectInfoPanel = ({
 // partners and founders see the same deck shape "" full-width 1:1
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
- const avatar = getAvatarUrl(project.founderAvatarPath);
  const recommended = project.isPolln8Recommended;
+ // Polln8 cards: prefer the admin-uploaded recommendation photo over
+ // the project owner's profile avatar. Direct read so it works even
+ // if listPublishedProjects' swap somehow missed.
+ const avatarPath = recommended && project.polln8FounderAvatarPath
+ ? project.polln8FounderAvatarPath
+ : project.founderAvatarPath;
+ const avatar = getAvatarUrl(avatarPath);
  const website = project.polln8FounderWebsite;
  return (
  <div className="flex flex-col gap-3">
