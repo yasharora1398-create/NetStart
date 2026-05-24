@@ -552,12 +552,14 @@ const PartnerView = () => {
  + side buttons (or action buttons when approving) move
  together as a unit. No absolute positioning, no big
  gaps; the card visibly slides left as the action
- buttons grow into existence on the right. */}
+ buttons grow into existence on the right.
+ Fullscreen: locked to viewport height, trimmed padding so
+ the card never overflows the screen. */}
  <div
  className={cn(
  "relative mx-auto flex items-center justify-center gap-6 px-4",
  fullscreen
- ? "min-h-[calc(100vh-72px)] py-12"
+ ? "h-[calc(100dvh-72px)] py-4"
  : "min-h-[760px] py-6",
  )}
  >
@@ -578,8 +580,22 @@ const PartnerView = () => {
 
  {/* The card itself "" fixed width, never shifts on its
  own. Justify-center on the parent does the visual
- slide as the action column grows on the right. */}
- <div className="w-full max-w-[520px] flex-shrink-0">
+ slide as the action column grows on the right.
+ Fullscreen sizing: cap column width by available viewport
+ height so the aspect-square photo + body never overflow.
+ The 25rem subtracts the card body + gaps + stage padding
+ so the picture leaves room for the rest of the card. */}
+ <div
+ className="w-full flex-shrink-0"
+ style={
+ fullscreen
+ ? {
+ maxWidth: "min(520px, calc(100dvh - 25rem))",
+ minWidth: "320px",
+ }
+ : { maxWidth: 520 }
+ }
+ >
  <MatchCandidateCard candidate={current} />
  </div>
 
@@ -1146,12 +1162,14 @@ const LookerView = () => {
 
  {/* DESKTOP deck stage "" X | Card | Ã¢Å" row with a slide-in
  info panel on accept. Hidden under 768px in favour of
- the swipe deck below. */}
+ the swipe deck below.
+ Fullscreen: locked to viewport height with trimmed padding so
+ the card + Previous button fit on screen without scrolling. */}
  <div
  className={cn(
  "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4",
  fullscreen
- ? "min-h-[calc(100vh-72px)] py-12"
+ ? "h-[calc(100dvh-72px)] py-4"
  : "min-h-[760px] py-6",
  )}
  >
@@ -1168,7 +1186,23 @@ const LookerView = () => {
  <X className="h-6 w-6" strokeWidth={2.2} />
  </button>
 
- <div className="w-full max-w-[520px] flex-shrink-0 flex flex-col gap-3">
+ {/* Card + Previous stack. Fullscreen sizing: cap column
+ width by the available viewport height so the
+ aspect-square photo + card body + Previous button all
+ fit on screen. The 27rem subtraction accounts for the
+ card body (~200px), gaps (12px), Previous button
+ (~50px), and the stage's py-4 padding. */}
+ <div
+ className="w-full flex-shrink-0 flex flex-col gap-3"
+ style={
+ fullscreen
+ ? {
+ maxWidth: "min(520px, calc(100dvh - 27rem))",
+ minWidth: "320px",
+ }
+ : { maxWidth: 520 }
+ }
+ >
  <MatchProjectCard project={displayed!} />
  <button
  type="button"
