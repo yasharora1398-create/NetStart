@@ -160,9 +160,16 @@ const HowItWorks = () => {
  </p>
  </div>
  <div
- className={`relative w-full max-w-full overflow-hidden ${reverse ? "lg:order-1" : ""}`}
+ className={`relative w-full overflow-x-auto overscroll-x-contain -mx-6 px-6 md:-mx-10 md:px-10 ${reverse ? "lg:order-1" : ""}`}
  >
- <div className="relative left-1/2 w-fit -translate-x-1/2">
+ {/* The Steps mockups have fixed widths (380-440px). On
+ viewports narrower than the mockup, the parent previously
+ had overflow-hidden which cut the sides off. Switched to
+ overflow-x-auto so the user can swipe horizontally to see
+ the full mockup; negative margins + matching padding mean
+ the scroll surface bleeds to the screen edges so the swipe
+ affordance is obvious. */}
+ <div className="mx-auto w-fit">
  {s.visual}
  </div>
  </div>

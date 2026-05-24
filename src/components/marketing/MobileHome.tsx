@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { ThemeToggleButton } from "@/components/netstart/ThemeToggleButton";
 
 type NavLink = { to: string; label: string };
 
@@ -77,28 +78,31 @@ const MobileHome = () => {
             />
             Polln8
           </Link>
-          <button
-            type="button"
-            onClick={() => setNavOpen(true)}
-            aria-label="Open navigation"
-            aria-expanded={navOpen}
-            aria-controls="mobile-nav"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border bg-card text-foreground hover:bg-accent transition-colors"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggleButton />
+            <button
+              type="button"
+              onClick={() => setNavOpen(true)}
+              aria-label="Open navigation"
+              aria-expanded={navOpen}
+              aria-controls="mobile-nav"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border bg-card text-foreground hover:bg-accent transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="px-5 pt-10 pb-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-4">
+      <section className="px-5 pt-16 pb-20">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-6">
           For founders + partners
         </p>
-        <h1 className="font-display text-4xl leading-[1.05] tracking-[-0.025em] text-foreground mb-4 font-bold">
+        <h1 className="font-display text-4xl leading-[1.05] tracking-[-0.025em] text-foreground mb-6 font-bold">
           Cofounders found efficiently.
         </h1>
-        <p className="text-base leading-relaxed text-muted-foreground mb-8 max-w-prose">
+        <p className="text-base leading-relaxed text-muted-foreground mb-10 max-w-prose">
           Polln8 is a private network of vetted founders and technical
           partners. Every profile is reviewed by a human, every chat
           starts with mutual interest, and the deck is ranked against
@@ -106,7 +110,7 @@ const MobileHome = () => {
         </p>
         <Link
           to={primaryCta.to}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
         >
           {primaryCta.label}
           <ArrowRight className="h-4 w-4" />
@@ -114,7 +118,7 @@ const MobileHome = () => {
         {!isAuthed && (
           <Link
             to="/signup"
-            className="inline-flex w-full items-center justify-center gap-2 mt-3 rounded-full border border-primary bg-transparent px-6 py-3.5 text-base font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+            className="inline-flex w-full items-center justify-center gap-2 mt-4 rounded-full border border-primary bg-transparent px-6 py-4 text-base font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             Create an account
           </Link>
@@ -122,11 +126,11 @@ const MobileHome = () => {
       </section>
 
       {/* What we do */}
-      <section className="px-5 py-10 border-t border-border bg-card">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-3">
+      <section className="px-5 py-16 border-t border-border bg-card">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-4">
           What Polln8 does
         </p>
-        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-4 font-bold">
+        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-6 font-bold">
           Match founders with the partner they need next to them.
         </h2>
         <p className="text-base leading-relaxed text-muted-foreground">
@@ -139,14 +143,14 @@ const MobileHome = () => {
       </section>
 
       {/* How it works */}
-      <section className="px-5 py-10 border-t border-border">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-3">
+      <section className="px-5 py-16 border-t border-border">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-4">
           How it works
         </p>
-        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-6 font-bold">
+        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-8 font-bold">
           Three steps. Under a day to be in.
         </h2>
-        <ol className="space-y-6">
+        <ol className="space-y-8">
           {[
             {
               n: "1",
@@ -182,14 +186,14 @@ const MobileHome = () => {
       </section>
 
       {/* Standards */}
-      <section className="px-5 py-10 border-t border-border bg-card">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-3">
+      <section className="px-5 py-16 border-t border-border bg-card">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-4">
           The bar
         </p>
-        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-4 font-bold">
+        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-6 font-bold">
           Vetted, not viral.
         </h2>
-        <p className="text-base leading-relaxed text-muted-foreground mb-6">
+        <p className="text-base leading-relaxed text-muted-foreground mb-8">
           Every member is reviewed for shipped work, references, and a
           track record of execution. We grow through reputation, kept
           tight on purpose. The network shrinks if it has to.
@@ -204,26 +208,26 @@ const MobileHome = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="px-5 py-12 border-t border-border">
-        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-4 font-bold text-center">
+      <section className="px-5 py-20 border-t border-border">
+        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-6 font-bold text-center">
           {isAuthed ? "You're in. Open the app." : "Find the right person."}
         </h2>
-        <p className="text-base leading-relaxed text-muted-foreground text-center mb-7 max-w-prose mx-auto">
+        <p className="text-base leading-relaxed text-muted-foreground text-center mb-10 max-w-prose mx-auto">
           {isAuthed
             ? "Jump into Match, edit MyNet, or check your chats."
             : "Sign in to start matching. Sign up if you're new."}
         </p>
         <Link
           to={primaryCta.to}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
         >
           {primaryCta.label}
           <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
 
-      <footer className="px-5 py-8 border-t border-border bg-card text-center">
-        <p className="text-xs text-muted-foreground mb-2">
+      <footer className="px-5 py-10 border-t border-border bg-card text-center">
+        <p className="text-xs text-muted-foreground mb-3">
           © {new Date().getFullYear()} Polln8
         </p>
         <div className="flex items-center justify-center gap-4 text-xs">
