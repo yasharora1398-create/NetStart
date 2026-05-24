@@ -608,7 +608,7 @@ const makeStyles = (theme: ThemePalette) =>
  borderBottomColor: theme.border,
  },
  pickerItemText: { color: theme.text, fontSize: 13 },
- deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
+ deck: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 110 },
  deckInner: { flex: 1, position: "relative" },
  // Shadow donor: matches the inner card's shape so iOS/web can
  // compute the colored swipe glow against a real silhouette. The

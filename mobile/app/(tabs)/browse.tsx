@@ -561,7 +561,7 @@ const makeStyles = (theme: ThemePalette) =>
  fontFamily: fonts.display,
  letterSpacing: -0.5,
  },
- deck: { flex: 1, padding: 20, paddingTop: 8 },
+ deck: { flex: 1, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
  deckInner: { flex: 1, position: "relative" },
  // Shadow donor: matches the inner card's shape so iOS/web can
  // compute the colored swipe glow against a real silhouette.
