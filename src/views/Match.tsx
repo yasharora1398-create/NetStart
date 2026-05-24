@@ -1175,7 +1175,7 @@ const LookerView = () => {
  onClick={goBack}
  disabled={!lastDecided}
  aria-label="Previous card"
- className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-gold hover:border-gold disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:border-gold"
+ className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold bg-card px-4 py-3 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card disabled:hover:text-gold disabled:hover:border-gold"
  >
  <ChevronLeft className="h-4 w-4" />
  Previous
