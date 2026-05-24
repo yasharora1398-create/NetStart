@@ -470,13 +470,26 @@ export const getResumeSignedUrl = async (
 
 // ---- Projects ------------------------------------------------------
 
-export const listProjects = async (userId: string): Promise<Project[]> => {
+export const listProjects = async (
+ userId: string,
+ opts: { includeRecommendations?: boolean } = {},
+): Promise<Project[]> => {
  const supabase = getSupabase();
 
- const { data: projectRows, error: projectsError } = await supabase
+ // Polln8-recommended posts (created via the admin Recommend form)
+ // have owner_id = admin's uid but aren't the admin's "own" project -
+ // they're featured cards posted on behalf of someone else. Hide them
+ // from MyNet / Match / Saved / Applications by default; the admin's
+ // My Posts tab passes includeRecommendations=true so it can still
+ // manage them.
+ let query = supabase
  .from("projects")
  .select("*")
- .eq("owner_id", userId)
+ .eq("owner_id", userId);
+ if (!opts.includeRecommendations) {
+ query = query.eq("is_polln8_recommended", false);
+ }
+ const { data: projectRows, error: projectsError } = await query
  .order("created_at", { ascending: false });
  if (projectsError) throw projectsError;
  if (!projectRows || projectRows.length === 0) return [];

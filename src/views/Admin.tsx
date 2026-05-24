@@ -1181,7 +1181,10 @@ const MyPostsTab = ({ adminUserId }: { adminUserId: string }) => {
 
  const load = () => {
  setError(null);
- listProjects(adminUserId)
+ // Admin tab shows everything the admin owns - own projects AND
+ // Polln8-recommended posts they made on behalf of others - so they
+ // can edit / publish / delete each one.
+ listProjects(adminUserId, { includeRecommendations: true })
  .then((rows) => setItems(rows))
  .catch((err: unknown) => {
  setError(err instanceof Error ? err.message : "Could not load posts.");

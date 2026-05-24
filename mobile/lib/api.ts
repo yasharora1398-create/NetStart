@@ -429,10 +429,17 @@ type SavedPersonRow = {
 };
 
 export const listProjects = async (userId: string): Promise<Project[]> => {
+ // Polln8-recommended posts (created via the admin web Recommend
+ // form) have owner_id = admin's uid but aren't the admin's "own"
+ // project - they're featured cards posted on behalf of someone
+ // else. Filter them out of everything that asks for "my projects"
+ // (MyNet, Match active-project picker, Saved, Applications). The
+ // admin can still manage them from the web /admin My Posts tab.
  const { data: projectRows, error: projectsError } = await supabase
  .from("projects")
  .select("*")
  .eq("owner_id", userId)
+ .eq("is_polln8_recommended", false)
  .order("created_at", { ascending: false });
  if (projectsError) throw projectsError;
  if (!projectRows || projectRows.length === 0) return [];
