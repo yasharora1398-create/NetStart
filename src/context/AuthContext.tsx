@@ -127,19 +127,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
  setThreadUnreadUser(data.session?.user?.id ?? null);
  });
 
- const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+ const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
  setRawSession(next);
- // A real Supabase sign-in event (the user re-authed in THIS
- // tab) clears the per-tab "signed out" mask so the UI snaps
- // back to the signed-in state.
- if (event === "SIGNED_IN" && next) {
- writeTabSignedOut(false);
- setTabSignedOut(false);
- }
- // Rebind per-user local stores on every auth change so different
+ // Per-user local stores rebind on every auth change so different
  // users on the same device see their own saves.
  setSavedProjectsUser(next?.user?.id ?? null);
  setThreadUnreadUser(next?.user?.id ?? null);
+ // NOTE: deliberately do NOT clear tabSignedOut here. Supabase
+ // fires SIGNED_IN on session restore from storage, on token
+ // refresh, AND on cross-tab sync via storage events. All three
+ // happen on reload, so clearing the tab flag from this listener
+ // un-signs-out the tab the moment the user refreshes - the exact
+ // bug a user just hit. The tab flag is only cleared by:
+ // (a) the user explicitly re-signing in via our signIn() method
+ // (b) a real Supabase signOut("local") / signOut("global") call
+ // which both clear the flag explicitly in the signOut() body.
  });
 
  return () => {
@@ -174,6 +176,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
  password,
  options: captchaToken ? { captchaToken } : undefined,
  });
+ if (!error) {
+ // User explicitly re-authenticated in THIS tab - clear the
+ // per-tab "signed out" mask so the signed-in chrome snaps back.
+ writeTabSignedOut(false);
+ setTabSignedOut(false);
+ }
  return { error };
  };
 
