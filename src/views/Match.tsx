@@ -550,17 +550,11 @@ const PartnerView = () => {
 
  {/* Deck stage "" single flex row, justify-center. The card
  + side buttons (or action buttons when approving) move
- together as a unit. No absolute positioning, no big
- gaps; the card visibly slides left as the action
- buttons grow into existence on the right.
- Fullscreen: locked to viewport height, trimmed padding so
- the card never overflows the screen. */}
+ together as a unit. */}
  <div
  className={cn(
- "relative mx-auto flex items-center justify-center gap-6 px-4",
- fullscreen
- ? "h-[calc(100dvh-72px)] py-4"
- : "min-h-[760px] py-6",
+ "relative mx-auto flex items-center justify-center gap-6 px-4 py-6",
+ fullscreen ? "h-[calc(100dvh-72px)]" : "min-h-[720px]",
  )}
  >
  {/* X button "" collapses out of the flex layout when the
@@ -580,22 +574,8 @@ const PartnerView = () => {
 
  {/* The card itself "" fixed width, never shifts on its
  own. Justify-center on the parent does the visual
- slide as the action column grows on the right.
- Fullscreen sizing: cap column width by available viewport
- height so the aspect-square photo + body never overflow.
- The 25rem subtracts the card body + gaps + stage padding
- so the picture leaves room for the rest of the card. */}
- <div
- className="w-full flex-shrink-0"
- style={
- fullscreen
- ? {
- maxWidth: "min(520px, calc(100dvh - 25rem))",
- minWidth: "320px",
- }
- : { maxWidth: 520 }
- }
- >
+ slide as the action column grows on the right. */}
+ <div className="w-full max-w-[480px] flex-shrink-0">
  <MatchCandidateCard candidate={current} />
  </div>
 
@@ -653,7 +633,7 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  candidate has no avatar - matches the anonymous silhouette in
  the How-it-works StepMatch mockup so the same visual reads
  across the marketing + product surfaces. */}
- <div className="relative w-full aspect-square bg-muted">
+ <div className="relative w-full aspect-[4/3] bg-muted">
  {avatar ? (
  <img
  src={avatar}
@@ -1162,15 +1142,11 @@ const LookerView = () => {
 
  {/* DESKTOP deck stage "" X | Card | Ã¢Å" row with a slide-in
  info panel on accept. Hidden under 768px in favour of
- the swipe deck below.
- Fullscreen: locked to viewport height with trimmed padding so
- the card + Previous button fit on screen without scrolling. */}
+ the swipe deck below. */}
  <div
  className={cn(
- "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4",
- fullscreen
- ? "h-[calc(100dvh-72px)] py-4"
- : "min-h-[760px] py-6",
+ "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4 py-6",
+ fullscreen ? "h-[calc(100dvh-72px)]" : "min-h-[760px]",
  )}
  >
  <button
@@ -1186,23 +1162,12 @@ const LookerView = () => {
  <X className="h-6 w-6" strokeWidth={2.2} />
  </button>
 
- {/* Card + Previous stack. Fullscreen sizing: cap column
- width by the available viewport height so the
- aspect-square photo + card body + Previous button all
- fit on screen. The 27rem subtraction accounts for the
- card body (~200px), gaps (12px), Previous button
- (~50px), and the stage's py-4 padding. */}
- <div
- className="w-full flex-shrink-0 flex flex-col gap-3"
- style={
- fullscreen
- ? {
- maxWidth: "min(520px, calc(100dvh - 27rem))",
- minWidth: "320px",
- }
- : { maxWidth: 520 }
- }
- >
+ {/* Card + Previous button stack. Width fixed at 480px so the
+ 4:3 picture (480x360) + body (~220) + Previous button
+ (~50) + gaps (~24) totals ~654px - comfortably inside
+ 720-760px viewports normal-mode, and inside any laptop
+ viewport in fullscreen mode. */}
+ <div className="w-full max-w-[480px] flex-shrink-0 flex flex-col gap-3">
  <MatchProjectCard project={displayed!} />
  <button
  type="button"
@@ -1496,25 +1461,34 @@ const ProjectInfoPanel = ({
  : `View ${p.title}`
  }
  className={cn(
- "block w-full rounded-sm border bg-background p-3 text-left transition-colors",
+ "block w-full rounded-sm border bg-card p-3 text-left transition-colors",
  isActive
- ? "border-primary bg-primary cursor-default"
- : "border-border hover:border-gold hover:bg-card",
+ ? "border-primary cursor-default ring-2 ring-primary"
+ : "border-border hover:border-gold hover:bg-accent",
  )}
  >
  <div className="mb-1 flex items-center gap-2">
- <p className="line-clamp-1 flex-1 text-sm font-medium text-foreground">
+ <p
+ className={cn(
+ "line-clamp-1 flex-1 text-sm font-medium",
+ isActive ? "text-primary" : "text-foreground",
+ )}
+ >
  {p.title}
  </p>
  {isActive ? (
  <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-primary-foreground">
- <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
  Viewing
  </span>
  ) : null}
  </div>
  {p.description ? (
- <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+ <p
+ className={cn(
+ "line-clamp-2 text-xs leading-snug",
+ isActive ? "text-foreground" : "text-muted-foreground",
+ )}
+ >
  {p.description}
  </p>
  ) : null}
@@ -1594,7 +1568,7 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  silhouette icon when the founder has no avatar - matches the
  partner-card fallback above and the StepMatch anonymous
  silhouette on the How-it-works page. */}
- <div className="relative w-full aspect-square bg-muted">
+ <div className="relative w-full aspect-[4/3] bg-muted">
  {avatar ? (
  <img
  src={avatar}
