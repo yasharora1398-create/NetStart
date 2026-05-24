@@ -288,10 +288,26 @@ export default function MatchScreen() {
  <MothLoader size={180} />
  </View>
  ) : remaining === 0 ? (
+ <View style={styles.caughtUp}>
  <MothEmptyState
  variant="caught"
  sub="No more candidates ranked against this project. Lower the criteria or wait for new partners to join."
  />
+ {candidates.length > 0 ? (
+ <Pressable
+ onPress={() => setIndex(0)}
+ style={({ pressed }) => [
+ styles.reviewSeenBtn,
+ pressed && { opacity: 0.85 },
+ ]}
+ >
+ <Undo2 size={16} color={theme.gold} />
+ <Text style={styles.reviewSeenText}>
+ Review already seen ({candidates.length})
+ </Text>
+ </Pressable>
+ ) : null}
+ </View>
  ) : (
  <View style={styles.deckInner}>
  {next && (
@@ -751,5 +767,28 @@ const makeStyles = (theme: ThemePalette) =>
  actionSave: {
  borderColor: theme.gold,
  backgroundColor: theme.gold,
+ },
+ caughtUp: {
+ flex: 1,
+ alignItems: "center",
+ justifyContent: "center",
+ gap: 18,
+ },
+ reviewSeenBtn: {
+ flexDirection: "row",
+ alignItems: "center",
+ gap: 8,
+ paddingHorizontal: 18,
+ paddingVertical: 12,
+ borderRadius: 999,
+ borderWidth: 1,
+ borderColor: theme.gold,
+ backgroundColor: theme.bgElev,
+ },
+ reviewSeenText: {
+ fontFamily: fonts.sans,
+ fontSize: 14,
+ fontWeight: "500",
+ color: theme.gold,
  },
  });

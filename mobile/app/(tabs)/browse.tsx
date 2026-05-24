@@ -254,11 +254,31 @@ export default function BrowseScreen() {
  <MothLoader size={160} />
  </View>
  ) : !current ? (
+ <View style={styles.caughtUp}>
  <MothEmptyState
- variant="platform"
- title="Nothing here yet."
- sub="Check back soon. Founders are spinning things up."
+ variant={projects.length > 0 ? "caught" : "platform"}
+ title={projects.length > 0 ? "You're caught up." : "Nothing here yet."}
+ sub={
+ projects.length > 0
+ ? "You've worked through every project on the deck. Review the ones you've already seen, or wait for new ones to land."
+ : "Check back soon. Founders are spinning things up."
+ }
  />
+ {projects.length > 0 ? (
+ <Pressable
+ onPress={() => setIndex(0)}
+ style={({ pressed }) => [
+ styles.reviewSeenBtn,
+ pressed && { opacity: 0.85 },
+ ]}
+ >
+ <Undo2 size={16} color={theme.gold} />
+ <Text style={styles.reviewSeenText}>
+ Review already seen ({projects.length})
+ </Text>
+ </Pressable>
+ ) : null}
+ </View>
  ) : (
  <View style={styles.deckInner}>
  {next ? (
@@ -688,5 +708,28 @@ const makeStyles = (theme: ThemePalette) =>
  alignItems: "center",
  justifyContent: "center",
  borderWidth: 1,
+ },
+ caughtUp: {
+ flex: 1,
+ alignItems: "center",
+ justifyContent: "center",
+ gap: 18,
+ },
+ reviewSeenBtn: {
+ flexDirection: "row",
+ alignItems: "center",
+ gap: 8,
+ paddingHorizontal: 18,
+ paddingVertical: 12,
+ borderRadius: 999,
+ borderWidth: 1,
+ borderColor: theme.gold,
+ backgroundColor: theme.bgElev,
+ },
+ reviewSeenText: {
+ fontFamily: fonts.sans,
+ fontSize: 14,
+ fontWeight: "500",
+ color: theme.gold,
  },
  });
