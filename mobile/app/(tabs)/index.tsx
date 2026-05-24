@@ -34,6 +34,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import {
  getAvatarUrl,
+ listOpenCandidates,
  listProjects,
  matchCandidatesForProject,
  removePerson,
@@ -109,24 +110,32 @@ export default function MatchScreen() {
  };
  }, [user]);
 
- // Load matches whenever the active project changes.
+ // Load matches whenever the active project changes. With an active
+ // project we use the AI-ranked RPC; without one (e.g. admin who only
+ // posts Polln8 recommendations, or any founder before their first
+ // real project is created) we fall back to the unranked open-
+ // candidates list so the deck always has something to swipe.
  useEffect(() => {
- if (!activeProject) {
- setCandidates([]);
- setIndex(0);
- return;
- }
  let cancelled = false;
  setLoading(true);
- matchCandidatesForProject(activeProject.id)
- .then((list) => {
- if (cancelled) return;
- // Filter out already-saved or already-passed.
+ const loader = activeProject
+ ? matchCandidatesForProject(activeProject.id).then((list) => {
  const saved = new Set(activeProject.savedPersonIds);
  const passed = new Set(activeProject.passedPersonIds);
- setCandidates(
- list.filter((c) => !saved.has(c.userId) && !passed.has(c.userId)),
+ return list.filter(
+ (c) => !saved.has(c.userId) && !passed.has(c.userId),
  );
+ })
+ : listOpenCandidates().then((list) =>
+ // Shape match: matchCandidatesForProject adds a `similarity`
+ // field. Without a project we have no ranking signal, so
+ // every candidate gets similarity 0.
+ list.map((c) => ({ ...c, similarity: 0 })),
+ );
+ loader
+ .then((list) => {
+ if (cancelled) return;
+ setCandidates(list);
  setIndex(0);
  })
  .catch(() => {
@@ -145,7 +154,7 @@ export default function MatchScreen() {
  const next = candidates[index + 1];
 
  const decide = async (direction: "left" | "right") => {
- if (!activeProject || !current) return;
+ if (!current) return;
  const status = direction === "right" ? "saved" : "passed";
  setLastSwipe({ candidate: current, status });
  if (direction === "right") {
@@ -155,15 +164,20 @@ export default function MatchScreen() {
  setSelected(current);
  }
  setIndex((i) => i + 1);
+ // Persist only if we have a project to attach the save / pass to.
+ // Without one (e.g. browsing without a real project yet) the deck
+ // still advances locally - the swipe just doesn't sync.
+ if (activeProject) {
  try {
  await setPersonStatus(activeProject.id, current.userId, status);
  } catch {
  // silent - user can re-decide on the web side
  }
+ }
  };
 
  const handleUndo = async () => {
- if (!activeProject || !lastSwipe) return;
+ if (!lastSwipe) return;
  const { candidate } = lastSwipe;
  setLastSwipe(null);
  setIndex((i) => Math.max(0, i - 1));
@@ -171,10 +185,12 @@ export default function MatchScreen() {
  const exists = prev.some((c) => c.userId === candidate.userId);
  return exists ? prev : [candidate, ...prev];
  });
+ if (activeProject) {
  try {
  await removePerson(activeProject.id, candidate.userId);
  } catch {
  // silent - DB row may not exist if the previous save failed
+ }
  }
  };
 
@@ -273,17 +289,7 @@ export default function MatchScreen() {
 
  {/* Deck */}
  <View style={styles.deck}>
- {loading && projects.length === 0 ? (
- <View style={styles.center}>
- <MothLoader size={180} />
- </View>
- ) : projects.length === 0 ? (
- <MothEmptyState
- variant="blank"
- title="No projects yet."
- sub="Create a project on the web to unlock matching. Match ranks partners against your project's criteria."
- />
- ) : loading ? (
+ {loading ? (
  <View style={styles.center}>
  <MothLoader size={180} />
  </View>
