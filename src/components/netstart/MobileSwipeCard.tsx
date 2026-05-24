@@ -109,6 +109,23 @@ export const MobileSwipeCard = ({
  const opacityRight = Math.min(1, Math.max(0, tx / (w * SWIPE_FRACTION)));
  const opacityLeft = Math.min(1, Math.max(0, -tx / (w * SWIPE_FRACTION)));
 
+ // Direction + intensity drive a colored ring + halo around the
+ // card instead of Save/Pass text labels. Right swipe = primary
+ // green (accept), left swipe = destructive red (pass). Intensity
+ // is whichever direction is currently winning.
+ const intensity = Math.max(opacityRight, opacityLeft);
+ const swipeColor = opacityRight >= opacityLeft
+ ? "var(--primary)"
+ : "var(--destructive)";
+ // Outer ring grows from 0 to 6px as the user crosses the swipe
+ // threshold, plus a soft halo that scales with intensity. Both
+ // hsl() calls inline so we can multiply alpha against intensity.
+ const ringWidth = (intensity * 6).toFixed(2);
+ const haloAlpha = (intensity * 0.55).toFixed(3);
+ const boxShadow = intensity > 0
+ ? `0 0 0 ${ringWidth}px hsl(${swipeColor}), 0 0 44px 10px hsl(${swipeColor} / ${haloAlpha})`
+ : "none";
+
  return (
  <div ref={wrapperRef} className="relative w-full">
  {under ? (
@@ -119,7 +136,7 @@ export const MobileSwipeCard = ({
 
  <div
  className={cn(
- "relative touch-pan-y select-none will-change-transform",
+ "relative touch-pan-y select-none will-change-transform rounded-2xl",
  dragging ? "transition-none" : "transition-transform ease-out",
  )}
  style={{
@@ -129,6 +146,7 @@ export const MobileSwipeCard = ({
  : dragging
  ? "0ms"
  : "200ms",
+ boxShadow,
  }}
  onPointerDown={onPointerDown}
  onPointerMove={onPointerMove}
@@ -136,21 +154,6 @@ export const MobileSwipeCard = ({
  onPointerCancel={onPointerUp}
  >
  {top}
-
- <span
- aria-hidden
- className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-md border-2 border-gold bg-gold px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-primary-foreground"
- style={{ opacity: opacityRight }}
- >
- Save
- </span>
- <span
- aria-hidden
- className="pointer-events-none absolute right-4 top-4 rotate-12 rounded-md border-2 border-destructive bg-destructive px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-destructive"
- style={{ opacity: opacityLeft }}
- >
- Pass
- </span>
  </div>
  </div>
  );
