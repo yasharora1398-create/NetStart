@@ -19,6 +19,8 @@ import { useRouter } from "expo-router";
 import {
  Dimensions,
  Image,
+ Linking,
+ Modal,
  Pressable,
  StyleSheet,
  Text,
@@ -41,7 +43,10 @@ import Animated, {
 import {
  Bookmark,
  Briefcase,
+ ExternalLink,
+ Globe,
  MapPin,
+ MessageCircle,
  Search,
  Sparkles,
  Undo2,
@@ -119,6 +124,12 @@ export default function BrowseScreen() {
  // while we fetch the founder's full profile.
  const [selected, setSelected] = useState<RankedCandidate | null>(null);
  const [applyTo, setApplyTo] = useState<RankedCandidate | null>(null);
+ // Polln8-recommended cards skip the full founder-profile sheet
+ // and open a slim action sheet instead (Request chat / Save /
+ // Website). Stored separately so we can render two completely
+ // different sheets without forcing CandidateDetail to fork.
+ const [polln8Selected, setPolln8Selected] =
+ useState<PublicProject | null>(null);
 
 
  // Founders shouldn't be on this screen - bounce them to their
@@ -163,10 +174,14 @@ export default function BrowseScreen() {
  if (dir === "right") {
  addSavedProject(current);
  setLastSwipe({ project: current, status: "saved" });
- // Saving = "I want to learn more". Open the detail sheet so
- // the user lands on the founder's full info immediately
- // after the swipe.
+ // Polln8 recommendations route through a slim action sheet
+ // (Request chat / Save / Website). Everything else loads the
+ // full founder profile sheet as before.
+ if (current.isPolln8Recommended) {
+ setPolln8Selected(current);
+ } else {
  void openDetail(current);
+ }
  } else {
  setLastSwipe({ project: current, status: "passed" });
  }
@@ -289,7 +304,15 @@ export default function BrowseScreen() {
  key={current.id + index}
  project={current}
  onDecide={decide}
- onTap={() => openDetail(current)}
+ onTap={() => {
+ // Polln8 recommendations: open the slim action sheet
+ // instead of the full founder profile sheet.
+ if (current.isPolln8Recommended) {
+ setPolln8Selected(current);
+ } else {
+ void openDetail(current);
+ }
+ }}
  styles={styles}
  theme={theme}
  />
@@ -307,6 +330,22 @@ export default function BrowseScreen() {
  setSelected(null);
  setApplyTo(target);
  }}
+ />
+ )}
+
+ {polln8Selected && (
+ <Polln8ActionsSheet
+ project={polln8Selected}
+ onClose={() => setPolln8Selected(null)}
+ onRequestChat={() => {
+ const target = polln8Selected;
+ setPolln8Selected(null);
+ router.push(
+ `/chat/${target.ownerId}?via=${target.id}` as never,
+ );
+ }}
+ styles={styles}
+ theme={theme}
  />
  )}
 
@@ -493,6 +532,110 @@ const SwipeCard = ({
  <ProjectCard project={project} styles={styles} theme={theme} />
  </Animated.View>
  </GestureDetector>
+ );
+};
+
+// Slim action sheet for Polln8-recommended cards. No bio, no founder
+// profile - just three actions: Request chat, Save, Visit website.
+// Replaces CandidateDetail entirely for these cards because
+// recommendations aren't real user profiles, they're curated picks.
+const Polln8ActionsSheet = ({
+ project,
+ onClose,
+ onRequestChat,
+ styles,
+ theme,
+}: {
+ project: PublicProject;
+ onClose: () => void;
+ onRequestChat: () => void;
+ styles: ReturnType<typeof makeStyles>;
+ theme: ThemePalette;
+}) => {
+ const website = project.polln8FounderWebsite?.trim() ?? "";
+ const websiteHref = website
+ ? website.startsWith("http")
+ ? website
+ : `https://${website}`
+ : null;
+
+ const handleWebsite = () => {
+ if (!websiteHref) return;
+ Linking.openURL(websiteHref).catch(() => {});
+ };
+
+ const displayName =
+ project.polln8FounderName ||
+ project.founderFullName ||
+ project.title;
+
+ return (
+ <Modal
+ visible
+ transparent
+ animationType="fade"
+ onRequestClose={onClose}
+ >
+ <Pressable style={styles.polln8Backdrop} onPress={onClose}>
+ <Pressable
+ style={styles.polln8Sheet}
+ onPress={(e) => e.stopPropagation()}
+ >
+ <Pressable
+ onPress={onClose}
+ hitSlop={12}
+ style={styles.polln8Close}
+ >
+ <X size={16} color={theme.textMuted} />
+ </Pressable>
+
+ <Text style={styles.polln8Eyebrow}>Recommended by Polln8</Text>
+ <Text style={styles.polln8Title} numberOfLines={2}>
+ {displayName}
+ </Text>
+
+ <Pressable
+ onPress={onRequestChat}
+ style={({ pressed }) => [
+ styles.polln8PrimaryBtn,
+ pressed && { opacity: 0.85 },
+ ]}
+ >
+ <MessageCircle size={16} color={theme.bg} />
+ <Text style={styles.polln8PrimaryBtnText}>Request chat</Text>
+ </Pressable>
+
+ <Pressable
+ onPress={() => {
+ // Already saved by the swipe-right gesture in decide();
+ // tapping here just confirms + closes.
+ onClose();
+ }}
+ style={({ pressed }) => [
+ styles.polln8OutlineBtn,
+ pressed && { opacity: 0.85 },
+ ]}
+ >
+ <Bookmark size={16} color={theme.gold} />
+ <Text style={styles.polln8OutlineBtnText}>Saved</Text>
+ </Pressable>
+
+ {websiteHref ? (
+ <Pressable
+ onPress={handleWebsite}
+ style={({ pressed }) => [
+ styles.polln8OutlineBtn,
+ pressed && { opacity: 0.85 },
+ ]}
+ >
+ <Globe size={16} color={theme.gold} />
+ <Text style={styles.polln8OutlineBtnText}>Visit website</Text>
+ <ExternalLink size={12} color={theme.gold} />
+ </Pressable>
+ ) : null}
+ </Pressable>
+ </Pressable>
+ </Modal>
  );
 };
 
@@ -713,5 +856,81 @@ const makeStyles = (theme: ThemePalette) =>
  fontSize: 14,
  fontWeight: "500",
  color: theme.gold,
+ },
+ polln8Backdrop: {
+ flex: 1,
+ backgroundColor: "rgba(0,0,0,0.5)",
+ alignItems: "center",
+ justifyContent: "center",
+ padding: 24,
+ },
+ polln8Sheet: {
+ width: "100%",
+ maxWidth: 380,
+ backgroundColor: theme.bg,
+ borderWidth: 1,
+ borderColor: theme.gold,
+ borderRadius: 16,
+ padding: 24,
+ gap: 12,
+ },
+ polln8Close: {
+ position: "absolute",
+ top: 10,
+ right: 10,
+ width: 28,
+ height: 28,
+ borderRadius: 999,
+ alignItems: "center",
+ justifyContent: "center",
+ borderWidth: 1,
+ borderColor: theme.border,
+ backgroundColor: theme.bgElev,
+ },
+ polln8Eyebrow: {
+ fontFamily: fonts.mono,
+ fontSize: 10,
+ letterSpacing: 2,
+ color: theme.gold,
+ textTransform: "uppercase",
+ marginBottom: 4,
+ marginTop: 4,
+ },
+ polln8Title: {
+ fontFamily: fonts.display,
+ fontSize: 22,
+ lineHeight: 26,
+ color: theme.text,
+ marginBottom: 18,
+ },
+ polln8PrimaryBtn: {
+ flexDirection: "row",
+ alignItems: "center",
+ justifyContent: "center",
+ gap: 8,
+ paddingVertical: 14,
+ borderRadius: 999,
+ backgroundColor: theme.gold,
+ },
+ polln8PrimaryBtnText: {
+ color: theme.bg,
+ fontSize: 15,
+ fontWeight: "600",
+ },
+ polln8OutlineBtn: {
+ flexDirection: "row",
+ alignItems: "center",
+ justifyContent: "center",
+ gap: 8,
+ paddingVertical: 14,
+ borderRadius: 999,
+ borderWidth: 1,
+ borderColor: theme.gold,
+ backgroundColor: theme.bg,
+ },
+ polln8OutlineBtnText: {
+ color: theme.gold,
+ fontSize: 15,
+ fontWeight: "500",
  },
  });

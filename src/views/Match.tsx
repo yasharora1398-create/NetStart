@@ -1297,6 +1297,12 @@ const LookerView = () => {
  >
  <div className="w-[520px]">
  {approving ? (
+ approving.isPolln8Recommended ? (
+ <Polln8ProjectActions
+ project={approving}
+ onClose={() => closeInfo()}
+ />
+ ) : (
  <ProjectInfoPanel
  project={approving}
  canGoBack={Boolean(lastDecided)}
@@ -1304,6 +1310,7 @@ const LookerView = () => {
  onBack={goBack}
  onSwitchProject={(p) => setApproving(p)}
  />
+ )
  ) : null}
  </div>
  </div>
@@ -1332,6 +1339,12 @@ const LookerView = () => {
  >
  <div className="p-4 pb-12">
  {approving ? (
+ approving.isPolln8Recommended ? (
+ <Polln8ProjectActions
+ project={approving}
+ onClose={() => closeInfo()}
+ />
+ ) : (
  <ProjectInfoPanel
  project={approving}
  canGoBack={Boolean(lastDecided)}
@@ -1339,6 +1352,7 @@ const LookerView = () => {
  onBack={goBack}
  onSwitchProject={(p) => setApproving(p)}
  />
+ )
  ) : null}
  </div>
  </BottomSheet>
@@ -1374,6 +1388,116 @@ const LookerView = () => {
 // deck. The icon-only action column on the founder side is
 // intentionally different because it's framing a person, not a
 // project; this surface frames a person.
+// Polln8-recommended action panel - takes the place of the full
+// ProjectInfoPanel for cards posted via the admin's "Recommend a
+// startup" flow. Recommendations are featured cards, not full
+// founder profiles, so the partner doesn't need bio / sibling
+// projects / etc. - they just need three actions:
+//   - Request chat (routes through the admin account; chat header
+//     shows the polln8 founder alias on the requester's side)
+//   - Save (adds to /saved like any normal project)
+//   - Website (opens the project's polln8_founder_website in a
+//     new tab; only renders when a website was set on the card)
+const Polln8ProjectActions = ({
+ project,
+ onClose,
+}: {
+ project: PublicProject;
+ onClose: () => void;
+}) => {
+ const navigate = useNavigate();
+ const saved = useIsProjectSaved(project.id);
+
+ const handleToggleSave = () => {
+ if (saved) {
+ void removeSavedProject(project.id);
+ toast.success("Removed.");
+ } else {
+ void addSavedProject(project);
+ toast.success("Saved.");
+ }
+ };
+
+ const handleMessage = () => {
+ onClose();
+ // ?via stamps the chat_contacts row with the recommendation's
+ // project id so the requester's DMs show the polln8 founder
+ // name + photo instead of the admin owner.
+ navigate(`/chats/${project.ownerId}?via=${project.id}`);
+ };
+
+ const website = project.polln8FounderWebsite;
+ const websiteHref = website?.trim()
+ ? website.startsWith("http")
+ ? website
+ : `https://${website}`
+ : null;
+
+ return (
+ <article className="relative rounded-2xl border border-primary bg-card p-5 shadow-sm">
+ <button
+ type="button"
+ onClick={onClose}
+ aria-label="Close"
+ className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
+ >
+ <X className="h-4 w-4" />
+ </button>
+
+ <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
+ Recommended by Polln8
+ </p>
+ <h3 className="mb-5 font-display text-2xl leading-tight text-foreground">
+ {project.polln8FounderName || project.founderFullName || project.title}
+ </h3>
+
+ <div className="flex flex-col gap-2.5">
+ <Button
+ type="button"
+ variant="gold"
+ size="lg"
+ className="w-full justify-center"
+ onClick={handleMessage}
+ >
+ <MessageCircle className="h-4 w-4" />
+ Request chat
+ </Button>
+
+ <Button
+ type="button"
+ variant="outline"
+ size="lg"
+ className="w-full justify-center"
+ onClick={handleToggleSave}
+ >
+ {saved ? (
+ <BookmarkCheck className="h-4 w-4 fill-current" />
+ ) : (
+ <Bookmark className="h-4 w-4" />
+ )}
+ {saved ? "Saved" : "Save"}
+ </Button>
+
+ {websiteHref ? (
+ <Button
+ asChild
+ type="button"
+ variant="outline"
+ size="lg"
+ className="w-full justify-center"
+ >
+ <a href={websiteHref} target="_blank" rel="noopener noreferrer">
+ <Globe className="h-4 w-4" />
+ Visit website
+ <ExternalLink className="h-3.5 w-3.5" />
+ </a>
+ </Button>
+ ) : null}
+ </div>
+ </article>
+ );
+};
+
 const ProjectInfoPanel = ({
  project,
  canGoBack,
