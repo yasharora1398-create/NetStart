@@ -1,29 +1,30 @@
 # Polln8 robots.txt
-# Public surfaces are crawlable; auth-gated product routes are
-# explicitly disallowed because they redirect to "/" in production
-# anyway and have no SEO value (and we don't want to leak account
-# routes into search results).
+# Public surfaces are crawlable. The product routes (mynet, match,
+# saved, chats, applications) render a public intro cover + sign-up
+# CTAs for unauthenticated visitors, so they ARE indexable - real
+# SEO value lives on those intros.
+#
+# Only auth-flow internals and truly private routes are blocked.
 
 User-agent: *
 Allow: /
 
-# Auth-gated product surfaces — redirect to "/" in production but
-# blocked here as belt-and-braces so crawlers don't index empty
-# placeholders or login wallpaper.
-Disallow: /mynet
-Disallow: /match
-Disallow: /talent
-Disallow: /saved
-Disallow: /applications
-Disallow: /chats
-Disallow: /settings
-Disallow: /admin
-Disallow: /u/
-
-# Auth-flow internals — irrelevant to search.
+# Auth-flow internals - no standalone SEO value (post-signup
+# confirmations, password reset handlers, redirect targets).
 Disallow: /authenticated
 Disallow: /check-email
 Disallow: /forgot-password
 Disallow: /reset-password
+
+# Admin dashboard - internal-only, never shown publicly.
+Disallow: /admin
+
+# Individual chat threads - private content between two users.
+# The /chats index itself stays crawlable (renders a public intro).
+Disallow: /chats/
+
+# Individual founder profile pages - data lives behind auth and
+# the page redirects guests to signup.
+Disallow: /u/
 
 Sitemap: https://polln8.com/sitemap.xml

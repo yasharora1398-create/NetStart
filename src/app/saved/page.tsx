@@ -6,7 +6,9 @@ export const metadata: Metadata = {
  description:
  "Your shortlist of potential cofounders and startup projects. Revisit top matches, track your active focus, and move the right connections toward a real conversation.",
  alternates: { canonical: "https://polln8.com/saved" },
- robots: { index: false, follow: false },
+ // Public intro cover + sign-up CTAs render for guests, so the page
+ // is indexable. Inherits index:true/follow:true from the root
+ // layout.
 };
 
 export default function Page() {

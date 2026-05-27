@@ -6,7 +6,9 @@ export const metadata: Metadata = {
  description:
  "Track every cofounder inquiry in one place. Review incoming applications to your projects or follow up on ones you've sent. Manage your startup pipeline without the noise.",
  alternates: { canonical: "https://polln8.com/applications" },
- robots: { index: false, follow: false },
+ // Public AuthGate intro + sign-up CTAs render for guests, so the
+ // page is indexable. Inherits index:true/follow:true from the root
+ // layout.
 };
 
 export default function Page() {

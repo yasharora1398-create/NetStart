@@ -6,7 +6,9 @@ export const metadata: Metadata = {
  description:
  "Swipe through vetted startup talent. Founders discover skilled partners ranked against their project. Partners explore real cofounder opportunities filtered by skill, location, and commitment level.",
  alternates: { canonical: "https://polln8.com/match" },
- robots: { index: false, follow: false },
+ // Public intro cover + sign-up CTAs render for guests, so the page
+ // is indexable. Inherits index:true/follow:true from the root
+ // layout.
 };
 
 export default function Page() {
