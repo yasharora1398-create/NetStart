@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /**
  * Next.js config. Replaces vite.config.ts.
@@ -137,4 +138,27 @@ const config: NextConfig = {
   },
 };
 
-export default config;
+// Sentry wraps the config to handle source-map upload at build time +
+// route-level instrumentation. Build-time bits run only when
+// SENTRY_AUTH_TOKEN + org + project are set; runtime client / server
+// instrumentation runs when NEXT_PUBLIC_SENTRY_DSN is set. Everything
+// else stays a no-op so local dev / CI without Sentry creds still
+// builds clean.
+export default withSentryConfig(config, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  // Don't upload source maps unless the auth token is present (e.g.
+  // local dev). Avoids noisy 'Sentry not configured' warnings.
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+  widenClientFileUpload: true,
+  reactComponentAnnotation: { enabled: true },
+  // Tunnels Sentry requests through /monitoring so ad-blockers don't
+  // eat them. Disabled until we know it doesn't conflict with our
+  // existing routing.
+  // tunnelRoute: "/monitoring",
+  hideSourceMaps: true,
+  disableLogger: true,
+});

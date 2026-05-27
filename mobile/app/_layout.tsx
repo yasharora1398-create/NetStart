@@ -1,6 +1,26 @@
 import "react-native-gesture-handler";
+import * as Sentry from "@sentry/react-native";
 import { ThemeProvider as NavThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
+
+// Sentry: error + crash reporting for native + Expo web. Inert until
+// EXPO_PUBLIC_SENTRY_DSN is set in env. Init runs at module load so
+// uncaught errors during the very first render are also captured.
+const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (sentryDsn) {
+ Sentry.init({
+ dsn: sentryDsn,
+ environment: process.env.EXPO_PUBLIC_ENV ?? "development",
+ release: process.env.EXPO_PUBLIC_RELEASE,
+ tracesSampleRate: 0.1,
+ // Auto-instruments fetch + navigation; gives us request timing +
+ // route-change breadcrumbs without per-screen wiring.
+ integrations: [Sentry.reactNavigationIntegration?.() ?? null].filter(
+ Boolean,
+ ),
+ enabled: !__DEV__,
+ });
+}
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo } from "react";
 import { Platform, View } from "react-native";
@@ -113,7 +133,7 @@ const RouteGuard = () => {
  );
 };
 
-export default function RootLayout() {
+function RootLayout() {
  const [fontsLoaded] = useFonts({
  Fraunces_500Medium,
  Fraunces_700Bold,
@@ -148,6 +168,11 @@ export default function RootLayout() {
  </GestureHandlerRootView>
  );
 }
+
+// Sentry.wrap captures the React tree boundary - any error thrown by
+// a screen / hook / effect that escapes our ErrorBoundary still lands
+// in Sentry. No-op when DSN isn't set.
+export default sentryDsn ? Sentry.wrap(RootLayout) : RootLayout;
 
 // Inner shell that lives INSIDE ThemeProvider so it can read the
 // dynamic theme via useTheme() and apply it to the navigation theme,
