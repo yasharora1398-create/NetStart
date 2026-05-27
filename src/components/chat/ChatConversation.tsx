@@ -105,6 +105,24 @@ type Props = {
  * no thread row available yet.
  */
  initialProfile: CounterpartyProfile | null;
+ /**
+ * Polln8-recommended project id passed via ?via=<id> on the URL
+ * when the chat was opened from a recommendation card. Forwarded
+ * to request_or_send_chat_message on the first send so the
+ * resulting chat_contacts row gets stamped with the alias. Null
+ * for any normal chat.
+ */
+ viaProjectId?: string | null;
+ /**
+ * Display overrides for Polln8-recommended chats. When the thread
+ * row from list_chat_threads carries these (because chat_contacts
+ * was stamped with via_project_id), they replace the contact's
+ * real profile name + avatar in the header, message author tags,
+ * and report dialog so the user sees the project's branded
+ * identity instead of the admin owner.
+ */
+ aliasName?: string | null;
+ aliasAvatarPath?: string | null;
  onThreadsChanged: () => void;
  onThreadDeleted: () => void;
 };
@@ -113,12 +131,36 @@ export const ChatConversation = ({
  contactId,
  currentUserId,
  initialProfile,
+ viaProjectId = null,
+ aliasName = null,
+ aliasAvatarPath = null,
  onThreadsChanged,
  onThreadDeleted,
 }: Props) => {
- const [profile, setProfile] = useState<CounterpartyProfile | null>(
+ const [rawProfile, setProfile] = useState<CounterpartyProfile | null>(
  initialProfile,
  );
+ // Apply the polln8 alias (if set) on top of whatever the contact's
+ // real profile says. Keeps loadProfile simple - it always fetches
+ // the real owner's profile; the alias overlay happens here so the
+ // header / avatar / report dialog all show the recommended business
+ // identity instead of the admin's name.
+ const profile = useMemo<CounterpartyProfile | null>(() => {
+ if (!rawProfile && !aliasName && !aliasAvatarPath) return null;
+ const base = rawProfile ?? {
+ fullName: "",
+ headline: "",
+ avatarPath: null,
+ linkedinUrl: "",
+ };
+ if (!aliasName && !aliasAvatarPath) return base;
+ return {
+ fullName: aliasName || base.fullName,
+ headline: aliasName ? "" : base.headline,
+ avatarPath: aliasAvatarPath || base.avatarPath,
+ linkedinUrl: aliasName ? "" : base.linkedinUrl,
+ };
+ }, [rawProfile, aliasName, aliasAvatarPath]);
  const [messages, setMessages] = useState<ChatMessage[]>([]);
  const [threadState, setThreadState] = useState<ChatThreadState>({
  state: "none",
@@ -458,7 +500,11 @@ export const ChatConversation = ({
  if (!body || sending) return;
  setSending(true);
  try {
- const result = await requestOrSendChatMessage(contactId, body);
+ const result = await requestOrSendChatMessage(
+ contactId,
+ body,
+ viaProjectId,
+ );
  // Optimistic insert " realtime will dedupe via the id check.
  setMessages((prev) =>
  prev.some((m) => m.id === result.messageId)

@@ -8,7 +8,7 @@
  * and the back button does the right thing.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "@/lib/router-compat";
+import { useNavigate, useParams, useLocation } from "@/lib/router-compat";
 import {
  AlertCircle,
  ArrowRight,
@@ -57,6 +57,16 @@ const Chats = () => {
  Boolean(user) && reviewStatus !== null && reviewStatus !== "accepted";
  const { id: routeContactId } = useParams<{ id: string }>();
  const navigate = useNavigate();
+ // Polln8-recommended chat alias: when a card opens this thread it
+ // appends ?via=<projectId>. The first message that lands during
+ // this session needs that id so chat_contacts.via_project_id gets
+ // stamped and list_chat_contacts swaps in the polln8 alias.
+ const location = useLocation();
+ const viaProjectId = useMemo(() => {
+ if (!location.search) return null;
+ const params = new URLSearchParams(location.search);
+ return params.get("via");
+ }, [location.search]);
  // Intro gate: every visit lands on the explainer first. After the
  // user clicks "Open Chat", the dismissal is sticky for the rest of
  // the browser tab session (sessionStorage). Without the persistence,
@@ -319,6 +329,9 @@ const Chats = () => {
  lastSender: null,
  state: "none",
  acceptedAt: null,
+ muted: false,
+ aliasName: null,
+ aliasAvatarPath: null,
  fullName: profiles.get(routeContactId)?.fullName ?? "",
  avatarPath: profiles.get(routeContactId)?.avatarPath ?? null,
  });
@@ -477,6 +490,9 @@ const Chats = () => {
  key={selected.contactId}
  contactId={selected.contactId}
  currentUserId={user.id}
+ viaProjectId={viaProjectId}
+ aliasName={selected.aliasName}
+ aliasAvatarPath={selected.aliasAvatarPath}
  initialProfile={
  selected.fullName || selected.avatarPath
  ? {

@@ -290,7 +290,11 @@ const EmptyState = () => (
 );
 
 // Helper for the page to merge thread metadata with profile data
-// pulled from getCandidatesByIds.
+// pulled from getCandidatesByIds. When the thread row carries a
+// polln8 alias (chat was opened via a Polln8 recommendation), the
+// alias name + avatar override the contact's real profile fields so
+// the requester sees the recommended business identity instead of
+// the admin owner.
 export const mergeThreadProfiles = (
  threads: ChatThreadSummary[],
  profiles: Candidate[],
@@ -300,8 +304,8 @@ export const mergeThreadProfiles = (
  const p = byId.get(t.contactId);
  return {
  ...t,
- fullName: p?.fullName ?? "",
- avatarPath: p?.avatarPath ?? null,
+ fullName: t.aliasName || p?.fullName || "",
+ avatarPath: t.aliasAvatarPath || p?.avatarPath || null,
  };
  });
 };

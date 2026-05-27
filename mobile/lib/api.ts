@@ -1242,9 +1242,44 @@ export type ChatThreadState = {
  pendingWindowStartAt: string | null;
 };
 
+// Fetch the polln8 alias fields for a project id. Used by the chat
+// detail page when the URL carries ?via=<id> from a recommendation
+// card - the contact row may not exist yet (first visit before any
+// message has been sent), so we can't rely on list_chat_contacts for
+// the override. Returns null when the project isn't a polln8
+// recommendation or doesn't exist.
+export const getPolln8ProjectAlias = async (
+ projectId: string,
+): Promise<{ name: string; avatarPath: string | null } | null> => {
+ const { data, error } = await supabase
+ .from("projects")
+ .select(
+ "polln8_founder_name, polln8_founder_avatar_path, is_polln8_recommended",
+ )
+ .eq("id", projectId)
+ .single();
+ if (error || !data) return null;
+ const row = data as {
+ polln8_founder_name: string | null;
+ polln8_founder_avatar_path: string | null;
+ is_polln8_recommended: boolean | null;
+ };
+ if (!row.is_polln8_recommended) return null;
+ const name = (row.polln8_founder_name ?? "").trim();
+ if (!name) return null;
+ return {
+ name,
+ avatarPath: (row.polln8_founder_avatar_path ?? "").trim() || null,
+ };
+};
+
 export const requestOrSendChatMessage = async (
  recipientUserId: string,
  body: string,
+ // Polln8-recommended project id. Stamped on chat_contacts so the
+ // requester sees the recommendation's branded founder name + photo
+ // instead of the admin owner. Null for normal chats.
+ viaProjectId: string | null = null,
 ): Promise<{
  messageId: string;
  pendingCount: number;
@@ -1255,6 +1290,7 @@ export const requestOrSendChatMessage = async (
  {
  recipient_user_id: recipientUserId,
  message_body: body,
+ via_project_id: viaProjectId,
  },
  );
  if (error) throw error;
@@ -1356,6 +1392,10 @@ export type ChatThreadSummary = {
  lastSender: string | null;
  state: ThreadState;
  acceptedAt: string | null;
+ // Polln8-recommended chat alias - non-null when chat_contacts was
+ // stamped with via_project_id and the project is is_polln8_recommended.
+ aliasName: string | null;
+ aliasAvatarPath: string | null;
 };
 
 type ChatThreadsRpcRow = {
@@ -1365,6 +1405,8 @@ type ChatThreadsRpcRow = {
  last_sender: string | null;
  state: ThreadState;
  accepted_at: string | null;
+ alias_name: string | null;
+ alias_avatar_path: string | null;
 };
 
 export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
@@ -1377,6 +1419,8 @@ export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
  lastSender: r.last_sender ?? null,
  state: r.state ?? "none",
  acceptedAt: r.accepted_at ?? null,
+ aliasName: r.alias_name ?? null,
+ aliasAvatarPath: r.alias_avatar_path ?? null,
  }));
 };
 

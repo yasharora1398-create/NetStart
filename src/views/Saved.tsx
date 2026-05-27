@@ -361,7 +361,13 @@ const SavedProjectCard = ({
  size="sm"
  aria-label="Message founder"
  >
- <Link to={`/chats/${project.ownerId}`}>
+ <Link
+ to={
+ project.isPolln8Recommended
+ ? `/chats/${project.ownerId}?via=${project.id}`
+ : `/chats/${project.ownerId}`
+ }
+ >
  <MessageCircle className="size-3.5" />
  <span className="ml-1 hidden sm:inline">Message</span>
  </Link>

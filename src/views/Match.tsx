@@ -1436,7 +1436,14 @@ const ProjectInfoPanel = ({
 
  const handleMessage = () => {
  onClose();
- navigate(`/chats/${project.ownerId}`);
+ // Polln8-recommended projects route the chat through the admin
+ // owner but display under the project's polln8 founder name. Pass
+ // the project id as ?via so the first message gets stamped with
+ // the alias on chat_contacts.
+ const target = project.isPolln8Recommended
+ ? `/chats/${project.ownerId}?via=${project.id}`
+ : `/chats/${project.ownerId}`;
+ navigate(target);
  };
 
  return (

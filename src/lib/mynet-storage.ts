@@ -1601,6 +1601,12 @@ export type ChatThreadSummary = {
  state: ThreadState;
  acceptedAt: string | null;
  muted: boolean;
+ // Polln8-recommended chat alias. When the chat was opened via an
+ // admin recommendation card, these carry the project's polln8
+ // founder name / avatar path so the UI shows "redstring" instead
+ // of "Polln8" on the requester's side.
+ aliasName: string | null;
+ aliasAvatarPath: string | null;
 };
 
 type ChatThreadsRpcRow = {
@@ -1611,6 +1617,8 @@ type ChatThreadsRpcRow = {
  state: ThreadState;
  accepted_at: string | null;
  muted: boolean | null;
+ alias_name: string | null;
+ alias_avatar_path: string | null;
 };
 
 // Load the full message thread between the current user and another.
@@ -1648,6 +1656,8 @@ export const listChatThreads = async (): Promise<ChatThreadSummary[]> => {
  state: r.state ?? "none",
  acceptedAt: r.accepted_at ?? null,
  muted: Boolean(r.muted),
+ aliasName: r.alias_name ?? null,
+ aliasAvatarPath: r.alias_avatar_path ?? null,
  }));
 };
 
@@ -1705,6 +1715,12 @@ export const getChatThreadState = async (
 export const requestOrSendChatMessage = async (
  recipientUserId: string,
  body: string,
+ // Optional Polln8-recommended project id. Stamped on the chat_contacts
+ // row so list_chat_contacts / list_chat_threads can swap the contact
+ // display name + photo to the project's polln8 founder fields. Set
+ // when this is the first message from a polln8 card; harmless on
+ // subsequent sends.
+ viaProjectId: string | null = null,
 ): Promise<{
  messageId: string;
  pendingCount: number;
@@ -1715,6 +1731,7 @@ export const requestOrSendChatMessage = async (
  {
  recipient_user_id: recipientUserId,
  message_body: body,
+ via_project_id: viaProjectId,
  },
  );
  if (error) throw error;

@@ -645,9 +645,19 @@ export default function ProjectDetailScreen() {
  }
  setActiveSavedProject(project.id);
  }}
- onMessageFounder={() =>
- router.push(`/chat/${project.ownerId}` as never)
- }
+ onMessageFounder={() => {
+ // Polln8 recommendations route the chat through the admin
+ // owner but display under the project's polln8 founder name.
+ // Pass ?via=<projectId> so the first message stamps the
+ // alias on chat_contacts and the requester sees the
+ // recommended business identity in their DMs.
+ const polln8 = (project as { isPolln8Recommended?: boolean })
+ .isPolln8Recommended;
+ const path = polln8
+ ? `/chat/${project.ownerId}?via=${project.id}`
+ : `/chat/${project.ownerId}`;
+ router.push(path as never);
+ }}
  styles={styles}
  theme={theme}
  />

@@ -233,11 +233,18 @@ const ThreadRow = ({
  theme: ThemePalette;
 }) => {
  const c = row.contact;
- const url = c?.avatarPath?.startsWith("http")
- ? c.avatarPath
- : getAvatarUrl(c?.avatarPath ?? null);
- const display = c?.fullName || "Unknown";
- const sub = c?.headline || "";
+ // Polln8-recommended chat alias: if the thread row carries an
+ // aliasName / aliasAvatarPath (because chat_contacts was stamped
+ // with via_project_id), they override the contact's real profile
+ // fields so the user sees the recommendation's brand instead of
+ // the admin owner.
+ const displayName = row.aliasName || c?.fullName || "Unknown";
+ const displayAvatarPath = row.aliasAvatarPath || c?.avatarPath || null;
+ const url = displayAvatarPath?.startsWith("http")
+ ? displayAvatarPath
+ : getAvatarUrl(displayAvatarPath);
+ const display = displayName;
+ const sub = row.aliasName ? "" : c?.headline || "";
  const isInbound = row.state === "inbound";
  const isOutbound = row.state === "outbound";
  const isDeclined = row.state === "declined";

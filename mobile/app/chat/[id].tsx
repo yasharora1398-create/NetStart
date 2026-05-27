@@ -61,6 +61,7 @@ import {
  deleteChatThread,
  getChatThreadState,
  setChatMute,
+ getPolln8ProjectAlias,
  type ChatThreadState,
  type ChatMessage,
 } from "@/lib/api";
@@ -221,8 +222,17 @@ export default function ChatScreen() {
  const { user } = useAuth();
  const { theme, mode } = useTheme();
  const styles = useMemo(() => makeStyles(theme), [theme]);
- const params = useLocalSearchParams<{ id: string; intro?: string }>();
+ const params = useLocalSearchParams<{
+ id: string;
+ intro?: string;
+ via?: string;
+ }>();
  const otherId = String(params.id);
+ // Polln8-recommended chat alias: when this chat is opened from a
+ // recommendation card, ?via=<projectId> is on the URL. Forwarded
+ // to the first send so chat_contacts gets stamped and the alias
+ // displays in the requester's threads / chat header.
+ const viaProjectId = params.via ? String(params.via) : null;
  // Fake-ID convention was used during early development to mock
  // chat threads without hitting Supabase. Production has no fake
  // contacts (the seed_fake_users.sql file was removed and every
@@ -230,6 +240,14 @@ export default function ChatScreen() {
  // existing `if (isFake)` branches below are unreachable.
  const isFake = false;
  const [candidate, setCandidate] = useState<Candidate | null>(null);
+ // Polln8-recommended alias overlay. Loaded asynchronously when
+ // viaProjectId is on the URL OR the contact's chat_contacts row was
+ // stamped with via_project_id on a prior send. Header / avatar
+ // render `alias?.name ?? candidate.fullName` so the recommendation
+ // brand wins when present.
+ const [alias, setAlias] = useState<
+ { name: string; avatarPath: string | null } | null
+ >(null);
  const [loading, setLoading] = useState(true);
  const [messages, setMessages] = useState<Msg[]>([]);
  const [draft, setDraft] = useState("");
@@ -318,6 +336,28 @@ export default function ChatScreen() {
  cancelled = true;
  };
  }, [otherId, isFake]);
+
+ // Resolve the polln8 alias when this chat came from a recommendation
+ // card. Runs in parallel with the candidate fetch above so the
+ // header doesn't flicker the admin's real name before the alias
+ // lands. No-op when viaProjectId is null.
+ useEffect(() => {
+ if (!viaProjectId) {
+ setAlias(null);
+ return;
+ }
+ let cancelled = false;
+ getPolln8ProjectAlias(viaProjectId)
+ .then((a) => {
+ if (!cancelled) setAlias(a);
+ })
+ .catch(() => {
+ if (!cancelled) setAlias(null);
+ });
+ return () => {
+ cancelled = true;
+ };
+ }, [viaProjectId]);
 
  // Pull the per-contact mute flag once the screen has a real user
  // and contact id. Used by the header overflow menu so the right
@@ -494,7 +534,11 @@ export default function ChatScreen() {
  // first message, increments the per-window counter, and only
  // throws "limit_reached" once the requester has used all 2
  // messages within a 48-hour window.
- const res = await requestOrSendChatMessage(otherId, text);
+ const res = await requestOrSendChatMessage(
+ otherId,
+ text,
+ viaProjectId,
+ );
  setDraft("");
  setReplyingTo(null);
  // Refresh state so the indicator updates (count goes up,
@@ -679,11 +723,14 @@ export default function ChatScreen() {
  setTimeout(() => inputRef.current?.focus(), 50);
  };
 
- const url =
- candidate?.avatarPath?.startsWith("http")
- ? candidate.avatarPath
- : getAvatarUrl(candidate?.avatarPath ?? null);
- const name = candidate?.fullName || "Loading...";
+ // Display fields: polln8 alias wins when present (chat opened via a
+ // recommendation card or chat_contacts row stamped). Falls back to
+ // the real contact profile otherwise.
+ const displayAvatarPath = alias?.avatarPath ?? candidate?.avatarPath ?? null;
+ const url = displayAvatarPath?.startsWith("http")
+ ? displayAvatarPath
+ : getAvatarUrl(displayAvatarPath);
+ const name = alias?.name || candidate?.fullName || "Loading...";
 
  return (
  <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
