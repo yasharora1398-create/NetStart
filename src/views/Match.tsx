@@ -578,8 +578,8 @@ const PartnerView = () => {
  768px in favour of the swipe deck below. */}
  <div
  className={cn(
- "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4 py-6",
- fullscreen ? "h-[calc(100dvh-72px)]" : "min-h-[720px]",
+ "relative mx-auto hidden md:flex items-start justify-center gap-6 px-4 py-6",
+ fullscreen ? "h-[calc(100dvh-72px)]" : "",
  )}
  >
  <button
@@ -595,7 +595,10 @@ const PartnerView = () => {
  <X className="h-6 w-6" strokeWidth={2.2} />
  </button>
 
- <div className="w-full max-w-[480px] flex-shrink-0 flex flex-col gap-3">
+ {/* Desktop card width: 400px keeps the card + Previous button +
+ the side info panel under the viewport height in non-fullscreen
+ mode (image scales with width since aspect-[4/3] is fixed). */}
+ <div className="w-full max-w-[400px] flex-shrink-0 flex flex-col gap-3">
  <MatchCandidateCard candidate={current} />
  <button
  type="button"
@@ -1242,8 +1245,8 @@ const LookerView = () => {
  favour of the swipe deck below. */}
  <div
  className={cn(
- "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4 py-6",
- fullscreen ? "h-[calc(100dvh-72px)]" : "min-h-[760px]",
+ "relative mx-auto hidden md:flex items-start justify-center gap-6 px-4 py-6",
+ fullscreen ? "h-[calc(100dvh-72px)]" : "",
  )}
  >
  <button
@@ -1259,7 +1262,10 @@ const LookerView = () => {
  <X className="h-6 w-6" strokeWidth={2.2} />
  </button>
 
- <div className="w-full max-w-[480px] flex-shrink-0 flex flex-col gap-3">
+ {/* Desktop card width: 400px keeps card + Previous + side panel
+ inside non-fullscreen viewport height (image aspect-[4/3]
+ scales with width). */}
+ <div className="w-full max-w-[400px] flex-shrink-0 flex flex-col gap-3">
  <MatchProjectCard project={displayed!} />
  <button
  type="button"
@@ -1291,11 +1297,15 @@ const LookerView = () => {
  className={cn(
  "transition-all duration-500 ease-out overflow-hidden",
  approving
- ? "max-w-[540px] opacity-100"
+ ? "max-w-[420px] opacity-100"
  : "max-w-0 opacity-0 -ml-6",
  )}
  >
- <div className="w-[520px]">
+ {/* Width matches the card width so the row reads as two equal
+ panels. max-height capped to the viewport so a long founder
+ profile scrolls inside the panel instead of pushing the page
+ taller than the screen. */}
+ <div className="w-[400px] max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl">
  {approving ? (
  approving.isPolln8Recommended ? (
  <Polln8ProjectActions
@@ -1433,22 +1443,54 @@ const Polln8ProjectActions = ({
  : `https://${website}`
  : null;
 
+ const avatar = getAvatarUrl(
+ project.polln8FounderAvatarPath || project.founderAvatarPath,
+ );
+ const displayName =
+ project.polln8FounderName || project.founderFullName || project.title;
+
  return (
- <article className="relative rounded-2xl border border-primary bg-card p-5 shadow-sm">
+ <article className="relative overflow-hidden rounded-2xl border-2 border-primary bg-card shadow-sm">
+ {/* Close button floats over the hero so the panel header stays
+ visually flush with the project card on the left. */}
  <button
  type="button"
  onClick={onClose}
  aria-label="Close"
- className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
+ className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
  >
  <X className="h-4 w-4" />
  </button>
 
- <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
+ {/* Recommended-by-Polln8 ribbon - same as on the deck card so
+ the two surfaces read as one. */}
+ <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
  Recommended by Polln8
- </p>
- <h3 className="mb-5 font-display text-2xl leading-tight text-foreground">
- {project.polln8FounderName || project.founderFullName || project.title}
+ </div>
+
+ {/* Hero image - same aspect + fallback as MatchProjectCard so
+ the action panel reads as the same card shape. */}
+ <div className="relative w-full aspect-[4/3] bg-muted">
+ {avatar ? (
+ <img
+ src={avatar}
+ alt={displayName}
+ className="absolute inset-0 h-full w-full object-cover"
+ />
+ ) : (
+ <div className="absolute inset-0 flex items-center justify-center">
+ <User
+ className="h-32 w-32 text-muted-foreground"
+ strokeWidth={1.4}
+ />
+ </div>
+ )}
+ </div>
+
+ {/* Body: name + 3 stacked action buttons. */}
+ <div className="p-5">
+ <h3 className="mb-4 font-display text-2xl leading-tight text-foreground">
+ {displayName}
  </h3>
 
  <div className="flex flex-col gap-2.5">
@@ -1493,6 +1535,7 @@ const Polln8ProjectActions = ({
  </a>
  </Button>
  ) : null}
+ </div>
  </div>
  </article>
  );
