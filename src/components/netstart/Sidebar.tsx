@@ -39,6 +39,10 @@ const HOME_ITEMS: Item[] = [
 
 const APP_ITEMS: Item[] = [
  { to: "/mynet", label: "MyNet", icon: MyNetIcon },
+ // Settings sits directly under MyNet because everything in it
+ // (email, password, sign-out, delete account) edits the MyNet
+ // identity the user just looked at.
+ { to: "/settings", label: "Settings", icon: SettingsIcon },
  { to: "/match", label: "Match", icon: MatchIcon },
  { to: "/saved", label: "Saved", icon: SavedIcon },
  { to: "/chats", label: "Chat", icon: ChatIcon },
@@ -276,6 +280,7 @@ import {
  Flower2,
  Home as HomeLucide,
  MessageCircle,
+ Settings as SettingsLucide,
  ShieldCheck,
  User as UserLucide,
  Wrench,
@@ -292,6 +297,7 @@ type RailItem = {
 const RAIL_ITEMS: RailItem[] = [
  { to: "/", label: "Home", icon: <HomeLucide className="size-4" />, end: true },
  { to: "/mynet", label: "MyNet", icon: <UserLucide className="size-4" /> },
+ { to: "/settings", label: "Settings", icon: <SettingsLucide className="size-4" /> },
  { to: "/match", label: "Match", icon: <Flower2 className="size-4" /> },
  { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
  { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
@@ -577,6 +583,31 @@ function HomeIcon() {
  >
  <path d="M2.5 7.5 L8 2.5 L13.5 7.5 V13 a0.8 0.8 0 0 1 -0.8 0.8 H3.3 a0.8 0.8 0 0 1 -0.8 -0.8 Z" />
  <path d="M6.5 13.8 V9.5 H9.5 V13.8" />
+ </svg>
+ );
+}
+
+function SettingsIcon() {
+ // Simple gear: inner ring + 8 tick marks. Stroke-only so it
+ // inherits the active/inactive sidebar color like the other icons.
+ return (
+ <svg
+ viewBox="0 0 16 16"
+ fill="none"
+ stroke="currentColor"
+ strokeWidth={1.4}
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ >
+ <circle cx="8" cy="8" r="2.3" />
+ <path d="M8 2 V3.6" />
+ <path d="M8 12.4 V14" />
+ <path d="M2 8 H3.6" />
+ <path d="M12.4 8 H14" />
+ <path d="M3.76 3.76 L4.89 4.89" />
+ <path d="M11.11 11.11 L12.24 12.24" />
+ <path d="M3.76 12.24 L4.89 11.11" />
+ <path d="M11.11 4.89 L12.24 3.76" />
  </svg>
  );
 }

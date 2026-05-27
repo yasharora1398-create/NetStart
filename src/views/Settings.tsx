@@ -1,11 +1,18 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
-import { Loader2, LogOut, Mail, Save, ShieldCheck, Trash2 } from "lucide-react";
+import {
+ Loader2,
+ LogOut,
+ Mail,
+ Save,
+ Settings as SettingsIcon,
+ ShieldCheck,
+ Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
-import { Nav } from "@/components/netstart/Nav";
-import { Footer } from "@/components/netstart/Footer";
+import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,9 +75,9 @@ const Settings = () => {
  }
  };
 
- // The shared confirm-sign-out dialog now presents both scopes
- // (this tab / everywhere) inside itself, so this page just opens
- // the dialog and lets the user pick.
+ // The shared confirm-sign-out dialog presents both scopes (this tab
+ // / everywhere) inside itself, so this page just opens the dialog
+ // and lets the user pick.
  const handleSignOut = () => confirmSignOut();
 
  const handleDeleteAccount = async () => {
@@ -100,36 +107,29 @@ const Settings = () => {
  }
  };
 
- if (loading) {
  return (
- <div className="min-h-screen bg-background text-foreground">
- <Nav />
- <div className="flex items-center justify-center pt-32">
- <Loader2 className="h-5 w-5 text-gold animate-spin" />
- </div>
- </div>
- );
- }
-
- if (!user) {
- return (
- <div className="min-h-screen bg-background text-foreground">
- <Nav />
- <AuthGate />
- </div>
- );
- }
-
- return (
- <div className="min-h-screen bg-background text-foreground">
- <Nav />
-
- <main className="pt-28 pb-24">
- <div className="container max-w-2xl">
- <header className="mb-10">
- <h1 className="font-display text-4xl md:text-5xl leading-[1]">
+ <AppLayout>
+ <AuthGate
+ authLoading={loading}
+ signedIn={Boolean(user)}
+ authTitle="Sign in to manage your account"
+ authBody="Settings is for changing your email, password, and account state - you need to be signed in first."
+ >
+ <div className="container max-w-2xl py-10">
+ <header className="mb-8">
+ <div className="mb-3 inline-flex items-center gap-2 rounded-sm border border-gold bg-gold px-3 py-1.5">
+ <SettingsIcon className="size-3 text-white" />
+ <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white">
  Settings
+ </span>
+ </div>
+ <h1 className="font-display text-4xl md:text-5xl leading-[1]">
+ Account.
  </h1>
+ <p className="mt-3 text-sm text-muted-foreground max-w-md">
+ Email, password, session, and the permanent-delete control all
+ live here.
+ </p>
  </header>
 
  <section className="rounded-sm border border-border bg-card overflow-hidden mb-6">
@@ -162,7 +162,7 @@ const Settings = () => {
  type="submit"
  variant="gold"
  size="sm"
- disabled={savingEmail || email === user.email || !email.trim()}
+ disabled={savingEmail || email === user?.email || !email.trim()}
  >
  {savingEmail ? (
  <Loader2 className="h-4 w-4 animate-spin" />
@@ -249,8 +249,8 @@ const Settings = () => {
  Delete account
  </h2>
  <p className="text-sm text-muted-foreground">
- Permanently removes your profile, projects, applications, and
- chat history. This cannot be undone.
+ Permanently removes your profile, projects, applications,
+ and chat history. This cannot be undone.
  </p>
  </div>
  <div>
@@ -288,9 +288,8 @@ const Settings = () => {
  </div>
  </section>
  </div>
- </main>
- <Footer />
- </div>
+ </AuthGate>
+ </AppLayout>
  );
 };
 
