@@ -1366,6 +1366,17 @@ export const setChatMute = async (
  if (error) throw error;
 };
 
+// Permanently wipes the caller's auth user + every row attached to
+// them across the public schema (profile, projects, applications,
+// saved_people, saved_projects, chat_contacts, chat_messages,
+// notifications, push_tokens, user_reports). Backed by migration
+// 0022. The JWT is invalid after this resolves, so the client must
+// sign out + redirect immediately.
+export const deleteMyAccount = async (): Promise<void> => {
+ const { error } = await supabase.rpc("delete_my_account");
+ if (error) throw error;
+};
+
 // Founder-only: change the lifecycle state on one of their
 // projects. Browse / Search hide non-active projects.
 export const setProjectLifecycle = async (

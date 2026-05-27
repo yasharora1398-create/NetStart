@@ -18,10 +18,12 @@ import {
  Mail,
  Save,
  ShieldCheck,
+ Trash2,
 } from "lucide-react-native";
 
 import { Field } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
+import { deleteMyAccount } from "@/lib/api";
 import { fonts } from "@/lib/theme";
 import { useTheme, type ThemePalette } from "@/lib/themeMode";
 
@@ -35,6 +37,8 @@ export default function SettingsScreen() {
  const [savingEmail, setSavingEmail] = useState(false);
  const [savingPassword, setSavingPassword] = useState(false);
  const [signingOutAll, setSigningOutAll] = useState(false);
+ const [deleteConfirm, setDeleteConfirm] = useState("");
+ const [deletingAccount, setDeletingAccount] = useState(false);
 
  useEffect(() => {
  if (user?.email) setEmail(user.email);
@@ -106,6 +110,62 @@ export default function SettingsScreen() {
  { text: "Cancel", style: "cancel" },
  {
  text: "Sign out everywhere",
+ style: "destructive",
+ onPress: () => void proceed(),
+ },
+ ],
+ );
+ };
+
+ const handleDeleteAccount = () => {
+ if (deleteConfirm.trim().toLowerCase() !== "delete") {
+ const msg = "Type DELETE in the confirm box to permanently delete your account.";
+ if (Platform.OS === "web") {
+ if (typeof window !== "undefined") window.alert(msg);
+ } else {
+ Alert.alert("Type DELETE", msg);
+ }
+ return;
+ }
+ const proceed = async () => {
+ setDeletingAccount(true);
+ try {
+ await deleteMyAccount();
+ // The auth user is gone; sign out locally to clear the cached
+ // token before we navigate. Failure here doesn't matter -
+ // the JWT is already invalid server-side.
+ await signOut("local").catch(() => {});
+ router.replace("/" as never);
+ } catch (err) {
+ const m = err instanceof Error ? err.message : "Could not delete.";
+ if (Platform.OS === "web") {
+ if (typeof window !== "undefined") window.alert(m);
+ } else {
+ Alert.alert("Could not delete account", m);
+ }
+ } finally {
+ setDeletingAccount(false);
+ }
+ };
+ // Same Alert / window.confirm split as sign-out: react-native-web
+ // doesn't fire Alert.alert callbacks reliably.
+ const warning =
+ "Permanently delete your account?\n\nThis wipes your profile, projects, applications, and chat history. It cannot be undone.";
+ if (Platform.OS === "web") {
+ const ok =
+ typeof window !== "undefined" &&
+ typeof window.confirm === "function" &&
+ window.confirm(warning);
+ if (ok) void proceed();
+ return;
+ }
+ Alert.alert(
+ "Delete account?",
+ "This wipes your profile, projects, applications, and chat history. It cannot be undone.",
+ [
+ { text: "Cancel", style: "cancel" },
+ {
+ text: "Delete forever",
  style: "destructive",
  onPress: () => void proceed(),
  },
@@ -248,6 +308,59 @@ export default function SettingsScreen() {
  <LogOut size={14} color={theme.destructive} />
  <Text style={styles.dangerBtnText}>
  Sign out everywhere
+ </Text>
+ </>
+ )}
+ </Pressable>
+ </View>
+
+ {/* Delete account - permanent. Wipes profile, projects,
+ applications, chat history, etc. Two-step gate: user
+ must type DELETE then confirm in a native dialog. */}
+ <View style={[styles.card, styles.dangerCard]}>
+ <View style={styles.cardHead}>
+ <Trash2 size={16} color={theme.destructive} />
+ <Text style={[styles.cardTitle, { color: theme.destructive }]}>
+ Delete account
+ </Text>
+ </View>
+ <Text style={styles.cardHint}>
+ Permanently removes your profile, projects, applications,
+ and chat history. This cannot be undone.
+ </Text>
+ <Field label="Type DELETE to confirm">
+ <TextInput
+ value={deleteConfirm}
+ onChangeText={setDeleteConfirm}
+ placeholder="DELETE"
+ placeholderTextColor={theme.textDim}
+ autoCapitalize="characters"
+ autoCorrect={false}
+ style={styles.input}
+ />
+ </Field>
+ <Pressable
+ onPress={handleDeleteAccount}
+ disabled={
+ deletingAccount ||
+ deleteConfirm.trim().toLowerCase() !== "delete"
+ }
+ style={({ pressed }) => [
+ styles.dangerBtn,
+ pressed && { opacity: 0.85 },
+ (deletingAccount ||
+ deleteConfirm.trim().toLowerCase() !== "delete") && {
+ opacity: 0.5,
+ },
+ ]}
+ >
+ {deletingAccount ? (
+ <ActivityIndicator color={theme.destructive} size="small" />
+ ) : (
+ <>
+ <Trash2 size={14} color={theme.destructive} />
+ <Text style={styles.dangerBtnText}>
+ Delete my account
  </Text>
  </>
  )}
