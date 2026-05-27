@@ -578,7 +578,7 @@ const PartnerView = () => {
  768px in favour of the swipe deck below. */}
  <div
  className={cn(
- "relative mx-auto hidden md:flex items-start justify-center gap-6 px-4 py-6",
+ "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4 py-6",
  fullscreen ? "h-[calc(100dvh-72px)]" : "",
  )}
  >
@@ -1245,7 +1245,7 @@ const LookerView = () => {
  favour of the swipe deck below. */}
  <div
  className={cn(
- "relative mx-auto hidden md:flex items-start justify-center gap-6 px-4 py-6",
+ "relative mx-auto hidden md:flex items-center justify-center gap-6 px-4 py-6",
  fullscreen ? "h-[calc(100dvh-72px)]" : "",
  )}
  >
@@ -1297,22 +1297,26 @@ const LookerView = () => {
  className={cn(
  "transition-all duration-500 ease-out overflow-hidden",
  approving
- ? "max-w-[420px] opacity-100"
+ ? approving.isPolln8Recommended
+ ? "max-w-[120px] opacity-100"
+ : "max-w-[420px] opacity-100"
  : "max-w-0 opacity-0 -ml-6",
  )}
  >
- {/* Width matches the card width so the row reads as two equal
- panels. max-height capped to the viewport so a long founder
- profile scrolls inside the panel instead of pushing the page
- taller than the screen. */}
- <div className="w-[400px] max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl">
+ {/* Polln8 recommendations get a slim icon-only column (chat /
+ website / save) - same shape as the founder-side
+ CandidateActions. Regular projects get the full info panel
+ capped to viewport height so it scrolls internally. */}
  {approving ? (
  approving.isPolln8Recommended ? (
+ <div className="w-[88px]">
  <Polln8ProjectActions
  project={approving}
  onClose={() => closeInfo()}
  />
+ </div>
  ) : (
+ <div className="w-[400px] max-h-[calc(100vh-160px)] overflow-y-auto rounded-2xl">
  <ProjectInfoPanel
  project={approving}
  canGoBack={Boolean(lastDecided)}
@@ -1320,9 +1324,9 @@ const LookerView = () => {
  onBack={goBack}
  onSwitchProject={(p) => setApproving(p)}
  />
+ </div>
  )
  ) : null}
- </div>
  </div>
  </div>
 
@@ -1443,101 +1447,72 @@ const Polln8ProjectActions = ({
  : `https://${website}`
  : null;
 
- const avatar = getAvatarUrl(
- project.polln8FounderAvatarPath || project.founderAvatarPath,
- );
- const displayName =
- project.polln8FounderName || project.founderFullName || project.title;
-
+ // Three stacked circular icon buttons - same shape as the
+ // founder-side CandidateActions column. Polln8 recommendations
+ // don't get a full info panel; just chat / website / save.
  return (
- <article className="relative overflow-hidden rounded-2xl border-2 border-primary bg-card shadow-sm">
- {/* Close button floats over the hero so the panel header stays
- visually flush with the project card on the left. */}
+ <div className="flex flex-col items-center gap-3">
+ {/* Chat - primary action, gold-filled */}
+ <button
+ type="button"
+ onClick={handleMessage}
+ aria-label="Request chat"
+ title="Request chat"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-gold text-primary-foreground shadow-sm transition-all hover:shadow-md"
+ >
+ <MessageCircle className="h-6 w-6" />
+ </button>
+
+ {/* Website (network icon). Disabled state matches founder-side
+ LinkedIn-unavailable styling when no website was set. */}
+ {websiteHref ? (
+ <a
+ href={websiteHref}
+ target="_blank"
+ rel="noopener noreferrer"
+ aria-label="Open website"
+ title="Open website"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:shadow-md"
+ >
+ <Globe className="h-6 w-6" />
+ </a>
+ ) : (
+ <span
+ aria-label="No website on file"
+ title="No website on file"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-card text-muted-foreground cursor-not-allowed"
+ >
+ <Globe className="h-6 w-6" />
+ </span>
+ )}
+
+ {/* Save */}
+ <button
+ type="button"
+ onClick={handleToggleSave}
+ aria-label={saved ? "Remove from saved" : "Save"}
+ title={saved ? "Saved" : "Save"}
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:shadow-md"
+ >
+ {saved ? (
+ <BookmarkCheck className="h-6 w-6 fill-current" />
+ ) : (
+ <Bookmark className="h-6 w-6" />
+ )}
+ </button>
+
+ {/* Close - smaller, secondary. Lets the user back out without
+ swiping the card away. */}
  <button
  type="button"
  onClick={onClose}
  aria-label="Close"
- className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
+ title="Close"
+ className="mt-1 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-gold hover:text-foreground"
  >
  <X className="h-4 w-4" />
  </button>
-
- {/* Recommended-by-Polln8 ribbon - same as on the deck card so
- the two surfaces read as one. */}
- <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
- Recommended by Polln8
  </div>
-
- {/* Hero image - same aspect + fallback as MatchProjectCard so
- the action panel reads as the same card shape. */}
- <div className="relative w-full aspect-[4/3] bg-muted">
- {avatar ? (
- <img
- src={avatar}
- alt={displayName}
- className="absolute inset-0 h-full w-full object-cover"
- />
- ) : (
- <div className="absolute inset-0 flex items-center justify-center">
- <User
- className="h-32 w-32 text-muted-foreground"
- strokeWidth={1.4}
- />
- </div>
- )}
- </div>
-
- {/* Body: name + 3 stacked action buttons. */}
- <div className="p-5">
- <h3 className="mb-4 font-display text-2xl leading-tight text-foreground">
- {displayName}
- </h3>
-
- <div className="flex flex-col gap-2.5">
- <Button
- type="button"
- variant="gold"
- size="lg"
- className="w-full justify-center"
- onClick={handleMessage}
- >
- <MessageCircle className="h-4 w-4" />
- Request chat
- </Button>
-
- <Button
- type="button"
- variant="outline"
- size="lg"
- className="w-full justify-center"
- onClick={handleToggleSave}
- >
- {saved ? (
- <BookmarkCheck className="h-4 w-4 fill-current" />
- ) : (
- <Bookmark className="h-4 w-4" />
- )}
- {saved ? "Saved" : "Save"}
- </Button>
-
- {websiteHref ? (
- <Button
- asChild
- type="button"
- variant="outline"
- size="lg"
- className="w-full justify-center"
- >
- <a href={websiteHref} target="_blank" rel="noopener noreferrer">
- <Globe className="h-4 w-4" />
- Visit website
- <ExternalLink className="h-3.5 w-3.5" />
- </a>
- </Button>
- ) : null}
- </div>
- </div>
- </article>
  );
 };
 

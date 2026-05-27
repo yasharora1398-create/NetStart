@@ -108,8 +108,11 @@ as $$
            bool_or(accepted_at is not null) as is_accepted,
            min(accepted_at) as accepted_at,
            -- Only outbound rows carry via_project_id; inbound rows
-           -- always have null, so max() picks the meaningful one.
-           max(via_project_id) as via_project_id
+           -- always have null. Postgres has no max(uuid), so cast to
+           -- text + back - the value is identical, only the type
+           -- pipeline changes. (Picking the lexicographic max is fine
+           -- because at most one row in this group has a non-null id.)
+           max(via_project_id::text)::uuid as via_project_id
     from my_contacts
     group by other_id
   ),
