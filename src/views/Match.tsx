@@ -120,12 +120,17 @@ const Match = () => {
 
  // Unauth visitors pick a role on a title page before they see the
  // deck. Lives in component state (not localStorage) so they re-pick
- // on the next visit - that's intentional, the picker is a moment
- // for the visitor to self-identify before they see anything that
- // depends on it.
+ // on the next visit - intentional; the picker is a moment for the
+ // visitor to self-identify before anything that depends on it.
+ //
+ // Two states intentionally split:
+ //   chosenRole - which card is currently highlighted (picking is
+ //                NOT a commitment - they can switch before Start).
+ //   started    - they hit Start. Falls through to the real deck.
  const [chosenRole, setChosenRole] = useState<
  "founder" | "partner" | null
  >(null);
+ const [started, setStarted] = useState(false);
 
  // Auth role is the primary signal: a partner swipes projects, a
  // founder swipes candidates. Fall back to project ownership only
@@ -164,12 +169,38 @@ const Match = () => {
  </div>
  );
 
- // Unauth role-picker title page. Renders before the device-gated
- // intro for signed-in users; unauth visitors go straight here and
- // see the deck after they pick. Once they pick, fall through to
- // the same render as authed (the AuthGate overlay is gone - save
- // and chat actions now redirect to /signin individually).
- if (!loading && !isAuthed && !chosenRole) {
+ // Unauth role-picker title page. Two RoleSplit-style cards: pick one
+ // to highlight (green outline), then click Start to enter the deck.
+ // Picking is NOT an immediate advance - that was the old behavior;
+ // user wanted picking to just preview the choice.
+ if (!loading && !isAuthed && !started) {
+ const ROLE_OPTIONS = [
+ {
+ value: "founder" as const,
+ eyebrow: "I'm a founder",
+ headline: "Pitch one person, the right one.",
+ body:
+ "Post what you're building once. We surface partners whose skills and commitment actually match.",
+ bullets: [
+ "One pitch covers every introduction",
+ "Partners with shipped work, not just bios",
+ "Block the noise. Accept only the ones you want",
+ ],
+ },
+ {
+ value: "partner" as const,
+ eyebrow: "I'm a partner",
+ headline: "See real projects. Not job boards.",
+ body:
+ "Swipe through what founders are actually building right now. Stage, traction, equity ask, what they need.",
+ bullets: [
+ "Browse projects, not LinkedIn job titles",
+ "Mutual interest before any commitment",
+ "Save the ones that intrigue you, ignore the rest",
+ ],
+ },
+ ];
+
  return (
  <AppLayout>
  <div className="container py-12 md:py-20">
@@ -183,23 +214,8 @@ const Match = () => {
  </p>
  </div>
 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-3xl">
- {(
- [
- {
- value: "founder" as const,
- title: "I'm a founder",
- line1: "Building a startup.",
- line2: "Show me partners I could build with.",
- },
- {
- value: "partner" as const,
- title: "I'm a partner",
- line1: "Looking to join a startup.",
- line2: "Show me projects I could ship.",
- },
- ]
- ).map((opt) => {
+ <div className="grid gap-5 md:grid-cols-2 mb-8">
+ {ROLE_OPTIONS.map((opt) => {
  const active = chosenRole === opt.value;
  return (
  <button
@@ -207,31 +223,40 @@ const Match = () => {
  type="button"
  onClick={() => setChosenRole(opt.value)}
  className={cn(
- "aspect-square rounded-2xl border-2 p-6 md:p-8 text-left transition-colors flex flex-col justify-between",
+ "group relative h-full rounded-sm border-2 bg-card p-8 text-left transition-colors",
  active
- ? "border-primary bg-primary"
- : "border-border bg-card hover:border-primary",
+ ? "border-primary"
+ : "border-border hover:border-primary",
  )}
  >
- <p
- className={cn(
- "font-display text-3xl md:text-4xl leading-tight",
- active ? "text-primary-foreground" : "text-foreground",
- )}
- >
- {opt.title}
+ <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+ {opt.eyebrow}
  </p>
- <div
- className={cn(
- "text-sm md:text-base leading-relaxed",
- active
- ? "text-primary-foreground"
- : "text-muted-foreground",
- )}
+ <h3 className="font-display text-3xl mb-4 leading-tight font-semibold text-foreground">
+ {opt.headline}
+ </h3>
+ <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+ {opt.body}
+ </p>
+ <ul className="space-y-2.5">
+ {opt.bullets.map((b) => (
+ <li
+ key={b}
+ className="flex items-start gap-2 text-sm text-foreground"
  >
- <p>{opt.line1}</p>
- <p>{opt.line2}</p>
- </div>
+ <span
+ aria-hidden
+ className="mt-1.5 inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary"
+ />
+ <span>{b}</span>
+ </li>
+ ))}
+ </ul>
+ {active ? (
+ <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-widest text-primary-foreground">
+ Selected
+ </span>
+ ) : null}
  </button>
  );
  })}
@@ -242,18 +267,7 @@ const Match = () => {
  variant="gold"
  size="xl"
  disabled={!chosenRole}
- onClick={() => {
- // No-op: chosenRole being set already causes the
- // page to fall through to the deck render below.
- // Button exists for visual progression cue + click
- // affordance after picking.
- if (chosenRole) {
- // Force a re-render by no-op state-set. The
- // conditional return uses chosenRole directly so
- // nothing else needs to fire.
- setChosenRole(chosenRole);
- }
- }}
+ onClick={() => setStarted(true)}
  >
  Start
  </Button>
@@ -919,10 +933,11 @@ const CandidateActions = ({
 
  const handleSave = async () => {
  if (working) return;
- // Unauth: route to /signin so they can create an account first.
+ // Unauth: bounce to /saved - that page renders the AuthGate
+ // 'sign in to save' message, which is friendlier than dropping
+ // them straight on the sign-in form with no context.
  if (!user) {
- toast.info("Sign up to save people.");
- navigate("/signin");
+ navigate("/saved");
  return;
  }
  // Saves attach to a project. Without one published & marked
@@ -950,9 +965,11 @@ const CandidateActions = ({
  };
 
  const handleMessage = () => {
+ // Unauth: bounce to /chats - that page renders the AuthGate
+ // 'sign in to chat' message so the user learns what's behind
+ // the action before they're asked to sign up.
  if (!user) {
- toast.info("Sign up to chat with people.");
- navigate("/signin");
+ navigate("/chats");
  return;
  }
  onClose();
@@ -1554,9 +1571,10 @@ const Polln8ProjectActions = ({
  const saved = useIsProjectSaved(project.id);
 
  const handleToggleSave = () => {
+ // Unauth: bounce to /saved so the AuthGate message explains
+ // what the saved tab does. Skips dropping them on /signin cold.
  if (!user) {
- toast.info("Sign up to save projects.");
- navigate("/signin");
+ navigate("/saved");
  return;
  }
  if (saved) {
@@ -1569,9 +1587,11 @@ const Polln8ProjectActions = ({
  };
 
  const handleMessage = () => {
+ // Unauth: bounce to /chats so the AuthGate message tells them
+ // chat needs an account, instead of dropping them on /signin
+ // with no context.
  if (!user) {
- toast.info("Sign up to request a chat.");
- navigate("/signin");
+ navigate("/chats");
  return;
  }
  onClose();
@@ -1709,9 +1729,10 @@ const ProjectInfoPanel = ({
  }, [project.ownerId]);
 
  const handleToggleSave = () => {
+ // Unauth: bounce to /saved so the AuthGate explains saves;
+ // dropping straight to /signin loses the context of why.
  if (!user) {
- toast.info("Sign up to save projects.");
- navigate("/signin");
+ navigate("/saved");
  return;
  }
  if (saved) {
@@ -1724,9 +1745,10 @@ const ProjectInfoPanel = ({
  };
 
  const handleMessage = () => {
+ // Unauth: bounce to /chats so the AuthGate explains chat;
+ // dropping straight to /signin loses the context of why.
  if (!user) {
- toast.info("Sign up to chat with founders.");
- navigate("/signin");
+ navigate("/chats");
  return;
  }
  onClose();
