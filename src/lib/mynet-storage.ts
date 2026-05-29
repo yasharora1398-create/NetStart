@@ -1712,6 +1712,37 @@ export const getChatThreadState = async (
 // window throttles unaccepted threads, accepted threads pass through.
 // Throws "limit_reached" when the pending window is full so the UI
 // can render a wait state.
+// Fetch the polln8 alias fields for a project id. Used by the chat
+// page when ?via=<id> is on the URL but no chat_contacts row exists
+// yet (first visit, no message sent), so the chat header has
+// something to render instead of falling back to the admin's
+// profile. Returns null when the project isn't a polln8
+// recommendation or doesn't exist.
+export const getPolln8ProjectAlias = async (
+ projectId: string,
+): Promise<{ name: string; avatarPath: string | null } | null> => {
+ const { data, error } = await getSupabase()
+ .from("projects")
+ .select(
+ "polln8_founder_name, polln8_founder_avatar_path, is_polln8_recommended",
+ )
+ .eq("id", projectId)
+ .single();
+ if (error || !data) return null;
+ const row = data as {
+ polln8_founder_name: string | null;
+ polln8_founder_avatar_path: string | null;
+ is_polln8_recommended: boolean | null;
+ };
+ if (!row.is_polln8_recommended) return null;
+ const name = (row.polln8_founder_name ?? "").trim();
+ if (!name) return null;
+ return {
+ name,
+ avatarPath: (row.polln8_founder_avatar_path ?? "").trim() || null,
+ };
+};
+
 export const requestOrSendChatMessage = async (
  recipientUserId: string,
  body: string,

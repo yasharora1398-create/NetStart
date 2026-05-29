@@ -62,6 +62,7 @@ import {
  getAvatarUrl,
  getChatMute,
  getChatThreadState,
+ getPolln8ProjectAlias,
  getPublicFounder,
  listChatThread,
  markMessagesDelivered,
@@ -140,27 +141,63 @@ export const ChatConversation = ({
  const [rawProfile, setProfile] = useState<CounterpartyProfile | null>(
  initialProfile,
  );
+ // Local alias fetched when viaProjectId is on the URL but
+ // list_chat_threads hasn't returned aliasName / aliasAvatarPath yet
+ // (e.g. first visit before any message has been sent - there's no
+ // chat_contacts row yet, so the threads query has nothing to join).
+ // Once the user sends a message, the row exists and the props-level
+ // alias takes over; this fetch becomes a no-op duplicate but stays
+ // harmless.
+ const [fetchedAlias, setFetchedAlias] = useState<{
+ name: string;
+ avatarPath: string | null;
+ } | null>(null);
+ useEffect(() => {
+ if (!viaProjectId) {
+ setFetchedAlias(null);
+ return;
+ }
+ let cancelled = false;
+ getPolln8ProjectAlias(viaProjectId)
+ .then((a) => {
+ if (!cancelled) setFetchedAlias(a);
+ })
+ .catch(() => {
+ if (!cancelled) setFetchedAlias(null);
+ });
+ return () => {
+ cancelled = true;
+ };
+ }, [viaProjectId]);
+
  // Apply the polln8 alias (if set) on top of whatever the contact's
- // real profile says. Keeps loadProfile simple - it always fetches
- // the real owner's profile; the alias overlay happens here so the
- // header / avatar / report dialog all show the recommended business
- // identity instead of the admin's name.
+ // real profile says. Three sources, in priority order:
+ //   1. aliasName / aliasAvatarPath props (from list_chat_threads -
+ //      reliable once a chat_contacts row exists)
+ //   2. fetchedAlias (from the project lookup - covers the
+ //      first-visit window before the row exists)
+ //   3. rawProfile (the admin's real profile, last-resort fallback
+ //      that we explicitly *don't* want to surface for polln8 chats)
+ const effectiveAliasName = aliasName || fetchedAlias?.name || null;
+ const effectiveAliasAvatarPath =
+ aliasAvatarPath || fetchedAlias?.avatarPath || null;
  const profile = useMemo<CounterpartyProfile | null>(() => {
- if (!rawProfile && !aliasName && !aliasAvatarPath) return null;
+ if (!rawProfile && !effectiveAliasName && !effectiveAliasAvatarPath)
+ return null;
  const base = rawProfile ?? {
  fullName: "",
  headline: "",
  avatarPath: null,
  linkedinUrl: "",
  };
- if (!aliasName && !aliasAvatarPath) return base;
+ if (!effectiveAliasName && !effectiveAliasAvatarPath) return base;
  return {
- fullName: aliasName || base.fullName,
- headline: aliasName ? "" : base.headline,
- avatarPath: aliasAvatarPath || base.avatarPath,
- linkedinUrl: aliasName ? "" : base.linkedinUrl,
+ fullName: effectiveAliasName || base.fullName,
+ headline: effectiveAliasName ? "" : base.headline,
+ avatarPath: effectiveAliasAvatarPath || base.avatarPath,
+ linkedinUrl: effectiveAliasName ? "" : base.linkedinUrl,
  };
- }, [rawProfile, aliasName, aliasAvatarPath]);
+ }, [rawProfile, effectiveAliasName, effectiveAliasAvatarPath]);
  const [messages, setMessages] = useState<ChatMessage[]>([]);
  const [threadState, setThreadState] = useState<ChatThreadState>({
  state: "none",

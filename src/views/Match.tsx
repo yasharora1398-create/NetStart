@@ -117,6 +117,16 @@ const Match = () => {
 
  const isAuthed = Boolean(user) && !loading;
  const isAccepted = profile?.reviewStatus === "accepted";
+
+ // Unauth visitors pick a role on a title page before they see the
+ // deck. Lives in component state (not localStorage) so they re-pick
+ // on the next visit - that's intentional, the picker is a moment
+ // for the visitor to self-identify before they see anything that
+ // depends on it.
+ const [chosenRole, setChosenRole] = useState<
+ "founder" | "partner" | null
+ >(null);
+
  // Auth role is the primary signal: a partner swipes projects, a
  // founder swipes candidates. Fall back to project ownership only
  // for legacy users who pre-date the role stamp on user_metadata.
@@ -125,7 +135,13 @@ const Match = () => {
  // below already use those names.)
  const role = user?.user_metadata?.role as string | undefined;
  const userMode: "partner" | "looker" =
- role === "partner"
+ // Unauth: their picker choice drives the deck. Founder picked
+ // -> partner-cards view; partner picked -> project-cards view.
+ !isAuthed && chosenRole === "founder"
+ ? "partner"
+ : !isAuthed && chosenRole === "partner"
+ ? "looker"
+ : role === "partner"
  ? "looker"
  : role === "founder"
  ? "partner"
@@ -147,6 +163,110 @@ const Match = () => {
  </Link>
  </div>
  );
+
+ // Unauth role-picker title page. Renders before the device-gated
+ // intro for signed-in users; unauth visitors go straight here and
+ // see the deck after they pick. Once they pick, fall through to
+ // the same render as authed (the AuthGate overlay is gone - save
+ // and chat actions now redirect to /signin individually).
+ if (!loading && !isAuthed && !chosenRole) {
+ return (
+ <AppLayout>
+ <div className="container py-12 md:py-20">
+ <div className="max-w-3xl mb-10 md:mb-14">
+ <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] mb-5 font-bold">
+ Pick your side.
+ </h1>
+ <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+ Polln8 matches founders with partners. Tell us which one
+ you are - the deck flips to show you the other side.
+ </p>
+ </div>
+
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-3xl">
+ {(
+ [
+ {
+ value: "founder" as const,
+ title: "I'm a founder",
+ line1: "Building a startup.",
+ line2: "Show me partners I could build with.",
+ },
+ {
+ value: "partner" as const,
+ title: "I'm a partner",
+ line1: "Looking to join a startup.",
+ line2: "Show me projects I could ship.",
+ },
+ ]
+ ).map((opt) => {
+ const active = chosenRole === opt.value;
+ return (
+ <button
+ key={opt.value}
+ type="button"
+ onClick={() => setChosenRole(opt.value)}
+ className={cn(
+ "aspect-square rounded-2xl border-2 p-6 md:p-8 text-left transition-colors flex flex-col justify-between",
+ active
+ ? "border-primary bg-primary"
+ : "border-border bg-card hover:border-primary",
+ )}
+ >
+ <p
+ className={cn(
+ "font-display text-3xl md:text-4xl leading-tight",
+ active ? "text-primary-foreground" : "text-foreground",
+ )}
+ >
+ {opt.title}
+ </p>
+ <div
+ className={cn(
+ "text-sm md:text-base leading-relaxed",
+ active
+ ? "text-primary-foreground"
+ : "text-muted-foreground",
+ )}
+ >
+ <p>{opt.line1}</p>
+ <p>{opt.line2}</p>
+ </div>
+ </button>
+ );
+ })}
+ </div>
+
+ <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+ <Button
+ variant="gold"
+ size="xl"
+ disabled={!chosenRole}
+ onClick={() => {
+ // No-op: chosenRole being set already causes the
+ // page to fall through to the deck render below.
+ // Button exists for visual progression cue + click
+ // affordance after picking.
+ if (chosenRole) {
+ // Force a re-render by no-op state-set. The
+ // conditional return uses chosenRole directly so
+ // nothing else needs to fire.
+ setChosenRole(chosenRole);
+ }
+ }}
+ >
+ Start
+ </Button>
+ <Link to="/signin">
+ <Button variant="outline" size="xl" className="w-full sm:w-auto">
+ Log in
+ </Button>
+ </Link>
+ </div>
+ </div>
+ </AppLayout>
+ );
+ }
 
  if (!opened) {
  // Match intro: hero stacked. Centered title + body up top, the
@@ -212,7 +332,7 @@ const Match = () => {
  }
 
  return (
- <AppLayout blurred={!isAuthed}>
+ <AppLayout>
  <div className="container">
  <header className="mb-6 md:mb-10">
  <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-3 md:mb-4">
@@ -237,8 +357,6 @@ const Match = () => {
  <LookerView />
  )}
  </div>
-
- {!loading && !user && <AuthGate />}
  </AppLayout>
  );
 };
@@ -774,6 +892,7 @@ const CandidateActions = ({
  onClose: () => void;
 }) => {
  const navigate = useNavigate();
+ const { user } = useAuth();
  const [saved, setSaved] = useState(false);
  const [working, setWorking] = useState(false);
  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
@@ -800,6 +919,12 @@ const CandidateActions = ({
 
  const handleSave = async () => {
  if (working) return;
+ // Unauth: route to /signin so they can create an account first.
+ if (!user) {
+ toast.info("Sign up to save people.");
+ navigate("/signin");
+ return;
+ }
  // Saves attach to a project. Without one published & marked
  // active in MyNet, there's nowhere to store the save "" so the
  // old behavior silently lost data. Block the action and tell the
@@ -825,6 +950,11 @@ const CandidateActions = ({
  };
 
  const handleMessage = () => {
+ if (!user) {
+ toast.info("Sign up to chat with people.");
+ navigate("/signin");
+ return;
+ }
  onClose();
  navigate(`/chats/${candidate.userId}`);
  };
@@ -1420,9 +1550,15 @@ const Polln8ProjectActions = ({
  onClose: () => void;
 }) => {
  const navigate = useNavigate();
+ const { user } = useAuth();
  const saved = useIsProjectSaved(project.id);
 
  const handleToggleSave = () => {
+ if (!user) {
+ toast.info("Sign up to save projects.");
+ navigate("/signin");
+ return;
+ }
  if (saved) {
  void removeSavedProject(project.id);
  toast.success("Removed.");
@@ -1433,6 +1569,11 @@ const Polln8ProjectActions = ({
  };
 
  const handleMessage = () => {
+ if (!user) {
+ toast.info("Sign up to request a chat.");
+ navigate("/signin");
+ return;
+ }
  onClose();
  // ?via stamps the chat_contacts row with the recommendation's
  // project id so the requester's DMs show the polln8 founder
@@ -1530,6 +1671,7 @@ const ProjectInfoPanel = ({
  onSwitchProject: (p: PublicProject) => void;
 }) => {
  const navigate = useNavigate();
+ const { user } = useAuth();
  const saved = useIsProjectSaved(project.id);
  const [founder, setFounder] = useState<PublicFounder | null>(null);
  // Every published project from this founder, including the one
@@ -1567,6 +1709,11 @@ const ProjectInfoPanel = ({
  }, [project.ownerId]);
 
  const handleToggleSave = () => {
+ if (!user) {
+ toast.info("Sign up to save projects.");
+ navigate("/signin");
+ return;
+ }
  if (saved) {
  void removeSavedProject(project.id);
  toast.success("Removed.");
@@ -1577,6 +1724,11 @@ const ProjectInfoPanel = ({
  };
 
  const handleMessage = () => {
+ if (!user) {
+ toast.info("Sign up to chat with founders.");
+ navigate("/signin");
+ return;
+ }
  onClose();
  // Polln8-recommended projects route the chat through the admin
  // owner but display under the project's polln8 founder name. Pass
