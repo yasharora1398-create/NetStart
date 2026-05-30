@@ -147,10 +147,14 @@ export default function BrowseScreen() {
  listPublishedProjects()
  .then((list) => {
  if (cancelled) return;
- // Filter out projects the current user owns; they shouldn't
- // see their own listing in the deck.
+ // Filter out projects the current user owns - EXCEPT Polln8
+ // recommendations. Those have owner_id = admin's uid because
+ // admin posted on someone else's behalf; they exist to surface
+ // in everyone's deck including the admin's own.
  const visible = user?.id
- ? list.filter((p) => p.ownerId !== user.id)
+ ? list.filter(
+ (p) => p.ownerId !== user.id || p.isPolln8Recommended,
+ )
  : list;
  setProjects(visible);
  })
@@ -404,10 +408,8 @@ const ProjectCard = ({
  <Text style={styles.cardTitle} numberOfLines={2}>
  {project.title}
  </Text>
- <Text style={styles.cardFounder} numberOfLines={1}>
- by {project.founderFullName || "Anonymous"}
- {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
- </Text>
+ {/* Founder-name byline removed per request: the card is
+ the venture, not the person. */}
 
  {/* Pills: business type + commitment + location + skills,
  all under the name. */}

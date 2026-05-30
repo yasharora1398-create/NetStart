@@ -1205,12 +1205,13 @@ const LookerView = () => {
  const com = commitmentFilter.trim().toLowerCase();
  const uid = user?.id;
  return projects.filter((p) => {
- // Hide projects the current user owns - including Polln8
- // recommendations the admin posted on behalf of someone else.
- // Those rows have owner_id = admin's uid even though the card
- // displays the recommended founder's name, so this single
- // ownership check covers both cases.
- if (uid && p.ownerId === uid) return false;
+ // Hide projects the current user owns - EXCEPT Polln8
+ // recommendations. Those rows have owner_id = admin's uid by
+ // necessity (admin posted on behalf of a third party) but they
+ // exist precisely so they show up in everyone's deck, including
+ // the admin's own. Filtering them out hides the curated picks
+ // from the person who curated them, which is wrong.
+ if (uid && p.ownerId === uid && !p.isPolln8Recommended) return false;
  if (decided.has(p.id)) return false;
  if (q) {
  const hay = `${p.title} ${p.description} ${p.criteria.skills.join(
@@ -1345,6 +1346,16 @@ const LookerView = () => {
  onChat={() => {
  if (!user) {
  navigate("/chats");
+ return;
+ }
+ // Self-chat guard: if this is your own Polln8 recommendation
+ // (you posted it on someone else's behalf), there's nobody on
+ // the other end. Toast + bail instead of dropping the user on
+ // an empty chat-with-self thread that looks broken.
+ if (p.ownerId === user.id) {
+ toast.info(
+ "You posted this recommendation - nothing to chat with on the other side.",
+ );
  return;
  }
  const target = p.isPolln8Recommended
@@ -1686,6 +1697,13 @@ const Polln8ProjectActions = ({
  navigate("/chats");
  return;
  }
+ // Self-chat guard: you posted this recommendation; there's
+ // no one on the other end. Show a toast instead of dumping
+ // the user on /chats/<self> which renders broken.
+ if (project.ownerId === user.id) {
+ toast.info("You posted this recommendation - nothing to chat with.");
+ return;
+ }
  onClose();
  // ?via stamps the chat_contacts row with the recommendation's
  // project id so the requester's DMs show the polln8 founder
@@ -1841,6 +1859,12 @@ const ProjectInfoPanel = ({
  // dropping straight to /signin loses the context of why.
  if (!user) {
  navigate("/chats");
+ return;
+ }
+ // Self-chat guard: own project (incl. own polln8 rec) - nobody
+ // on the other end to message.
+ if (project.ownerId === user.id) {
+ toast.info("You own this project - nothing to chat with.");
  return;
  }
  onClose();
@@ -2126,18 +2150,13 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  )}
  </div>
 
- {/* Body "" title, byline, pills, description. */}
+ {/* Body - title only. Founder-name byline removed per request:
+ the deck is about the venture, not the person; founder
+ identity surfaces on the /u/<id> page on accept. */}
  <div className="p-5">
- <h2 className="mb-1 font-display text-2xl leading-tight text-foreground">
+ <h2 className="mb-3 font-display text-2xl leading-tight text-foreground">
  {project.title}
  </h2>
- <p className="mb-3 text-sm text-muted-foreground">
- by{" "}
- <span className="text-foreground">
- {project.founderFullName || "Anonymous"}
- </span>
- {project.founderHeadline ? ` · ${project.founderHeadline}` : null}
- </p>
 
  {(project.criteria.commitment ||
  project.criteria.location ||
@@ -2341,9 +2360,6 @@ const ProjectStrip = ({
  <div className="min-w-0 flex-1">
  <p className="truncate text-sm font-medium text-foreground">
  {project.title}
- </p>
- <p className="truncate text-xs text-muted-foreground">
- by {project.founderFullName || "Anonymous"}
  </p>
  </div>
  <div className="flex items-center gap-1.5 flex-shrink-0">
