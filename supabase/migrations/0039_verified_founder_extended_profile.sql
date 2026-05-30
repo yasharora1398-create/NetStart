@@ -48,8 +48,17 @@ alter table public.profiles
 -- can test the entire flow end-to-end without a payment surface.
 -- The lookup is case-insensitive against auth.users.email so casing
 -- in the email column doesn't matter.
+--
+-- Also flips review_status to 'accepted' for the same account.
+-- MyNet only renders the dashboard (with the tabs that host the
+-- extended-profile editor) when review_status = 'accepted'; the
+-- draft/rejected/pending branches drop into the credentials wizard
+-- instead. Without this update the extended editor is invisible
+-- because the wizard branch never reaches it.
 update public.profiles
-set is_verified_founder = true
+set is_verified_founder = true,
+    review_status       = 'accepted',
+    reviewed_at         = coalesce(reviewed_at, now())
 where user_id in (
   select id from auth.users
   where lower(email) = lower('netstartapp@outlook.com')
