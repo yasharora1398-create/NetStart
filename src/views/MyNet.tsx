@@ -700,6 +700,8 @@ const MyNet = () => {
  return r === "founder" ? "founder" : "partner";
  })() as Role}
  onRoleSwitched={handleRoleSwitched}
+ userId={user?.id ?? ""}
+ onSavedExtended={(next) => setProfile(next)}
  />
  ) : (
  <>

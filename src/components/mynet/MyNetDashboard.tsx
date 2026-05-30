@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+ BadgeCheck,
  Briefcase,
  CheckCircle2,
  ExternalLink,
@@ -8,10 +9,13 @@ import {
  Hammer,
  Hourglass,
  Linkedin,
+ Loader2,
  MapPin,
  Pencil,
  Plus,
+ Save,
  Telescope,
+ Trash2,
  User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +26,7 @@ import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
 import type { ProfileSubmission } from "./ProfileCard";
-import { getAvatarUrl } from "@/lib/mynet-storage";
+import { getAvatarUrl, updateExtendedProfile } from "@/lib/mynet-storage";
 import type {
  CandidateProfile,
  Profile,
@@ -55,6 +59,12 @@ type Props = {
  role: Role;
  /** Called after the role switch persists; parent refreshes session. */
  onRoleSwitched: (role: Role) => void | Promise<void>;
+ /** Signed-in user id - needed for the verified-founder extended
+ * profile writes (updateExtendedProfile RPC takes user_id). */
+ userId: string;
+ /** Bubble up extended-profile saves so the parent's profile state
+ * stays in sync without a refetch round-trip. */
+ onSavedExtended: (next: Profile) => void;
 };
 
 const formatBytes = (bytes: number): string => {
@@ -91,6 +101,8 @@ export const MyNetDashboard = ({
  onSetActiveProject,
  role,
  onRoleSwitched,
+ userId,
+ onSavedExtended,
 }: Props) => {
  const [editing, setEditing] = useState(false);
 
@@ -307,6 +319,59 @@ export const MyNetDashboard = ({
  </div>
  )}
  </Section>
+ ) : null}
+
+ {/* VERIFIED-FOUNDER PERK SECTIONS. Render only for founders
+ with profile.is_verified_founder = true (paid feature).
+ Each section is a normal Section card with its own Save
+ button so it reads as native MyNet surface. */}
+ {role === "founder" && profile.isVerifiedFounder ? (
+ <>
+ <Section
+ title="Your venture, deeper"
+ eyebrow="04"
+ icon={<BadgeCheck className="h-3.5 w-3.5 text-primary" />}
+ >
+ <AboutVentureBody
+ profile={profile}
+ userId={userId}
+ onSaved={onSavedExtended}
+ />
+ </Section>
+ <Section
+ title="Pitch deck link"
+ eyebrow="05"
+ icon={<BadgeCheck className="h-3.5 w-3.5 text-primary" />}
+ >
+ <PitchLinkBody
+ profile={profile}
+ userId={userId}
+ onSaved={onSavedExtended}
+ />
+ </Section>
+ <Section
+ title="Project links"
+ eyebrow="06"
+ icon={<BadgeCheck className="h-3.5 w-3.5 text-primary" />}
+ >
+ <ProjectLinksBody
+ profile={profile}
+ userId={userId}
+ onSaved={onSavedExtended}
+ />
+ </Section>
+ <Section
+ title="What collaborators say"
+ eyebrow="07"
+ icon={<BadgeCheck className="h-3.5 w-3.5 text-primary" />}
+ >
+ <ReferencesBody
+ profile={profile}
+ userId={userId}
+ onSaved={onSavedExtended}
+ />
+ </Section>
+ </>
  ) : null}
 
  </>
@@ -738,3 +803,334 @@ const PreviewPill = ({
  {children}
  </span>
 );
+
+// ===== Verified-founder section bodies ============================
+//
+// Each body is self-contained: holds local edit state, calls
+// updateExtendedProfile on Save, then bubbles the new Profile up
+// through onSaved so the parent's state stays current without a
+// refetch. Re-sync from props on profile change so a parent-side
+// refresh doesn't silently overwrite remote changes.
+
+const ExtendedSaveButton = ({
+ saving,
+ onClick,
+}: {
+ saving: boolean;
+ onClick: () => void;
+}) => (
+ <div className="flex justify-end mt-4">
+ <Button
+ type="button"
+ variant="gold"
+ size="sm"
+ onClick={onClick}
+ disabled={saving}
+ >
+ {saving ? (
+ <Loader2 className="h-4 w-4 animate-spin" />
+ ) : (
+ <Save className="h-4 w-4" />
+ )}
+ Save
+ </Button>
+ </div>
+);
+
+const AboutVentureBody = ({
+ profile,
+ userId,
+ onSaved,
+}: {
+ profile: Profile;
+ userId: string;
+ onSaved: (next: Profile) => void;
+}) => {
+ const [value, setValue] = useState(profile.extendedDescription);
+ const [saving, setSaving] = useState(false);
+ useEffect(() => {
+ setValue(profile.extendedDescription);
+ }, [profile.extendedDescription]);
+ const handleSave = async () => {
+ if (saving) return;
+ setSaving(true);
+ try {
+ await updateExtendedProfile(userId, {
+ extendedDescription: value,
+ pitchUrl: profile.pitchUrl,
+ projectLinks: profile.projectLinks,
+ collaboratorReferences: profile.collaboratorReferences,
+ });
+ onSaved({ ...profile, extendedDescription: value });
+ toast.success("About saved.");
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not save.");
+ } finally {
+ setSaving(false);
+ }
+ };
+ return (
+ <div>
+ <p className="text-sm text-muted-foreground mb-3">
+ Standard profiles get a one-line headline. With the verified
+ perk you have room for the full story.
+ </p>
+ <textarea
+ value={value}
+ onChange={(e) => setValue(e.target.value)}
+ rows={8}
+ placeholder="What you're building, why it matters, where you are with it. Take as much room as you want."
+ className="w-full rounded-sm border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+ />
+ <ExtendedSaveButton saving={saving} onClick={handleSave} />
+ </div>
+ );
+};
+
+const PitchLinkBody = ({
+ profile,
+ userId,
+ onSaved,
+}: {
+ profile: Profile;
+ userId: string;
+ onSaved: (next: Profile) => void;
+}) => {
+ const [value, setValue] = useState(profile.pitchUrl);
+ const [saving, setSaving] = useState(false);
+ useEffect(() => {
+ setValue(profile.pitchUrl);
+ }, [profile.pitchUrl]);
+ const handleSave = async () => {
+ if (saving) return;
+ setSaving(true);
+ try {
+ const trimmed = value.trim();
+ await updateExtendedProfile(userId, {
+ extendedDescription: profile.extendedDescription,
+ pitchUrl: trimmed,
+ projectLinks: profile.projectLinks,
+ collaboratorReferences: profile.collaboratorReferences,
+ });
+ onSaved({ ...profile, pitchUrl: trimmed });
+ toast.success("Pitch link saved.");
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not save.");
+ } finally {
+ setSaving(false);
+ }
+ };
+ return (
+ <div>
+ <p className="text-sm text-muted-foreground mb-3">
+ Anywhere your deck or full pitch already lives - Google Slides,
+ Notion, hosted PDF. Partners open it from your profile.
+ </p>
+ <input
+ type="url"
+ value={value}
+ onChange={(e) => setValue(e.target.value)}
+ placeholder="https://docs.google.com/presentation/..."
+ className="w-full h-11 rounded-sm border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+ />
+ <ExtendedSaveButton saving={saving} onClick={handleSave} />
+ </div>
+ );
+};
+
+const ProjectLinksBody = ({
+ profile,
+ userId,
+ onSaved,
+}: {
+ profile: Profile;
+ userId: string;
+ onSaved: (next: Profile) => void;
+}) => {
+ const [links, setLinks] = useState(profile.projectLinks);
+ const [saving, setSaving] = useState(false);
+ useEffect(() => {
+ setLinks(profile.projectLinks);
+ }, [profile.projectLinks]);
+ const handleSave = async () => {
+ if (saving) return;
+ setSaving(true);
+ try {
+ const cleaned = links
+ .map((l) => ({ title: l.title.trim(), url: l.url.trim() }))
+ .filter((l) => l.title || l.url);
+ await updateExtendedProfile(userId, {
+ extendedDescription: profile.extendedDescription,
+ pitchUrl: profile.pitchUrl,
+ projectLinks: cleaned,
+ collaboratorReferences: profile.collaboratorReferences,
+ });
+ onSaved({ ...profile, projectLinks: cleaned });
+ toast.success("Project links saved.");
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not save.");
+ } finally {
+ setSaving(false);
+ }
+ };
+ return (
+ <div>
+ <p className="text-sm text-muted-foreground mb-3">
+ Anything you&apos;ve shipped or are actively building.
+ </p>
+ <div className="space-y-2">
+ {links.map((link, i) => (
+ <div key={i} className="flex gap-2 items-center">
+ <input
+ type="text"
+ value={link.title}
+ onChange={(e) => {
+ const next = [...links];
+ next[i] = { ...link, title: e.target.value };
+ setLinks(next);
+ }}
+ placeholder="Title"
+ className="flex-shrink-0 w-1/3 h-10 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <input
+ type="url"
+ value={link.url}
+ onChange={(e) => {
+ const next = [...links];
+ next[i] = { ...link, url: e.target.value };
+ setLinks(next);
+ }}
+ placeholder="https://..."
+ className="flex-1 h-10 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <button
+ type="button"
+ onClick={() => setLinks(links.filter((_, j) => j !== i))}
+ aria-label="Remove link"
+ className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground hover:border-destructive hover:text-destructive"
+ >
+ <Trash2 className="h-4 w-4" />
+ </button>
+ </div>
+ ))}
+ <button
+ type="button"
+ onClick={() => setLinks([...links, { title: "", url: "" }])}
+ className="text-[11px] font-mono uppercase tracking-widest text-primary hover:underline mt-2"
+ >
+ + Add a link
+ </button>
+ </div>
+ <ExtendedSaveButton saving={saving} onClick={handleSave} />
+ </div>
+ );
+};
+
+const ReferencesBody = ({
+ profile,
+ userId,
+ onSaved,
+}: {
+ profile: Profile;
+ userId: string;
+ onSaved: (next: Profile) => void;
+}) => {
+ const [refs, setRefs] = useState(profile.collaboratorReferences);
+ const [saving, setSaving] = useState(false);
+ useEffect(() => {
+ setRefs(profile.collaboratorReferences);
+ }, [profile.collaboratorReferences]);
+ const handleSave = async () => {
+ if (saving) return;
+ setSaving(true);
+ try {
+ const cleaned = refs
+ .map((r) => ({
+ name: r.name.trim(),
+ role: r.role.trim(),
+ text: r.text.trim(),
+ }))
+ .filter((r) => r.name || r.text);
+ await updateExtendedProfile(userId, {
+ extendedDescription: profile.extendedDescription,
+ pitchUrl: profile.pitchUrl,
+ projectLinks: profile.projectLinks,
+ collaboratorReferences: cleaned,
+ });
+ onSaved({ ...profile, collaboratorReferences: cleaned });
+ toast.success("References saved.");
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not save.");
+ } finally {
+ setSaving(false);
+ }
+ };
+ return (
+ <div>
+ <p className="text-sm text-muted-foreground mb-3">
+ A short quote from a past collaborator builds trust on your
+ card.
+ </p>
+ <div className="space-y-3">
+ {refs.map((ref, i) => (
+ <div
+ key={i}
+ className="rounded-sm border border-border bg-background p-3 space-y-2"
+ >
+ <div className="flex gap-2">
+ <input
+ type="text"
+ value={ref.name}
+ onChange={(e) => {
+ const next = [...refs];
+ next[i] = { ...ref, name: e.target.value };
+ setRefs(next);
+ }}
+ placeholder="Name"
+ className="flex-1 h-9 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <input
+ type="text"
+ value={ref.role}
+ onChange={(e) => {
+ const next = [...refs];
+ next[i] = { ...ref, role: e.target.value };
+ setRefs(next);
+ }}
+ placeholder="Role / relationship"
+ className="flex-1 h-9 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <button
+ type="button"
+ onClick={() => setRefs(refs.filter((_, j) => j !== i))}
+ aria-label="Remove reference"
+ className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground hover:border-destructive hover:text-destructive"
+ >
+ <Trash2 className="h-4 w-4" />
+ </button>
+ </div>
+ <textarea
+ value={ref.text}
+ onChange={(e) => {
+ const next = [...refs];
+ next[i] = { ...ref, text: e.target.value };
+ setRefs(next);
+ }}
+ rows={2}
+ placeholder="What they said about working with you."
+ className="w-full rounded-sm border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary"
+ />
+ </div>
+ ))}
+ <button
+ type="button"
+ onClick={() => setRefs([...refs, { name: "", role: "", text: "" }])}
+ className="text-[11px] font-mono uppercase tracking-widest text-primary hover:underline mt-2"
+ >
+ + Add a reference
+ </button>
+ </div>
+ <ExtendedSaveButton saving={saving} onClick={handleSave} />
+ </div>
+ );
+};
