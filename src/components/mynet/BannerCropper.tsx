@@ -161,7 +161,7 @@ export const BannerCropper = ({ file, open, onClose, onConfirm }: Props) => {
  };
 
  const handleConfirm = async () => {
- if (!naturalSize || !src) return;
+ if (!naturalSize || !file || frameSize.w === 0) return;
  setSaving(true);
  try {
  const canvas = document.createElement("canvas");
@@ -170,32 +170,39 @@ export const BannerCropper = ({ file, open, onClose, onConfirm }: Props) => {
  const ctx = canvas.getContext("2d");
  if (!ctx) throw new Error("Canvas unavailable.");
 
- // Fill with the muted bg first so JPEG (no alpha channel) shows
- // a neutral colour where the image doesn't cover, instead of
- // black.
+ // Fill the canvas with a neutral colour so any empty area (when
+ // the user has zoomed out below cover) reads as muted negative
+ // space instead of black. JPEG has no alpha so transparent
+ // pixels would otherwise render black.
  ctx.fillStyle = EMPTY_BG;
  ctx.fillRect(0, 0, OUTPUT_W, OUTPUT_H);
 
- // Use the live <img> element rather than a freshly-created
- // Image(). The DOM <img> is guaranteed already decoded (otherwise
- // we wouldn't have naturalSize); a fresh Image() with the same
- // blob URL occasionally raced toBlob and produced a black image.
- const img = imgRef.current;
- if (!img || !img.complete) {
- throw new Error("Image not ready yet, try again.");
+ // Decode the source file directly to an ImageBitmap. This gives
+ // a fully-decoded bitmap drawImage can always render in one
+ // synchronous call - dodges every race / taint / "image not
+ // ready" footgun an <img> or fresh Image() could hit.
+ let bitmap: ImageBitmap;
+ try {
+ bitmap = await createImageBitmap(file);
+ } catch (decodeErr) {
+ // eslint-disable-next-line no-console
+ console.error("[cropper] decode failed", decodeErr);
+ throw new Error(
+ "Could not read this image. Try a JPEG or PNG under 10 MB.",
+ );
  }
 
- // Map the frame -> destination canvas using the same scale the
- // user sees on screen. The image's position inside the frame is
- // (offset.x, offset.y) in CSS pixels; we render at OUTPUT_W /
- // frameSize.w pixel-per-css factor.
+ // Map the on-screen frame -> destination canvas using the same
+ // scale ratios the user sees. Image position inside the frame is
+ // (offset.x, offset.y) in CSS pixels.
  const px = OUTPUT_W / frameSize.w;
  const py = OUTPUT_H / frameSize.h;
  const drawX = offset.x * px;
  const drawY = offset.y * py;
  const drawW = renderedW * px;
  const drawH = renderedH * py;
- ctx.drawImage(img, drawX, drawY, drawW, drawH);
+ ctx.drawImage(bitmap, drawX, drawY, drawW, drawH);
+ bitmap.close();
 
  const blob: Blob | null = await new Promise((res) =>
  canvas.toBlob((b) => res(b), "image/jpeg", 0.92),
@@ -205,6 +212,13 @@ export const BannerCropper = ({ file, open, onClose, onConfirm }: Props) => {
  } catch (err) {
  // eslint-disable-next-line no-console
  console.error("[cropper] confirm failed", err);
+ // Surface the failure to the user instead of silently closing.
+ // sonner is available globally; import is dynamic to keep this
+ // component dependency-light for the success path.
+ const { toast } = await import("sonner");
+ toast.error(
+ err instanceof Error ? err.message : "Could not save banner.",
+ );
  } finally {
  setSaving(false);
  }
