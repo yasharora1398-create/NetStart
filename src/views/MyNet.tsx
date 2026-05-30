@@ -3,12 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import {
  ArrowLeft,
  ArrowRight,
+ BadgeCheck,
  Hammer,
  Hourglass,
  Loader2,
  Plus,
+ Save,
  Search,
+ Sparkles,
  Telescope,
+ Trash2,
  XCircle,
 } from "lucide-react";
 import { Link } from "@/lib/router-compat";
@@ -65,6 +69,7 @@ import {
  setWebsite,
  submitProfile,
  updateCandidate,
+ updateExtendedProfile,
  updateProject,
  uploadAvatar,
  uploadProof,
@@ -768,6 +773,13 @@ const MyNet = () => {
  </TabsContent>
 
  <TabsContent value="building" className="space-y-12">
+ {displayProfile.isVerifiedFounder && user ? (
+ <ExtendedFounderEditor
+ profile={displayProfile}
+ userId={user.id}
+ onSaved={(next) => setProfile(next)}
+ />
+ ) : null}
  <section className="relative">
  <div
  className={
@@ -1058,5 +1070,302 @@ const Field = ({ label, value }: { label: string; value: string }) => (
  <dd className="text-sm">{value}</dd>
  </div>
 );
+
+// Verified-founder extended profile editor. Renders only when the
+// founder's is_verified_founder flag is on (paid perk). Saves all
+// four fields in one upsert via updateExtendedProfile. UI mirrors
+// the existing card style: gold eyebrow + display heading + form.
+const ExtendedFounderEditor = ({
+ profile,
+ userId,
+ onSaved,
+}: {
+ profile: Profile;
+ userId: string;
+ onSaved: (next: Profile) => void;
+}) => {
+ const [extendedDescription, setExtendedDescription] = useState(
+ profile.extendedDescription,
+ );
+ const [pitchUrl, setPitchUrl] = useState(profile.pitchUrl);
+ const [projectLinks, setProjectLinks] = useState(profile.projectLinks);
+ const [refs, setRefs] = useState(profile.collaboratorReferences);
+ const [saving, setSaving] = useState(false);
+
+ // Re-sync from props whenever the parent profile changes (e.g.
+ // server refresh after submit). Without this, edits would survive
+ // a parent re-render and silently overwrite remote changes.
+ useEffect(() => {
+ setExtendedDescription(profile.extendedDescription);
+ setPitchUrl(profile.pitchUrl);
+ setProjectLinks(profile.projectLinks);
+ setRefs(profile.collaboratorReferences);
+ }, [
+ profile.extendedDescription,
+ profile.pitchUrl,
+ profile.projectLinks,
+ profile.collaboratorReferences,
+ ]);
+
+ const handleSave = async () => {
+ if (saving) return;
+ setSaving(true);
+ try {
+ const cleanLinks = projectLinks
+ .map((l) => ({ title: l.title.trim(), url: l.url.trim() }))
+ .filter((l) => l.title || l.url);
+ const cleanRefs = refs
+ .map((r) => ({
+ name: r.name.trim(),
+ role: r.role.trim(),
+ text: r.text.trim(),
+ }))
+ .filter((r) => r.name || r.text);
+ await updateExtendedProfile(userId, {
+ extendedDescription,
+ pitchUrl,
+ projectLinks: cleanLinks,
+ collaboratorReferences: cleanRefs,
+ });
+ onSaved({
+ ...profile,
+ extendedDescription,
+ pitchUrl: pitchUrl.trim(),
+ projectLinks: cleanLinks,
+ collaboratorReferences: cleanRefs,
+ });
+ toast.success("Extended profile saved.");
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not save.");
+ } finally {
+ setSaving(false);
+ }
+ };
+
+ return (
+ <section className="rounded-sm border-2 border-primary bg-card p-6 md:p-8">
+ <div className="flex items-center justify-between gap-4 mb-6">
+ <div>
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-2 flex items-center gap-1.5">
+ <BadgeCheck className="h-3 w-3" />
+ Verified founder
+ </p>
+ <h2 className="font-display text-3xl">Extended profile</h2>
+ <p className="text-sm text-muted-foreground mt-1.5 max-w-xl">
+ Goes deeper than the standard profile. Partners who tap your
+ card on Match land on a full page with everything below.
+ </p>
+ </div>
+ <Sparkles className="h-6 w-6 text-primary flex-shrink-0" />
+ </div>
+
+ <div className="space-y-6">
+ {/* Long-form description */}
+ <div>
+ <label
+ htmlFor="ext-desc"
+ className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2 block"
+ >
+ Deeper venture description
+ </label>
+ <textarea
+ id="ext-desc"
+ value={extendedDescription}
+ onChange={(e) => setExtendedDescription(e.target.value)}
+ rows={6}
+ placeholder="What you're building, why it matters, where you are with it. Take as much room as you want."
+ className="w-full rounded-sm border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+ />
+ </div>
+
+ {/* Pitch link */}
+ <div>
+ <label
+ htmlFor="ext-pitch"
+ className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2 block"
+ >
+ Pitch link
+ </label>
+ <input
+ id="ext-pitch"
+ type="url"
+ value={pitchUrl}
+ onChange={(e) => setPitchUrl(e.target.value)}
+ placeholder="https://docs.google.com/presentation/... (deck, Notion page, hosted PDF)"
+ className="w-full h-11 rounded-sm border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+ />
+ <p className="text-[11px] text-muted-foreground mt-1.5">
+ Anywhere your deck or full pitch already lives. Partners open
+ it from your profile.
+ </p>
+ </div>
+
+ {/* Project links */}
+ <div>
+ <div className="flex items-center justify-between mb-2">
+ <label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ Project links
+ </label>
+ <button
+ type="button"
+ onClick={() =>
+ setProjectLinks([...projectLinks, { title: "", url: "" }])
+ }
+ className="text-[11px] font-mono uppercase tracking-widest text-primary hover:underline"
+ >
+ + Add
+ </button>
+ </div>
+ {projectLinks.length === 0 ? (
+ <p className="text-xs text-muted-foreground italic">
+ No project links yet. Add anything you've shipped or are
+ actively building.
+ </p>
+ ) : (
+ <div className="space-y-2">
+ {projectLinks.map((link, i) => (
+ <div
+ key={i}
+ className="flex gap-2 items-center"
+ >
+ <input
+ type="text"
+ value={link.title}
+ onChange={(e) => {
+ const next = [...projectLinks];
+ next[i] = { ...link, title: e.target.value };
+ setProjectLinks(next);
+ }}
+ placeholder="Title"
+ className="flex-shrink-0 w-1/3 h-10 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <input
+ type="url"
+ value={link.url}
+ onChange={(e) => {
+ const next = [...projectLinks];
+ next[i] = { ...link, url: e.target.value };
+ setProjectLinks(next);
+ }}
+ placeholder="https://..."
+ className="flex-1 h-10 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <button
+ type="button"
+ onClick={() =>
+ setProjectLinks(
+ projectLinks.filter((_, j) => j !== i),
+ )
+ }
+ aria-label="Remove link"
+ className="flex h-10 w-10 items-center justify-center rounded-sm border border-border text-muted-foreground hover:border-destructive hover:text-destructive"
+ >
+ <Trash2 className="h-4 w-4" />
+ </button>
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
+
+ {/* References */}
+ <div>
+ <div className="flex items-center justify-between mb-2">
+ <label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ References
+ </label>
+ <button
+ type="button"
+ onClick={() =>
+ setRefs([...refs, { name: "", role: "", text: "" }])
+ }
+ className="text-[11px] font-mono uppercase tracking-widest text-primary hover:underline"
+ >
+ + Add
+ </button>
+ </div>
+ {refs.length === 0 ? (
+ <p className="text-xs text-muted-foreground italic">
+ No references yet. A short quote from a past collaborator
+ builds trust on your card.
+ </p>
+ ) : (
+ <div className="space-y-3">
+ {refs.map((ref, i) => (
+ <div
+ key={i}
+ className="rounded-sm border border-border bg-background p-3 space-y-2"
+ >
+ <div className="flex gap-2">
+ <input
+ type="text"
+ value={ref.name}
+ onChange={(e) => {
+ const next = [...refs];
+ next[i] = { ...ref, name: e.target.value };
+ setRefs(next);
+ }}
+ placeholder="Name"
+ className="flex-1 h-9 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <input
+ type="text"
+ value={ref.role}
+ onChange={(e) => {
+ const next = [...refs];
+ next[i] = { ...ref, role: e.target.value };
+ setRefs(next);
+ }}
+ placeholder="Role / relationship"
+ className="flex-1 h-9 rounded-sm border border-border bg-background px-3 text-sm focus:outline-none focus:border-primary"
+ />
+ <button
+ type="button"
+ onClick={() =>
+ setRefs(refs.filter((_, j) => j !== i))
+ }
+ aria-label="Remove reference"
+ className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground hover:border-destructive hover:text-destructive"
+ >
+ <Trash2 className="h-4 w-4" />
+ </button>
+ </div>
+ <textarea
+ value={ref.text}
+ onChange={(e) => {
+ const next = [...refs];
+ next[i] = { ...ref, text: e.target.value };
+ setRefs(next);
+ }}
+ rows={2}
+ placeholder="What they said about working with you."
+ className="w-full rounded-sm border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary"
+ />
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
+
+ <div className="flex justify-end pt-2">
+ <Button
+ type="button"
+ variant="gold"
+ size="lg"
+ onClick={handleSave}
+ disabled={saving}
+ >
+ {saving ? (
+ <Loader2 className="h-4 w-4 animate-spin" />
+ ) : (
+ <Save className="h-4 w-4" />
+ )}
+ Save extended profile
+ </Button>
+ </div>
+ </div>
+ </section>
+ );
+};
 
 export default MyNet;

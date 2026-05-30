@@ -94,6 +94,14 @@ type ProfileRow = {
  is_open_to_work: boolean | null;
  avatar_path: string | null;
  active_project_id: string | null;
+ // Verified founder perk columns (migration 0039). Tolerated as
+ // optional/undefined so the row mapper still works before the
+ // migration is applied locally.
+ is_verified_founder?: boolean | null;
+ extended_description?: string | null;
+ pitch_url?: string | null;
+ project_links?: unknown;
+ collaborator_references?: unknown;
 };
 
 type ProjectRow = {
@@ -129,6 +137,14 @@ const candidateFromRow = (row: ProfileRow): CandidateProfile => ({
  isOpenToWork: Boolean(row.is_open_to_work),
 });
 
+// Generic parser used for the two jsonb-array profile columns.
+// Returns [] on any non-array input so a missing column or bad data
+// doesn't break the page.
+const arrayFromJson = <T,>(raw: unknown): T[] => {
+ if (!Array.isArray(raw)) return [];
+ return raw.filter((v): v is T => typeof v === "object" && v !== null);
+};
+
 const profileFromRow = (row: ProfileRow): Profile => ({
  linkedinUrl: row.linkedin_url ?? "",
  resume:
@@ -154,6 +170,17 @@ const profileFromRow = (row: ProfileRow): Profile => ({
  avatarPath: row.avatar_path ?? null,
  activeProjectId: row.active_project_id ?? null,
  candidate: candidateFromRow(row),
+ isVerifiedFounder: Boolean(row.is_verified_founder),
+ extendedDescription: row.extended_description ?? "",
+ pitchUrl: row.pitch_url ?? "",
+ projectLinks: arrayFromJson<{ title: string; url: string }>(
+ row.project_links,
+ ),
+ collaboratorReferences: arrayFromJson<{
+ name: string;
+ role: string;
+ text: string;
+ }>(row.collaborator_references),
 });
 
 const criteriaFromJson = (raw: Partial<ProjectCriteria> | null): ProjectCriteria => {
@@ -270,6 +297,40 @@ export const getResumePath = async (userId: string): Promise<string | null> => {
  .maybeSingle();
  if (error) throw error;
  return (data?.resume_path as string | null) ?? null;
+};
+
+// ---- Verified founder extended profile ----------------------------
+
+// Bulk update of the four extended-profile columns. Only meaningful
+// when profile.is_verified_founder = true; the editor only renders for
+// verified founders so untrusted callers can't reach this anyway.
+// RLS on profiles still gates that user_id = auth.uid().
+export const updateExtendedProfile = async (
+ userId: string,
+ input: {
+ extendedDescription: string;
+ pitchUrl: string;
+ projectLinks: Array<{ title: string; url: string }>;
+ collaboratorReferences: Array<{
+ name: string;
+ role: string;
+ text: string;
+ }>;
+ },
+): Promise<void> => {
+ const { error } = await getSupabase()
+ .from("profiles")
+ .upsert(
+ {
+ user_id: userId,
+ extended_description: input.extendedDescription,
+ pitch_url: input.pitchUrl.trim(),
+ project_links: input.projectLinks,
+ collaborator_references: input.collaboratorReferences,
+ },
+ { onConflict: "user_id" },
+ );
+ if (error) throw error;
 };
 
 // ---- Founder website + proof --------------------------------------
@@ -832,6 +893,8 @@ export const matchProjectsForMe = async (): Promise<
  polln8FounderName: "",
  polln8FounderHeadline: "",
  polln8FounderWebsite: "",
+ polln8FounderAvatarPath: null,
+ isVerifiedFounder: false,
  }));
 };
 
@@ -879,12 +942,18 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  full_name: string | null;
  headline: string | null;
  avatar_path: string | null;
+ // Verified perk - drives the green-outline + ribbon on the card.
+ // Tolerated as nullable to keep working before migration 0039 is
+ // applied.
+ is_verified_founder: boolean | null;
  };
  let profileMap = new Map<string, FounderProfile>();
  if (ownerIds.length > 0) {
  const { data: profileRows, error: profileError } = await supabase
  .from("profiles")
- .select("user_id, full_name, headline, avatar_path")
+ .select(
+ "user_id, full_name, headline, avatar_path, is_verified_founder",
+ )
  .in("user_id", ownerIds);
  if (profileError) throw profileError;
  profileMap = new Map(
@@ -923,6 +992,7 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  polln8FounderHeadline: polln8Headline,
  polln8FounderWebsite: (p.polln8_founder_website ?? "").trim(),
  polln8FounderAvatarPath: polln8Avatar || null,
+ isVerifiedFounder: Boolean(profile?.is_verified_founder),
  };
  });
 };
@@ -1274,6 +1344,14 @@ export type PublicFounder = {
  avatarPath: string | null;
  isOpenToWork: boolean;
  websiteUrl: string;
+ // Verified founder perk fields. isVerifiedFounder drives card +
+ // /u/<id> visuals; the other four are only meaningful when true
+ // (standard founders carry empty defaults).
+ isVerifiedFounder: boolean;
+ extendedDescription: string;
+ pitchUrl: string;
+ projectLinks: Array<{ title: string; url: string }>;
+ collaboratorReferences: Array<{ name: string; role: string; text: string }>;
 };
 
 type PublicFounderRow = {
@@ -1288,6 +1366,19 @@ type PublicFounderRow = {
  avatar_path: string | null;
  is_open_to_work: boolean;
  website_url: string | null;
+ is_verified_founder: boolean | null;
+ extended_description: string | null;
+ pitch_url: string | null;
+ project_links: unknown;
+ collaborator_references: unknown;
+};
+
+// Parse a jsonb column expected to hold an array of objects with
+// known string keys. Defensive: bad data shapes silently collapse
+// to an empty array rather than crashing the page.
+const arrayOfObjects = <T,>(value: unknown): T[] => {
+ if (!Array.isArray(value)) return [];
+ return value.filter((v): v is T => typeof v === "object" && v !== null);
 };
 
 export const getPublicFounder = async (
@@ -1312,6 +1403,17 @@ export const getPublicFounder = async (
  avatarPath: r.avatar_path ?? null,
  isOpenToWork: Boolean(r.is_open_to_work),
  websiteUrl: r.website_url ?? "",
+ isVerifiedFounder: Boolean(r.is_verified_founder),
+ extendedDescription: r.extended_description ?? "",
+ pitchUrl: r.pitch_url ?? "",
+ projectLinks: arrayOfObjects<{ title: string; url: string }>(
+ r.project_links,
+ ),
+ collaboratorReferences: arrayOfObjects<{
+ name: string;
+ role: string;
+ text: string;
+ }>(r.collaborator_references),
  };
 };
 
@@ -1351,6 +1453,7 @@ export const listPublishedProjectsForOwner = async (
  polln8FounderHeadline: "",
  polln8FounderWebsite: "",
  polln8FounderAvatarPath: null,
+ isVerifiedFounder: false,
  }));
 };
 

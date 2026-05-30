@@ -65,6 +65,21 @@ export type CandidateProfile = {
  isOpenToWork: boolean;
 };
 
+// Project link surfaced on a verified founder's extended profile.
+// Free-form pair of title + url - the founder picks what to link.
+export type ProjectLink = {
+ title: string;
+ url: string;
+};
+
+// Reference from a past collaborator. name + role label what they
+// did with the founder; text is the actual quote / story.
+export type CollaboratorReference = {
+ name: string;
+ role: string;
+ text: string;
+};
+
 export type Profile = {
  linkedinUrl: string;
  resume: ResumeMeta | null;
@@ -80,6 +95,17 @@ export type Profile = {
  // criteria Match uses to rank candidates and is where saves land.
  activeProjectId: string | null;
  candidate: CandidateProfile;
+ // Verified founder perk (paid). Drives card visuals + unlocks the
+ // extended-profile editor surface in MyNet. Defaults to false for
+ // every founder until they upgrade or an admin flips the flag.
+ isVerifiedFounder: boolean;
+ // Extended profile fields - only meaningful when isVerifiedFounder.
+ // Standard profiles still carry empty strings + arrays so the
+ // editor can no-op the surface cleanly.
+ extendedDescription: string;
+ pitchUrl: string;
+ projectLinks: ProjectLink[];
+ collaboratorReferences: CollaboratorReference[];
 };
 
 export type Candidate = {
@@ -175,6 +201,12 @@ export type PublicProject = {
  // resolve with getAvatarUrl. Null when none was uploaded - card
  // falls back to the silhouette icon.
  polln8FounderAvatarPath: string | null;
+ // Verified-founder perk. True when the project's owner has the
+ // is_verified_founder flag flipped (paid feature). Cards render
+ // with a 'Verified' ribbon + green outline (same visual treatment
+ // as polln8 recommendations) and accept-click routes to the
+ // founder's full /u/<id> page instead of the slim info panel.
+ isVerifiedFounder: boolean;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({
@@ -204,6 +236,11 @@ export const emptyProfile = (): Profile => ({
  avatarPath: null,
  activeProjectId: null,
  candidate: emptyCandidate(),
+ isVerifiedFounder: false,
+ extendedDescription: "",
+ pitchUrl: "",
+ projectLinks: [],
+ collaboratorReferences: [],
 });
 
 export const CANDIDATE_BIO_MIN = 60;

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
 import {
  ArrowLeft,
+ BadgeCheck,
  Briefcase,
  ExternalLink,
  Globe,
@@ -128,8 +129,17 @@ const FounderProfile = () => {
  </div>
  )}
  <div className="flex-1 min-w-0">
- <h1 className="font-display text-3xl sm:text-4xl leading-tight mb-1">
+ <h1 className="font-display text-3xl sm:text-4xl leading-tight mb-1 flex items-center gap-2 flex-wrap">
  {founder.fullName || "Unnamed"}
+ {founder.isVerifiedFounder ? (
+ <span
+ title="Verified founder"
+ className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-primary-foreground"
+ >
+ <BadgeCheck className="h-3 w-3" />
+ Verified
+ </span>
+ ) : null}
  </h1>
  {founder.headline && (
  <p className="text-sm text-muted-foreground mb-4">
@@ -166,6 +176,100 @@ const FounderProfile = () => {
  <p className="text-sm leading-relaxed whitespace-pre-line">
  {founder.bio}
  </p>
+ </div>
+ )}
+
+ {/* Verified-founder extended sections. Render only when the
+ founder has the paid perk + actually filled in each field.
+ Standard founders skip every block silently. */}
+ {founder.isVerifiedFounder &&
+ founder.extendedDescription.trim() && (
+ <div className="mt-6 pt-6 border-t-2 border-primary">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-2 flex items-center gap-1.5">
+ <BadgeCheck className="h-3 w-3" />
+ Deeper venture
+ </p>
+ <p className="text-sm leading-relaxed whitespace-pre-line">
+ {founder.extendedDescription}
+ </p>
+ </div>
+ )}
+
+ {founder.isVerifiedFounder && founder.pitchUrl && (
+ <div className="mt-6 pt-6 border-t border-border">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-2">
+ Pitch deck
+ </p>
+ <a
+ href={
+ founder.pitchUrl.startsWith("http")
+ ? founder.pitchUrl
+ : `https://${founder.pitchUrl}`
+ }
+ target="_blank"
+ rel="noopener noreferrer"
+ className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all"
+ >
+ <ExternalLink className="h-4 w-4 flex-shrink-0" />
+ {founder.pitchUrl.replace(/^https?:\/\//, "")}
+ </a>
+ </div>
+ )}
+
+ {founder.isVerifiedFounder && founder.projectLinks.length > 0 && (
+ <div className="mt-6 pt-6 border-t border-border">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3">
+ Project links
+ </p>
+ <ul className="space-y-2">
+ {founder.projectLinks.map((link, i) => (
+ <li
+ key={i}
+ className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm"
+ >
+ <span className="font-medium text-foreground">
+ {link.title}
+ </span>
+ <a
+ href={
+ link.url.startsWith("http")
+ ? link.url
+ : `https://${link.url}`
+ }
+ target="_blank"
+ rel="noopener noreferrer"
+ className="text-primary hover:underline break-all"
+ >
+ {link.url.replace(/^https?:\/\//, "")}
+ </a>
+ </li>
+ ))}
+ </ul>
+ </div>
+ )}
+
+ {founder.isVerifiedFounder &&
+ founder.collaboratorReferences.length > 0 && (
+ <div className="mt-6 pt-6 border-t border-border">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3">
+ References
+ </p>
+ <ul className="space-y-4">
+ {founder.collaboratorReferences.map((r, i) => (
+ <li
+ key={i}
+ className="rounded-sm border border-border bg-card p-4"
+ >
+ <p className="text-sm leading-relaxed text-foreground italic mb-2">
+ &ldquo;{r.text}&rdquo;
+ </p>
+ <p className="text-xs text-muted-foreground">
+ &mdash; {r.name}
+ {r.role ? `, ${r.role}` : null}
+ </p>
+ </li>
+ ))}
+ </ul>
  </div>
  )}
 
