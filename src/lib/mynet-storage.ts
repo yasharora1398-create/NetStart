@@ -102,6 +102,8 @@ type ProfileRow = {
  pitch_url?: string | null;
  project_links?: unknown;
  collaborator_references?: unknown;
+ // Banner image (migration 0040). Optional same reason.
+ banner_image_path?: string | null;
 };
 
 type ProjectRow = {
@@ -181,6 +183,7 @@ const profileFromRow = (row: ProfileRow): Profile => ({
  role: string;
  text: string;
  }>(row.collaborator_references),
+ bannerImagePath: row.banner_image_path ?? "",
 });
 
 const criteriaFromJson = (raw: Partial<ProjectCriteria> | null): ProjectCriteria => {
@@ -1352,6 +1355,9 @@ export type PublicFounder = {
  pitchUrl: string;
  projectLinks: Array<{ title: string; url: string }>;
  collaboratorReferences: Array<{ name: string; role: string; text: string }>;
+ // Banner image path under the avatars bucket. Empty when no banner
+ // has been uploaded; the public profile renders a placeholder.
+ bannerImagePath: string;
 };
 
 type PublicFounderRow = {
@@ -1371,6 +1377,7 @@ type PublicFounderRow = {
  pitch_url: string | null;
  project_links: unknown;
  collaborator_references: unknown;
+ banner_image_path: string | null;
 };
 
 // Parse a jsonb column expected to hold an array of objects with
@@ -1414,6 +1421,7 @@ export const getPublicFounder = async (
  role: string;
  text: string;
  }>(r.collaborator_references),
+ bannerImagePath: r.banner_image_path ?? "",
  };
 };
 
@@ -1498,6 +1506,66 @@ export const uploadAvatar = async (
  }
 
  return path;
+};
+
+// Banner image upload. Same bucket as avatars but stored under
+// <uid>/banner/<ts>.<ext>, so RLS (which requires the first path
+// segment = auth.uid()) is satisfied. Max size bumped a bit since
+// banners are wider; 5MB is enough for a high-quality cover.
+const BANNER_MAX_BYTES = 5 * 1024 * 1024;
+
+export const uploadBanner = async (
+ userId: string,
+ file: File,
+ previousPath: string | null,
+): Promise<string> => {
+ if (file.size > BANNER_MAX_BYTES) {
+ throw new Error("Banner too large. Max 5 MB.");
+ }
+ const supabase = getSupabase();
+ const ext = (file.name.split(".").pop() ?? "png").toLowerCase();
+ const path = `${userId}/banner/${Date.now()}.${ext}`;
+
+ const { error: uploadError } = await supabase.storage
+ .from(AVATARS_BUCKET)
+ .upload(path, file, {
+ cacheControl: "3600",
+ upsert: false,
+ contentType: file.type || undefined,
+ });
+ if (uploadError) throw uploadError;
+
+ const { error: profileError } = await supabase
+ .from("profiles")
+ .upsert(
+ { user_id: userId, banner_image_path: path },
+ { onConflict: "user_id" },
+ );
+ if (profileError) {
+ await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+ throw profileError;
+ }
+
+ if (previousPath) {
+ await supabase.storage.from(AVATARS_BUCKET).remove([previousPath]);
+ }
+
+ return path;
+};
+
+export const removeBanner = async (
+ userId: string,
+ path: string | null,
+): Promise<void> => {
+ const supabase = getSupabase();
+ if (path) {
+ await supabase.storage.from(AVATARS_BUCKET).remove([path]);
+ }
+ const { error } = await supabase
+ .from("profiles")
+ .update({ banner_image_path: "" })
+ .eq("user_id", userId);
+ if (error) throw error;
 };
 
 export const removeAvatar = async (

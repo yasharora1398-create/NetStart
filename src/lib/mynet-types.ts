@@ -106,6 +106,10 @@ export type Profile = {
  pitchUrl: string;
  projectLinks: ProjectLink[];
  collaboratorReferences: CollaboratorReference[];
+ // Banner image path (under the 'avatars' bucket, prefix
+ // <uid>/banner/). Empty string = no banner uploaded; the public
+ // profile renders a neutral placeholder.
+ bannerImagePath: string;
 };
 
 export type Candidate = {
@@ -241,6 +245,7 @@ export const emptyProfile = (): Profile => ({
  pitchUrl: "",
  projectLinks: [],
  collaboratorReferences: [],
+ bannerImagePath: "",
 });
 
 export const CANDIDATE_BIO_MIN = 60;

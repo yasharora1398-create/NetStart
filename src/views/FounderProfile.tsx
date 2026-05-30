@@ -1,22 +1,26 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
 import {
  ArrowLeft,
  BadgeCheck,
  Briefcase,
+ Camera,
  ExternalLink,
+ FileText,
  Globe,
+ ImagePlus,
  Linkedin,
  Loader2,
  MapPin,
  MessageCircle,
+ ShieldCheck,
+ Sparkles,
  User,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Nav } from "@/components/netstart/Nav";
-import { Footer } from "@/components/netstart/Footer";
+import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { Button } from "@/components/ui/button";
@@ -25,19 +29,11 @@ import {
  getAvatarUrl,
  getPublicFounder,
  listPublishedProjectsForOwner,
+ uploadBanner,
  type PublicFounder,
 } from "@/lib/mynet-storage";
 import type { PublicProject } from "@/lib/mynet-types";
-
-const initials = (name: string): string => {
- if (!name.trim()) return "?";
- return name
- .trim()
- .split(/\s+/)
- .slice(0, 2)
- .map((p) => p[0]?.toUpperCase() ?? "")
- .join("");
-};
+import { cn } from "@/lib/utils";
 
 const formatDate = (iso: string): string => {
  try {
@@ -57,9 +53,11 @@ const FounderProfile = () => {
  const [founder, setFounder] = useState<PublicFounder | null>(null);
  const [projects, setProjects] = useState<PublicProject[]>([]);
  const [loadingData, setLoadingData] = useState(false);
+ const [uploadingBanner, setUploadingBanner] = useState(false);
+ const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
  useEffect(() => {
- if (!user || !id) return;
+ if (!id) return;
  let cancelled = false;
  setLoadingData(true);
  Promise.all([getPublicFounder(id), listPublishedProjectsForOwner(id)])
@@ -79,186 +77,244 @@ const FounderProfile = () => {
  return () => {
  cancelled = true;
  };
- }, [user, id]);
+ }, [id]);
 
  const isAuthed = Boolean(user) && !loading;
+ const isOwner = Boolean(user?.id && id && user.id === id);
  const avatarUrl = founder ? getAvatarUrl(founder.avatarPath) : null;
+ const bannerUrl = founder?.bannerImagePath
+ ? getAvatarUrl(founder.bannerImagePath)
+ : null;
 
+ // Aggregate "skills looking for" across this founder's published
+ // projects so the right rail has a clean single list.
+ const skillsLookingFor = useMemo(() => {
+ if (projects.length === 0) return [];
+ const set = new Set<string>();
+ for (const p of projects) {
+ for (const s of p.criteria.skills) {
+ if (s.trim()) set.add(s.trim());
+ }
+ }
+ return Array.from(set);
+ }, [projects]);
+
+ const handleBannerPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+ const file = e.target.files?.[0];
+ e.target.value = ""; // reset so picking the same file twice works
+ if (!file || !isOwner || !user) return;
+ setUploadingBanner(true);
+ try {
+ const newPath = await uploadBanner(
+ user.id,
+ file,
+ founder?.bannerImagePath || null,
+ );
+ setFounder((prev) =>
+ prev ? { ...prev, bannerImagePath: newPath } : prev,
+ );
+ toast.success("Banner updated.");
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Could not upload.");
+ } finally {
+ setUploadingBanner(false);
+ }
+ };
+
+ // Loading / not-found states. Render inside AppLayout so the
+ // sidebar is consistent with everything else.
+ if (loadingData) {
  return (
- <div className="min-h-screen bg-background text-foreground">
- <Nav />
-
- <main
- className={`pt-28 pb-24 ${!isAuthed ? "pointer-events-none select-none " : ""}`}
- >
- <div className="container max-w-3xl">
- <Link
- to="/match"
- className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-6"
- >
- <ArrowLeft className="h-3.5 w-3.5" />
- Back to Match
- </Link>
-
- {loadingData ? (
- <div className="flex items-center justify-center py-24">
+ <AppLayout>
+ <div className="container max-w-6xl py-16 flex items-center justify-center">
  <Loader2 className="h-5 w-5 text-gold animate-spin" />
  </div>
- ) : !founder ? (
+ </AppLayout>
+ );
+ }
+ if (!founder) {
+ return (
+ <AppLayout>
+ <div className="container max-w-3xl py-16">
  <div className="rounded-sm border border-dashed border-border bg-card">
  <MothEmptyState
- variant="lost"
+ variant="platform"
  ctx="Not found"
  title="No such profile."
  sub="The trail goes cold here. The person you're looking for may have left the platform."
  />
  </div>
- ) : (
- <>
- <header className="rounded-sm border border-gold bg-card p-6 sm:p-8 mb-10">
- <div className="flex items-start gap-5 flex-wrap">
- {avatarUrl ? (
+ </div>
+ </AppLayout>
+ );
+ }
+
+ return (
+ <AppLayout>
+ <div className="container max-w-6xl py-6 md:py-8">
+ <Link
+ to="/match"
+ className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-4"
+ >
+ <ArrowLeft className="h-3.5 w-3.5" />
+ Back to Match
+ </Link>
+
+ {/* BANNER: h-56 cover. Owner sees a click-to-upload affordance
+ (hover overlay + Camera icon). Guests see whatever the
+ founder uploaded (or a neutral placeholder). */}
+ <div
+ className={cn(
+ "relative w-full overflow-hidden rounded-sm border border-border",
+ "h-44 sm:h-56 md:h-64",
+ isOwner && !uploadingBanner ? "cursor-pointer group" : "",
+ )}
+ onClick={() => {
+ if (isOwner && !uploadingBanner) bannerInputRef.current?.click();
+ }}
+ role={isOwner ? "button" : undefined}
+ aria-label={isOwner ? "Change banner image" : undefined}
+ >
+ {bannerUrl ? (
+ // eslint-disable-next-line @next/next/no-img-element
  <img
- src={avatarUrl}
- alt={founder.fullName}
- className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm object-cover border border-gold flex-shrink-0"
+ src={bannerUrl}
+ alt=""
+ className="absolute inset-0 h-full w-full object-cover"
  />
  ) : (
- <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-sm bg-muted border border-border flex items-center justify-center flex-shrink-0">
- <User className="h-10 w-10 text-muted-foreground" />
- </div>
+ <div className="absolute inset-0 bg-gradient-to-br from-muted via-card to-muted" />
  )}
- <div className="flex-1 min-w-0">
- <h1 className="font-display text-3xl sm:text-4xl leading-tight mb-1 flex items-center gap-2 flex-wrap">
+ {isOwner ? (
+ <div
+ className={cn(
+ "absolute inset-0 flex items-center justify-center transition-colors",
+ bannerUrl
+ ? "bg-black/0 group-hover:bg-black/40"
+ : "bg-black/10",
+ )}
+ >
+ {uploadingBanner ? (
+ <Loader2 className="h-6 w-6 text-white animate-spin" />
+ ) : (
+ <span
+ className={cn(
+ "inline-flex items-center gap-2 rounded-full bg-card border border-border px-4 py-2 text-sm text-foreground shadow",
+ bannerUrl
+ ? "opacity-0 group-hover:opacity-100 transition-opacity"
+ : "",
+ )}
+ >
+ {bannerUrl ? (
+ <>
+ <Camera className="h-4 w-4 text-primary" />
+ Change banner
+ </>
+ ) : (
+ <>
+ <ImagePlus className="h-4 w-4 text-primary" />
+ Add a banner image
+ </>
+ )}
+ </span>
+ )}
+ </div>
+ ) : null}
+ <input
+ ref={bannerInputRef}
+ type="file"
+ accept="image/*"
+ className="hidden"
+ onChange={handleBannerPick}
+ />
+ </div>
+
+ {/* PFP overlap row. The pfp sits aligned with the bottom of the
+ banner, on the right side. Name + headline sit on the left,
+ vertically aligned with the bottom of the pfp via mt-4 on
+ the left + negative-margin on the pfp. */}
+ <div className="relative flex items-end justify-between gap-4 -mt-12 sm:-mt-16 mb-6 px-1 sm:px-4">
+ <div className="flex-1 min-w-0 pt-12 sm:pt-16">
+ <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight flex items-center gap-2 flex-wrap">
  {founder.fullName || "Unnamed"}
  {founder.isVerifiedFounder ? (
  <span
  title="Verified founder"
- className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-primary-foreground"
+ className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-primary-foreground"
  >
  <BadgeCheck className="h-3 w-3" />
  Verified
  </span>
  ) : null}
  </h1>
- {founder.headline && (
- <p className="text-sm text-muted-foreground mb-4">
+ {founder.headline ? (
+ <p className="mt-1 text-sm sm:text-base text-muted-foreground max-w-2xl">
  {founder.headline}
  </p>
- )}
- <div className="flex flex-wrap gap-2">
- {founder.commitment && (
- <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border bg-background font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
- <Briefcase className="h-3 w-3 text-gold" />
- {founder.commitment}
- </span>
- )}
- {founder.location && (
- <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border bg-background font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
- <MapPin className="h-3 w-3 text-gold" />
- {founder.location}
- </span>
- )}
- {founder.isOpenToWork && (
- <span className="inline-flex items-center px-2.5 py-1 rounded-sm border border-primary bg-primary font-mono text-[11px] text-primary-foreground uppercase tracking-widest">
- Open to work
- </span>
- )}
+ ) : null}
  </div>
+ {/* PFP - aligned with banner bottom right. White ring sets it
+ off from whatever banner image sits behind. */}
+ <div className="relative flex-shrink-0">
+ {avatarUrl ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={avatarUrl}
+ alt={founder.fullName}
+ className="h-24 w-24 sm:h-32 sm:w-32 rounded-full object-cover border-4 border-background shadow-md bg-muted"
+ />
+ ) : (
+ <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-muted border-4 border-background shadow-md flex items-center justify-center">
+ <User
+ className="h-10 w-10 sm:h-14 sm:w-14 text-muted-foreground"
+ strokeWidth={1.4}
+ />
+ </div>
+ )}
  </div>
  </div>
 
- {founder.bio && (
- <div className="mt-6 pt-6 border-t border-border">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">
- Pitch / Bio
+ {/* MAIN GRID: left = bio + pitch, right = info rectangle.
+ Stacks on mobile, two-col on md+. */}
+ <div className="grid md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6 md:gap-8">
+ {/* LEFT COLUMN: bio + pitch */}
+ <div className="space-y-6 min-w-0">
+ {founder.bio ? (
+ <section className="rounded-sm border border-border bg-card p-6">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+ Bio
  </p>
- <p className="text-sm leading-relaxed whitespace-pre-line">
+ <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line text-foreground">
  {founder.bio}
  </p>
- </div>
- )}
+ </section>
+ ) : null}
 
- {/* Verified-founder extended sections. Render only when the
- founder has the paid perk + actually filled in each field.
- Standard founders skip every block silently. */}
  {founder.isVerifiedFounder &&
- founder.extendedDescription.trim() && (
- <div className="mt-6 pt-6 border-t-2 border-primary">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-2 flex items-center gap-1.5">
- <BadgeCheck className="h-3 w-3" />
- Deeper venture
+ founder.extendedDescription.trim() ? (
+ <section className="rounded-sm border-2 border-primary bg-card p-6">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3 flex items-center gap-1.5">
+ <Sparkles className="h-3 w-3" />
+ The pitch
  </p>
- <p className="text-sm leading-relaxed whitespace-pre-line">
+ <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line text-foreground">
  {founder.extendedDescription}
  </p>
- </div>
- )}
-
- {founder.isVerifiedFounder && founder.pitchUrl && (
- <div className="mt-6 pt-6 border-t border-border">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-2">
- Pitch deck
- </p>
- <a
- href={
- founder.pitchUrl.startsWith("http")
- ? founder.pitchUrl
- : `https://${founder.pitchUrl}`
- }
- target="_blank"
- rel="noopener noreferrer"
- className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all"
- >
- <ExternalLink className="h-4 w-4 flex-shrink-0" />
- {founder.pitchUrl.replace(/^https?:\/\//, "")}
- </a>
- </div>
- )}
-
- {founder.isVerifiedFounder && founder.projectLinks.length > 0 && (
- <div className="mt-6 pt-6 border-t border-border">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3">
- Project links
- </p>
- <ul className="space-y-2">
- {founder.projectLinks.map((link, i) => (
- <li
- key={i}
- className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm"
- >
- <span className="font-medium text-foreground">
- {link.title}
- </span>
- <a
- href={
- link.url.startsWith("http")
- ? link.url
- : `https://${link.url}`
- }
- target="_blank"
- rel="noopener noreferrer"
- className="text-primary hover:underline break-all"
- >
- {link.url.replace(/^https?:\/\//, "")}
- </a>
- </li>
- ))}
- </ul>
- </div>
- )}
+ </section>
+ ) : null}
 
  {founder.isVerifiedFounder &&
- founder.collaboratorReferences.length > 0 && (
- <div className="mt-6 pt-6 border-t border-border">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3">
+ founder.collaboratorReferences.length > 0 ? (
+ <section className="rounded-sm border border-border bg-card p-6">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3 flex items-center gap-1.5">
+ <BadgeCheck className="h-3 w-3" />
  References
  </p>
  <ul className="space-y-4">
  {founder.collaboratorReferences.map((r, i) => (
  <li
  key={i}
- className="rounded-sm border border-border bg-card p-4"
+ className="rounded-sm border border-border bg-background p-4"
  >
  <p className="text-sm leading-relaxed text-foreground italic mb-2">
  &ldquo;{r.text}&rdquo;
@@ -270,127 +326,226 @@ const FounderProfile = () => {
  </li>
  ))}
  </ul>
- </div>
- )}
+ </section>
+ ) : null}
 
- {founder.skills.length > 0 && (
- <div className="mt-6 pt-6 border-t border-border">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
- Skills
- </p>
- <div className="flex flex-wrap gap-1.5">
- {founder.skills.map((s) => (
- <span
- key={s}
- className="px-2 py-0.5 text-[11px] rounded-sm border border-gold bg-gold"
- >
- {s}
- </span>
- ))}
- </div>
- </div>
- )}
-
- <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
- {user && id && user.id !== id ? (
+ {/* Message CTA - bottom of left column for non-owners. */}
+ {!isOwner && user && id ? (
  <Link to={`/chats/${id}`} className="inline-block">
  <Button variant="gold" size="lg">
  <MessageCircle className="h-4 w-4" />
  Message {founder.fullName.split(" ")[0] || "founder"}
  </Button>
  </Link>
- ) : (
- <span />
- )}
- <div className="flex flex-wrap items-center gap-4">
- {founder.websiteUrl && (
- <a
+ ) : null}
+ </div>
+
+ {/* RIGHT COLUMN: info rectangle */}
+ <aside className="md:sticky md:top-6 md:self-start">
+ <div className="rounded-sm border border-border bg-card p-5 space-y-5">
+ {/* Links */}
+ <RightSection title="Links">
+ <ul className="space-y-2">
+ {founder.websiteUrl ? (
+ <ExternalLinkRow
+ icon={<Globe className="h-3.5 w-3.5 text-gold flex-shrink-0" />}
+ label="Website"
  href={founder.websiteUrl}
- target="_blank"
- rel="noopener noreferrer"
- className="inline-flex items-center gap-2 text-sm text-gold hover:underline break-all"
- >
- <Globe className="h-4 w-4" />
- Website
- <ExternalLink className="h-3 w-3 " />
- </a>
- )}
- {founder.linkedinUrl && (
- <a
- href={founder.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
- className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
- >
- <Linkedin className="h-4 w-4" />
- LinkedIn
- <ExternalLink className="h-3 w-3 " />
- </a>
- )}
- </div>
- </div>
- </header>
-
- <section>
- <div className="flex items-center justify-between mb-4">
- <div>
- <h2 className="font-display text-2xl sm:text-3xl">
- Active projects{" "}
- <span className="text-muted-foreground">
- ({projects.length})
- </span>
- </h2>
- </div>
- </div>
-
- {projects.length === 0 ? (
- <div className="rounded-sm border border-dashed border-border bg-card">
- <MothEmptyState
- variant="blank"
- title="No published projects yet."
- sub="When this founder publishes a project, it'll appear here."
  />
- </div>
- ) : (
- <div className="grid sm:grid-cols-2 gap-4">
- {projects.map((p) => (
- <article
- key={p.id}
- className="rounded-sm border border-border bg-card p-5"
+ ) : null}
+ {founder.linkedinUrl ? (
+ <ExternalLinkRow
+ icon={
+ <Linkedin className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+ }
+ label="LinkedIn"
+ href={founder.linkedinUrl}
+ />
+ ) : null}
+ {founder.isVerifiedFounder && founder.pitchUrl ? (
+ <ExternalLinkRow
+ icon={
+ <FileText className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+ }
+ label="Pitch deck"
+ href={founder.pitchUrl}
+ />
+ ) : null}
+ {founder.isVerifiedFounder
+ ? founder.projectLinks.map((l, i) => (
+ <ExternalLinkRow
+ key={i}
+ icon={
+ <ExternalLink className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+ }
+ label={l.title || l.url.replace(/^https?:\/\//, "")}
+ href={l.url}
+ />
+ ))
+ : null}
+ {!founder.websiteUrl &&
+ !founder.linkedinUrl &&
+ !(founder.isVerifiedFounder && founder.pitchUrl) &&
+ (!founder.isVerifiedFounder ||
+ founder.projectLinks.length === 0) ? (
+ <li className="text-xs text-muted-foreground italic">
+ No links yet.
+ </li>
+ ) : null}
+ </ul>
+ </RightSection>
+
+ {/* Skills they have */}
+ {founder.skills.length > 0 ? (
+ <RightSection title="Skills">
+ <div className="flex flex-wrap gap-1.5">
+ {founder.skills.map((s) => (
+ <span
+ key={s}
+ className="px-2 py-0.5 text-[11px] rounded-sm border border-gold bg-gold text-primary-foreground"
  >
- <h3 className="font-display text-xl leading-tight mb-2">
- {p.title}
- </h3>
- {p.description && (
- <p className="text-xs text-muted-foreground line-clamp-3 mb-3">
- {p.description}
- </p>
- )}
- <div className="flex items-center justify-between gap-2">
- <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
- {formatDate(p.createdAt)}
+ {s}
  </span>
- {p.criteria.skills.length > 0 && (
- <span className="text-[10px] font-mono uppercase tracking-widest text-gold">
- {p.criteria.skills.length} skills
- </span>
- )}
- </div>
- </article>
  ))}
  </div>
- )}
- </section>
- </>
- )}
- </div>
- </main>
+ </RightSection>
+ ) : null}
 
- {!loading && !user && <AuthGate />}
-
- <Footer />
+ {/* Skills they're looking for (aggregate from projects) */}
+ {skillsLookingFor.length > 0 ? (
+ <RightSection title="Looking for">
+ <div className="flex flex-wrap gap-1.5">
+ {skillsLookingFor.map((s) => (
+ <span
+ key={s}
+ className="px-2 py-0.5 text-[11px] rounded-sm border border-border bg-muted text-muted-foreground"
+ >
+ {s}
+ </span>
+ ))}
  </div>
+ </RightSection>
+ ) : null}
+
+ {/* Credentials - location, commitment, open-to-work, verified */}
+ <RightSection title="Credentials">
+ <ul className="space-y-1.5 text-xs">
+ {founder.isVerifiedFounder ? (
+ <li className="flex items-center gap-2 text-foreground">
+ <BadgeCheck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+ Verified founder
+ </li>
+ ) : null}
+ {founder.location ? (
+ <li className="flex items-center gap-2 text-muted-foreground">
+ <MapPin className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+ {founder.location}
+ </li>
+ ) : null}
+ {founder.commitment ? (
+ <li className="flex items-center gap-2 text-muted-foreground">
+ <Briefcase className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+ {founder.commitment}
+ </li>
+ ) : null}
+ {founder.isOpenToWork ? (
+ <li className="flex items-center gap-2 text-foreground">
+ <ShieldCheck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+ Open to work
+ </li>
+ ) : null}
+ {!founder.isVerifiedFounder &&
+ !founder.location &&
+ !founder.commitment &&
+ !founder.isOpenToWork ? (
+ <li className="text-muted-foreground italic">
+ Nothing on file yet.
+ </li>
+ ) : null}
+ </ul>
+ </RightSection>
+
+ {/* Other projects */}
+ <RightSection
+ title={
+ projects.length === 1 ? "Project" : "Other projects"
+ }
+ >
+ {projects.length === 0 ? (
+ <p className="text-xs text-muted-foreground italic">
+ No published projects.
+ </p>
+ ) : (
+ <ul className="space-y-3">
+ {projects.map((p) => (
+ <li
+ key={p.id}
+ className="rounded-sm border border-border bg-background p-3"
+ >
+ <p className="text-sm font-medium text-foreground mb-1">
+ {p.title}
+ </p>
+ {p.description ? (
+ <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5">
+ {p.description}
+ </p>
+ ) : null}
+ <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+ {formatDate(p.createdAt)}
+ </p>
+ </li>
+ ))}
+ </ul>
+ )}
+ </RightSection>
+ </div>
+ </aside>
+ </div>
+ </div>
+
+ {!loading && !user ? <AuthGate /> : null}
+ </AppLayout>
  );
 };
+
+// Right-rail section header + slot. Same eyebrow style across all
+// blocks so the rectangle reads as one continuous panel.
+const RightSection = ({
+ title,
+ children,
+}: {
+ title: string;
+ children: React.ReactNode;
+}) => (
+ <div>
+ <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+ {title}
+ </p>
+ {children}
+ </div>
+);
+
+const ExternalLinkRow = ({
+ icon,
+ label,
+ href,
+}: {
+ icon: React.ReactNode;
+ label: string;
+ href: string;
+}) => (
+ <li>
+ <a
+ href={href.startsWith("http") ? href : `https://${href}`}
+ target="_blank"
+ rel="noopener noreferrer"
+ className="inline-flex items-center gap-2 text-xs text-foreground hover:text-primary transition-colors max-w-full"
+ >
+ {icon}
+ <span className="truncate">{label}</span>
+ <ExternalLink className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+ </a>
+ </li>
+);
 
 export default FounderProfile;
