@@ -1335,6 +1335,7 @@ const LookerView = () => {
  <ProjectStrip
  key={p.id}
  project={p}
+ isOwn={Boolean(user?.id && p.ownerId === user.id)}
  onSave={() => {
  if (!user) {
  navigate("/saved");
@@ -1346,16 +1347,6 @@ const LookerView = () => {
  onChat={() => {
  if (!user) {
  navigate("/chats");
- return;
- }
- // Self-chat guard: if this is your own Polln8 recommendation
- // (you posted it on someone else's behalf), there's nobody on
- // the other end. Toast + bail instead of dropping the user on
- // an empty chat-with-self thread that looks broken.
- if (p.ownerId === user.id) {
- toast.info(
- "You posted this recommendation - nothing to chat with on the other side.",
- );
  return;
  }
  const target = p.isPolln8Recommended
@@ -2326,10 +2317,16 @@ const ProjectStrip = ({
  project,
  onSave,
  onChat,
+ isOwn = false,
 }: {
  project: PublicProject;
  onSave: () => void;
  onChat: () => void;
+ // True when the signed-in viewer owns this project (incl. their
+ // own polln8 recommendations). Drives whether the chat + save
+ // buttons render at all - there's nobody to chat with and no
+ // point saving your own thing.
+ isOwn?: boolean;
 }) => {
  const avatarPath =
  project.isPolln8Recommended && project.polln8FounderAvatarPath
@@ -2363,6 +2360,8 @@ const ProjectStrip = ({
  </p>
  </div>
  <div className="flex items-center gap-1.5 flex-shrink-0">
+ {!isOwn ? (
+ <>
  <button
  type="button"
  onClick={onChat}
@@ -2381,6 +2380,8 @@ const ProjectStrip = ({
  >
  <Bookmark className="h-4 w-4" />
  </button>
+ </>
+ ) : null}
  {websiteHref ? (
  <a
  href={websiteHref}
