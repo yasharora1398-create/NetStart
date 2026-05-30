@@ -631,6 +631,53 @@ const PartnerView = () => {
 
  {loadingData ? (
  <Loading />
+ ) : query.trim() ? (
+ // Search-bar mode: flatten the deck into a list of strips
+ // so a user looking for a specific name doesn't have to
+ // swipe through cards to find them.
+ filtered.length === 0 ? (
+ <p className="text-sm text-muted-foreground italic">
+ No candidates match &ldquo;{query}&rdquo;.
+ </p>
+ ) : (
+ <ul className="space-y-2">
+ {filtered.map((c) => (
+ <CandidateStrip
+ key={c.userId}
+ candidate={c}
+ onSave={async () => {
+ if (!user) {
+ navigate("/saved");
+ return;
+ }
+ if (!activeProjectId) {
+ toast.error("Finish your active project in MyNet first");
+ return;
+ }
+ try {
+ await setPersonStatus(
+ activeProjectId,
+ c.userId,
+ "saved",
+ );
+ toast.success("Saved.");
+ } catch (err) {
+ toast.error(
+ err instanceof Error ? err.message : "Could not save.",
+ );
+ }
+ }}
+ onChat={() => {
+ if (!user) {
+ navigate("/chats");
+ return;
+ }
+ navigate(`/chats/${c.userId}`);
+ }}
+ />
+ ))}
+ </ul>
+ )
  ) : !current ? (
  <div className="flex flex-col items-center">
  <MothEmptyState
@@ -1273,6 +1320,42 @@ const LookerView = () => {
 
  {loadingData ? (
  <Loading />
+ ) : query.trim() ? (
+ // Search-bar mode: flatten the deck into a list of strips
+ // so a user looking for a specific founder doesn't have to
+ // swipe through cards to find them.
+ filtered.length === 0 ? (
+ <p className="text-sm text-muted-foreground italic">
+ No projects match &ldquo;{query}&rdquo;.
+ </p>
+ ) : (
+ <ul className="space-y-2">
+ {filtered.map((p) => (
+ <ProjectStrip
+ key={p.id}
+ project={p}
+ onSave={() => {
+ if (!user) {
+ navigate("/saved");
+ return;
+ }
+ void addSavedProject(p);
+ toast.success("Saved.");
+ }}
+ onChat={() => {
+ if (!user) {
+ navigate("/chats");
+ return;
+ }
+ const target = p.isPolln8Recommended
+ ? `/chats/${p.ownerId}?via=${p.id}`
+ : `/chats/${p.ownerId}`;
+ navigate(target);
+ }}
+ />
+ ))}
+ </ul>
+ )
  ) : !current ? (
  <div className="flex flex-col items-center">
  <MothEmptyState
@@ -2091,6 +2174,219 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  </div>
  </article>
  </div>
+ );
+};
+
+// ============= Search list mode =====================================
+//
+// When the user types in the search bar the deck collapses into a
+// list of strips (one per matching candidate / project) - same
+// visual language as /saved. Tap the icons on the right to act
+// without scrolling through the full deck.
+
+// Partner-side strip: grey background, one matched candidate.
+// Icons on the right: chat / save / resume / linkedin.
+const CandidateStrip = ({
+ candidate,
+ onSave,
+ onChat,
+}: {
+ candidate: Candidate;
+ onSave: () => void;
+ onChat: () => void;
+}) => {
+ const avatar = getAvatarUrl(candidate.avatarPath);
+ const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+ useEffect(() => {
+ if (!candidate.resumePath) return;
+ let cancelled = false;
+ getResumeSignedUrl(candidate.resumePath)
+ .then((url) => {
+ if (!cancelled) setResumeUrl(url);
+ })
+ .catch(() => {});
+ return () => {
+ cancelled = true;
+ };
+ }, [candidate.resumePath]);
+
+ return (
+ <li className="flex items-center gap-3 rounded-sm border border-border bg-muted px-4 py-3">
+ {/* tiny pfp */}
+ <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-background flex items-center justify-center">
+ {avatar ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={avatar}
+ alt={candidate.fullName}
+ className="h-full w-full object-cover"
+ />
+ ) : (
+ <User className="h-5 w-5 text-muted-foreground" />
+ )}
+ </div>
+ {/* name + headline */}
+ <div className="min-w-0 flex-1">
+ <p className="truncate text-sm font-medium text-foreground">
+ {candidate.fullName || "Unnamed"}
+ </p>
+ {candidate.headline ? (
+ <p className="truncate text-xs text-muted-foreground">
+ {candidate.headline}
+ </p>
+ ) : null}
+ </div>
+ {/* action icons */}
+ <div className="flex items-center gap-1.5 flex-shrink-0">
+ <button
+ type="button"
+ onClick={onChat}
+ aria-label="Chat"
+ title="Chat"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-gold bg-card text-gold transition-colors hover:bg-gold hover:text-primary-foreground"
+ >
+ <MessageCircle className="h-4 w-4" />
+ </button>
+ <button
+ type="button"
+ onClick={onSave}
+ aria-label="Save"
+ title="Save"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-gold bg-card text-gold transition-colors hover:bg-gold hover:text-primary-foreground"
+ >
+ <Bookmark className="h-4 w-4" />
+ </button>
+ {resumeUrl ? (
+ <a
+ href={resumeUrl}
+ target="_blank"
+ rel="noopener noreferrer"
+ aria-label="Resume"
+ title={candidate.resumeName ?? "Resume"}
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-gold bg-card text-gold transition-colors hover:bg-gold hover:text-primary-foreground"
+ >
+ <FileText className="h-4 w-4" />
+ </a>
+ ) : (
+ <span
+ aria-label="No resume"
+ title="No resume on file"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground cursor-not-allowed"
+ >
+ <FileText className="h-4 w-4" />
+ </span>
+ )}
+ {candidate.linkedinUrl ? (
+ <a
+ href={candidate.linkedinUrl}
+ target="_blank"
+ rel="noopener noreferrer"
+ aria-label="LinkedIn"
+ title="LinkedIn"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-gold bg-card text-gold transition-colors hover:bg-gold hover:text-primary-foreground"
+ >
+ <Linkedin className="h-4 w-4" />
+ </a>
+ ) : (
+ <span
+ aria-label="No LinkedIn"
+ title="No LinkedIn on file"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground cursor-not-allowed"
+ >
+ <Linkedin className="h-4 w-4" />
+ </span>
+ )}
+ </div>
+ </li>
+ );
+};
+
+// Founder-side strip: grey background + green outline, one matched
+// project. Icons on the right: chat / save / website.
+const ProjectStrip = ({
+ project,
+ onSave,
+ onChat,
+}: {
+ project: PublicProject;
+ onSave: () => void;
+ onChat: () => void;
+}) => {
+ const avatarPath =
+ project.isPolln8Recommended && project.polln8FounderAvatarPath
+ ? project.polln8FounderAvatarPath
+ : project.founderAvatarPath;
+ const avatar = getAvatarUrl(avatarPath);
+ const website = project.polln8FounderWebsite || "";
+ const websiteHref = website.trim()
+ ? website.startsWith("http")
+ ? website
+ : `https://${website}`
+ : null;
+
+ return (
+ <li className="flex items-center gap-3 rounded-sm border-2 border-primary bg-muted px-4 py-3">
+ <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-background flex items-center justify-center">
+ {avatar ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={avatar}
+ alt={project.founderFullName}
+ className="h-full w-full object-cover"
+ />
+ ) : (
+ <User className="h-5 w-5 text-muted-foreground" />
+ )}
+ </div>
+ <div className="min-w-0 flex-1">
+ <p className="truncate text-sm font-medium text-foreground">
+ {project.title}
+ </p>
+ <p className="truncate text-xs text-muted-foreground">
+ by {project.founderFullName || "Anonymous"}
+ </p>
+ </div>
+ <div className="flex items-center gap-1.5 flex-shrink-0">
+ <button
+ type="button"
+ onClick={onChat}
+ aria-label="Chat"
+ title="Chat"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-primary bg-card text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+ >
+ <MessageCircle className="h-4 w-4" />
+ </button>
+ <button
+ type="button"
+ onClick={onSave}
+ aria-label="Save"
+ title="Save"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-primary bg-card text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+ >
+ <Bookmark className="h-4 w-4" />
+ </button>
+ {websiteHref ? (
+ <a
+ href={websiteHref}
+ target="_blank"
+ rel="noopener noreferrer"
+ aria-label="Website"
+ title="Website"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-primary bg-card text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+ >
+ <Globe className="h-4 w-4" />
+ </a>
+ ) : (
+ <span
+ aria-label="No website"
+ title="No website on file"
+ className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground cursor-not-allowed"
+ >
+ <Globe className="h-4 w-4" />
+ </span>
+ )}
+ </div>
+ </li>
  );
 };
 
