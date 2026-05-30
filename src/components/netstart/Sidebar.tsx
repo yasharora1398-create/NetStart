@@ -46,6 +46,9 @@ const APP_ITEMS: Item[] = [
  { to: "/match", label: "Match", icon: MatchIcon },
  { to: "/saved", label: "Saved", icon: SavedIcon },
  { to: "/chats", label: "Chat", icon: ChatIcon },
+ // Reviews is public-read for everyone (signed-in or not); the
+ // page itself gates the write action on signed-in state.
+ { to: "/reviews", label: "Reviews", icon: ReviewsIcon },
 ];
 
 const ABOUT_ITEMS: Item[] = [
@@ -282,6 +285,7 @@ import {
  MessageCircle,
  Settings as SettingsLucide,
  ShieldCheck,
+ Star as StarLucide,
  User as UserLucide,
  Wrench,
 } from "lucide-react";
@@ -301,6 +305,7 @@ const RAIL_ITEMS: RailItem[] = [
  { to: "/match", label: "Match", icon: <Flower2 className="size-4" /> },
  { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
  { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
+ { to: "/reviews", label: "Reviews", icon: <StarLucide className="size-4" /> },
  { to: "/how", label: "How it works", icon: <Compass className="size-4" /> },
  { to: "/standards", label: "Standards", icon: <ShieldCheck className="size-4" /> },
  { to: "/download", label: "Download", icon: <DownloadLucide className="size-4" /> },
@@ -519,6 +524,24 @@ function SavedIcon() {
  strokeLinejoin="round"
  >
  <path d="M4 2.5 H12 V13.5 L8 10.7 L4 13.5 Z" />
+ </svg>
+ );
+}
+
+function ReviewsIcon() {
+ // Five-point star drawn in the same stroke-only style as the
+ // rest of the sidebar icons so it inherits the active/inactive
+ // colour like SavedIcon, ChatIcon, etc.
+ return (
+ <svg
+ viewBox="0 0 16 16"
+ fill="none"
+ stroke="currentColor"
+ strokeWidth={1.4}
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ >
+ <path d="M8 2 L9.8 6 L14 6.4 L10.8 9.2 L11.8 13.4 L8 11.1 L4.2 13.4 L5.2 9.2 L2 6.4 L6.2 6 Z" />
  </svg>
  );
 }
