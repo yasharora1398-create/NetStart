@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { BannerCropper } from "@/components/mynet/BannerCropper";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -55,6 +56,9 @@ const FounderProfile = () => {
  const [loadingData, setLoadingData] = useState(false);
  const [uploadingBanner, setUploadingBanner] = useState(false);
  const bannerInputRef = useRef<HTMLInputElement | null>(null);
+ // Two-step picker: pick file -> open cropper -> confirm -> upload.
+ // pendingBannerFile holds the picked File while the cropper is open.
+ const [pendingBannerFile, setPendingBannerFile] = useState<File | null>(null);
 
  useEffect(() => {
  if (!id) return;
@@ -99,20 +103,30 @@ const FounderProfile = () => {
  return Array.from(set);
  }, [projects]);
 
- const handleBannerPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+ // Step 1: file picker -> stash the file + open the cropper.
+ const handleBannerPick = (e: React.ChangeEvent<HTMLInputElement>) => {
  const file = e.target.files?.[0];
  e.target.value = ""; // reset so picking the same file twice works
  if (!file || !isOwner || !user) return;
+ setPendingBannerFile(file);
+ };
+
+ // Step 2: cropper returns a Blob; upload it as a JPEG and refresh the
+ // founder state so the new banner appears immediately.
+ const handleCroppedBanner = async (blob: Blob) => {
+ if (!user) return;
  setUploadingBanner(true);
  try {
  const newPath = await uploadBanner(
  user.id,
- file,
+ blob,
  founder?.bannerImagePath || null,
+ "jpg",
  );
  setFounder((prev) =>
  prev ? { ...prev, bannerImagePath: newPath } : prev,
  );
+ setPendingBannerFile(null);
  toast.success("Banner updated.");
  } catch (err) {
  toast.error(err instanceof Error ? err.message : "Could not upload.");
@@ -183,7 +197,7 @@ const FounderProfile = () => {
  className="absolute inset-0 h-full w-full object-cover"
  />
  ) : (
- <div className="absolute inset-0 bg-gradient-to-br from-muted via-card to-muted" />
+ <div className="absolute inset-0 bg-muted" />
  )}
  {isOwner ? (
  <div
@@ -504,6 +518,15 @@ const FounderProfile = () => {
  </div>
 
  {!loading && !user ? <AuthGate /> : null}
+
+ {/* Banner crop modal. Opens once a file is picked; closes on
+ cancel or after a successful upload. */}
+ <BannerCropper
+ file={pendingBannerFile}
+ open={Boolean(pendingBannerFile)}
+ onClose={() => setPendingBannerFile(null)}
+ onConfirm={handleCroppedBanner}
+ />
  </AppLayout>
  );
 };

@@ -1516,14 +1516,20 @@ const BANNER_MAX_BYTES = 5 * 1024 * 1024;
 
 export const uploadBanner = async (
  userId: string,
- file: File,
+ file: File | Blob,
  previousPath: string | null,
+ explicitExt?: string,
 ): Promise<string> => {
  if (file.size > BANNER_MAX_BYTES) {
  throw new Error("Banner too large. Max 5 MB.");
  }
  const supabase = getSupabase();
- const ext = (file.name.split(".").pop() ?? "png").toLowerCase();
+ const rawName = (file as File).name ?? "";
+ const ext = (
+ explicitExt ??
+ (rawName ? rawName.split(".").pop() : undefined) ??
+ (file.type === "image/jpeg" ? "jpg" : "png")
+ ).toLowerCase();
  const path = `${userId}/banner/${Date.now()}.${ext}`;
 
  const { error: uploadError } = await supabase.storage
@@ -1533,7 +1539,11 @@ export const uploadBanner = async (
  upsert: false,
  contentType: file.type || undefined,
  });
- if (uploadError) throw uploadError;
+ if (uploadError) {
+ // eslint-disable-next-line no-console
+ console.error("[banner] storage upload failed", uploadError);
+ throw new Error(`Could not upload image: ${uploadError.message}`);
+ }
 
  const { error: profileError } = await supabase
  .from("profiles")
@@ -1542,8 +1552,20 @@ export const uploadBanner = async (
  { onConflict: "user_id" },
  );
  if (profileError) {
+ // eslint-disable-next-line no-console
+ console.error("[banner] profile upsert failed", profileError);
  await supabase.storage.from(AVATARS_BUCKET).remove([path]);
- throw profileError;
+ const msg = profileError.message || "";
+ if (
+ /banner_image_path/i.test(msg) ||
+ /column.*does not exist/i.test(msg) ||
+ /schema cache/i.test(msg)
+ ) {
+ throw new Error(
+ "Banner column is missing on the database. Run supabase/migrations/0040_profile_banner.sql in the Supabase SQL editor, then try again.",
+ );
+ }
+ throw new Error(`Could not save banner: ${msg}`);
  }
 
  if (previousPath) {
