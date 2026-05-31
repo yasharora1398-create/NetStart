@@ -21,12 +21,12 @@ import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/netstart/Footer";
-import { IconRail } from "@/components/netstart/IconRail";
 import { HomeAuthStrip } from "@/components/netstart/HomeAuthStrip";
 import { FadeUp } from "@/components/netstart/FadeUp";
 import WhySection from "@/components/marketing/WhySection";
 import MobileHome from "@/components/marketing/MobileHome";
 import { BoostPopup } from "@/components/netstart/BoostPopup";
+import { Sidebar } from "@/components/netstart/Sidebar";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -217,12 +217,21 @@ const Home = () => {
 
  {/* Tablet + desktop: the full marketing site. Hidden on phones
  so the mobile layout owns the viewport without competing
- sections fighting for space. */}
+ sections fighting for space.
+
+ Sidebar is the same expanded nav the rest of the app uses
+ (not the old thin IconRail) so the home page matches /match,
+ /mynet, /perks, etc. Sidebar owns the --sidebar-width CSS
+ variable so the main content pads correctly when the user
+ collapses the sidebar. */}
  <div className="hidden md:block min-h-dvh bg-background text-foreground overflow-x-clip">
- <IconRail />
+ <Sidebar />
  <HomeAuthStrip />
 
- <main className="md:pl-20">
+ <main
+ className="transition-[padding] duration-300 ease-out"
+ style={{ paddingLeft: "var(--sidebar-width, 248px)" }}
+ >
  <Hero />
  <Problem />
  <ProofIntro />
