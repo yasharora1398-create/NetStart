@@ -28,6 +28,7 @@ const NAV_LINKS_GUEST: NavLink[] = [
   { to: "/", label: "Home" },
   { to: "/how", label: "How it works" },
   { to: "/standards", label: "The bar" },
+  { to: "/perks", label: "Paid features" },
   { to: "/signin", label: "Sign in" },
   { to: "/signup", label: "Sign up" },
 ];
@@ -36,6 +37,7 @@ const NAV_LINKS_AUTHED: NavLink[] = [
   { to: "/", label: "Home" },
   { to: "/how", label: "How it works" },
   { to: "/standards", label: "The bar" },
+  { to: "/perks", label: "Paid features" },
   { to: "/m/", label: "Open the app" },
 ];
 
@@ -203,6 +205,82 @@ const MobileHome = () => {
           className="inline-flex items-center gap-2 text-sm font-medium text-primary"
         >
           Read the standards
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </section>
+
+      {/* Paid features promo. Three compact cards (text-only, no
+          mockup images per the "explain it properly, max 2 images"
+          rule) linking to /perks for the full visual catalogue.
+          Sits between Standards and the Final CTA so the user
+          encounters the perks before they decide to act. */}
+      <section className="px-5 py-16 border-t border-border">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-4">
+          Paid features
+        </p>
+        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground mb-6 font-bold">
+          Three tiny upgrades when you want to stand out.
+        </h2>
+        <ul className="space-y-3 mb-7">
+          {[
+            {
+              name: "Boost",
+              price: "50¢",
+              note: "USD · 72 hours",
+              body: "Pin your card to position #1 of the opposite-role Match deck for 72 hours.",
+              href: "/boost",
+            },
+            {
+              name: "Verified",
+              price: "50¢",
+              note: "USD · permanent",
+              body: "A blue check next to your name everywhere on Polln8. Pay once, badge forever.",
+              href: "/verified",
+            },
+            {
+              name: "Spotlight",
+              price: "75¢",
+              note: "USD · both at once",
+              body: "Boost + Verified bundled. 25¢ cheaper than buying them separately.",
+              href: "/spotlight",
+              best: true,
+            },
+          ].map((p) => (
+            <li key={p.name}>
+              <Link
+                to={p.href}
+                className="block rounded-2xl border border-border bg-card p-4 transition-colors hover:border-gold"
+              >
+                <div className="flex items-baseline justify-between gap-3 mb-1.5">
+                  <h3 className="font-display text-xl leading-none text-foreground">
+                    {p.name}
+                  </h3>
+                  <div className="flex items-baseline gap-2 flex-shrink-0">
+                    <span className="font-display text-xl text-gold">
+                      {p.price}
+                    </span>
+                    {p.best ? (
+                      <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-mono uppercase tracking-widest text-primary-foreground">
+                        Best value
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+                  {p.note}
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {p.body}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link
+          to="/perks"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary"
+        >
+          See all three side-by-side
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </section>

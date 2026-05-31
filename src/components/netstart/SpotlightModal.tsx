@@ -16,7 +16,10 @@ import { cn } from "@/lib/utils";
 // On md+ viewports it renders nothing; desktop users still get the
 // non-blocking BoostPopup in the bottom-right corner.
 
-const DISMISS_KEY = "polln8.spotlight-modal.dismissed.v1";
+// Key version bumped to v2 to force re-show for users who already
+// dismissed the v1 modal (the original deploy never made it to
+// prod in time for them to see it).
+const DISMISS_KEY = "polln8.spotlight-modal.dismissed.v2";
 
 export const SpotlightModal = () => {
  // Default to visible. Hide if either: viewport is desktop (handled

@@ -18,7 +18,6 @@ import {
  Bookmark,
  ChevronLeft,
  ChevronRight,
- Crown,
  Flower2,
  MessageCircle,
  User,
@@ -36,7 +35,6 @@ type Tab = {
 const TABS: Tab[] = [
  { to: "/match", label: "Match", icon: Flower2 },
  { to: "/saved", label: "Saved", icon: Bookmark },
- { to: "/perks", label: "Perks", icon: Crown },
  { to: "/chats", label: "Chat", icon: MessageCircle },
  { to: "/mynet", label: "MyNet", icon: User },
 ];
