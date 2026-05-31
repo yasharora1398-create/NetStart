@@ -97,6 +97,8 @@ type ProfileRow = {
  // Banner image (migration 0040). Optional so the mapper still
  // works before the migration is applied locally.
  banner_image_path?: string | null;
+ // Verified perk (migration 0044). Optional same reason.
+ is_verified?: boolean | null;
 };
 
 type ProjectRow = {
@@ -158,6 +160,7 @@ const profileFromRow = (row: ProfileRow): Profile => ({
  activeProjectId: row.active_project_id ?? null,
  candidate: candidateFromRow(row),
  bannerImagePath: row.banner_image_path ?? "",
+ isVerified: Boolean(row.is_verified),
 });
 
 const criteriaFromJson = (raw: Partial<ProjectCriteria> | null): ProjectCriteria => {
@@ -838,6 +841,7 @@ export const matchProjectsForMe = async (): Promise<
  polln8FounderWebsite: "",
  polln8FounderAvatarPath: null,
  isBoosted: false,
+ isOwnerVerified: false,
  }));
 };
 
@@ -885,12 +889,16 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  full_name: string | null;
  headline: string | null;
  avatar_path: string | null;
+ // Verified perk drives the card's ribbon + outline treatment.
+ // Tolerated as nullable so the row mapper still works before
+ // migration 0044 is applied locally.
+ is_verified: boolean | null;
  };
  let profileMap = new Map<string, FounderProfile>();
  if (ownerIds.length > 0) {
  const { data: profileRows, error: profileError } = await supabase
  .from("profiles")
- .select("user_id, full_name, headline, avatar_path")
+ .select("user_id, full_name, headline, avatar_path, is_verified")
  .in("user_id", ownerIds);
  if (profileError) throw profileError;
  profileMap = new Map(
@@ -959,6 +967,7 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  polln8FounderWebsite: (p.polln8_founder_website ?? "").trim(),
  polln8FounderAvatarPath: polln8Avatar || null,
  isBoosted: boosted,
+ isOwnerVerified: Boolean(profile?.is_verified),
  };
  });
 
@@ -1333,6 +1342,9 @@ export type PublicFounder = {
  // Banner image path under the avatars bucket. Empty when no banner
  // has been uploaded; the public profile renders a placeholder.
  bannerImagePath: string;
+ // Verified perk (migration 0044). Drives the blue checkmark badge
+ // next to the founder's name on /u/<id> + the card visual on Match.
+ isVerified: boolean;
 };
 
 type PublicFounderRow = {
@@ -1348,6 +1360,7 @@ type PublicFounderRow = {
  is_open_to_work: boolean;
  website_url: string | null;
  banner_image_path: string | null;
+ is_verified: boolean | null;
 };
 
 export const getPublicFounder = async (
@@ -1373,6 +1386,7 @@ export const getPublicFounder = async (
  isOpenToWork: Boolean(r.is_open_to_work),
  websiteUrl: r.website_url ?? "",
  bannerImagePath: r.banner_image_path ?? "",
+ isVerified: Boolean(r.is_verified),
  };
 };
 
@@ -1413,6 +1427,7 @@ export const listPublishedProjectsForOwner = async (
  polln8FounderWebsite: "",
  polln8FounderAvatarPath: null,
  isBoosted: false,
+ isOwnerVerified: false,
  }));
 };
 

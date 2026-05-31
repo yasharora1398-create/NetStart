@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
 import { BannerCropper } from "@/components/mynet/BannerCropper";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -246,8 +247,9 @@ const FounderProfile = () => {
  the left + negative-margin on the pfp. */}
  <div className="relative flex items-end justify-between gap-4 -mt-12 sm:-mt-16 mb-6 px-1 sm:px-4">
  <div className="flex-1 min-w-0 pt-12 sm:pt-16">
- <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight">
- {founder.fullName || "Unnamed"}
+ <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight inline-flex items-center gap-2 flex-wrap">
+ <span>{founder.fullName || "Unnamed"}</span>
+ {founder.isVerified ? <VerifiedBadge size="lg" /> : null}
  </h1>
  {founder.headline ? (
  <p className="mt-1 text-sm sm:text-base text-muted-foreground max-w-2xl">

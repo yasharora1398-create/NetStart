@@ -382,8 +382,9 @@ const Boost = () => {
  You can&apos;t stack two at the same time.
  </Faq>
  <Faq q="Will partners know my card is boosted?">
- No badge, no ribbon, no asterisk. The pin is invisible to
- viewers; you just sit at position one.
+ Your card gets the green outline so it stands out a little,
+ but no ribbon or badge. The pin itself is what does the work
+ - you just sit at position one for 72 hours.
  </Faq>
  <Faq q="Refunds?">
  If something breaks on our end, message us and we&apos;ll
@@ -457,11 +458,9 @@ const BoostedCardMockup = ({ opposite }: { opposite: string }) => (
  </div>
 
  <article className="overflow-hidden rounded-2xl bg-card shadow-sm border-2 border-primary">
- {/* Recommended-by header strip - same primary fill + text as
- the real card. */}
- <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
- Recommended by Polln8
- </div>
+ {/* Boost gets the green outline only, NO "Recommended by
+ Polln8" header strip. The strip is reserved for verified
+ founders and Polln8-curated picks. */}
 
  {/* Picture square - 4:3 muted background with the silhouette
  fallback, identical to MatchProjectCard's no-avatar path. */}

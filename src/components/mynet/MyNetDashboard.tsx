@@ -24,6 +24,7 @@ import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
 import { BoostActiveBanner } from "./BoostActiveBanner";
+import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
 import type { ProfileSubmission } from "./ProfileCard";
 import {
  getAvatarUrl,
@@ -582,8 +583,9 @@ const CandidateDisplay = ({ profile }: { profile: Profile }) => {
  </div>
  )}
  <div className="flex-1 min-w-0">
- <h3 className="font-display text-2xl mb-1">
- {profile.fullName || "Unnamed"}
+ <h3 className="font-display text-2xl mb-1 inline-flex items-center gap-1.5">
+ <span>{profile.fullName || "Unnamed"}</span>
+ {profile.isVerified ? <VerifiedBadge size="md" /> : null}
  </h3>
  {c.headline && (
  <p className="text-sm text-muted-foreground mb-3">{c.headline}</p>
@@ -705,8 +707,9 @@ const CandidatePreviewCard = ({ profile }: { profile: Profile }) => {
  )}
  </div>
  <div className="p-5">
- <h3 className="mb-2 font-display text-2xl leading-tight">
- {profile.fullName || "Unnamed"}
+ <h3 className="mb-2 font-display text-2xl leading-tight inline-flex items-center gap-1.5">
+ <span>{profile.fullName || "Unnamed"}</span>
+ {profile.isVerified ? <VerifiedBadge size="md" /> : null}
  </h3>
  {(c.commitment || c.location || c.skills.length > 0) ? (
  <div className="mb-3 flex flex-wrap gap-1.5">

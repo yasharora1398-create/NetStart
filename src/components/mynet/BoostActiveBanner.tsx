@@ -282,9 +282,10 @@ const PreviewCard = ({
 
  return (
  <article className="overflow-hidden rounded-2xl bg-card shadow-md border-2 border-primary transition-transform duration-300 hover:scale-[1.02]">
- <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
- Recommended by Polln8
- </div>
+ {/* Boost = green outline ONLY. The "Recommended by Polln8"
+ header strip is reserved for verified-perk owners and
+ Polln8-curated picks; boosted cards just get the heavier
+ border + the position-#1 pin. */}
  <div className="relative w-full aspect-[4/3] bg-muted">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element

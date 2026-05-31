@@ -2069,11 +2069,14 @@ const ProjectInfoPanel = ({
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  const recommended = project.isPolln8Recommended;
- // Paid boosts get the same green-outline + "Recommended by Polln8"
- // header strip as a real Polln8 recommendation. recommended wins
- // when both are true (a curated admin pick is still the stronger
- // signal than a paid pin).
- const highlighted = recommended || project.isBoosted;
+ const verified = project.isOwnerVerified;
+ // Visual rules:
+ //  - isPolln8Recommended OR isOwnerVerified -> green outline +
+ //    "Recommended by Polln8" ribbon (highest visual tier)
+ //  - isBoosted (paid 72h pin) -> green outline only, no ribbon
+ //  - default -> the existing gold border
+ const ribbon = recommended || verified;
+ const outlined = ribbon || project.isBoosted;
  // Polln8 cards: prefer the admin-uploaded recommendation photo over
  // the project owner's profile avatar. Direct read so it works even
  // if listPublishedProjects' swap somehow missed.
@@ -2099,12 +2102,13 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  <article
  className={cn(
  "overflow-hidden rounded-2xl bg-card shadow-sm",
- // Polln8-recommended + boosted cards both get a heavier
- // green outline so they stand out in the deck.
- highlighted ? "border-2 border-primary" : "border border-gold",
+ // Outlined = polln8-recommended OR verified-perk owner OR
+ // boosted. All three get the heavier green border to stand
+ // out in the deck.
+ outlined ? "border-2 border-primary" : "border border-gold",
  )}
  >
- {highlighted ? (
+ {ribbon ? (
  <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
  Recommended by Polln8
  </div>

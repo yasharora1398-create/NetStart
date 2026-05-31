@@ -4,11 +4,17 @@ import { getUserFromAuthHeader } from "@/lib/api-auth";
 import { getStripe } from "@/lib/stripe";
 
 // Stripe Checkout session creator. Frontend POSTs here with a
-// Bearer token; we mint a Checkout session for the signed-in user
-// with metadata that the verify-session endpoint will read after
-// the user pays.
+// Bearer token + an optional purpose ("boost" or "verified") in the
+// JSON body, and we mint a Checkout session for the right product.
+// Both perks redirect back to the same /<purpose>?session_id= URL
+// so each page can run its own verify-session call on mount.
 
 export const runtime = "nodejs";
+
+type Purpose = "boost" | "verified";
+
+const isPurpose = (v: unknown): v is Purpose =>
+ v === "boost" || v === "verified";
 
 export async function POST(request: Request) {
  const user = await getUserFromAuthHeader(request);
@@ -19,12 +25,28 @@ export async function POST(request: Request) {
  );
  }
 
- const priceId = process.env.STRIPE_BOOST_PRICE_ID;
+ // Purpose defaults to "boost" for backwards compatibility with the
+ // existing /boost call site that doesn't send a body.
+ let purpose: Purpose = "boost";
+ try {
+ const body = (await request.json()) as { purpose?: unknown };
+ if (body && isPurpose(body.purpose)) purpose = body.purpose;
+ } catch {
+ /* empty body is fine, falls through to default */
+ }
+
+ const priceEnvName =
+ purpose === "verified"
+ ? "STRIPE_VERIFIED_PRICE_ID"
+ : "STRIPE_BOOST_PRICE_ID";
+ const priceId =
+ purpose === "verified"
+ ? process.env.STRIPE_VERIFIED_PRICE_ID
+ : process.env.STRIPE_BOOST_PRICE_ID;
  if (!priceId) {
  return NextResponse.json(
  {
- error:
- "STRIPE_BOOST_PRICE_ID is not configured. Set it in .env.local + restart dev.",
+ error: `${priceEnvName} is not configured. Set it in .env.local + restart dev.`,
  },
  { status: 500 },
  );
@@ -38,22 +60,27 @@ export async function POST(request: Request) {
 
  // Boost target_role is the OPPOSITE of the buyer's own role: a
  // founder pays to show up in the partner deck and vice versa.
- // Defaults to partner if user_metadata.role isn't set (legacy
- // accounts).
+ // Stamped into metadata regardless of purpose so the verify
+ // endpoint can use it if needed (verified ignores it).
  const role =
  user.user_metadata?.role === "founder" ? "founder" : "partner";
  const targetRole = role === "founder" ? "partner" : "founder";
+
+ // Where Stripe sends the user after success. Boost lands back on
+ // /boost; verified lands on /verified. Both pages run their own
+ // verify-session on mount.
+ const returnPath = purpose === "verified" ? "/verified" : "/boost";
 
  try {
  const session = await getStripe().checkout.sessions.create({
  mode: "payment",
  line_items: [{ price: priceId, quantity: 1 }],
- success_url: `${appUrl}/boost?session_id={CHECKOUT_SESSION_ID}`,
- cancel_url: `${appUrl}/boost`,
+ success_url: `${appUrl}${returnPath}?session_id={CHECKOUT_SESSION_ID}`,
+ cancel_url: `${appUrl}${returnPath}`,
  customer_email: user.email ?? undefined,
  // Card-only for v1 - async payment methods (ACH, bank debits,
  // Klarna) settle hours-to-days later and would need a webhook
- // to grant the boost. Keeping payment_method_types at "card"
+ // to grant the perk. Keeping payment_method_types at "card"
  // means payment_status flips to "paid" immediately on the
  // success redirect, which is the only path our verify endpoint
  // handles right now.
@@ -61,7 +88,7 @@ export async function POST(request: Request) {
  metadata: {
  user_id: user.id,
  target_role: targetRole,
- purpose: "boost",
+ purpose,
  },
  });
 

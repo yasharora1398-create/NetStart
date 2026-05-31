@@ -84,6 +84,11 @@ export type Profile = {
  // <uid>/banner/). Empty string = no banner uploaded; the public
  // profile renders a neutral placeholder.
  bannerImagePath: string;
+ // Permanent verified perk (one-time 50c via Stripe). When true,
+ // the user's Match card renders with the green outline +
+ // "Recommended by Polln8" header strip, and a small blue
+ // checkmark renders next to their name everywhere it appears.
+ isVerified: boolean;
 };
 
 export type Candidate = {
@@ -180,10 +185,15 @@ export type PublicProject = {
  // falls back to the silhouette icon.
  polln8FounderAvatarPath: string | null;
  // Paid boost: owner of this project has an active boost row in
- // public.boosts. Boosted cards render with the same green outline
- // + "Recommended by Polln8" header strip as a Polln8-curated card,
- // and sort to the top of the deck (most recent boost first).
+ // public.boosts. Boosted cards get a green outline only (no ribbon
+ // text) and sort to the top of the deck (most recent boost first).
+ // The ribbon text is reserved for Polln8 recommendations and
+ // verified-perk owners.
  isBoosted: boolean;
+ // Verified perk: owner.is_verified = true. Cards from a verified
+ // founder get the green outline + "Recommended by Polln8" header
+ // strip (same treatment as a Polln8-curated card).
+ isOwnerVerified: boolean;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({
@@ -214,6 +224,7 @@ export const emptyProfile = (): Profile => ({
  activeProjectId: null,
  candidate: emptyCandidate(),
  bannerImagePath: "",
+ isVerified: false,
 });
 
 export const CANDIDATE_BIO_MIN = 60;
