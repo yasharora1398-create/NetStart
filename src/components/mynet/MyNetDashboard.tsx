@@ -23,8 +23,13 @@ import { Switch } from "@/components/ui/switch";
 import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
+import { BoostActiveBanner } from "./BoostActiveBanner";
 import type { ProfileSubmission } from "./ProfileCard";
-import { getAvatarUrl } from "@/lib/mynet-storage";
+import {
+ getAvatarUrl,
+ getMyActiveBoost,
+ type ActiveBoost,
+} from "@/lib/mynet-storage";
 import type {
  CandidateProfile,
  Profile,
@@ -99,12 +104,58 @@ export const MyNetDashboard = ({
  userId,
 }: Props) => {
  const [editing, setEditing] = useState(false);
+ // The current user's most recent active boost row (null if none).
+ // Polled on mount + every 2 minutes so the banner disappears at
+ // the right time even if the user stays on MyNet through the
+ // expiry. The banner itself does its own per-minute countdown.
+ const [activeBoost, setActiveBoost] = useState<ActiveBoost | null>(null);
+ useEffect(() => {
+ if (!userId) return;
+ let cancelled = false;
+ const load = () => {
+ getMyActiveBoost(userId)
+ .then((b) => {
+ if (!cancelled) setActiveBoost(b);
+ })
+ .catch(() => {
+ /* silent - boosts table may not exist on this deploy */
+ });
+ };
+ load();
+ const id = window.setInterval(load, 120_000);
+ return () => {
+ cancelled = true;
+ window.clearInterval(id);
+ };
+ }, [userId]);
+ // The project the preview card mocks: the user's active project,
+ // or the first one they've published. Null when they have nothing
+ // yet - the banner falls back to a profile-only preview.
+ const boostPreviewProject =
+ projects.find((p) => p.id === profile.activeProjectId) ??
+ projects[0] ??
+ null;
 
  const hasProjects = projects.length > 0;
  const isPending = profile.reviewStatus === "pending";
 
  return (
  <>
+ {/* Boost banner: only renders for the 72-hour window after the
+ user pays. Sits at the very top of MyNet so they land on it
+ immediately after returning from /boost. Self-hides the
+ moment the timer hits zero. */}
+ {activeBoost ? (
+ <div className="mb-8">
+ <BoostActiveBanner
+ boost={activeBoost}
+ profile={profile}
+ project={boostPreviewProject}
+ projectCount={projects.length}
+ />
+ </div>
+ ) : null}
+
  {/* Header - Edit toggle now lives up top so the user can flip
  into edit mode the moment they land on the page, instead of
  scrolling to the bottom to find the button. */}

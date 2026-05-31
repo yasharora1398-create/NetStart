@@ -1416,6 +1416,50 @@ export const listPublishedProjectsForOwner = async (
  }));
 };
 
+// ---- Boost ---------------------------------------------------------
+
+// Caller's most recent active boost row, or null if they have none
+// running. Used by MyNet to render the celebratory banner + preview
+// card during the 72-hour window. Tolerates the table not existing
+// (pre-migration-0043 deploys) by returning null on error so the
+// rest of the dashboard still renders.
+export type ActiveBoost = {
+ id: string;
+ targetRole: "founder" | "partner";
+ startsAt: string;
+ expiresAt: string;
+};
+
+export const getMyActiveBoost = async (
+ userId: string,
+): Promise<ActiveBoost | null> => {
+ try {
+ const { data, error } = await getSupabase()
+ .from("boosts")
+ .select("id, target_role, starts_at, expires_at")
+ .eq("user_id", userId)
+ .gt("expires_at", new Date().toISOString())
+ .order("created_at", { ascending: false })
+ .limit(1)
+ .maybeSingle();
+ if (error || !data) return null;
+ const row = data as {
+ id: string;
+ target_role: "founder" | "partner";
+ starts_at: string;
+ expires_at: string;
+ };
+ return {
+ id: row.id,
+ targetRole: row.target_role,
+ startsAt: row.starts_at,
+ expiresAt: row.expires_at,
+ };
+ } catch {
+ return null;
+ }
+};
+
 // ---- Avatars ------------------------------------------------------
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
