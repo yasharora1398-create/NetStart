@@ -11,10 +11,10 @@ import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
-type Purpose = "boost" | "verified";
+type Purpose = "boost" | "verified" | "spotlight";
 
 const isPurpose = (v: unknown): v is Purpose =>
- v === "boost" || v === "verified";
+ v === "boost" || v === "verified" || v === "spotlight";
 
 export async function POST(request: Request) {
  const user = await getUserFromAuthHeader(request);
@@ -35,13 +35,18 @@ export async function POST(request: Request) {
  /* empty body is fine, falls through to default */
  }
 
+ // Map each purpose to its env-var price ID.
  const priceEnvName =
  purpose === "verified"
  ? "STRIPE_VERIFIED_PRICE_ID"
+ : purpose === "spotlight"
+ ? "STRIPE_SPOTLIGHT_PRICE_ID"
  : "STRIPE_BOOST_PRICE_ID";
  const priceId =
  purpose === "verified"
  ? process.env.STRIPE_VERIFIED_PRICE_ID
+ : purpose === "spotlight"
+ ? process.env.STRIPE_SPOTLIGHT_PRICE_ID
  : process.env.STRIPE_BOOST_PRICE_ID;
  if (!priceId) {
  return NextResponse.json(
@@ -66,10 +71,15 @@ export async function POST(request: Request) {
  user.user_metadata?.role === "founder" ? "founder" : "partner";
  const targetRole = role === "founder" ? "partner" : "founder";
 
- // Where Stripe sends the user after success. Boost lands back on
- // /boost; verified lands on /verified. Both pages run their own
- // verify-session on mount.
- const returnPath = purpose === "verified" ? "/verified" : "/boost";
+ // Where Stripe sends the user after success. Each purpose lands
+ // back on its own page so the success copy + verify-session call
+ // is local to that page.
+ const returnPath =
+ purpose === "verified"
+ ? "/verified"
+ : purpose === "spotlight"
+ ? "/spotlight"
+ : "/boost";
 
  try {
  const session = await getStripe().checkout.sessions.create({

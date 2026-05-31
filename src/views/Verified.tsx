@@ -231,6 +231,20 @@ const Verified = () => {
  ? `Badge appears on your ${role} profile`
  : "Works for founder OR partner accounts"}
  </p>
+ {/* Upsell to the combo SKU. Same blue (#1d9bf0) border as
+ the verified visual so it reads as a related action. */}
+ <Link
+ to="/spotlight"
+ className="mt-5 inline-flex items-center gap-2 rounded-sm border border-[#1d9bf0] bg-card px-3 py-2 text-xs text-foreground hover:bg-[#1d9bf0] hover:text-white transition-colors"
+ >
+ <span>
+ Want a 72-hour pin too?{" "}
+ <span className="text-[#1d9bf0] group-hover:text-white">
+ Get both for 75¢
+ </span>
+ </span>
+ <ArrowRight className="h-3.5 w-3.5" />
+ </Link>
  </FadeUp>
 
  {/* Right column: preview of how the verified card looks in

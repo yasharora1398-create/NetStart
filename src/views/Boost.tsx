@@ -213,6 +213,20 @@ const Boost = () => {
  ? `Activates on your ${role} side`
  : `Boost applies to whichever role you use`}
  </p>
+ {/* Upsell to the combo SKU. Same border tone as the gold
+ hero button so it reads as a related action, not noise. */}
+ <Link
+ to="/spotlight"
+ className="mt-5 inline-flex items-center gap-2 rounded-sm border border-gold bg-card px-3 py-2 text-xs text-foreground hover:bg-gold hover:text-primary-foreground transition-colors"
+ >
+ <span>
+ Want the blue check too?{" "}
+ <span className="text-gold group-hover:text-primary-foreground">
+ Get both for 75¢
+ </span>
+ </span>
+ <ArrowRight className="h-3.5 w-3.5" />
+ </Link>
  </FadeUp>
 
  {/* Right column: a pixel-for-pixel mock of how a boosted card
