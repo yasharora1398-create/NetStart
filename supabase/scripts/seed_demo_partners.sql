@@ -48,8 +48,13 @@ with new_partners(id, email, full_name, linkedin_url, headline, bio, skills, loc
       'Full-time'
     )
 )
--- 1a. auth.users row. Dummy bcrypt password = no one can sign in
---     as these accounts; they exist only for display.
+-- 1a. auth.users row. Universal password "Polln8Demo!" is hashed
+--     into encrypted_password so the operator (you) can actually
+--     sign in as either demo account from the Polln8 sign-in form
+--     and walk through the partner-side experience. Both demo
+--     emails share the same password.
+--
+--     Universal password: Polln8Demo!
 insert into auth.users (
   instance_id, id, aud, role, email,
   encrypted_password, email_confirmed_at,
@@ -63,7 +68,7 @@ select
   'authenticated',
   'authenticated',
   np.email,
-  crypt(gen_random_uuid()::text, gen_salt('bf')),
+  crypt('Polln8Demo!', gen_salt('bf')),
   now(),
   now(),
   now(),
