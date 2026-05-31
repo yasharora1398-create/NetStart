@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import {
  ArrowLeft,
@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
+import { FadeUp } from "@/components/netstart/FadeUp";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -60,9 +61,11 @@ const Boost = () => {
 
  {/* HERO ------------------------------------------------------ */}
  {/* Two-column split: copy + price on the left, mockup of the
- deck-with-boosted-card on the right. Stacks on mobile. */}
+ deck-with-boosted-card on the right. Stacks on mobile.
+ Both columns fade in; the right column is staggered slightly
+ so the visual reveal feels intentional. */}
  <header className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-10 md:gap-14 items-center mb-16 md:mb-24">
- <div className="min-w-0">
+ <FadeUp className="min-w-0">
  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-gold mb-4 flex items-center gap-2">
  <Rocket className="h-3.5 w-3.5" />
  Boost
@@ -80,18 +83,19 @@ const Boost = () => {
  moment.
  </p>
 
- <div className="flex items-center gap-3 mb-7">
- <div className="font-display text-7xl md:text-8xl leading-none">
+ <div className="flex items-end gap-3 mb-7">
+ <div className="font-display text-7xl md:text-8xl leading-none transition-transform duration-300 hover:scale-105 origin-bottom-left">
  10¢
  </div>
- <div className="text-xs text-muted-foreground leading-tight">
+ <div className="text-xs text-muted-foreground leading-tight pb-2">
+ <span className="font-mono uppercase tracking-widest text-[10px] text-foreground block">
+ USD
+ </span>
  one-time
  <br />
  charge.
  <br />
- no
- <br />
- sub.
+ no sub.
  </div>
  </div>
 
@@ -128,39 +132,48 @@ const Boost = () => {
  ? `Activates on your ${role} side`
  : `Boost applies to whichever role you use`}
  </p>
- </div>
+ </FadeUp>
 
  {/* Right column: a pixel-for-pixel mock of how a boosted card
  appears at the top of the deck. Same border-2 border-primary,
  same primary header strip, same picture square + criteria pills
  as a real Polln8-recommended card in Match. */}
+ <FadeUp delay={150}>
  <BoostedCardMockup opposite={opposite} />
+ </FadeUp>
  </header>
 
  {/* WHAT IT DOES (3 stat tiles) ----------------------------- */}
  <section className="grid md:grid-cols-3 gap-4 mb-16 md:mb-24">
+ <FadeUp>
  <StatTile
  icon={<Layers className="h-5 w-5" />}
  number="#1"
  label="Position in deck"
  detail={`First card every ${opposite} sees when they open Match.`}
  />
+ </FadeUp>
+ <FadeUp delay={100}>
  <StatTile
  icon={<Timer className="h-5 w-5" />}
  number={`${DURATION_HOURS}h`}
  label="Of priority"
  detail="Long enough to catch a weekend, short enough to stay fresh."
  />
+ </FadeUp>
+ <FadeUp delay={200}>
  <StatTile
  icon={<Eye className="h-5 w-5" />}
  number="100%"
  label={`Of ${opposite}s see you`}
  detail="Not a sample. Every active user in the window."
  />
+ </FadeUp>
  </section>
 
  {/* HOW IT WORKS (3 steps with mini illustrations) ---------- */}
  <section className="mb-16 md:mb-24">
+ <FadeUp>
  <div className="mb-10">
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
  How it works
@@ -169,30 +182,38 @@ const Boost = () => {
  Three steps. Less than a minute.
  </h2>
  </div>
+ </FadeUp>
 
  <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+ <FadeUp>
  <StepTile
  n="01"
- title="Pay 10¢"
- body={`A single charge. No subscription, no renewal, no surprise email next month.`}
+ title="Pay 10¢ USD"
+ body={`A single charge in US dollars. No subscription, no renewal, no surprise email next month.`}
  illustration={<PayIllustration />}
  />
+ </FadeUp>
+ <FadeUp delay={120}>
  <StepTile
  n="02"
  title="Your card pins"
  body={`Within seconds, your card jumps to position one of the ${opposite} Match deck.`}
  illustration={<PinIllustration />}
  />
+ </FadeUp>
+ <FadeUp delay={240}>
  <StepTile
  n="03"
  title="72 hours of eyes"
  body="Every viewer in that window starts with you. Then the boost expires automatically."
  illustration={<ClockIllustration />}
  />
+ </FadeUp>
  </div>
  </section>
 
  {/* TIMELINE band -------------------------------------------- */}
+ <FadeUp>
  <section className="mb-16 md:mb-24 rounded-sm border border-border bg-card p-6 md:p-10">
  <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-6">
  <div>
@@ -210,15 +231,16 @@ const Boost = () => {
  </div>
  <TimelineBar />
  </section>
+ </FadeUp>
 
  {/* WHAT YOU GET (checklist + side card) -------------------- */}
  <section className="grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-6 md:gap-10 mb-16 md:mb-24">
- <div>
+ <FadeUp>
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
  In the box
  </p>
  <h2 className="font-display text-3xl md:text-4xl mb-6 leading-tight">
- What you actually get for 10¢.
+ What you actually get for 10¢ USD.
  </h2>
  <ul className="space-y-3">
  <FeatureRow>
@@ -241,21 +263,25 @@ const Boost = () => {
  dark-pattern renewal email at hour 71.
  </FeatureRow>
  </ul>
- </div>
+ </FadeUp>
 
  {/* Side compare card: "Without boost" vs "With boost" stat
  strip. Keeps the proof concrete instead of abstract copy. */}
+ <FadeUp delay={150}>
  <CompareCard opposite={opposite} />
+ </FadeUp>
  </section>
 
  {/* FAQ ----------------------------------------------------- */}
  <section className="mb-16">
+ <FadeUp>
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
  Honest answers
  </p>
  <h2 className="font-display text-3xl md:text-4xl mb-8 leading-tight">
  The questions we keep getting.
  </h2>
+ </FadeUp>
  <div className="grid md:grid-cols-2 gap-4 md:gap-6">
  <Faq q={`Why ${DURATION_HOURS} hours?`}>
  Long enough to catch every {opposite} who logs in over a
@@ -286,10 +312,11 @@ const Boost = () => {
  </section>
 
  {/* FINAL CTA ----------------------------------------------- */}
+ <FadeUp>
  <section className="rounded-sm border-2 border-gold bg-card p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
  <div className="min-w-0">
  <h2 className="font-display text-3xl md:text-4xl leading-tight mb-2">
- Ten cents. Top of the deck.
+ Ten cents USD. Top of the deck.
  </h2>
  <p className="text-sm text-muted-foreground max-w-md">
  The next {opposite} who opens Match could be the one. Make
@@ -313,6 +340,7 @@ const Boost = () => {
  </Button>
  </a>
  </section>
+ </FadeUp>
  </div>
  </AppLayout>
  );
@@ -334,7 +362,7 @@ const BoostedCardMockup = ({ opposite }: { opposite: string }) => (
  {/* Eyebrow above the card pointing into it. Establishes that
  this is the boosted position-#1 card. */}
  <div className="flex items-center gap-2 mb-3 ml-1">
- <Rocket className="h-3.5 w-3.5 text-primary" />
+ <Rocket className="h-3.5 w-3.5 text-primary animate-bounce" />
  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
  Position #1 in the {opposite} deck
  </span>
@@ -405,8 +433,10 @@ const StatTile = ({
  label: string;
  detail: string;
 }) => (
- <div className="rounded-sm border border-border bg-card p-6 md:p-7">
- <div className="flex items-center gap-2 mb-4 text-gold">{icon}</div>
+ <div className="group rounded-sm border border-border bg-card p-6 md:p-7 transition-all duration-300 hover:border-gold hover:-translate-y-1">
+ <div className="flex items-center gap-2 mb-4 text-gold transition-transform duration-300 group-hover:scale-110 origin-left">
+ {icon}
+ </div>
  <p className="font-display text-5xl md:text-6xl leading-none mb-2">
  {number}
  </p>
@@ -430,9 +460,11 @@ const StepTile = ({
  body: string;
  illustration: React.ReactNode;
 }) => (
- <div className="rounded-sm border border-border bg-card overflow-hidden flex flex-col">
- <div className="relative bg-muted h-40 flex items-center justify-center">
+ <div className="group rounded-sm border border-border bg-card overflow-hidden flex flex-col transition-all duration-300 hover:border-gold hover:-translate-y-1">
+ <div className="relative bg-muted h-40 flex items-center justify-center overflow-hidden">
+ <div className="transition-transform duration-500 group-hover:scale-110">
  {illustration}
+ </div>
  <span className="absolute top-3 left-3 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
  {n}
  </span>
@@ -476,11 +508,43 @@ const ClockIllustration = () => (
 );
 
 // Horizontal bar showing the 72-hour boost lifespan with markers at
-// 0 / 24 / 48 / 72. Solid gold bar (no gradient), tick marks below.
-const TimelineBar = () => (
- <div className="pt-4">
+// 0 / 24 / 48 / 72. Solid gold fill (no gradient) that animates from
+// 0% to 100% width when scrolled into view, so the bar visually
+// "spends" the 72 hours as the section enters.
+const TimelineBar = () => {
+ const ref = useRef<HTMLDivElement | null>(null);
+ const [filled, setFilled] = useState(false);
+ useEffect(() => {
+ const el = ref.current;
+ if (!el) return;
+ const reduce = window.matchMedia(
+ "(prefers-reduced-motion: reduce)",
+ ).matches;
+ if (reduce) {
+ setFilled(true);
+ return;
+ }
+ const io = new IntersectionObserver(
+ ([entry]) => {
+ if (entry.isIntersecting) {
+ setFilled(true);
+ io.disconnect();
+ }
+ },
+ { threshold: 0.4 },
+ );
+ io.observe(el);
+ return () => io.disconnect();
+ }, []);
+ return (
+ <div className="pt-4" ref={ref}>
  <div className="relative h-3 rounded-full bg-muted overflow-hidden">
- <div className="absolute inset-y-0 left-0 right-0 bg-gold" />
+ <div
+ className={cn(
+ "absolute inset-y-0 left-0 bg-gold transition-[width] duration-[1800ms] ease-out",
+ filled ? "w-full" : "w-0",
+ )}
+ />
  </div>
  <div className="flex justify-between mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
  <span>0h · pin lands</span>
@@ -489,7 +553,8 @@ const TimelineBar = () => (
  <span>72h · expires</span>
  </div>
  </div>
-);
+ );
+};
 
 const CompareCard = ({ opposite }: { opposite: string }) => (
  <div className="rounded-sm border border-border bg-card overflow-hidden">
@@ -536,7 +601,7 @@ const FeatureRow = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Faq = ({ q, children }: { q: string; children: React.ReactNode }) => (
- <div className="rounded-sm border border-border bg-card p-5">
+ <div className="rounded-sm border border-border bg-card p-5 transition-colors duration-300 hover:border-gold">
  <dt className="font-medium text-foreground mb-1.5">{q}</dt>
  <dd className="text-sm text-muted-foreground leading-relaxed">{children}</dd>
  </div>
