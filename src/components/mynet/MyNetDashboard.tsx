@@ -23,6 +23,7 @@ import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
 import { BoostActiveBanner } from "./BoostActiveBanner";
+import { VerifiedBanner } from "./VerifiedBanner";
 import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
 import type { ProfileSubmission } from "./ProfileCard";
 import {
@@ -145,6 +146,20 @@ export const MyNetDashboard = ({
 
  return (
  <>
+ {/* Verified banner: permanent. Renders for any user whose
+ profiles.is_verified = true. Sits above the boost banner
+ (verified is permanent identity, boost is a 72h promo)
+ so the blue check is the first thing they see when they
+ land on MyNet after paying. */}
+ {profile.isVerified ? (
+ <div className="mb-8">
+ <VerifiedBanner
+ profile={profile}
+ project={boostPreviewProject}
+ />
+ </div>
+ ) : null}
+
  {/* Boost banner: only renders for the 72-hour window after the
  user pays. Sits at the very top of MyNet so they land on it
  immediately after returning from /boost. Self-hides the

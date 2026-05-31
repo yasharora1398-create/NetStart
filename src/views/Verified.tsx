@@ -184,11 +184,19 @@ const Verified = () => {
  </div>
 
  {alreadyVerified ? (
+ <div className="flex flex-col sm:flex-row sm:items-center gap-3">
  <div className="inline-flex items-center gap-2 rounded-sm border-2 border-[#1d9bf0] bg-card px-4 py-3">
  <VerifiedBadge size="md" />
  <span className="font-medium text-foreground">
  You&apos;re verified.
  </span>
+ </div>
+ <Link to="/mynet">
+ <Button variant="gold" size="lg">
+ See it live in MyNet
+ <ArrowRight className="h-4 w-4" />
+ </Button>
+ </Link>
  </div>
  ) : user ? (
  <Button
