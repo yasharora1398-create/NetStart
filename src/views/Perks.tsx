@@ -22,7 +22,10 @@ type Variant = "boost" | "verified" | "spotlight";
 
 const Perks = () => {
  return (
- <AppLayout>
+ // hideBottomNav: /perks is a catalog/marketing page accessed
+ // from the hamburger, not part of the core app loop, so the
+ // mobile bottom tab bar would just be noise here.
+ <AppLayout hideBottomNav>
  <div className="container max-w-6xl py-8 md:py-12">
  {/* HERO --------------------------------------------------- */}
  <FadeUp>

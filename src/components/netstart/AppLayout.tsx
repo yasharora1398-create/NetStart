@@ -13,6 +13,12 @@ type Props = {
  * source compatibility with existing call sites.
  */
  blurred?: boolean;
+ /**
+ * Hide the mobile bottom tab bar for pages that aren't part of
+ * the core app loop (e.g. /perks - it's a marketing surface
+ * accessed from the hamburger menu, not a tab in its own right).
+ */
+ hideBottomNav?: boolean;
 };
 
 /**
@@ -23,7 +29,7 @@ type Props = {
  * pinned to the visible area as mobile browser chrome animates
  * in/out, rather than leaving the white strip a static `100vh` would.
  */
-export const AppLayout = ({ children }: Props) => (
+export const AppLayout = ({ children, hideBottomNav = false }: Props) => (
  <div className="min-h-dvh bg-background text-foreground">
  <Sidebar />
  <div
@@ -33,6 +39,6 @@ export const AppLayout = ({ children }: Props) => (
  <main className="pt-12 pb-24">{children}</main>
  <Footer />
  </div>
- <MobileBottomNav />
+ {!hideBottomNav && <MobileBottomNav />}
  </div>
 );
