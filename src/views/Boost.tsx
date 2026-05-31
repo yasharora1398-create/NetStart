@@ -82,6 +82,14 @@ const Boost = () => {
  `Boost activated. You're at the top for ${DURATION_HOURS} hours.`,
  );
  }
+ // Bust the Match projects cache so the next /match visit shows
+ // the fresh deck (with this user pinned at position #1) instead
+ // of a stale cached version that pre-dated the boost.
+ try {
+ window.localStorage.removeItem("polln8.match.projects");
+ } catch {
+ /* ignore - private mode / quota errors are non-fatal here */
+ }
  } catch (err) {
  toast.error(
  err instanceof Error ? err.message : "Could not confirm your boost.",

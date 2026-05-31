@@ -179,6 +179,11 @@ export type PublicProject = {
  // resolve with getAvatarUrl. Null when none was uploaded - card
  // falls back to the silhouette icon.
  polln8FounderAvatarPath: string | null;
+ // Paid boost: owner of this project has an active boost row in
+ // public.boosts. Boosted cards render with the same green outline
+ // + "Recommended by Polln8" header strip as a Polln8-curated card,
+ // and sort to the top of the deck (most recent boost first).
+ isBoosted: boolean;
 };
 
 export const emptyCriteria = (): ProjectCriteria => ({

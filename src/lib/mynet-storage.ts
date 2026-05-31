@@ -837,6 +837,7 @@ export const matchProjectsForMe = async (): Promise<
  polln8FounderHeadline: "",
  polln8FounderWebsite: "",
  polln8FounderAvatarPath: null,
+ isBoosted: false,
  }));
 };
 
@@ -896,12 +897,41 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  ((profileRows ?? []) as FounderProfile[]).map((pr) => [pr.user_id, pr]),
  );
  }
- return projectRows.map((p) => {
+
+ // Active boosts targeting the partner deck (this is the partner-
+ // facing deck of founder projects). Most recent first so a fresh
+ // boost outranks an older one. We tolerate the table not existing
+ // yet (pre-migration-0043 deploys) by silently treating an error
+ // as "no boosts" - the deck just renders unranked.
+ type BoostRow = { user_id: string; created_at: string };
+ let boostMap = new Map<string, string>(); // owner_id -> created_at
+ try {
+ const { data: boostRows, error: boostError } = await supabase
+ .from("boosts")
+ .select("user_id, created_at")
+ .eq("target_role", "partner")
+ .gt("expires_at", new Date().toISOString())
+ .order("created_at", { ascending: false });
+ if (!boostError && boostRows) {
+ // First entry per user_id wins (newest first), so .set() in
+ // iteration order gives us the latest active boost per owner.
+ for (const b of boostRows as BoostRow[]) {
+ if (!boostMap.has(b.user_id)) {
+ boostMap.set(b.user_id, b.created_at);
+ }
+ }
+ }
+ } catch {
+ boostMap = new Map();
+ }
+
+ const mapped = projectRows.map((p) => {
  const recommended = Boolean(p.is_polln8_recommended);
  const polln8Name = (p.polln8_founder_name ?? "").trim();
  const polln8Headline = (p.polln8_founder_headline ?? "").trim();
  const polln8Avatar = (p.polln8_founder_avatar_path ?? "").trim();
  const profile = profileMap.get(p.owner_id);
+ const boosted = boostMap.has(p.owner_id);
  return {
  id: p.id,
  ownerId: p.owner_id,
@@ -928,8 +958,29 @@ export const listPublishedProjects = async (): Promise<PublicProject[]> => {
  polln8FounderHeadline: polln8Headline,
  polln8FounderWebsite: (p.polln8_founder_website ?? "").trim(),
  polln8FounderAvatarPath: polln8Avatar || null,
+ isBoosted: boosted,
  };
  });
+
+ // Final sort: boosted (most recent boost first), then keep the
+ // existing recommended-then-newest order for everything else. The
+ // initial DB sort already put recommended-then-newest, so we only
+ // need to lift boosted rows to the top while preserving their
+ // internal order by boost recency.
+ mapped.sort((a, b) => {
+ const aBoost = boostMap.get(a.ownerId);
+ const bBoost = boostMap.get(b.ownerId);
+ if (aBoost && bBoost) {
+ // Both boosted - newer boost on top.
+ return bBoost.localeCompare(aBoost);
+ }
+ if (aBoost) return -1;
+ if (bBoost) return 1;
+ // Neither boosted - preserve the order they came in (the DB
+ // already sorted by is_polln8_recommended desc, created_at desc).
+ return 0;
+ });
+ return mapped;
 };
 
 // Admin-only: update an existing Polln8-recommended project. Same
@@ -1361,6 +1412,7 @@ export const listPublishedProjectsForOwner = async (
  polln8FounderHeadline: "",
  polln8FounderWebsite: "",
  polln8FounderAvatarPath: null,
+ isBoosted: false,
  }));
 };
 
