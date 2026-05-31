@@ -23,9 +23,9 @@ import { AppLayout } from "@/components/netstart/AppLayout";
 import { FadeUp } from "@/components/netstart/FadeUp";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { getSupabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
-const PRICE_CENTS = 10;
 const DURATION_HOURS = 72;
 
 const Boost = () => {
@@ -38,14 +38,87 @@ const Boost = () => {
  }, [user]);
  const opposite = role === "founder" ? "partner" : "founder";
 
+ // After Stripe redirects back to /boost?session_id=cs_xxx we POST
+ // the id to /api/stripe/verify-session to actually grant the
+ // boost. Strips the query param so a refresh doesn't re-trigger
+ // (the endpoint is idempotent regardless, but clean URL is nicer).
+ useEffect(() => {
+ if (typeof window === "undefined") return;
+ const params = new URLSearchParams(window.location.search);
+ const sessionId = params.get("session_id");
+ if (!sessionId) return;
+ // Clean the URL early so a fast refresh doesn't loop.
+ window.history.replaceState({}, "", window.location.pathname);
+ void (async () => {
+ try {
+ const { data: sess } = await getSupabase().auth.getSession();
+ const token = sess.session?.access_token;
+ if (!token) {
+ toast.error("Sign in to confirm your boost.");
+ return;
+ }
+ const res = await fetch("/api/stripe/verify-session", {
+ method: "POST",
+ headers: {
+ "Content-Type": "application/json",
+ Authorization: `Bearer ${token}`,
+ },
+ body: JSON.stringify({ sessionId }),
+ });
+ const data = (await res.json()) as {
+ ok?: boolean;
+ alreadyGranted?: boolean;
+ expiresAt?: string;
+ error?: string;
+ };
+ if (!res.ok || !data.ok) {
+ toast.error(data.error ?? "Could not confirm your boost.");
+ return;
+ }
+ if (data.alreadyGranted) {
+ toast.success("Boost already active.");
+ } else {
+ toast.success(
+ `Boost activated. You're at the top for ${DURATION_HOURS} hours.`,
+ );
+ }
+ } catch (err) {
+ toast.error(
+ err instanceof Error ? err.message : "Could not confirm your boost.",
+ );
+ }
+ })();
+ }, []);
+
  const handlePay = async () => {
  if (!user) return;
  setSubmitting(true);
- await new Promise((r) => setTimeout(r, 600));
- setSubmitting(false);
- toast.info(
- "Stripe isn't wired up yet. The boost will activate once payment is connected.",
+ try {
+ const { data: sess } = await getSupabase().auth.getSession();
+ const token = sess.session?.access_token;
+ if (!token) {
+ throw new Error("Session expired. Sign in again.");
+ }
+ const res = await fetch("/api/stripe/checkout", {
+ method: "POST",
+ headers: {
+ "Content-Type": "application/json",
+ Authorization: `Bearer ${token}`,
+ },
+ });
+ const data = (await res.json()) as { url?: string; error?: string };
+ if (!res.ok || !data.url) {
+ throw new Error(data.error ?? "Could not start checkout.");
+ }
+ // Hard redirect to Stripe-hosted page. The browser carries the
+ // user from here.
+ window.location.href = data.url;
+ } catch (err) {
+ toast.error(
+ err instanceof Error ? err.message : "Could not start checkout.",
  );
+ setSubmitting(false);
+ }
  };
 
  return (
