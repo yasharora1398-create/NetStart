@@ -247,9 +247,13 @@ const Home = () => {
  <Footer />
  </div>
 
- {/* Floating bottom-right boost promo. Outside the
- desktop-only wrapper so mobile sees it too. */}
+ {/* Floating bottom-right boost promo - desktop only. On
+ mobile the corresponding promo lives on /match as the
+ full-screen SpotlightModal, so showing a competing small
+ popup here was confusing. */}
+ <div className="hidden md:block">
  <BoostPopup />
+ </div>
  </>
  );
 };

@@ -18,9 +18,10 @@ import { cn } from "@/lib/utils";
 // Dismissal persists via localStorage. Renders nothing on md+;
 // desktop /match gets the small non-blocking BoostPopup instead.
 
-// Key version bumped to v3 to force re-show when the visual moved
-// from full-bleed opaque to translucent-with-card.
-const DISMISS_KEY = "polln8.spotlight-modal.dismissed.v3";
+// Key version bumped to v4 - the user kept missing the v3 modal
+// because they dismissed it on a previous visit and the flag stuck.
+// Bumping forces a fresh render.
+const DISMISS_KEY = "polln8.spotlight-modal.dismissed.v4";
 
 export const SpotlightModal = () => {
  const [visible, setVisible] = useState(true);
