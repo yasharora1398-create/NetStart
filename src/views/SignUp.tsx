@@ -11,7 +11,6 @@ import {
  Eye,
  EyeOff,
  Loader2,
- Sparkles,
 } from "lucide-react";
 import type { AuthError } from "@supabase/supabase-js";
 

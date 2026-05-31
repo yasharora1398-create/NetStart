@@ -8,8 +8,6 @@ import {
  Globe,
  Loader2,
  Rocket,
- Sparkles,
- Star,
  User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -143,8 +141,7 @@ const Spotlight = () => {
  {/* HERO ------------------------------------------------------ */}
  <header className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-10 md:gap-14 items-center mb-16 md:mb-24">
  <FadeUp className="min-w-0">
- <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-gold mb-4 flex items-center gap-2">
- <Sparkles className="h-3.5 w-3.5" />
+ <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-gold mb-4">
  Spotlight
  </p>
  <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[0.95] mb-5">
@@ -511,10 +508,6 @@ const StatTile = ({
  detail: string;
 }) => (
  <div className="group rounded-sm border border-border bg-card p-6 md:p-7 transition-all duration-300 hover:border-gold hover:-translate-y-1">
- <Star
- className="h-5 w-5 text-gold mb-4 transition-transform duration-300 group-hover:scale-110 origin-left"
- strokeWidth={1.6}
- />
  <p className="font-display text-5xl md:text-6xl leading-none mb-2">
  {number}
  </p>

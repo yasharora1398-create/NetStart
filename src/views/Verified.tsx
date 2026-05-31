@@ -9,8 +9,8 @@ import {
  Globe,
  Infinity as InfinityIcon,
  Loader2,
+ MapPin,
  ShieldCheck,
- Sparkles,
  User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -266,7 +266,7 @@ const Verified = () => {
  </FadeUp>
  <FadeUp delay={100}>
  <StatTile
- icon={<Sparkles className="h-5 w-5 text-gold" />}
+ icon={<MapPin className="h-5 w-5 text-gold" />}
  number="3 spots"
  label="Where the badge shows"
  detail="Public profile, MyNet dashboard, and the chat header next to your name."
@@ -496,7 +496,7 @@ const BadgePlacementCard = () => (
  <PlacementRow icon={<User className="h-3.5 w-3.5" />}>
  The MyNet dashboard name row
  </PlacementRow>
- <PlacementRow icon={<Sparkles className="h-3.5 w-3.5" />}>
+ <PlacementRow icon={<Eye className="h-3.5 w-3.5" />}>
  Your card title in the Match deck
  </PlacementRow>
  <PlacementRow icon={<InfinityIcon className="h-3.5 w-3.5" />}>

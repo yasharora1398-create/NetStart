@@ -10,7 +10,6 @@ import {
  Loader2,
  MapPin,
  Send,
- Sparkles,
  Telescope,
  Trash2,
  Upload,
@@ -799,7 +798,6 @@ const Intro = ({
  return (
  <div className="max-w-5xl mx-auto text-center animate-fade-up">
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
- <Sparkles className="h-3 w-3 text-white" />
  <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-white">
  {rejected ? "Resubmit your profile" : "Welcome to MyNet"}
  </span>

@@ -282,13 +282,13 @@ export const Sidebar = () => {
 import {
  Bookmark,
  Compass,
+ Crown,
  Download as DownloadLucide,
  Flower2,
  Home as HomeLucide,
  MessageCircle,
  Settings as SettingsLucide,
  ShieldCheck,
- Sparkles,
  Star as StarLucide,
  User as UserLucide,
  Wrench,
@@ -310,7 +310,7 @@ const RAIL_ITEMS: RailItem[] = [
  { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
  { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
  { to: "/reviews", label: "Reviews", icon: <StarLucide className="size-4" /> },
- { to: "/perks", label: "Paid features", icon: <Sparkles className="size-4" /> },
+ { to: "/perks", label: "Paid features", icon: <Crown className="size-4" /> },
  { to: "/how", label: "How it works", icon: <Compass className="size-4" /> },
  { to: "/standards", label: "Standards", icon: <ShieldCheck className="size-4" /> },
  { to: "/download", label: "Download", icon: <DownloadLucide className="size-4" /> },
@@ -552,9 +552,9 @@ function ReviewsIcon() {
 }
 
 function PerksIcon() {
- // Four-point sparkle - same stroke-only style as the rest of
- // the sidebar icons. Evokes "premium/special" without
- // overlapping the Reviews five-point star.
+ // Crown silhouette - stroke-only to match the rest of the
+ // sidebar icons. Reads as "premium / paid features" without
+ // the shine/sparkle treatment.
  return (
  <svg
  viewBox="0 0 16 16"
@@ -564,8 +564,8 @@ function PerksIcon() {
  strokeLinecap="round"
  strokeLinejoin="round"
  >
- <path d="M8 2 L9 7 L14 8 L9 9 L8 14 L7 9 L2 8 L7 7 Z" />
- <path d="M12.5 2.5 L13 4 L14.5 4.5 L13 5 L12.5 6.5 L12 5 L10.5 4.5 L12 4 Z" />
+ <path d="M2.5 5 L5 9 L8 4 L11 9 L13.5 5 L12.5 12 H3.5 Z" />
+ <path d="M3.5 12 H12.5" />
  </svg>
  );
 }

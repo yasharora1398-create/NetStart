@@ -7,7 +7,6 @@ import {
  ChevronUp,
  Circle,
  Clock,
- Sparkles,
  X,
 } from "lucide-react";
 import { Link } from "@/lib/router-compat";
@@ -124,7 +123,7 @@ export const OnboardingChecklist = ({
  aria-expanded={!collapsed}
  >
  <div className="h-10 w-10 rounded-sm bg-gold border border-gold flex items-center justify-center flex-shrink-0">
- <Sparkles className="h-4 w-4 text-white" />
+ <Clock className="h-4 w-4 text-white" />
  </div>
  <div className="flex-1 min-w-0">
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1">

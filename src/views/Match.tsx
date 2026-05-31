@@ -17,7 +17,6 @@ import {
  MessageCircle,
  Minimize2,
  Search,
- Sparkles,
  Undo2,
  User,
  X,
@@ -590,7 +589,6 @@ const PartnerView = () => {
  {!fullscreen && activeProjectTitle ? (
  <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-gold bg-gold px-4 py-3">
  <div className="flex items-center gap-2 text-sm">
- <Sparkles className="h-3.5 w-3.5 text-white flex-shrink-0" />
  <span className="text-muted-foreground">Matching for</span>
  <span className="font-medium text-foreground">
  {activeProjectTitle}
@@ -901,7 +899,6 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  <div className="mb-3 flex flex-wrap gap-1.5">
  {candidate.commitment ? (
  <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground">
- <Sparkles className="h-3 w-3" />
  {candidate.commitment}
  </span>
  ) : null}

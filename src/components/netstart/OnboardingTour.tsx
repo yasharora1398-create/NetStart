@@ -15,7 +15,7 @@
  * by name instead.
  */
 import { useEffect, useState } from "react";
-import { ArrowRight, Check, Sparkles, X } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const KEY_PREFIX = "polln8.onboarding.mynet.";
@@ -111,7 +111,6 @@ export const OnboardingTour = ({ userId }: Props) => {
  </button>
 
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
- <Sparkles className="h-3 w-3 text-white" />
  <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
  {current.badge}
  </span>

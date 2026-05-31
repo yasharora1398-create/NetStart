@@ -3,8 +3,6 @@ import { Link } from "@/lib/router-compat";
 import {
  ArrowRight,
  Rocket,
- Sparkles,
- Star,
  User,
 } from "lucide-react";
 
@@ -29,8 +27,7 @@ const Perks = () => {
  {/* HERO --------------------------------------------------- */}
  <FadeUp>
  <header className="mb-12 md:mb-16 max-w-3xl">
- <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-gold mb-4 flex items-center gap-2">
- <Sparkles className="h-3.5 w-3.5" />
+ <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-gold mb-4">
  Paid features
  </p>
  <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[0.95] mb-5">
@@ -137,8 +134,7 @@ const ProductCard = ({
  {/* Best value ribbon (Spotlight only). Sits at the top-right
  of the card. */}
  {best ? (
- <div className="absolute top-4 right-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-primary-foreground">
- <Star className="h-3 w-3" />
+ <div className="absolute top-4 right-4 z-10 rounded-full bg-primary px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-primary-foreground">
  Best value
  </div>
  ) : null}

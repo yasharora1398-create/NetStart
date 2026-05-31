@@ -6,7 +6,6 @@ import {
  Clock,
  Eye,
  Rocket,
- Sparkles,
  Trophy,
  User,
 } from "lucide-react";
@@ -119,14 +118,6 @@ export const BoostActiveBanner = ({
  {/* Decorative sparkles in the corners. Static (no opacity
  pulse / no glow per the design rules) - just there to
  dress up the otherwise plain card. */}
- <Sparkles
- className="absolute top-4 right-4 h-4 w-4 text-primary"
- strokeWidth={1.6}
- />
- <Sparkles
- className="absolute bottom-4 right-10 h-3 w-3 text-primary"
- strokeWidth={1.6}
- />
 
  <div className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-8 md:gap-12 items-center">
  {/* LEFT: copy + countdown + meta */}
@@ -217,7 +208,6 @@ export const BoostActiveBanner = ({
  <FadeUp delay={200}>
  <div>
  <div className="flex items-center gap-2 mb-3 ml-1">
- <Sparkles className="h-3.5 w-3.5 text-primary" />
  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
  How {opposite}s see you right now
  </span>

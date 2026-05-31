@@ -8,7 +8,6 @@ import {
  Loader2,
  Plus,
  Search,
- Sparkles,
  Telescope,
  XCircle,
 } from "lucide-react";

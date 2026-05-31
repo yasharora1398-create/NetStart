@@ -10,7 +10,6 @@ import {
  Loader2,
  MapPin,
  MessageCircle,
- Sparkles,
  X,
  User,
 } from "lucide-react";
@@ -135,7 +134,6 @@ export const FindPeopleSheet = ({
  <div ref={scrollRef} className="flex-1 overflow-y-auto">
  <SheetHeader className="border-b border-border p-6">
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-3 self-start">
- <Sparkles className="h-3 w-3 text-white" />
  <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
  Matching against {project?.title ?? "project"}
  </span>

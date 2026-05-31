@@ -1,6 +1,6 @@
 "use client";
 import { Link } from "@/lib/router-compat";
-import { ArrowRight, Sparkles, User } from "lucide-react";
+import { ArrowRight, User } from "lucide-react";
 
 import { FadeUp } from "@/components/netstart/FadeUp";
 import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
@@ -27,15 +27,6 @@ export const VerifiedBanner = ({ profile, project }: Props) => {
  return (
  <FadeUp>
  <section className="relative rounded-sm border-2 border-[#1d9bf0] bg-card p-6 md:p-10 overflow-hidden">
- {/* Static sparkles, same pattern as BoostActiveBanner. */}
- <Sparkles
- className="absolute top-4 right-4 h-4 w-4 text-[#1d9bf0]"
- strokeWidth={1.6}
- />
- <Sparkles
- className="absolute bottom-4 right-10 h-3 w-3 text-[#1d9bf0]"
- strokeWidth={1.6}
- />
 
  <div className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-8 md:gap-12 items-center">
  {/* LEFT: copy */}
@@ -81,7 +72,6 @@ export const VerifiedBanner = ({ profile, project }: Props) => {
  <FadeUp delay={150}>
  <div>
  <div className="flex items-center gap-2 mb-3 ml-1">
- <Sparkles className="h-3.5 w-3.5 text-[#1d9bf0]" />
  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#1d9bf0]">
  How others see you
  </span>

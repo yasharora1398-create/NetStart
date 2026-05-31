@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/lib/router-compat";
-import { ArrowRight, BadgeCheck, Check, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, Telescope, Zap } from "lucide-react";
 import { Sidebar } from "@/components/netstart/Sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useInView } from "@/hooks/useInView";
@@ -28,7 +28,7 @@ const WHY: {
  mockup: "review",
  },
  {
- icon: Sparkles,
+ icon: Telescope,
  title: "Matches ranked by AI.",
  body: "The deck is ordered against your skills, project, and intent. Not the algorithm's.",
  details: [

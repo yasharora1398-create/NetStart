@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router-compat";
-import { Loader2, Pencil, Sparkles, Star, User, X } from "lucide-react";
+import { Loader2, Pencil, Star, User, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
@@ -484,24 +484,6 @@ const ThanksIllustration = () => (
  strokeWidth={1.4}
  />
  </div>
- {/* Sparkles in the four corners. Slightly offset so they sit
- just outside the centre star. */}
- <Sparkles
- className="absolute -top-1 -right-1 h-5 w-5 text-gold"
- strokeWidth={1.6}
- />
- <Sparkles
- className="absolute -bottom-1 -left-1 h-4 w-4 text-gold"
- strokeWidth={1.6}
- />
- <Sparkles
- className="absolute top-3 -left-2 h-3.5 w-3.5 text-gold"
- strokeWidth={1.6}
- />
- <Sparkles
- className="absolute bottom-2 -right-2 h-3.5 w-3.5 text-gold"
- strokeWidth={1.6}
- />
  </div>
 );
 

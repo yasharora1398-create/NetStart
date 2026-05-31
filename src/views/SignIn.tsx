@@ -10,7 +10,6 @@ import {
  Eye,
  EyeOff,
  Loader2,
- Sparkles,
 } from "lucide-react";
 import type { AuthError } from "@supabase/supabase-js";
 
@@ -163,7 +162,6 @@ const SignIn = () => {
 
  <div className="relative z-10 max-w-md">
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-8">
- <Sparkles className="h-3 w-3 text-white" />
  <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white">
  Welcome back
  </span>
