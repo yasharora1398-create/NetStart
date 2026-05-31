@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Match from "@/views/Match";
 import { BoostPopup } from "@/components/netstart/BoostPopup";
+import { SpotlightModal } from "@/components/netstart/SpotlightModal";
 
 export const metadata: Metadata = {
  title: { absolute: "Polln8 | Match | Discover vetted startup talent" },
@@ -16,7 +17,14 @@ export default function Page() {
  return (
  <>
  <Match />
+ {/* Desktop: non-blocking bottom-right popup. BoostPopup
+ itself doesn't gate on viewport, so we wrap it here. */}
+ <div className="hidden md:block">
  <BoostPopup />
+ </div>
+ {/* Mobile: blocking full-screen Spotlight modal. Renders
+ nothing on md+. */}
+ <SpotlightModal />
  </>
  );
 }

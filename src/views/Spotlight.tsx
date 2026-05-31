@@ -217,7 +217,10 @@ const Spotlight = () => {
  </header>
 
  {/* WHAT YOU GET (split: boost row + verified row) ---------- */}
- <section className="grid md:grid-cols-2 gap-4 md:gap-6 mb-16 md:mb-24">
+ {/* Hidden on mobile - the two perk cards include extra
+ illustration weight; the hero mock already shows what
+ the user buys. */}
+ <section className="hidden md:grid md:grid-cols-2 gap-4 md:gap-6 mb-16 md:mb-24">
  <FadeUp>
  <PerkCard
  icon={<Rocket className="h-5 w-5 text-gold animate-bounce" strokeWidth={1.8} />}
@@ -247,7 +250,10 @@ const Spotlight = () => {
  </section>
 
  {/* HOW IT STACKS ------------------------------------------- */}
- <section className="mb-16 md:mb-24">
+ {/* 3 stat tiles each with a number + label. Hidden on mobile
+ to keep the page short; same information is covered in the
+ hero + FAQ. */}
+ <section className="hidden md:block mb-16 md:mb-24">
  <FadeUp>
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
  How they stack

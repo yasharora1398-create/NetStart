@@ -267,7 +267,10 @@ const Boost = () => {
  </section>
 
  {/* HOW IT WORKS (3 steps with mini illustrations) ---------- */}
- <section className="mb-16 md:mb-24">
+ {/* Hidden on mobile - the 3 step illustrations are pure
+ visual padding once you've seen the hero, and we capped
+ mobile at 2 images per page. */}
+ <section className="hidden md:block mb-16 md:mb-24">
  <FadeUp>
  <div className="mb-10">
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
@@ -308,8 +311,10 @@ const Boost = () => {
  </section>
 
  {/* TIMELINE band -------------------------------------------- */}
+ {/* Animated gold-fill bar counts as an image; hidden on
+ mobile to keep the page concise. */}
  <FadeUp>
- <section className="mb-16 md:mb-24 rounded-sm border border-border bg-card p-6 md:p-10">
+ <section className="hidden md:block mb-16 md:mb-24 rounded-sm border border-border bg-card p-6 md:p-10">
  <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-6">
  <div>
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-2">

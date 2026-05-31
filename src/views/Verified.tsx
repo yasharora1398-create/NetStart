@@ -255,7 +255,8 @@ const Verified = () => {
  </header>
 
  {/* 3 STAT TILES --------------------------------------------- */}
- <section className="grid md:grid-cols-3 gap-4 mb-16 md:mb-24">
+ {/* Hidden on mobile - desktop-only padding section. */}
+ <section className="hidden md:grid md:grid-cols-3 gap-4 mb-16 md:mb-24">
  <FadeUp>
  <StatTile
  icon={<VerifiedBadge size="md" />}
@@ -317,8 +318,12 @@ const Verified = () => {
  </ul>
  </FadeUp>
 
+ {/* Side card with the badge-placement list is desktop-only;
+ mobile users already see the checklist on the left. */}
  <FadeUp delay={150}>
+ <div className="hidden md:block">
  <BadgePlacementCard />
+ </div>
  </FadeUp>
  </section>
 

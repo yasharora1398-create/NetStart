@@ -56,6 +56,7 @@ const Perks = () => {
  href="/boost"
  description="Pin your card to position #1 of the opposite-role Match deck for 72 hours. Every viewer in the window sees you first. Then the pin expires automatically."
  highlight={["#1 position", "72-hour window", "Green outline on card"]}
+ hideMockOnMobile
  />
  </FadeUp>
  <FadeUp delay={120}>
@@ -118,6 +119,13 @@ type ProductCardProps = {
  highlight: string[];
  // "Best value" ribbon on the Spotlight card.
  best?: boolean;
+ // Mobile-only: hide the mini Match-card mock. Used to keep
+ // /perks at 2 images max on phones - the Spotlight card is the
+ // most visually informative so its mock stays on every viewport;
+ // Verified shows because the badge is its whole point; Boost's
+ // mock (green outline only) is the least distinct, so we hide
+ // its mock on mobile.
+ hideMockOnMobile?: boolean;
 };
 
 const ProductCard = ({
@@ -129,6 +137,7 @@ const ProductCard = ({
  description,
  highlight,
  best = false,
+ hideMockOnMobile = false,
 }: ProductCardProps) => (
  <div className="group relative h-full rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:border-gold hover:-translate-y-1 flex flex-col">
  {/* Best value ribbon (Spotlight only). Sits at the top-right
@@ -140,8 +149,14 @@ const ProductCard = ({
  ) : null}
 
  {/* Mini Match-card mock area. Muted background; the actual
- mini-card sits centered inside. */}
- <div className="bg-muted p-6 flex items-center justify-center min-h-[200px]">
+ mini-card sits centered inside. Optionally hidden on mobile
+ via the `hideMockOnMobile` prop (Boost card only). */}
+ <div
+ className={cn(
+ "bg-muted p-6 flex items-center justify-center min-h-[200px]",
+ hideMockOnMobile && "hidden md:flex",
+ )}
+ >
  <MiniMatchCard variant={variant} />
  </div>
 
