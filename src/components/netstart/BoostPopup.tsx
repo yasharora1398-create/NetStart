@@ -7,9 +7,6 @@ import { ArrowRight, Rocket, X } from "lucide-react";
 // across page navigations within Match / Home; dismissing it sets a
 // session-storage flag so it doesn't reappear on every nav within
 // the same session.
-//
-// Local-host only for now (gated by NODE_ENV !== "production") so it
-// doesn't ship to polln8.com until the Stripe wiring is live.
 
 const DISMISS_KEY = "polln8.boost-popup.dismissed";
 
@@ -17,12 +14,11 @@ export const BoostPopup = () => {
  const [visible, setVisible] = useState(false);
 
  useEffect(() => {
- if (process.env.NODE_ENV === "production") return;
  if (typeof window === "undefined") return;
  if (window.sessionStorage.getItem(DISMISS_KEY) === "1") return;
  // Small delay so it doesn't pop up the instant a page loads and
  // distract from the page hero.
- const t = window.setTimeout(() => setVisible(true), 1200);
+ const t = window.setTimeout(() => setVisible(true), 600);
  return () => window.clearTimeout(t);
  }, []);
 
@@ -37,7 +33,7 @@ export const BoostPopup = () => {
 
  return (
  <div
- className="fixed bottom-4 right-4 z-50 w-[320px] rounded-sm border-2 border-gold bg-card shadow-xl"
+ className="fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] max-w-[320px] rounded-sm border-2 border-gold bg-card shadow-xl"
  role="dialog"
  aria-label="Boost your card"
  >

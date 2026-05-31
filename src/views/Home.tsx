@@ -236,8 +236,11 @@ const Home = () => {
  </main>
 
  <Footer />
- <BoostPopup />
  </div>
+
+ {/* Floating bottom-right boost promo. Outside the
+ desktop-only wrapper so mobile sees it too. */}
+ <BoostPopup />
  </>
  );
 };
