@@ -78,7 +78,7 @@ export const BoostPopup = () => {
  <div className="px-4 pb-4">
  <h3 className="font-display text-xl leading-tight mt-1">
  Skip the queue.{" "}
- <span className="text-gold">10¢ USD.</span>
+ <span className="text-gold">50¢ USD.</span>
  </h3>
  <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
  Pin your card to the top of the opposite-role Match deck for

@@ -146,7 +146,7 @@ const Boost = () => {
  <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[0.95] mb-5">
  Skip the queue.
  <br />
- <em className="text-gradient-gold not-italic">For ten cents.</em>
+ <em className="text-gradient-gold not-italic">For fifty cents.</em>
  </h1>
  <p className="text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed mb-7">
  Pin your card to the top of the {opposite} Match deck for{" "}
@@ -158,7 +158,7 @@ const Boost = () => {
 
  <div className="flex items-end gap-3 mb-7">
  <div className="font-display text-7xl md:text-8xl leading-none transition-transform duration-300 hover:scale-105 origin-bottom-left">
- 10¢
+ 50¢
  </div>
  <div className="text-xs text-muted-foreground leading-tight pb-2">
  <span className="font-mono uppercase tracking-widest text-[10px] text-foreground block">
@@ -187,7 +187,7 @@ const Boost = () => {
  </>
  ) : (
  <>
- Pay 10¢ and boost now
+ Pay 50¢ and boost now
  <ArrowRight className="h-4 w-4" />
  </>
  )}
@@ -261,7 +261,7 @@ const Boost = () => {
  <FadeUp>
  <StepTile
  n="01"
- title="Pay 10¢ USD"
+ title="Pay 50¢ USD"
  body={`A single charge in US dollars. No subscription, no renewal, no surprise email next month.`}
  illustration={<PayIllustration />}
  />
@@ -313,7 +313,7 @@ const Boost = () => {
  In the box
  </p>
  <h2 className="font-display text-3xl md:text-4xl mb-6 leading-tight">
- What you actually get for 10¢ USD.
+ What you actually get for 50¢ USD.
  </h2>
  <ul className="space-y-3">
  <FeatureRow>
@@ -361,7 +361,7 @@ const Boost = () => {
  weekend, short enough to keep the slot fresh for the next
  person who wants it.
  </Faq>
- <Faq q="Why only 10 cents?">
+ <Faq q="Why only 50 cents?">
  To filter for people who actually want the slot, without
  making cost the reason you can&apos;t get one.
  </Faq>
@@ -389,7 +389,7 @@ const Boost = () => {
  <section className="rounded-sm border-2 border-gold bg-card p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
  <div className="min-w-0">
  <h2 className="font-display text-3xl md:text-4xl leading-tight mb-2">
- Ten cents USD. Top of the deck.
+ Fifty cents USD. Top of the deck.
  </h2>
  <p className="text-sm text-muted-foreground max-w-md">
  The next {opposite} who opens Match could be the one. Make
@@ -555,7 +555,7 @@ const PayIllustration = () => (
  <CreditCard className="h-10 w-10 text-gold" strokeWidth={1.5} />
  </div>
  <div className="absolute -bottom-2 -right-2 rounded-full bg-primary text-primary-foreground h-9 w-9 flex items-center justify-center text-xs font-bold">
- 10¢
+ 50¢
  </div>
  </div>
 );
