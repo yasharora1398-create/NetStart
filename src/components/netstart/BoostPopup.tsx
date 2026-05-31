@@ -4,27 +4,31 @@ import { Link } from "@/lib/router-compat";
 import { ArrowRight, Rocket, X } from "lucide-react";
 
 // Floating bottom-right card promoting the /boost feature. Sticky
-// across page navigations within Match / Home; dismissing it sets a
-// session-storage flag so it doesn't reappear on every nav within
-// the same session.
+// across every page navigation. Once dismissed (X button) the
+// preference persists across browser sessions via localStorage, so
+// the popup never returns for that browser until the user clears
+// site data. Key was bumped from .dismissed -> .dismissed.v2 when
+// the persistence semantics changed, so anyone with an old
+// session-storage flag still sees the new popup at least once.
 
-const DISMISS_KEY = "polln8.boost-popup.dismissed";
+const DISMISS_KEY = "polln8.boost-popup.dismissed.v2";
 
 export const BoostPopup = () => {
- const [visible, setVisible] = useState(false);
+ // Default to true so the popup renders the moment the component
+ // mounts (no flash-of-empty). We only flip to false if the user
+ // had previously dismissed it.
+ const [visible, setVisible] = useState(true);
 
  useEffect(() => {
  if (typeof window === "undefined") return;
- if (window.sessionStorage.getItem(DISMISS_KEY) === "1") return;
- // Small delay so it doesn't pop up the instant a page loads and
- // distract from the page hero.
- const t = window.setTimeout(() => setVisible(true), 600);
- return () => window.clearTimeout(t);
+ if (window.localStorage.getItem(DISMISS_KEY) === "1") {
+ setVisible(false);
+ }
  }, []);
 
  const dismiss = () => {
  if (typeof window !== "undefined") {
- window.sessionStorage.setItem(DISMISS_KEY, "1");
+ window.localStorage.setItem(DISMISS_KEY, "1");
  }
  setVisible(false);
  };

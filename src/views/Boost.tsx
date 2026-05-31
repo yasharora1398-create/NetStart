@@ -9,9 +9,9 @@ import {
  Clock,
  CreditCard,
  Eye,
+ Globe,
  Layers,
  Loader2,
- MapPin,
  Rocket,
  Star,
  Timer,
@@ -130,10 +130,11 @@ const Boost = () => {
  </p>
  </div>
 
- {/* Right column: mocked Match deck with one boosted card on
- top. Built from the same visual vocabulary as the real
- cards so it feels like the actual product. */}
- <BoostedDeckMockup opposite={opposite} />
+ {/* Right column: a pixel-for-pixel mock of how a boosted card
+ appears at the top of the deck. Same border-2 border-primary,
+ same primary header strip, same picture square + criteria pills
+ as a real Polln8-recommended card in Match. */}
+ <BoostedCardMockup opposite={opposite} />
  </header>
 
  {/* WHAT IT DOES (3 stat tiles) ----------------------------- */}
@@ -322,111 +323,74 @@ const Boost = () => {
 // scale and inherit the theme palette without dragging in image
 // assets.
 
-const BoostedDeckMockup = ({ opposite }: { opposite: string }) => (
- <div className="relative h-[420px] md:h-[460px]">
- {/* Two muted background cards stacked behind so the top card
- reads as "first in the deck." Solid (no opacity); the
- muted variant alone carries the "this is behind" cue via
- border-border + muted-foreground text. */}
- <MockCard
- className="absolute top-12 left-6 right-12"
- muted
- title="Another startup"
- sub="Founder, NYC"
- />
- <MockCard
- className="absolute top-6 left-3 right-9"
- muted
- title="An earlier card"
- sub={`${opposite === "founder" ? "Partner" : "Founder"}, remote`}
- />
- {/* The boosted card. Sits on top with a thicker primary border
- and a small "BOOSTED" eyebrow above it pointing into the
- card. */}
- <div className="absolute top-0 left-0 right-6">
- <div className="flex items-center gap-2 mb-2 ml-1">
+// Pixel-for-pixel mock of a Polln8-recommended card as it appears
+// at the top of the Match deck. Mirrors MatchProjectCard's structure
+// in src/views/Match.tsx so the visual reads as the actual product
+// surface: external website strip on top, then the article with the
+// "Recommended by Polln8" header bar, picture square with silhouette,
+// title, and criteria pills.
+const BoostedCardMockup = ({ opposite }: { opposite: string }) => (
+ <div className="relative w-full max-w-md mx-auto">
+ {/* Eyebrow above the card pointing into it. Establishes that
+ this is the boosted position-#1 card. */}
+ <div className="flex items-center gap-2 mb-3 ml-1">
  <Rocket className="h-3.5 w-3.5 text-primary" />
  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
- Boosted to position #1
+ Position #1 in the {opposite} deck
  </span>
  </div>
- <MockCard
- className="border-2 border-primary"
- title="You"
- sub={`Your ${opposite === "founder" ? "partner" : "founder"} card`}
- highlight
- />
- </div>
- </div>
-);
 
-const MockCard = ({
- className,
- title,
- sub,
- muted = false,
- highlight = false,
-}: {
- className?: string;
- title: string;
- sub: string;
- muted?: boolean;
- highlight?: boolean;
-}) => (
- <div
- className={cn(
- "rounded-2xl bg-card overflow-hidden shadow-sm",
- muted ? "border border-border" : "border border-gold",
- className,
- )}
- >
- {/* Faux avatar/header area. Solid muted square so it reads as
- a real card without needing actual imagery. */}
- <div className="relative aspect-[4/3] bg-muted flex items-center justify-center">
+ {/* Faux external website link strip - real recommended cards
+ show this above the card when the founder ships a public URL. */}
+ <div className="inline-flex items-center gap-2 self-start font-display text-2xl md:text-3xl font-bold tracking-tight text-primary mb-3 break-all">
+ <Globe className="h-5 w-5 flex-shrink-0" />
+ yourstartup.com
+ </div>
+
+ <article className="overflow-hidden rounded-2xl bg-card shadow-sm border-2 border-primary">
+ {/* Recommended-by header strip - same primary fill + text as
+ the real card. */}
+ <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
+ Recommended by Polln8
+ </div>
+
+ {/* Picture square - 4:3 muted background with the silhouette
+ fallback, identical to MatchProjectCard's no-avatar path. */}
+ <div className="relative w-full aspect-[4/3] bg-muted">
+ <div className="absolute inset-0 flex items-center justify-center">
  <User
- className={cn(
- "h-20 w-20",
- highlight ? "text-primary" : "text-muted-foreground",
- )}
- strokeWidth={1.2}
+ className="h-32 w-32 text-muted-foreground"
+ strokeWidth={1.4}
  />
  </div>
- <div className="p-4">
- <p
- className={cn(
- "font-display text-lg leading-tight mb-1",
- muted ? "text-muted-foreground" : "text-foreground",
- )}
- >
- {title}
- </p>
- <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
- <MapPin className="h-3 w-3" />
- {sub}
- </p>
- <div className="flex gap-1.5 flex-wrap">
- <span
- className={cn(
- "px-2 py-0.5 text-[10px] rounded-sm",
- muted
- ? "border border-border bg-muted text-muted-foreground"
- : "border border-gold bg-gold text-primary-foreground",
- )}
- >
- React
+ </div>
+
+ {/* Body: title only, no founder byline (matches the real
+ card per the prior "deck is about the venture" change). */}
+ <div className="p-5">
+ <h3 className="mb-3 font-display text-2xl leading-tight text-foreground">
+ Your startup name
+ </h3>
+ <div className="flex flex-wrap gap-1.5 mb-3">
+ <span className="px-2 py-0.5 text-xs rounded-sm border border-gold bg-gold text-primary-foreground">
+ Full-time
  </span>
- <span
- className={cn(
- "px-2 py-0.5 text-[10px] rounded-sm",
- muted
- ? "border border-border bg-muted text-muted-foreground"
- : "border border-gold bg-gold text-primary-foreground",
- )}
- >
- Design
+ <span className="px-2 py-0.5 text-xs rounded-sm border border-gold bg-gold text-primary-foreground">
+ Remote
  </span>
  </div>
+ <p className="text-sm text-muted-foreground leading-relaxed">
+ The one-line pitch that hooks the {opposite}. Two sentences
+ max so they can decide if they want to swipe right.
+ </p>
  </div>
+ </article>
+
+ {/* Footer caption beneath the card - tells the reader this
+ is the boosted view, not just a static screenshot. */}
+ <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mt-3 text-center">
+ What every {opposite} sees first, for 72 hours.
+ </p>
  </div>
 );
 
