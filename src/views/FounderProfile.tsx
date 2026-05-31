@@ -3,11 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "@/lib/router-compat";
 import {
  ArrowLeft,
- BadgeCheck,
  Briefcase,
  Camera,
  ExternalLink,
- FileText,
  Globe,
  ImagePlus,
  Linkedin,
@@ -15,7 +13,6 @@ import {
  MapPin,
  MessageCircle,
  ShieldCheck,
- Sparkles,
  User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -249,17 +246,8 @@ const FounderProfile = () => {
  the left + negative-margin on the pfp. */}
  <div className="relative flex items-end justify-between gap-4 -mt-12 sm:-mt-16 mb-6 px-1 sm:px-4">
  <div className="flex-1 min-w-0 pt-12 sm:pt-16">
- <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight flex items-center gap-2 flex-wrap">
+ <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight">
  {founder.fullName || "Unnamed"}
- {founder.isVerifiedFounder ? (
- <span
- title="Verified founder"
- className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-primary-foreground"
- >
- <BadgeCheck className="h-3 w-3" />
- Verified
- </span>
- ) : null}
  </h1>
  {founder.headline ? (
  <p className="mt-1 text-sm sm:text-base text-muted-foreground max-w-2xl">
@@ -304,45 +292,6 @@ const FounderProfile = () => {
  </section>
  ) : null}
 
- {founder.isVerifiedFounder &&
- founder.extendedDescription.trim() ? (
- <section className="rounded-sm border-2 border-primary bg-card p-6">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3 flex items-center gap-1.5">
- <Sparkles className="h-3 w-3" />
- The pitch
- </p>
- <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line text-foreground">
- {founder.extendedDescription}
- </p>
- </section>
- ) : null}
-
- {founder.isVerifiedFounder &&
- founder.collaboratorReferences.length > 0 ? (
- <section className="rounded-sm border border-border bg-card p-6">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary mb-3 flex items-center gap-1.5">
- <BadgeCheck className="h-3 w-3" />
- References
- </p>
- <ul className="space-y-4">
- {founder.collaboratorReferences.map((r, i) => (
- <li
- key={i}
- className="rounded-sm border border-border bg-background p-4"
- >
- <p className="text-sm leading-relaxed text-foreground italic mb-2">
- &ldquo;{r.text}&rdquo;
- </p>
- <p className="text-xs text-muted-foreground">
- &mdash; {r.name}
- {r.role ? `, ${r.role}` : null}
- </p>
- </li>
- ))}
- </ul>
- </section>
- ) : null}
-
  {/* Message CTA - bottom of left column for non-owners. */}
  {!isOwner && user && id ? (
  <Link to={`/chats/${id}`} className="inline-block">
@@ -376,32 +325,7 @@ const FounderProfile = () => {
  href={founder.linkedinUrl}
  />
  ) : null}
- {founder.isVerifiedFounder && founder.pitchUrl ? (
- <ExternalLinkRow
- icon={
- <FileText className="h-3.5 w-3.5 text-primary flex-shrink-0" />
- }
- label="Pitch deck"
- href={founder.pitchUrl}
- />
- ) : null}
- {founder.isVerifiedFounder
- ? founder.projectLinks.map((l, i) => (
- <ExternalLinkRow
- key={i}
- icon={
- <ExternalLink className="h-3.5 w-3.5 text-primary flex-shrink-0" />
- }
- label={l.title || l.url.replace(/^https?:\/\//, "")}
- href={l.url}
- />
- ))
- : null}
- {!founder.websiteUrl &&
- !founder.linkedinUrl &&
- !(founder.isVerifiedFounder && founder.pitchUrl) &&
- (!founder.isVerifiedFounder ||
- founder.projectLinks.length === 0) ? (
+ {!founder.websiteUrl && !founder.linkedinUrl ? (
  <li className="text-xs text-muted-foreground italic">
  No links yet.
  </li>
@@ -444,12 +368,6 @@ const FounderProfile = () => {
  {/* Credentials - location, commitment, open-to-work, verified */}
  <RightSection title="Credentials">
  <ul className="space-y-1.5 text-xs">
- {founder.isVerifiedFounder ? (
- <li className="flex items-center gap-2 text-foreground">
- <BadgeCheck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
- Verified founder
- </li>
- ) : null}
  {founder.location ? (
  <li className="flex items-center gap-2 text-muted-foreground">
  <MapPin className="h-3.5 w-3.5 text-gold flex-shrink-0" />
@@ -468,8 +386,7 @@ const FounderProfile = () => {
  Open to work
  </li>
  ) : null}
- {!founder.isVerifiedFounder &&
- !founder.location &&
+ {!founder.location &&
  !founder.commitment &&
  !founder.isOpenToWork ? (
  <li className="text-muted-foreground italic">

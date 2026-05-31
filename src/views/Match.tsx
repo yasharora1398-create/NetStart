@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@/lib/router-compat";
 import {
- BadgeCheck,
  Bookmark,
  BookmarkCheck,
  Briefcase,
@@ -1264,14 +1263,6 @@ const LookerView = () => {
  // info sheet stays visible until the user drags it down.
  setHistory((prev) => [...prev, displayed]);
  setDecided((prev) => new Set(prev).add(displayed.id));
- // Verified-founder perk: send the partner straight to the full
- // founder profile page instead of the slim side panel. Polln8
- // recommendations still get the icon column (handled inside
- // the panel branch). Everything else gets the regular info panel.
- if (displayed.isVerifiedFounder && !displayed.isPolln8Recommended) {
- navigate(`/u/${displayed.ownerId}`);
- return;
- }
  setApproving(displayed);
  };
  const closeInfo = () => {
@@ -2078,10 +2069,6 @@ const ProjectInfoPanel = ({
 // photo at top, then title, then pills, then optional description.
 const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  const recommended = project.isPolln8Recommended;
- // Verified-founder perk: same heavier green border + ribbon as a
- // polln8 recommendation, just labeled differently. recommended
- // wins when both are true (curated picks are the stronger signal).
- const verified = project.isVerifiedFounder && !recommended;
  // Polln8 cards: prefer the admin-uploaded recommendation photo over
  // the project owner's profile avatar. Direct read so it works even
  // if listPublishedProjects' swap somehow missed.
@@ -2090,7 +2077,6 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  : project.founderAvatarPath;
  const avatar = getAvatarUrl(avatarPath);
  const website = project.polln8FounderWebsite;
- const greenOutline = recommended || verified;
  return (
  <div className="flex flex-col gap-3">
  {recommended && website ? (
@@ -2108,19 +2094,14 @@ const MatchProjectCard = ({ project }: { project: PublicProject }) => {
  <article
  className={cn(
  "overflow-hidden rounded-2xl bg-card shadow-sm",
- // Polln8-recommended + verified founder cards both get a
- // heavier green outline so they stand out in the deck.
- greenOutline ? "border-2 border-primary" : "border border-gold",
+ // Polln8-recommended cards get a heavier green outline so
+ // they stand out in the deck.
+ recommended ? "border-2 border-primary" : "border border-gold",
  )}
  >
  {recommended ? (
  <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
  Recommended by Polln8
- </div>
- ) : verified ? (
- <div className="bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground flex items-center gap-1.5">
- <BadgeCheck className="h-4 w-4" />
- Verified founder
  </div>
  ) : null}
  {/* Picture square "" full-width, 1:1 aspect. Grey field with

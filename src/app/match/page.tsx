@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Match from "@/views/Match";
+import { BoostPopup } from "@/components/netstart/BoostPopup";
 
 export const metadata: Metadata = {
  title: { absolute: "Polln8 | Match | Discover vetted startup talent" },
@@ -12,5 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
- return <Match />;
+ return (
+ <>
+ <Match />
+ <BoostPopup />
+ </>
+ );
 }

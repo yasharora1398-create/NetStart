@@ -26,6 +26,7 @@ import { HomeAuthStrip } from "@/components/netstart/HomeAuthStrip";
 import { FadeUp } from "@/components/netstart/FadeUp";
 import WhySection from "@/components/marketing/WhySection";
 import MobileHome from "@/components/marketing/MobileHome";
+import { BoostPopup } from "@/components/netstart/BoostPopup";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -235,6 +236,7 @@ const Home = () => {
  </main>
 
  <Footer />
+ <BoostPopup />
  </div>
  </>
  );
