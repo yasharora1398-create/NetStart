@@ -59,6 +59,7 @@ import {
  removeResume,
  setActiveProject,
  setLinkedIn,
+ setAvailability,
  setOpenToWork,
  setPersonStatus,
  setProjectLifecycle,
@@ -207,7 +208,26 @@ const MyNet = () => {
  await setOpenToWork(uid, value);
  setProfile((prev) => ({
  ...prev,
- candidate: { ...prev.candidate, isOpenToWork: value },
+ candidate: {
+ ...prev.candidate,
+ isOpenToWork: value,
+ availability: value ? "open" : "closed",
+ },
+ }));
+ };
+
+ const handleSetAvailability = async (
+ value: import("@/lib/mynet-types").Availability,
+ ) => {
+ if (!uid) return;
+ await setAvailability(uid, value);
+ setProfile((prev) => ({
+ ...prev,
+ candidate: {
+ ...prev.candidate,
+ availability: value,
+ isOpenToWork: value === "open",
+ },
  }));
  };
 
@@ -679,6 +699,7 @@ const MyNet = () => {
  onSubmitProfile={handleSubmitProfile}
  onSaveCandidate={handleSaveCandidate}
  onToggleOpenToWork={handleToggleOpenToWork}
+ onSetAvailability={handleSetAvailability}
  onUploadAvatar={handleUploadAvatar}
  onRemoveAvatar={handleRemoveAvatar}
  onNewProject={() => setDialogState({ mode: "new" })}

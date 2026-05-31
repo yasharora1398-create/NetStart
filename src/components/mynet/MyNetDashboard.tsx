@@ -19,7 +19,6 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
@@ -32,6 +31,7 @@ import {
  type ActiveBoost,
 } from "@/lib/mynet-storage";
 import type {
+ Availability,
  CandidateProfile,
  Profile,
  Project,
@@ -48,6 +48,8 @@ type Props = {
  fullName: string;
  }) => Promise<void>;
  onToggleOpenToWork: (value: boolean) => Promise<void>;
+ /** Set the tri-state availability (closed / discoverable / open). */
+ onSetAvailability: (value: Availability) => Promise<void>;
  onUploadAvatar: (file: File) => Promise<void>;
  onRemoveAvatar: () => Promise<void>;
  onNewProject: () => void;
@@ -90,6 +92,7 @@ export const MyNetDashboard = ({
  onSubmitProfile,
  onSaveCandidate,
  onToggleOpenToWork,
+ onSetAvailability,
  onUploadAvatar,
  onRemoveAvatar,
  onNewProject,
@@ -254,9 +257,9 @@ export const MyNetDashboard = ({
  eyebrow="02"
  icon={<Telescope className="h-3.5 w-3.5 text-gold" />}
  action={
- <OpenToWorkToggle
- open={profile.candidate.isOpenToWork}
- onToggle={onToggleOpenToWork}
+ <AvailabilityPicker
+ value={profile.candidate.availability}
+ onChange={onSetAvailability}
  />
  }
  >
@@ -423,24 +426,57 @@ const Section = ({
  </section>
 );
 
-// Standalone Open-to-Work toggle. Lives in the "How partners find you"
-// section header so users can flip discoverability on/off without
-// having to enter edit mode. Both directions are always allowed " the
-// parent handler is permissive, and forcing eligibility checks here
-// turned the switch into a one-way trap when a profile was incomplete.
-const OpenToWorkToggle = ({
- open,
- onToggle,
+// Tri-state availability picker. Replaces the old binary
+// Open-to-Work switch. Three segments laid out horizontally:
+//   closed       - default, hidden everywhere
+//   discoverable - not in the match deck, but findable when a
+//                  founder searches for candidates for their project
+//   open         - in the match deck AND in search
+//
+// Each segment hovers a small tooltip on desktop explaining what
+// the state actually does so the user can pick deliberately
+// without trial and error.
+const AVAILABILITY_OPTIONS: ReadonlyArray<{
+ value: Availability;
+ label: string;
+ toast: string;
+ hint: string;
+}> = [
+ {
+ value: "closed",
+ label: "Closed",
+ toast: "Hidden everywhere.",
+ hint: "Nobody can find you. You won't appear in the Match deck or in any project-side search.",
+ },
+ {
+ value: "discoverable",
+ label: "Discoverable",
+ toast: "Findable when founders search.",
+ hint: "Not in the Match swipe deck. When a founder actively searches for someone for their project, you can be found.",
+ },
+ {
+ value: "open",
+ label: "Open to work",
+ toast: "Visible in Match + search.",
+ hint: "In the Match deck and the project-side search. Founders see you everywhere.",
+ },
+];
+
+const AvailabilityPicker = ({
+ value,
+ onChange,
 }: {
- open: boolean;
- onToggle: (value: boolean) => Promise<void>;
+ value: Availability;
+ onChange: (next: Availability) => Promise<void>;
 }) => {
  const [busy, setBusy] = useState(false);
- const handleChange = async (next: boolean) => {
+ const handleClick = async (next: Availability) => {
+ if (busy || next === value) return;
  setBusy(true);
  try {
- await onToggle(next);
- toast.success(next ? "Visible to founders." : "Hidden from search.");
+ await onChange(next);
+ const opt = AVAILABILITY_OPTIONS.find((o) => o.value === next);
+ toast.success(opt?.toast ?? "Updated.");
  } catch (err) {
  toast.error(err instanceof Error ? err.message : "Could not update.");
  } finally {
@@ -448,20 +484,41 @@ const OpenToWorkToggle = ({
  }
  };
  return (
- <div className="flex items-center gap-3">
- <span
- className={`text-[11px] font-mono uppercase tracking-[0.18em] ${
- open ? "text-gold" : "text-muted-foreground"
+ <div
+ role="radiogroup"
+ aria-label="Your availability"
+ className="inline-flex rounded-sm border border-border bg-card p-0.5"
+ >
+ {AVAILABILITY_OPTIONS.map((opt) => {
+ const active = opt.value === value;
+ return (
+ <div key={opt.value} className="group relative">
+ <button
+ type="button"
+ role="radio"
+ aria-checked={active}
+ onClick={() => handleClick(opt.value)}
+ disabled={busy}
+ className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.16em] rounded-sm transition-colors ${
+ active
+ ? "bg-gold text-primary-foreground"
+ : "text-muted-foreground hover:text-foreground"
  }`}
  >
- {open ? "Open to work" : "Closed"}
+ {opt.label}
+ </button>
+ {/* Hover tooltip - desktop only. Doesn't render on
+ touch since :hover isn't reliable there; mobile users
+ can tap to switch and read the toast. */}
+ <span
+ role="tooltip"
+ className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 w-56 rounded-sm border border-border bg-card px-3 py-2 text-[11px] leading-relaxed text-foreground shadow-md opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 hidden md:block"
+ >
+ {opt.hint}
  </span>
- <Switch
- checked={open}
- onCheckedChange={handleChange}
- disabled={busy}
- aria-label="Open to work"
- />
+ </div>
+ );
+ })}
  </div>
  );
 };

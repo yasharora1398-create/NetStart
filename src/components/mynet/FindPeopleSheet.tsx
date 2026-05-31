@@ -34,7 +34,7 @@ import { isAiConfigured } from "@/lib/ai";
 import { hasAnyCriteria, scoreCandidate } from "@/lib/matching";
 import {
  getAvatarUrl,
- listOpenCandidates,
+ listSearchableCandidates,
  matchCandidatesForProject,
  requestChat,
 } from "@/lib/mynet-storage";
@@ -84,7 +84,10 @@ export const FindPeopleSheet = ({
  setUsingAi(useAi);
  const loader = useAi
  ? matchCandidatesForProject(project.id)
- : listOpenCandidates();
+ // Project-side search: include both 'open' and
+ // 'discoverable' candidates. The match deck (Match.tsx)
+ // still uses listOpenCandidates which is 'open' only.
+ : listSearchableCandidates();
  loader
  .then((list) => {
  if (!cancelled) setCandidates(list);

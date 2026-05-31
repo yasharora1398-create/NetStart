@@ -99,6 +99,10 @@ type ProfileRow = {
  banner_image_path?: string | null;
  // Verified perk (migration 0044). Optional same reason.
  is_verified?: boolean | null;
+ // Tri-state availability (migration 0045). Optional during the
+ // dual-write window where is_open_to_work is the source of truth
+ // for code paths that haven't migrated yet.
+ availability?: string | null;
 };
 
 type ProjectRow = {
@@ -125,6 +129,16 @@ const skillsFromJson = (raw: unknown): string[] => {
  return [];
 };
 
+const availabilityFromRow = (
+ raw: string | null | undefined,
+ fallbackOpen: boolean,
+): import("./mynet-types").Availability => {
+ if (raw === "open" || raw === "discoverable" || raw === "closed") return raw;
+ // Pre-migration-0045 rows have null availability; derive from the
+ // legacy is_open_to_work flag.
+ return fallbackOpen ? "open" : "closed";
+};
+
 const candidateFromRow = (row: ProfileRow): CandidateProfile => ({
  headline: row.headline ?? "",
  bio: row.bio ?? "",
@@ -132,6 +146,10 @@ const candidateFromRow = (row: ProfileRow): CandidateProfile => ({
  location: row.candidate_location ?? "",
  commitment: row.candidate_commitment ?? "",
  isOpenToWork: Boolean(row.is_open_to_work),
+ availability: availabilityFromRow(
+ row.availability ?? null,
+ Boolean(row.is_open_to_work),
+ ),
 });
 
 const profileFromRow = (row: ProfileRow): Profile => ({
@@ -740,13 +758,35 @@ export const setOpenToWork = async (
  userId: string,
  value: boolean,
 ): Promise<void> => {
+ // Legacy two-state setter. New UI calls setAvailability instead;
+ // this stays so any older callers keep working. The trigger in
+ // migration 0045 keeps is_open_to_work and availability in sync
+ // from the other direction too.
+ await setAvailability(userId, value ? "open" : "closed");
+};
+
+// Write the tri-state availability column. Migration 0045's
+// before-update trigger automatically mirrors the value to the
+// legacy is_open_to_work column for code paths that still read it.
+export const setAvailability = async (
+ userId: string,
+ value: import("./mynet-types").Availability,
+): Promise<void> => {
  const { error } = await getSupabase()
  .from("profiles")
  .upsert(
- { user_id: userId, is_open_to_work: value },
+ { user_id: userId, availability: value },
  { onConflict: "user_id" },
  );
- if (error) throw error;
+ if (error) {
+ const msg = error.message || "";
+ if (/availability/i.test(msg) || /schema cache/i.test(msg)) {
+ throw new Error(
+ "availability column is missing. Run supabase/migrations/0045_candidate_availability.sql in the Supabase SQL editor.",
+ );
+ }
+ throw error;
+ }
 };
 
 type CandidateRpcRow = {
@@ -780,6 +820,27 @@ const candidateFromRpc = (row: CandidateRpcRow): Candidate => ({
 export const listOpenCandidates = async (): Promise<Candidate[]> => {
  const { data, error } = await getSupabase().rpc("list_open_candidates");
  if (error) throw error;
+ return ((data ?? []) as CandidateRpcRow[]).map(candidateFromRpc);
+};
+
+// Same shape as listOpenCandidates but the RPC includes both 'open'
+// AND 'discoverable' availability rows. Used by FindPeopleSheet
+// (project-side founder search) so users who picked the middle
+// state surface here but not in the swipe deck.
+export const listSearchableCandidates = async (): Promise<Candidate[]> => {
+ const { data, error } = await getSupabase().rpc(
+ "list_searchable_candidates",
+ );
+ if (error) {
+ // Pre-migration-0045 fallback: if the new RPC doesn't exist yet,
+ // gracefully fall back to the open-only list so the page still
+ // works (just with the old visibility behaviour).
+ const msg = error.message || "";
+ if (/list_searchable_candidates/i.test(msg) || /does not exist/i.test(msg)) {
+ return listOpenCandidates();
+ }
+ throw error;
+ }
  return ((data ?? []) as CandidateRpcRow[]).map(candidateFromRpc);
 };
 

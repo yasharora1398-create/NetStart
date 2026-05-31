@@ -56,13 +56,23 @@ export type ProofMeta = {
 
 export type ReviewStatus = "draft" | "pending" | "accepted" | "rejected";
 
+// Tri-state candidate availability (migration 0045).
+//   closed       - hidden from match deck AND from project-side search
+//   discoverable - hidden from match deck, surfaced when founders
+//                  actively search for candidates for their project
+//   open         - in the match deck AND in search
+export type Availability = "closed" | "discoverable" | "open";
+
 export type CandidateProfile = {
  headline: string;
  bio: string;
  skills: string[];
  location: string;
  commitment: string;
+ // Legacy two-state. Kept on the type so anything still reading
+ // it keeps working; mirrors availability === 'open'.
  isOpenToWork: boolean;
+ availability: Availability;
 };
 
 export type Profile = {
@@ -210,6 +220,7 @@ export const emptyCandidate = (): CandidateProfile => ({
  location: "",
  commitment: "",
  isOpenToWork: false,
+ availability: "closed",
 });
 
 export const emptyProfile = (): Profile => ({
