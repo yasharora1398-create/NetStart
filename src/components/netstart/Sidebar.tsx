@@ -49,6 +49,9 @@ const APP_ITEMS: Item[] = [
  // Reviews is public-read for everyone (signed-in or not); the
  // page itself gates the write action on signed-in state.
  { to: "/reviews", label: "Reviews", icon: ReviewsIcon },
+ // Paid features hub: lists Boost, Verified, Spotlight with
+ // mini card previews. Each card links to its own product page.
+ { to: "/perks", label: "Paid features", icon: PerksIcon },
 ];
 
 const ABOUT_ITEMS: Item[] = [
@@ -285,6 +288,7 @@ import {
  MessageCircle,
  Settings as SettingsLucide,
  ShieldCheck,
+ Sparkles,
  Star as StarLucide,
  User as UserLucide,
  Wrench,
@@ -306,6 +310,7 @@ const RAIL_ITEMS: RailItem[] = [
  { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
  { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
  { to: "/reviews", label: "Reviews", icon: <StarLucide className="size-4" /> },
+ { to: "/perks", label: "Paid features", icon: <Sparkles className="size-4" /> },
  { to: "/how", label: "How it works", icon: <Compass className="size-4" /> },
  { to: "/standards", label: "Standards", icon: <ShieldCheck className="size-4" /> },
  { to: "/download", label: "Download", icon: <DownloadLucide className="size-4" /> },
@@ -542,6 +547,25 @@ function ReviewsIcon() {
  strokeLinejoin="round"
  >
  <path d="M8 2 L9.8 6 L14 6.4 L10.8 9.2 L11.8 13.4 L8 11.1 L4.2 13.4 L5.2 9.2 L2 6.4 L6.2 6 Z" />
+ </svg>
+ );
+}
+
+function PerksIcon() {
+ // Four-point sparkle - same stroke-only style as the rest of
+ // the sidebar icons. Evokes "premium/special" without
+ // overlapping the Reviews five-point star.
+ return (
+ <svg
+ viewBox="0 0 16 16"
+ fill="none"
+ stroke="currentColor"
+ strokeWidth={1.4}
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ >
+ <path d="M8 2 L9 7 L14 8 L9 9 L8 14 L7 9 L2 8 L7 7 Z" />
+ <path d="M12.5 2.5 L13 4 L14.5 4.5 L13 5 L12.5 6.5 L12 5 L10.5 4.5 L12 4 Z" />
  </svg>
  );
 }
