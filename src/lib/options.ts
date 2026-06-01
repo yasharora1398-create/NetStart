@@ -241,43 +241,60 @@ export const LOCATION_OPTIONS: string[] = [
 // vs a long checklist. Free-text fallback is still on (allowCustom
 // on TagInput) so anything niche can be typed manually.
 export const SKILLS_OPTIONS: string[] = [
- // Engineering & tech
- "Engineering",
- "Frontend Engineering",
- "Backend Engineering",
- "Full-Stack Engineering",
- "Mobile Engineering",
- "AI / Machine Learning",
- "Data & Analytics",
- "Data Engineering",
- "DevOps / Infrastructure",
- "Security",
- "Hardware / Robotics",
- // Product & design
- "Product Management",
- "Product Design",
- "UX Research",
- "Brand Design",
- // Growth, marketing, community
- "Marketing",
- "Growth",
- "Content",
+ // Engineering & Technical
+ "Frontend dev",
+ "Backend dev",
+ "Full-stack dev",
+ "Mobile dev",
+ "DevOps / Infra",
+ "Data / Analytics",
+ "Machine learning / AI",
+ "No-code / Automation",
+ "Cybersecurity",
+ // Design & Creative
+ "UI/UX design",
+ "Graphic design",
+ "Branding",
+ "Motion graphics",
+ "Video editing",
+ "Illustration",
+ "Copywriting",
+ // Product & Strategy
+ "Product management",
+ "UX research",
+ "Business strategy",
+ "Fundraising / Pitching",
+ // Marketing & Growth
+ "Growth marketing",
+ "Paid ads",
  "SEO",
- "Performance Marketing",
- "Community",
- // Sales & revenue
- "Sales",
- "Business Development",
- "Partnerships",
- "Customer Success",
- // Business & ops
+ "Social media",
+ "Community management",
+ "PR / Comms",
+ // Sales & Business
+ "Sales & Business Development",
+ // Operations & Finance
  "Operations",
- "Strategy",
- "Finance",
- "Fundraising",
+ "Finance / Accounting",
  "Legal",
- "Hiring / People",
- "Project Management",
+ "HR / Recruiting",
+];
+
+// C-level role a partner wants to play in their next venture.
+// Only meaningful on the partner-side of MyNet; founders ignore
+// this field. Renders as a pill on the partner's Match card.
+export const PARTNER_ROLE_OPTIONS: ReadonlyArray<{
+ value: "CTO" | "CPO" | "CMO" | "CRO" | "CDO" | "COO" | "CFO";
+ label: string;
+ description: string;
+}> = [
+ { value: "CTO", label: "CTO", description: "Engineering" },
+ { value: "CPO", label: "CPO", description: "Product" },
+ { value: "CMO", label: "CMO", description: "Marketing" },
+ { value: "CRO", label: "CRO", description: "Sales / revenue" },
+ { value: "CDO", label: "CDO", description: "Design" },
+ { value: "COO", label: "COO", description: "Operations" },
+ { value: "CFO", label: "CFO", description: "Finance" },
 ];
 
 // Kept (but not exported) so referencing tools that scrape this file

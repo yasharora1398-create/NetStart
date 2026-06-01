@@ -63,6 +63,19 @@ export type ReviewStatus = "draft" | "pending" | "accepted" | "rejected";
 //   open         - in the match deck AND in search
 export type Availability = "closed" | "discoverable" | "open";
 
+// C-level role a partner wants to play in their next venture
+// (migration 0046). Distinct from auth.user_metadata.role which
+// is the founder-vs-partner account mode. Partner-only; founders
+// ignore this field.
+export type PartnerRole =
+ | "CTO"
+ | "CPO"
+ | "CMO"
+ | "CRO"
+ | "CDO"
+ | "COO"
+ | "CFO";
+
 export type CandidateProfile = {
  headline: string;
  bio: string;
@@ -73,6 +86,8 @@ export type CandidateProfile = {
  // it keeps working; mirrors availability === 'open'.
  isOpenToWork: boolean;
  availability: Availability;
+ // Null until the partner picks one. Founders ignore.
+ partnerRole: PartnerRole | null;
 };
 
 export type Profile = {
@@ -113,6 +128,9 @@ export type Candidate = {
  resumeName: string | null;
  resumePath: string | null;
  avatarPath: string | null;
+ // C-level role pill on the partner's Match card. Null when the
+ // partner hasn't picked one yet.
+ partnerRole: PartnerRole | null;
 };
 
 export type ApplicationStatus =
@@ -221,6 +239,7 @@ export const emptyCandidate = (): CandidateProfile => ({
  commitment: "",
  isOpenToWork: false,
  availability: "closed",
+ partnerRole: null,
 });
 
 export const emptyProfile = (): Profile => ({

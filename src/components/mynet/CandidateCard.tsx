@@ -29,6 +29,7 @@ import {
  COMMITMENT_OPTIONS,
  HEADLINE_OPTIONS,
  LOCATION_OPTIONS,
+ PARTNER_ROLE_OPTIONS,
  SKILLS_OPTIONS,
 } from "@/lib/options";
 import {
@@ -37,6 +38,7 @@ import {
  candidateGaps,
  isCandidateProfileComplete,
  type CandidateProfile,
+ type PartnerRole,
  type Profile,
 } from "@/lib/mynet-types";
 
@@ -78,6 +80,12 @@ export const CandidateCard = ({
  Boolean(profile.candidate.location.trim()),
  );
  const [commitment, setCommitment] = useState(profile.candidate.commitment);
+ // C-level role (CTO / CPO / CMO / CRO / CDO / COO / CFO). Null
+ // until the partner picks one. Founders never see this section
+ // because they edit projects, not their candidate profile.
+ const [partnerRole, setPartnerRole] = useState<PartnerRole | null>(
+ profile.candidate.partnerRole,
+ );
  const [saving, setSaving] = useState(false);
  const [dirty, setDirty] = useState(false);
  const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -93,6 +101,7 @@ export const CandidateCard = ({
  setLocation(profile.candidate.location);
  setLocationEnabled(Boolean(profile.candidate.location.trim()));
  setCommitment(profile.candidate.commitment);
+ setPartnerRole(profile.candidate.partnerRole);
  }, [profile, dirty]);
 
  const isAccepted = profile.reviewStatus === "accepted";
@@ -103,6 +112,8 @@ export const CandidateCard = ({
  location: location.trim(),
  commitment: commitment.trim(),
  isOpenToWork: profile.candidate.isOpenToWork,
+ availability: profile.candidate.availability,
+ partnerRole,
  };
  const profileComplete = isCandidateProfileComplete(liveCandidate);
  const missing = candidateGaps(liveCandidate);
@@ -116,7 +127,8 @@ export const CandidateCard = ({
  bio !== profile.candidate.bio ||
  !arraysEqual(skills, profile.candidate.skills) ||
  location !== profile.candidate.location ||
- commitment !== profile.candidate.commitment);
+ commitment !== profile.candidate.commitment ||
+ partnerRole !== profile.candidate.partnerRole);
 
  const markDirty = () => {
  if (!dirty) setDirty(true);
@@ -164,6 +176,8 @@ export const CandidateCard = ({
  location: location.trim(),
  commitment: commitment.trim(),
  isOpenToWork: profile.candidate.isOpenToWork && isAccepted,
+ availability: profile.candidate.availability,
+ partnerRole,
  },
  fullName: fullName.trim(),
  });
@@ -331,6 +345,43 @@ export const CandidateCard = ({
  placeholder="What you've shipped. Where you want to focus next. Why a founder should reach out."
  className="bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
  />
+ </div>
+
+ {/* Partner-only C-level role picker. Renders for everyone
+ in CandidateCard since this component is the partner-side
+ profile editor; founders edit projects, never their
+ candidate profile. */}
+ <div className="mb-6">
+ <Label
+ htmlFor="partner-role"
+ className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2"
+ >
+ <UserCheck className="h-3.5 w-3.5 text-gold" />
+ The role you want to play
+ </Label>
+ <Select
+ value={partnerRole ?? "none"}
+ onValueChange={(v) => {
+ setPartnerRole(v === "none" ? null : (v as PartnerRole));
+ markDirty();
+ }}
+ >
+ <SelectTrigger id="partner-role">
+ <SelectValue placeholder="Pick a role" />
+ </SelectTrigger>
+ <SelectContent>
+ <SelectItem value="none">No preference</SelectItem>
+ {PARTNER_ROLE_OPTIONS.map((opt) => (
+ <SelectItem key={opt.value} value={opt.value}>
+ {opt.label} — {opt.description}
+ </SelectItem>
+ ))}
+ </SelectContent>
+ </Select>
+ <p className="text-[11px] text-muted-foreground mt-1.5">
+ The C-suite seat you&apos;d step into on the next venture.
+ Shows as a pill on your card in Match.
+ </p>
  </div>
 
  <div className="grid md:grid-cols-2 gap-6 mb-6">

@@ -103,6 +103,9 @@ type ProfileRow = {
  // dual-write window where is_open_to_work is the source of truth
  // for code paths that haven't migrated yet.
  availability?: string | null;
+ // Partner C-level role (migration 0046). Null for founders +
+ // partners who haven't picked one.
+ partner_role?: string | null;
 };
 
 type ProjectRow = {
@@ -139,6 +142,25 @@ const availabilityFromRow = (
  return fallbackOpen ? "open" : "closed";
 };
 
+const ALLOWED_PARTNER_ROLES = new Set([
+ "CTO",
+ "CPO",
+ "CMO",
+ "CRO",
+ "CDO",
+ "COO",
+ "CFO",
+]);
+
+const partnerRoleFromRow = (
+ raw: string | null | undefined,
+): import("./mynet-types").PartnerRole | null => {
+ if (raw && ALLOWED_PARTNER_ROLES.has(raw)) {
+ return raw as import("./mynet-types").PartnerRole;
+ }
+ return null;
+};
+
 const candidateFromRow = (row: ProfileRow): CandidateProfile => ({
  headline: row.headline ?? "",
  bio: row.bio ?? "",
@@ -150,6 +172,7 @@ const candidateFromRow = (row: ProfileRow): CandidateProfile => ({
  row.availability ?? null,
  Boolean(row.is_open_to_work),
  ),
+ partnerRole: partnerRoleFromRow(row.partner_role ?? null),
 });
 
 const profileFromRow = (row: ProfileRow): Profile => ({
@@ -740,6 +763,7 @@ export const updateCandidate = async (
  candidate_location: candidate.location,
  candidate_commitment: candidate.commitment,
  is_open_to_work: candidate.isOpenToWork,
+ partner_role: candidate.partnerRole ?? null,
  },
  { onConflict: "user_id" },
  );
@@ -801,6 +825,7 @@ type CandidateRpcRow = {
  resume_name: string | null;
  resume_path: string | null;
  avatar_path: string | null;
+ partner_role?: string | null;
 };
 
 const candidateFromRpc = (row: CandidateRpcRow): Candidate => ({
@@ -815,6 +840,7 @@ const candidateFromRpc = (row: CandidateRpcRow): Candidate => ({
  resumeName: row.resume_name ?? null,
  resumePath: row.resume_path ?? null,
  avatarPath: row.avatar_path ?? null,
+ partnerRole: partnerRoleFromRow(row.partner_role ?? null),
 });
 
 export const listOpenCandidates = async (): Promise<Candidate[]> => {
@@ -1294,6 +1320,9 @@ export const listApplicationsForProject = async (
  resumeName: r.candidate_resume_name ?? null,
  resumePath: r.candidate_resume_path ?? null,
  avatarPath: r.candidate_avatar_path ?? null,
+ // list_applications_for_project RPC doesn't return
+ // partner_role; default null until the RPC is rebuilt.
+ partnerRole: null,
  },
  }));
 };

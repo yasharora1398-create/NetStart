@@ -893,10 +893,20 @@ const MatchCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  {candidate.fullName || "Unnamed"}
  </h2>
 
- {(candidate.commitment ||
+ {(candidate.partnerRole ||
+ candidate.commitment ||
  candidate.location ||
  candidate.skills.length > 0) ? (
  <div className="mb-3 flex flex-wrap gap-1.5">
+ {/* C-level role pill leads since it's the strongest
+ signal of what this partner brings. Solid primary
+ fill so it stands out vs the gold-tone commitment /
+ location pills. */}
+ {candidate.partnerRole ? (
+ <span className="inline-flex items-center rounded-full border border-primary bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+ {candidate.partnerRole}
+ </span>
+ ) : null}
  {candidate.commitment ? (
  <span className="inline-flex items-center gap-1.5 rounded-full border border-gold bg-gold px-3 py-1 text-xs font-medium text-primary-foreground">
  {candidate.commitment}
