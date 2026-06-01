@@ -41,6 +41,7 @@ import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 import { MyNetWizard } from "@/components/mynet/MyNetWizard";
+import { MyNetSetupModal } from "@/components/mynet/MyNetSetupModal";
 import { MyNetDashboard } from "@/components/mynet/MyNetDashboard";
 import { getSupabase } from "@/lib/supabase";
 import type { Role } from "@/components/netstart/RoleSwitcher";
@@ -151,6 +152,14 @@ const MyNet = () => {
  >({ mode: "closed" });
  const [findForId, setFindForId] = useState<string | null>(null);
  const [editingPending, setEditingPending] = useState(false);
+ // Local-only Stripe-style setup modal toggle. When the user
+ // taps X on the modal we hide it for the rest of this page
+ // lifetime and fall back to the legacy full-page wizard so they
+ // can still complete setup. Refresh re-opens the modal.
+ const [setupModalSkipped, setSetupModalSkipped] = useState(false);
+ // process.env.NODE_ENV is statically replaced at build time, so
+ // this is just a constant on the client - safe to check directly.
+ const SETUP_MODAL_ENABLED = process.env.NODE_ENV !== "production";
 
  const refreshAll = async () => {
  if (!uid) return;
@@ -587,14 +596,7 @@ const MyNet = () => {
  }
 
  if (showWizard && uid) {
- return (
- <div className="min-h-dvh bg-background text-foreground">
- <Sidebar />
- <div
- className="transition-[padding] duration-200 ease-out"
- style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
- >
- <main className="pt-12 pb-24">
+ const wizardEl = (
  <MyNetWizard
  uid={uid}
  profile={profile}
@@ -605,6 +607,82 @@ const MyNet = () => {
  return r === "founder" || r === "partner" ? r : undefined;
  })()}
  />
+ );
+
+ // Stripe-style setup modal. Local-host only for now; on
+ // production we fall through to the legacy full-page wizard
+ // below. Inside the modal the user sees the intro slide
+ // first (the one that explains MyNet + the 3 steps), then
+ // taps Next to start filling things in.
+ const inModal =
+ SETUP_MODAL_ENABLED &&
+ !setupModalSkipped &&
+ profile.reviewStatus === "draft";
+
+ if (inModal) {
+ return (
+ <div className="min-h-dvh bg-background text-foreground">
+ <Sidebar />
+ <div
+ className="transition-[padding] duration-200 ease-out"
+ style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
+ >
+ {/* Page underneath the modal. Shows a brief placeholder so
+ the user sees Polln8 chrome + this strip at the edges
+ (blurred via the modal's backdrop) while the modal
+ holds focus. */}
+ <main className="pt-12 pb-24">
+ <div className="container max-w-3xl py-16 text-center">
+ <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
+ Welcome to Polln8
+ </p>
+ <h1 className="font-display text-3xl md:text-4xl leading-tight mb-3">
+ Let&apos;s set up your MyNet.
+ </h1>
+ <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+ The setup will pop up in a moment. Tap the X if you
+ want to come back later.
+ </p>
+ </div>
+ </main>
+ <Footer />
+ </div>
+ <MobileBottomNav />
+
+ <MyNetSetupModal
+ open
+ onSkip={() => setSetupModalSkipped(true)}
+ >
+ {wizardEl}
+ </MyNetSetupModal>
+ </div>
+ );
+ }
+
+ // Legacy full-page wizard. Used on production and as the
+ // fallback when the user skipped the modal.
+ return (
+ <div className="min-h-dvh bg-background text-foreground">
+ <Sidebar />
+ <div
+ className="transition-[padding] duration-200 ease-out"
+ style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
+ >
+ <main className="pt-12 pb-24">
+ {/* If the user skipped the modal, offer a one-tap way
+ to bring it back. */}
+ {SETUP_MODAL_ENABLED && setupModalSkipped ? (
+ <div className="container max-w-5xl mb-6">
+ <button
+ type="button"
+ onClick={() => setSetupModalSkipped(false)}
+ className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-gold hover:underline"
+ >
+ Reopen the guided setup
+ </button>
+ </div>
+ ) : null}
+ {wizardEl}
  </main>
  <Footer />
  </div>

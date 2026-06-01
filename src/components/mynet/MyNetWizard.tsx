@@ -804,12 +804,16 @@ const Intro = ({
  </div>
 
  <h1 className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] mb-6">
- Set up your <em className="text-gradient-gold not-italic">profile.</em>
+ This is <em className="text-gradient-gold not-italic">MyNet.</em>
  </h1>
 
- <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-12">
- Three short steps. We&apos;ll get you in front of the right people, and
- keep the network high signal.
+ <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto mb-4 leading-relaxed">
+ Your profile on Polln8. It&apos;s how every founder or partner on
+ the network discovers you, decides if it&apos;s worth a chat, and
+ trusts that you&apos;re real.
+ </p>
+ <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+ Every match starts here. Three short steps to get it built.
  </p>
 
  {rejected && rejectionReason && (
@@ -839,7 +843,7 @@ const Intro = ({
  </div>
 
  <Button variant="gold" size="xl" onClick={onStart} className="group">
- {rejected ? "Update and resubmit" : "Get started"}
+ {rejected ? "Update and resubmit" : "Next"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
  </Button>
  </div>
