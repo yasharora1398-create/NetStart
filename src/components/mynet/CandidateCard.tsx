@@ -359,18 +359,23 @@ export const CandidateCard = ({
  <UserCheck className="h-3.5 w-3.5 text-gold" />
  The role you want to play
  </Label>
+ {/* value={undefined} when null so Radix shows the placeholder
+ instead of a "No preference" label - we explicitly don't
+ want users with no role set to see anything that implies a
+ picked preference. Once a role is picked the user can change
+ it but can't clear it back to null from this control;
+ that's fine since the field is purely additive cosmetic. */}
  <Select
- value={partnerRole ?? "none"}
+ value={partnerRole ?? undefined}
  onValueChange={(v) => {
- setPartnerRole(v === "none" ? null : (v as PartnerRole));
+ setPartnerRole(v as PartnerRole);
  markDirty();
  }}
  >
  <SelectTrigger id="partner-role">
- <SelectValue placeholder="Pick a role" />
+ <SelectValue placeholder="Optional — pick a role" />
  </SelectTrigger>
  <SelectContent>
- <SelectItem value="none">No preference</SelectItem>
  {PARTNER_ROLE_OPTIONS.map((opt) => (
  <SelectItem key={opt.value} value={opt.value}>
  {opt.label} — {opt.description}
@@ -379,8 +384,9 @@ export const CandidateCard = ({
  </SelectContent>
  </Select>
  <p className="text-[11px] text-muted-foreground mt-1.5">
- The C-suite seat you&apos;d step into on the next venture.
- Shows as a pill on your card in Match.
+ Optional. Pick the C-suite seat you&apos;d step into on
+ the next venture and it shows as a pill on your Match card.
+ Leave blank to keep your card exactly as it is now.
  </p>
  </div>
 
