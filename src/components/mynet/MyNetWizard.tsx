@@ -370,6 +370,8 @@ export const MyNetWizard = ({
  location: lookingLocation.trim(),
  commitment: lookingCommitment.trim(),
  isOpenToWork: true,
+ availability: profile.candidate.availability,
+ partnerRole: profile.candidate.partnerRole,
  },
  fullName.trim(),
  );

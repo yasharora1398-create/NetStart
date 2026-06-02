@@ -241,43 +241,16 @@ export const LOCATION_OPTIONS: string[] = [
 // vs a long checklist. Free-text fallback is still on (allowCustom
 // on TagInput) so anything niche can be typed manually.
 export const SKILLS_OPTIONS: string[] = [
- // Engineering & Technical
- "Frontend dev",
- "Backend dev",
- "Full-stack dev",
- "Mobile dev",
- "DevOps / Infra",
- "Data / Analytics",
- "Machine learning / AI",
- "No-code / Automation",
- "Cybersecurity",
- // Design & Creative
- "UI/UX design",
- "Graphic design",
- "Branding",
- "Motion graphics",
- "Video editing",
- "Illustration",
- "Copywriting",
- // Product & Strategy
- "Product management",
- "UX research",
- "Business strategy",
- "Fundraising / Pitching",
- // Marketing & Growth
- "Growth marketing",
- "Paid ads",
- "SEO",
- "Social media",
- "Community management",
- "PR / Comms",
- // Sales & Business
- "Sales & Business Development",
- // Operations & Finance
- "Operations",
- "Finance / Accounting",
- "Legal",
- "HR / Recruiting",
+ "Full-stack engineering",
+ "Frontend engineering",
+ "Backend / infrastructure engineering",
+ "AI/ML engineering",
+ "Product design",
+ "Customer research",
+ "Sales",
+ "Distribution / growth marketing",
+ "Content and storytelling",
+ "Fundraising",
 ];
 
 // C-level role a partner wants to play in their next venture.

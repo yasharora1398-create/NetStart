@@ -41,8 +41,7 @@ import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 import { MyNetWizard } from "@/components/mynet/MyNetWizard";
-import { MyNetSetupModal } from "@/components/mynet/MyNetSetupModal";
-import { MatchDeckBackdrop } from "@/components/mynet/MatchDeckBackdrop";
+import { MyNetSignupFlow } from "@/components/mynet/MyNetSignupFlow";
 import { MyNetDashboard } from "@/components/mynet/MyNetDashboard";
 import { getSupabase } from "@/lib/supabase";
 import type { Role } from "@/components/netstart/RoleSwitcher";
@@ -153,20 +152,11 @@ const MyNet = () => {
  >({ mode: "closed" });
  const [findForId, setFindForId] = useState<string | null>(null);
  const [editingPending, setEditingPending] = useState(false);
- // Stripe-style setup modal toggle. When the user taps Skip on
- // the modal we hide it for the rest of this page lifetime; the
- // legacy in-page wizard takes over so they can still complete
- // setup. Refresh re-opens the modal.
- const [setupModalSkipped, setSetupModalSkipped] = useState(false);
- // Progress payload emitted by MyNetWizard.onStageChange, used to
- // render the "Step X of N" indicator at the top of the modal.
- const [wizardProgress, setWizardProgress] = useState<{
- current: number;
- total: number;
- } | null>(null);
- // True after a successful submitProfile inside the wizard. Shows
- // the "MyNet is live" final card briefly, then the modal closes.
- const [showFinalCard, setShowFinalCard] = useState(false);
+ // Post-signup full-screen flow. When the user taps "Skip MyNet"
+ // we hide it for the rest of this page lifetime; the legacy
+ // in-page wizard takes over so they can still complete setup.
+ // Refresh re-opens the post-signup flow.
+ const [signupFlowSkipped, setSignupFlowSkipped] = useState(false);
 
  const refreshAll = async () => {
  if (!uid) return;
@@ -603,93 +593,46 @@ const MyNet = () => {
  }
 
  if (showWizard && uid) {
- const wizardEl = (
+ // First-run, draft user: full-screen MyNetSignupFlow. Tapping
+ // "Skip MyNet" inside the flow flips signupFlowSkipped and
+ // falls through to the legacy in-page wizard below. The
+ // legacy wizard stays exactly as it was - that's the
+ // "comes back later via the sidebar" surface.
+ if (!signupFlowSkipped && profile.reviewStatus === "draft") {
+ return (
+ <MyNetSignupFlow
+ uid={uid}
+ profile={profile}
+ onProfileRefresh={refreshAll}
+ onSkip={() => setSignupFlowSkipped(true)}
+ onDone={() => {
+ setEditingPending(false);
+ setSignupFlowSkipped(true);
+ }}
+ />
+ );
+ }
+
+ // Legacy in-page wizard. Unchanged from before; this is what
+ // users hitting /mynet via the sidebar after skipping see.
+ return (
+ <div className="min-h-dvh bg-background text-foreground">
+ <Sidebar />
+ <div
+ className="transition-[padding] duration-200 ease-out"
+ style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
+ >
+ <main className="pt-12 pb-24">
  <MyNetWizard
  uid={uid}
  profile={profile}
  onProfileRefresh={refreshAll}
- onSubmitComplete={() => {
- setEditingPending(false);
- // Show the "MyNet is live" celebration card briefly,
- // then close the modal which drops the user onto the
- // standard /mynet pending/accepted dashboard.
- setShowFinalCard(true);
- window.setTimeout(() => {
- setShowFinalCard(false);
- setSetupModalSkipped(true);
- }, 2200);
- }}
- onStageChange={setWizardProgress}
+ onSubmitComplete={() => setEditingPending(false)}
  preselectedRole={(() => {
  const r = user?.user_metadata?.role;
  return r === "founder" || r === "partner" ? r : undefined;
  })()}
  />
- );
-
- // Stripe-style setup modal on first run. Skip falls back to
- // the legacy in-page wizard so the user can still complete
- // setup the old way if they prefer.
- const inModal =
- !setupModalSkipped && profile.reviewStatus === "draft";
-
- if (inModal) {
- return (
- <div className="min-h-dvh bg-background text-foreground">
- <Sidebar />
- <div
- className="transition-[padding] duration-200 ease-out"
- style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
- >
- {/* Mock Match deck as the background behind the modal.
- The modal's backdrop-blur defocuses it so the user
- sees the silhouette of where they're going (the
- actual Match feed) without us firing real RPCs. */}
- <main className="pt-12 pb-24">
- <MatchDeckBackdrop />
- </main>
- <Footer />
- </div>
- <MobileBottomNav />
-
- <MyNetSetupModal
- open
- onSkip={() => setSetupModalSkipped(true)}
- progress={wizardProgress ?? undefined}
- finalCard={showFinalCard}
- finalCtaHref="/mynet"
- finalCtaLabel="Open MyNet"
- >
- {wizardEl}
- </MyNetSetupModal>
- </div>
- );
- }
-
- // Legacy full-page wizard. Used on production and as the
- // fallback when the user skipped the modal.
- return (
- <div className="min-h-dvh bg-background text-foreground">
- <Sidebar />
- <div
- className="transition-[padding] duration-200 ease-out"
- style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
- >
- <main className="pt-12 pb-24">
- {/* If the user skipped the modal, offer a one-tap way
- to bring it back. */}
- {setupModalSkipped ? (
- <div className="container max-w-5xl mb-6">
- <button
- type="button"
- onClick={() => setSetupModalSkipped(false)}
- className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-gold hover:underline"
- >
- Reopen the guided setup
- </button>
- </div>
- ) : null}
- {wizardEl}
  </main>
  <Footer />
  </div>
