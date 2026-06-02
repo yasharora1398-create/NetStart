@@ -42,6 +42,7 @@ import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 import { MyNetWizard } from "@/components/mynet/MyNetWizard";
 import { MyNetSetupModal } from "@/components/mynet/MyNetSetupModal";
+import { MatchDeckBackdrop } from "@/components/mynet/MatchDeckBackdrop";
 import { MyNetDashboard } from "@/components/mynet/MyNetDashboard";
 import { getSupabase } from "@/lib/supabase";
 import type { Role } from "@/components/netstart/RoleSwitcher";
@@ -153,10 +154,19 @@ const MyNet = () => {
  const [findForId, setFindForId] = useState<string | null>(null);
  const [editingPending, setEditingPending] = useState(false);
  // Local-only Stripe-style setup modal toggle. When the user
- // taps X on the modal we hide it for the rest of this page
- // lifetime and fall back to the legacy full-page wizard so they
- // can still complete setup. Refresh re-opens the modal.
+ // taps Skip on the modal we hide it for the rest of this page
+ // lifetime; legacy full-page wizard takes over so they can still
+ // complete setup. Refresh re-opens the modal.
  const [setupModalSkipped, setSetupModalSkipped] = useState(false);
+ // Progress payload emitted by MyNetWizard.onStageChange, used to
+ // render the "Step X of N" indicator at the top of the modal.
+ const [wizardProgress, setWizardProgress] = useState<{
+ current: number;
+ total: number;
+ } | null>(null);
+ // True after a successful submitProfile inside the wizard. Shows
+ // the "MyNet is live" final card briefly, then the modal closes.
+ const [showFinalCard, setShowFinalCard] = useState(false);
  // process.env.NODE_ENV is statically replaced at build time, so
  // this is just a constant on the client - safe to check directly.
  const SETUP_MODAL_ENABLED = process.env.NODE_ENV !== "production";
@@ -601,7 +611,18 @@ const MyNet = () => {
  uid={uid}
  profile={profile}
  onProfileRefresh={refreshAll}
- onSubmitComplete={() => setEditingPending(false)}
+ onSubmitComplete={() => {
+ setEditingPending(false);
+ // Show the "MyNet is live" celebration card briefly,
+ // then close the modal which drops the user onto the
+ // standard /mynet pending/accepted dashboard.
+ setShowFinalCard(true);
+ window.setTimeout(() => {
+ setShowFinalCard(false);
+ setSetupModalSkipped(true);
+ }, 2200);
+ }}
+ onStageChange={setWizardProgress}
  preselectedRole={(() => {
  const r = user?.user_metadata?.role;
  return r === "founder" || r === "partner" ? r : undefined;
@@ -611,9 +632,7 @@ const MyNet = () => {
 
  // Stripe-style setup modal. Local-host only for now; on
  // production we fall through to the legacy full-page wizard
- // below. Inside the modal the user sees the intro slide
- // first (the one that explains MyNet + the 3 steps), then
- // taps Next to start filling things in.
+ // below.
  const inModal =
  SETUP_MODAL_ENABLED &&
  !setupModalSkipped &&
@@ -627,23 +646,12 @@ const MyNet = () => {
  className="transition-[padding] duration-200 ease-out"
  style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
  >
- {/* Page underneath the modal. Shows a brief placeholder so
- the user sees Polln8 chrome + this strip at the edges
- (blurred via the modal's backdrop) while the modal
- holds focus. */}
+ {/* Mock Match deck as the background behind the modal.
+ The modal's backdrop-blur defocuses it so the user
+ sees the silhouette of where they're going (the
+ actual Match feed) without us firing real RPCs. */}
  <main className="pt-12 pb-24">
- <div className="container max-w-3xl py-16 text-center">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
- Welcome to Polln8
- </p>
- <h1 className="font-display text-3xl md:text-4xl leading-tight mb-3">
- Let&apos;s set up your MyNet.
- </h1>
- <p className="text-sm text-muted-foreground max-w-xl mx-auto">
- The setup will pop up in a moment. Tap the X if you
- want to come back later.
- </p>
- </div>
+ <MatchDeckBackdrop />
  </main>
  <Footer />
  </div>
@@ -652,6 +660,10 @@ const MyNet = () => {
  <MyNetSetupModal
  open
  onSkip={() => setSetupModalSkipped(true)}
+ progress={wizardProgress ?? undefined}
+ finalCard={showFinalCard}
+ finalCtaHref="/mynet"
+ finalCtaLabel="Open MyNet"
  >
  {wizardEl}
  </MyNetSetupModal>

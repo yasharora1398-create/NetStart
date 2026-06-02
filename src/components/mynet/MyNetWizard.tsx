@@ -77,6 +77,16 @@ type Props = {
  * after credentials. Comes from `user_metadata.role`.
  */
  preselectedRole?: "founder" | "partner";
+ /**
+ * Notified whenever the wizard advances or moves back through
+ * its internal stage machine. Used by the setup modal to render
+ * a "Step X of N" progress indicator above the slide.
+ */
+ onStageChange?: (info: {
+ current: number;
+ total: number;
+ label: string;
+ }) => void;
 };
 
 const isValidLinkedIn = (url: string): boolean => {
@@ -103,11 +113,47 @@ export const MyNetWizard = ({
  onProfileRefresh,
  onSubmitComplete,
  preselectedRole,
+ onStageChange,
 }: Props) => {
  // Rejected users start at credentials so they can update and resubmit.
  const [stage, setStage] = useState<Stage>(
  profile.reviewStatus === "rejected" ? "credentials" : "intro",
  );
+
+ // Emit a progress payload to the host whenever stage changes.
+ // The total is 4 normally (intro/credentials/mode/details) or 3
+ // when preselectedRole skips the mode step.
+ useEffect(() => {
+ if (!onStageChange) return;
+ const skipsMode = Boolean(preselectedRole);
+ const total = skipsMode ? 3 : 4;
+ const orderedStages: ReadonlyArray<{
+ stage: Stage | "details";
+ label: string;
+ }> = skipsMode
+ ? [
+ { stage: "intro", label: "Intro" },
+ { stage: "credentials", label: "Credentials" },
+ { stage: "details", label: "Details" },
+ ]
+ : [
+ { stage: "intro", label: "Intro" },
+ { stage: "credentials", label: "Credentials" },
+ { stage: "mode", label: "Mode" },
+ { stage: "details", label: "Details" },
+ ];
+ const idx = orderedStages.findIndex((s) =>
+ s.stage === "details"
+ ? stage === "looking" || stage === "building"
+ : s.stage === stage,
+ );
+ if (idx < 0) return;
+ onStageChange({
+ current: idx + 1,
+ total,
+ label: orderedStages[idx].label,
+ });
+ }, [stage, preselectedRole, onStageChange]);
 
  // Step 1 - credentials
  const [linkedin, setLinkedin] = useState(profile.linkedinUrl);
@@ -796,7 +842,7 @@ const Intro = ({
  ];
 
  return (
- <div className="max-w-5xl mx-auto text-center animate-fade-up">
+ <div className="max-w-5xl mx-auto text-center animate-slide-in-right">
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
  <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-white">
  {rejected ? "Resubmit your profile" : "Welcome to MyNet"}
@@ -909,7 +955,11 @@ const StepShell = ({
  onBack?: () => void;
  children: React.ReactNode;
 }) => (
- <div className="max-w-3xl mx-auto animate-fade-up">
+ // animate-slide-in-right replaces the old fade-up so each
+ // wizard stage transition reads as a horizontal slide when
+ // rendered inside the setup modal. Outside the modal (legacy
+ // full-page wizard), the animation still plays cleanly.
+ <div className="max-w-3xl mx-auto animate-slide-in-right">
  {onBack && (
  <button
  onClick={onBack}

@@ -1,29 +1,75 @@
 "use client";
-import { useEffect, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Link } from "@/lib/router-compat";
+import { ArrowRight, Check } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Stripe-style onboarding modal that wraps MyNetWizard. Almost-full-
-// screen card centered on a translucent + backdrop-blurred backdrop,
-// so the user sees the rest of the app (sidebar + footer + page
-// content) behind the modal, blurred. Small X top-right is the
-// only escape hatch; the parent component decides what shows behind
-// the modal when the user skips.
+// Centered-card setup modal modeled on Linear/Stripe's onboarding.
+// 480px wide on desktop, full-width-minus-32px on mobile. Rendered
+// over a backdrop-blurred view of the app behind it.
 //
-// LOCAL-HOST ONLY for now (gated at the call site, not here). The
-// existing full-page wizard stays the prod experience until the
-// user signs off on this one.
+// LOCAL-HOST ONLY (gated at the call site).
+//
+// Behaviour:
+//   - Backdrop clicks are no-ops; only the "Skip for now" link
+//     dismisses
+//   - Skip fades modal + overlay over 300ms then calls onSkip
+//   - Successful completion fades into a brief "MyNet is live"
+//     card before the parent removes the modal entirely
+//   - Stage changes inside the wizard animate as a horizontal
+//     slide-in from the right (via the slide-in-right keyframe;
+//     each StepShell is keyed on stage so it remounts and animates)
+
+type Progress = {
+ // 1-indexed step the user is currently on.
+ current: number;
+ // Total number of steps in the flow.
+ total: number;
+};
 
 type Props = {
  open: boolean;
  onSkip: () => void;
+ // When true, the modal fades the wizard out and shows a brief
+ // success card. Parent should set this on a successful submit
+ // and then close the modal a moment later.
+ finalCard?: boolean;
+ // Where to send the user after the success card (defaults to /mynet).
+ finalCtaHref?: string;
+ finalCtaLabel?: string;
+ // Optional progress indicator. Hidden on the final card.
+ progress?: Progress;
  children: ReactNode;
 };
 
-export const MyNetSetupModal = ({ open, onSkip, children }: Props) => {
- // Lock background scroll while the modal is up so the blurred
- // page behind doesn't drift under the user's pointer.
+export const MyNetSetupModal = ({
+ open,
+ onSkip,
+ finalCard = false,
+ finalCtaHref = "/mynet",
+ finalCtaLabel = "Open MyNet",
+ progress,
+ children,
+}: Props) => {
+ // Local "fading out" state - flipped by handleSkip so we can play
+ // a 300ms opacity transition before the parent unmounts the modal.
+ const [closing, setClosing] = useState(false);
+
+ // Entrance: mount with opacity 0 then transition to 1 next frame.
+ const [mounted, setMounted] = useState(false);
+ useEffect(() => {
+ if (!open) {
+ setMounted(false);
+ setClosing(false);
+ return;
+ }
+ const id = window.requestAnimationFrame(() => setMounted(true));
+ return () => window.cancelAnimationFrame(id);
+ }, [open]);
+
+ // Lock background scroll while the modal is up.
  useEffect(() => {
  if (!open) return;
  const prev = document.body.style.overflow;
@@ -33,20 +79,26 @@ export const MyNetSetupModal = ({ open, onSkip, children }: Props) => {
  };
  }, [open]);
 
+ const handleSkip = () => {
+ setClosing(true);
+ window.setTimeout(onSkip, 300);
+ };
+
  if (!open) return null;
+
+ const fade = mounted && !closing ? "opacity-100" : "opacity-0";
 
  return (
  <div
- className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8"
+ className="fixed inset-0 z-[60] flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10"
  role="dialog"
  aria-modal="true"
  aria-label="Set up MyNet"
  >
- {/* Backdrop. backdrop-blur defocuses the page behind, the
- translucent fill darkens it slightly so the modal card
- reads as the focus point. Clicks pass through to a no-op
- button so the user can't accidentally dismiss by tapping
- the backdrop - only X closes it. */}
+ {/* Backdrop. Translucent dark + backdrop-blur. backdrop-blur-md
+ (12px) on mobile for perf; backdrop-blur-xl (24px) on
+ desktop. Background overlay uses a darker tint in dark
+ mode (#0F1614 @ 60%) than light mode (#0F1410 @ 50%). */}
  <button
  type="button"
  aria-hidden="true"
@@ -55,38 +107,125 @@ export const MyNetSetupModal = ({ open, onSkip, children }: Props) => {
  e.preventDefault();
  e.stopPropagation();
  }}
- className="absolute inset-0 bg-foreground/30 backdrop-blur-md cursor-default"
+ className={cn(
+ "absolute inset-0 cursor-default transition-opacity duration-300",
+ "bg-[#0F1410]/50 dark:bg-[#0F1614]/60",
+ "backdrop-blur-md sm:backdrop-blur-xl",
+ fade,
+ )}
  />
 
- {/* Modal card. Inset from each edge so the blurred page
- strip remains visible around it. Internal scroll for long
- content (the credentials + details steps are tall on
- mobile). */}
+ {/* Card. Max-w-[480px] desktop, full-width-minus-margin mobile.
+ Max-h 80vh so it doesn't bleed off short viewports. Internal
+ scroll. */}
  <div
  className={cn(
- "relative w-full max-w-5xl rounded-2xl border-2 border-gold bg-card shadow-2xl overflow-hidden flex flex-col",
- "h-[calc(100dvh-2rem)] md:h-[calc(100dvh-4rem)]",
+ "relative w-full max-w-[480px] flex flex-col overflow-hidden",
+ "rounded-2xl border bg-card shadow-2xl",
+ "bg-[#FFFFFF] border-[#E1E1DC] dark:bg-[#19211D] dark:border-[#2A332E]",
+ "max-h-[calc(100dvh-3rem)] sm:max-h-[80vh]",
+ "transition-all duration-300 ease-out",
+ fade,
+ mounted ? "translate-y-0 scale-100" : "translate-y-2 scale-[0.98]",
  )}
+ style={{
+ boxShadow: "0 20px 60px -10px rgba(15, 20, 16, 0.15)",
+ }}
  >
- {/* Skip control. Sticky top-right inside the card so it
- stays reachable when the user scrolls the wizard. */}
+ {finalCard ? (
+ <FinalCard
+ onContinue={onSkip}
+ ctaHref={finalCtaHref}
+ ctaLabel={finalCtaLabel}
+ />
+ ) : (
+ <>
+ {/* Header: thin progress bar + "Skip for now" link. */}
+ <div className="flex items-center justify-between gap-4 px-6 pt-5">
+ {progress ? (
+ <ProgressBar
+ current={progress.current}
+ total={progress.total}
+ />
+ ) : (
+ <span aria-hidden className="flex-1" />
+ )}
  <button
  type="button"
- onClick={onSkip}
- aria-label="Skip setup for now"
- title="Skip"
- className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted transition-colors"
+ onClick={handleSkip}
+ className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 min-h-[44px] sm:min-h-0 inline-flex items-center"
  >
- <X className="h-4 w-4" />
+ Skip for now
  </button>
+ </div>
 
- {/* Scrollable body - the wizard renders inside here. */}
- <div className="flex-1 overflow-y-auto px-4 md:px-10 py-10 md:py-14">
+ {/* Body: scrollable. Children = the wizard. */}
+ <div className="flex-1 overflow-y-auto px-6 pb-8 pt-4">
  {children}
  </div>
+ </>
+ )}
  </div>
  </div>
  );
 };
+
+// Thin progress bar at the top of the card. ~3px tall, with a
+// filled portion proportional to current/total. Above it, small
+// "Step X of N" caption in mono so it reads as system chrome.
+const ProgressBar = ({
+ current,
+ total,
+}: {
+ current: number;
+ total: number;
+}) => {
+ const pct = Math.max(0, Math.min(1, total > 0 ? current / total : 0));
+ return (
+ <div className="flex-1 min-w-0">
+ <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
+ Step {current} of {total}
+ </p>
+ <div className="relative h-0.5 rounded-full bg-border overflow-hidden">
+ <div
+ className="absolute inset-y-0 left-0 bg-gold transition-[width] duration-500 ease-out"
+ style={{ width: `${pct * 100}%` }}
+ />
+ </div>
+ </div>
+ );
+};
+
+// Brief celebration card shown right after the user submits their
+// profile. Parent flips finalCard=true on submit success, holds it
+// for ~1.5s, then onContinue (or auto-dismiss) takes them to
+// /mynet.
+const FinalCard = ({
+ onContinue,
+ ctaHref,
+ ctaLabel,
+}: {
+ onContinue: () => void;
+ ctaHref: string;
+ ctaLabel: string;
+}) => (
+ <div className="flex flex-col items-center text-center px-6 py-12">
+ <div className="h-16 w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-6">
+ <Check className="h-8 w-8" strokeWidth={2.4} />
+ </div>
+ <h2 className="font-display text-3xl leading-tight mb-2">
+ MyNet is live.
+ </h2>
+ <p className="text-sm text-muted-foreground mb-8 max-w-xs">
+ Let&apos;s find your person.
+ </p>
+ <Link to={ctaHref} onClick={onContinue} className="w-full">
+ <Button variant="gold" size="lg" className="w-full min-h-[44px]">
+ {ctaLabel}
+ <ArrowRight className="h-4 w-4" />
+ </Button>
+ </Link>
+ </div>
+);
 
 export default MyNetSetupModal;

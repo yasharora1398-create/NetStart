@@ -122,6 +122,14 @@ export default {
           "0%, 100%": { transform: "scale(1)" },
           "50%": { transform: "scale(1.02)" },
         },
+        // Horizontal slide-in for the MyNet setup modal stage
+        // transitions. New step slides in from the right; the
+        // outgoing step unmounts when stage changes so a separate
+        // slide-out animation isn't needed.
+        "slide-in-right": {
+          "0%": { opacity: "0", transform: "translateX(20px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -133,6 +141,7 @@ export default {
         "swipe-out-left": "swipe-out-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "shimmer": "shimmer 3s linear infinite",
         "pulse-gold": "pulse-gold 2.5s ease-out infinite",
+        "slide-in-right": "slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },
