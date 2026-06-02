@@ -153,10 +153,10 @@ const MyNet = () => {
  >({ mode: "closed" });
  const [findForId, setFindForId] = useState<string | null>(null);
  const [editingPending, setEditingPending] = useState(false);
- // Local-only Stripe-style setup modal toggle. When the user
- // taps Skip on the modal we hide it for the rest of this page
- // lifetime; legacy full-page wizard takes over so they can still
- // complete setup. Refresh re-opens the modal.
+ // Stripe-style setup modal toggle. When the user taps Skip on
+ // the modal we hide it for the rest of this page lifetime; the
+ // legacy in-page wizard takes over so they can still complete
+ // setup. Refresh re-opens the modal.
  const [setupModalSkipped, setSetupModalSkipped] = useState(false);
  // Progress payload emitted by MyNetWizard.onStageChange, used to
  // render the "Step X of N" indicator at the top of the modal.
@@ -167,9 +167,6 @@ const MyNet = () => {
  // True after a successful submitProfile inside the wizard. Shows
  // the "MyNet is live" final card briefly, then the modal closes.
  const [showFinalCard, setShowFinalCard] = useState(false);
- // process.env.NODE_ENV is statically replaced at build time, so
- // this is just a constant on the client - safe to check directly.
- const SETUP_MODAL_ENABLED = process.env.NODE_ENV !== "production";
 
  const refreshAll = async () => {
  if (!uid) return;
@@ -630,13 +627,11 @@ const MyNet = () => {
  />
  );
 
- // Stripe-style setup modal. Local-host only for now; on
- // production we fall through to the legacy full-page wizard
- // below.
+ // Stripe-style setup modal on first run. Skip falls back to
+ // the legacy in-page wizard so the user can still complete
+ // setup the old way if they prefer.
  const inModal =
- SETUP_MODAL_ENABLED &&
- !setupModalSkipped &&
- profile.reviewStatus === "draft";
+ !setupModalSkipped && profile.reviewStatus === "draft";
 
  if (inModal) {
  return (
@@ -683,7 +678,7 @@ const MyNet = () => {
  <main className="pt-12 pb-24">
  {/* If the user skipped the modal, offer a one-tap way
  to bring it back. */}
- {SETUP_MODAL_ENABLED && setupModalSkipped ? (
+ {setupModalSkipped ? (
  <div className="container max-w-5xl mb-6">
  <button
  type="button"

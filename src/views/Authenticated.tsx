@@ -23,11 +23,11 @@ const Authenticated = () => {
 
  useEffect(() => {
  if (loading || !user) return;
- // Brief visual confirmation that the verify worked, then forward
- // straight into the setup wizard. 600ms is enough to register
- // the green checkmark; longer just feels slow.
- const id = setTimeout(() => navigate("/mynet", { replace: true }), 600);
- return () => clearTimeout(id);
+ // Redirect immediately - the user just clicked the verify
+ // link, they don't need another splash before the setup
+ // modal opens. The MyNetSetupModal on /mynet provides the
+ // celebration moment.
+ navigate("/mynet", { replace: true });
  }, [loading, user, navigate]);
 
  if (!loading && !user) {
