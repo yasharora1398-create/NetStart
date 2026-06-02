@@ -25,7 +25,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { EmailVerifyBanner } from "@/components/netstart/EmailVerifyBanner";
-import { PrivacyBanner } from "@/components/netstart/PrivacyBanner";
 import { SignOutConfirmProvider } from "@/components/netstart/SignOutConfirm";
 import { logPageView } from "@/lib/analytics";
 
@@ -54,7 +53,6 @@ export default function Providers({ children }: { children: ReactNode }) {
  <SidebarProvider>
  <PageViewLogger />
  <EmailVerifyBanner />
- <PrivacyBanner />
  {children}
  </SidebarProvider>
  </SignOutConfirmProvider>
