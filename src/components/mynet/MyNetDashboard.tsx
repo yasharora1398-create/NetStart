@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@/lib/router-compat";
 import {
- ArrowRight,
  Briefcase,
  CheckCircle2,
  ExternalLink,
@@ -385,33 +383,6 @@ export const MyNetDashboard = ({
  </Section>
  ) : null}
 
- {/* Bottom CTA: jump to /u/<self-id> so the user sees the same
- page that partners + founders see. Click-through hits the
- customizable public profile (banner + pfp + 2-col layout). */}
- {userId ? (
- <Link
- to={`/u/${userId}`}
- className="block rounded-sm border border-gold bg-card hover:bg-gold/5 transition-colors p-6 group"
- >
- <div className="flex items-center justify-between gap-4">
- <div className="min-w-0">
- <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-1 flex items-center gap-1.5">
- <Eye className="h-3 w-3" />
- Preview
- </p>
- <h3 className="font-display text-2xl leading-tight">
- See how others view your profile
- </h3>
- <p className="text-sm text-muted-foreground mt-1.5 max-w-xl">
- The same page partners land on after they accept your card -
- banner, photo, bio, pitch, links, projects. Edit the banner
- right on the page.
- </p>
- </div>
- <ArrowRight className="h-6 w-6 text-gold flex-shrink-0 group-hover:translate-x-1 transition-transform" />
- </div>
- </Link>
- ) : null}
 
  </>
  );

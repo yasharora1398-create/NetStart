@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { deleteMyAccount } from "@/lib/mynet-storage";
 import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
+import { getSupabase } from "@/lib/supabase";
 
 const Settings = () => {
  const {
@@ -33,6 +34,7 @@ const Settings = () => {
  const confirmSignOut = useConfirmSignOut();
 
  const [email, setEmail] = useState("");
+ const [currentPassword, setCurrentPassword] = useState("");
  const [password, setPassword] = useState("");
  const [savingEmail, setSavingEmail] = useState(false);
  const [savingPassword, setSavingPassword] = useState(false);
@@ -58,18 +60,44 @@ const Settings = () => {
 
  const handlePassword = async (e: React.FormEvent) => {
  e.preventDefault();
+ if (!user?.email) {
+ toast.error("Sign in first.");
+ return;
+ }
+ if (currentPassword.length < 1) {
+ toast.error("Enter your current password.");
+ return;
+ }
  if (password.length < 8) {
- toast.error("Password must be at least 8 characters.");
+ toast.error("New password must be at least 8 characters.");
+ return;
+ }
+ if (password === currentPassword) {
+ toast.error("New password must be different from your current one.");
  return;
  }
  setSavingPassword(true);
  try {
- const { error } = await updatePassword(password);
- if (error) toast.error(error.message);
- else {
- toast.success("Password updated.");
- setPassword("");
+ // Reauthenticate against the current password first. Supabase
+ // requires a fresh sign-in before updateUser({password}) for
+ // accounts older than a few hours, which is why bare
+ // updatePassword was failing with "current password" errors.
+ const { error: signInError } = await getSupabase().auth.signInWithPassword({
+ email: user.email,
+ password: currentPassword,
+ });
+ if (signInError) {
+ toast.error("Current password is wrong.");
+ return;
  }
+ const { error } = await updatePassword(password);
+ if (error) {
+ toast.error(error.message);
+ return;
+ }
+ toast.success("Password updated.");
+ setCurrentPassword("");
+ setPassword("");
  } finally {
  setSavingPassword(false);
  }
@@ -182,8 +210,25 @@ const Settings = () => {
  Password
  </h2>
  <p className="text-sm text-muted-foreground">
- At least 8 characters.
+ Enter your current password, then a new one at least 8
+ characters.
  </p>
+ </div>
+ <div>
+ <Label
+ htmlFor="current-password"
+ className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
+ >
+ Current password
+ </Label>
+ <Input
+ id="current-password"
+ type="password"
+ value={currentPassword}
+ onChange={(e) => setCurrentPassword(e.target.value)}
+ autoComplete="current-password"
+ className="mt-2 h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
+ />
  </div>
  <div>
  <Label
@@ -205,7 +250,11 @@ const Settings = () => {
  type="submit"
  variant="gold"
  size="sm"
- disabled={savingPassword || password.length < 8}
+ disabled={
+ savingPassword ||
+ currentPassword.length < 1 ||
+ password.length < 8
+ }
  >
  {savingPassword ? (
  <Loader2 className="h-4 w-4 animate-spin" />

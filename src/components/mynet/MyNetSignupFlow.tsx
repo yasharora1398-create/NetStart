@@ -235,8 +235,13 @@ export const MyNetSignupFlow = ({
  const canAdvance = slideValid(currentSlide);
 
  return (
+ // z-40 (not z-60) so Radix portals from inside the card -
+ // notably the Select dropdown content at z-50 - layer ABOVE
+ // the modal. Otherwise the role dropdown opens but its menu
+ // items render behind the card and clicks land on the card
+ // backdrop instead.
  <div
- className="fixed inset-0 z-[60] bg-background"
+ className="fixed inset-0 z-40 bg-background"
  role="dialog"
  aria-modal="true"
  aria-label="Set up MyNet"
