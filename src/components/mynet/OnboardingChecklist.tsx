@@ -220,7 +220,7 @@ export const OnboardingChecklist = ({
  Find People on one of yours.
  </p>
  <div className="flex flex-wrap items-center justify-center gap-2">
- <Link to="/match">
+ <Link to="/app/match">
  <Button variant="gold" size="sm">
  Open Match
  <ArrowRight className="h-4 w-4" />

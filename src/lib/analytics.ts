@@ -45,7 +45,7 @@ const todayLocal = (): string => {
 // "Goals" -> "Custom events." Set those goals up before the events
 // have reporting value:
 //
-// - signup_completed (verified email + first MyNet visit)
+// - signup_completed (verified email + first Profile visit)
 // - mynet_submitted (sent profile for review)
 // - first_match_action (first save/pass after acceptance)
 // - first_chat_request_sent (first time a user kicks off a chat)

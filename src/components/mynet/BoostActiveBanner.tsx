@@ -15,12 +15,12 @@ import { getAvatarUrl, type ActiveBoost } from "@/lib/mynet-storage";
 import type { Profile, Project } from "@/lib/mynet-types";
 import { cn } from "@/lib/utils";
 
-// Celebratory banner shown at the top of MyNet for the full 72-hour
+// Celebratory banner shown at the top of Profile for the full 72-hour
 // window after a user pays for a boost. Auto-disappears the moment
 // expires_at passes (the ticking effect keeps re-rendering, and the
 // component returns null when remaining ms hits 0).
 //
-// Visual is intentionally "louder" than the rest of MyNet - thick
+// Visual is intentionally "louder" than the rest of Profile - thick
 // primary border, big display countdown, animated rocket, sparkles
 // in the corners, animated progress bar - so the user actually
 // feels they got something for their money.
@@ -98,7 +98,7 @@ export const BoostActiveBanner = ({
  Math.max(0, 1 - remainingMs / TOTAL_BOOST_MS),
  );
 
- // Hide the moment the timer hits zero. The next MyNet load will
+ // Hide the moment the timer hits zero. The next Profile load will
  // confirm via getMyActiveBoost that there's no longer an active
  // row, so the dashboard returns to its non-boosted state on its
  // own.
@@ -195,7 +195,7 @@ export const BoostActiveBanner = ({
  verify the placement themselves. */}
  <div className="mt-7">
  <Link
- to="/match"
+ to="/app/match"
  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
  >
  See your card live in Match

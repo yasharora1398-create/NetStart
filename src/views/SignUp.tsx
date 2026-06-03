@@ -106,7 +106,7 @@ const SignUp = () => {
  // - Verified users go to /mynet (same policy as sign-in). Avoids the
  // bounce-back-to-home loop that hit users clicking homepage CTAs
  // when they were already signed in.
- const fromState = (location.state as { from?: string } | null)?.from ?? "/mynet";
+ const fromState = (location.state as { from?: string } | null)?.from ?? "/app/profile/edit";
 
  useEffect(() => {
  if (loading || !user) return;

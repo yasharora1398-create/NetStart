@@ -6,7 +6,7 @@
  * signed in.
  *
  * The combined sign-up + setup flow needs people to land directly
- * in MyNet without an extra "click here to set up" step. We show a
+ * in Profile without an extra "click here to set up" step. We show a
  * brief "you're in" splash then auto-redirect to /mynet so the
  * wizard runs end-to-end. Anyone hitting /authenticated without a
  * session falls back to /signin.
@@ -23,11 +23,11 @@ const Authenticated = () => {
 
  useEffect(() => {
  if (loading || !user) return;
- // Redirect immediately - the user just clicked the verify
- // link, they don't need another splash before the setup
- // modal opens. The MyNetSetupModal on /mynet provides the
- // celebration moment.
- navigate("/mynet", { replace: true });
+ // Drop the freshly-verified user into Profile so the setup flow
+ // runs immediately. /app/profile/edit because the signed-in app lives
+ // under /app now; the marketing root (/) and the About pages
+ // stay reserved for logged-out visitors.
+ navigate("/app/profile/edit", { replace: true });
  }, [loading, user, navigate]);
 
  if (!loading && !user) {

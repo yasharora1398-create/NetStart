@@ -527,7 +527,7 @@ export const listProjects = async (
  // Polln8-recommended posts (created via the admin Recommend form)
  // have owner_id = admin's uid but aren't the admin's "own" project -
  // they're featured cards posted on behalf of someone else. Hide them
- // from MyNet / Match / Saved / Applications by default; the admin's
+ // from Profile / Match / Saved / Applications by default; the admin's
  // My Posts tab passes includeRecommendations=true so it can still
  // manage them.
  let query = supabase
@@ -1524,7 +1524,7 @@ export const listPublishedProjectsForOwner = async (
 // ---- Boost ---------------------------------------------------------
 
 // Caller's most recent active boost row, or null if they have none
-// running. Used by MyNet to render the celebratory banner + preview
+// running. Used by Profile to render the celebratory banner + preview
 // card during the 72-hour window. Tolerates the table not existing
 // (pre-migration-0043 deploys) by returning null on error so the
 // rest of the dashboard still renders.

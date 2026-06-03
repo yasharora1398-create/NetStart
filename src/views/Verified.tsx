@@ -142,7 +142,7 @@ const Verified = () => {
  <AppLayout>
  <div className="container max-w-6xl py-6 md:py-10">
  <Link
- to="/match"
+ to="/app/match"
  className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-6"
  >
  <ArrowLeft className="h-3.5 w-3.5" />
@@ -191,9 +191,9 @@ const Verified = () => {
  You&apos;re verified.
  </span>
  </div>
- <Link to="/mynet">
+ <Link to="/app/profile/edit">
  <Button variant="gold" size="lg">
- See it live in MyNet
+ See it live in Profile
  <ArrowRight className="h-4 w-4" />
  </Button>
  </Link>
@@ -234,7 +234,7 @@ const Verified = () => {
  {/* Upsell to the combo SKU. Same blue (#1d9bf0) border as
  the verified visual so it reads as a related action. */}
  <Link
- to="/spotlight"
+ to="/app/spotlight"
  className="mt-5 inline-flex items-center gap-2 rounded-sm border border-[#1d9bf0] bg-card px-3 py-2 text-xs text-foreground hover:bg-[#1d9bf0] hover:text-white transition-colors"
  >
  <span>
@@ -270,7 +270,7 @@ const Verified = () => {
  icon={<MapPin className="h-5 w-5 text-gold" />}
  number="3 spots"
  label="Where the badge shows"
- detail="Public profile, MyNet dashboard, and the chat header next to your name."
+ detail="Public profile, Profile dashboard, and the chat header next to your name."
  />
  </FadeUp>
  <FadeUp delay={200}>
@@ -295,7 +295,7 @@ const Verified = () => {
  <ul className="space-y-3">
  <FeatureRow>
  The blue verified badge, rendered next to your name on
- your public profile, the chat header, and your MyNet
+ your public profile, the chat header, and your Profile
  dashboard.
  </FeatureRow>
  <FeatureRow>
@@ -499,7 +499,7 @@ const BadgePlacementCard = () => (
  Your public profile header
  </PlacementRow>
  <PlacementRow icon={<User className="h-3.5 w-3.5" />}>
- The MyNet dashboard name row
+ The Profile dashboard name row
  </PlacementRow>
  <PlacementRow icon={<Eye className="h-3.5 w-3.5" />}>
  Your card title in the Match deck

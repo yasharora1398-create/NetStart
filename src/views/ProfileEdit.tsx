@@ -11,7 +11,7 @@ import {
  Telescope,
  XCircle,
 } from "lucide-react";
-import { Link } from "@/lib/router-compat";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -19,7 +19,6 @@ import { Footer } from "@/components/netstart/Footer";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { StepCredentials } from "@/components/mockups/Steps";
-import { OnboardingTour } from "@/components/netstart/OnboardingTour";
 import { trackMynetSubmitted } from "@/lib/analytics";
 import { readIntroOpened, writeIntroOpened } from "@/lib/introGate";
 import { Sidebar } from "@/components/netstart/Sidebar";
@@ -40,9 +39,9 @@ import { ProjectDialog } from "@/components/mynet/ProjectDialog";
 import { FindPeopleSheet } from "@/components/mynet/FindPeopleSheet";
 import { SavedPeopleList } from "@/components/mynet/SavedPeopleList";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
-import { MyNetWizard } from "@/components/mynet/MyNetWizard";
-import { MyNetSignupFlow } from "@/components/mynet/MyNetSignupFlow";
-import { MyNetDashboard } from "@/components/mynet/MyNetDashboard";
+import { ProfileWizard } from "@/components/mynet/ProfileWizard";
+import { ProfileSignupFlow } from "@/components/mynet/ProfileSignupFlow";
+import { ProfileDashboard } from "@/components/mynet/ProfileDashboard";
 import { getSupabase } from "@/lib/supabase";
 import type { Role } from "@/components/netstart/RoleSwitcher";
 
@@ -126,8 +125,8 @@ const errorMessage = (err: unknown): string => {
  return "Something went wrong.";
 };
 
-const MyNet = () => {
- // Intro gate: only shown the first time the user opens MyNet on
+const ProfileEdit = () => {
+ // Intro gate: only shown the first time the user opens Profile on
  // this device. Stored in localStorage so reloads and new tabs land
  // straight on the dashboard.
  const [opened, setOpenedState] = useState<boolean>(() =>
@@ -139,6 +138,7 @@ const MyNet = () => {
  };
  const { user, loading } = useAuth();
  const uid = user?.id ?? null;
+ const navigate = useNavigate();
 
  const [profile, setProfile] = useState<Profile>(emptyProfile());
  const [projects, setProjects] = useState<Project[]>([]);
@@ -152,7 +152,7 @@ const MyNet = () => {
  >({ mode: "closed" });
  const [findForId, setFindForId] = useState<string | null>(null);
  const [editingPending, setEditingPending] = useState(false);
- // Post-signup full-screen flow. When the user taps "Skip MyNet"
+ // Post-signup full-screen flow. When the user taps "Skip Profile"
  // we hide it for the rest of this page lifetime; the legacy
  // in-page wizard takes over so they can still complete setup.
  // Refresh re-opens the post-signup flow.
@@ -517,7 +517,7 @@ const MyNet = () => {
  // Pre-acceptance flow: draft/rejected users go through the step-by-step wizard.
  // Pending and accepted users both see the full dashboard (the dashboard
  // surfaces a "review pending" pill for pending users so they understand state
- // without being blocked from viewing all of their MyNet).
+ // without being blocked from viewing all of their Profile).
  const showWizard =
  isAuthed &&
  (profile.reviewStatus === "draft" ||
@@ -529,7 +529,7 @@ const MyNet = () => {
  profile.reviewStatus === "pending");
 
  if (!opened) {
- // MyNet intro: split layout. Text on the left, the same
+ // Profile intro: split layout. Text on the left, the same
  // Credentials phone mockup we use on /how on the right.
  return (
  <AppLayout>
@@ -537,13 +537,13 @@ const MyNet = () => {
  <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-20 items-center">
  <div>
  <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1] mb-6 font-bold">
- Your network,
+ Edit your
  <br />
- your moves.
+ profile.
  </h1>
  <div className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 space-y-4">
  <p>
- MyNet is your private workspace on Polln8. Your profile,
+ Your private workspace on Polln8. Your profile,
  your credentials, your projects, and the switch that
  decides whether you&apos;re discoverable to the other
  side of the network.
@@ -560,7 +560,7 @@ const MyNet = () => {
  onClick={() => setOpened(true)}
  className="group"
  >
- Open MyNet
+ Open editor
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
  </Button>
  </div>
@@ -593,37 +593,41 @@ const MyNet = () => {
  }
 
  if (showWizard && uid) {
- // First-run, draft user: full-screen MyNetSignupFlow. Tapping
- // "Skip MyNet" inside the flow flips signupFlowSkipped and
+ // First-run, draft user: full-screen ProfileSignupFlow. Tapping
+ // "Skip Profile" inside the flow flips signupFlowSkipped and
  // falls through to the legacy in-page wizard below. The
  // legacy wizard stays exactly as it was - that's the
  // "comes back later via the sidebar" surface.
  if (!signupFlowSkipped && profile.reviewStatus === "draft") {
  return (
- <MyNetSignupFlow
+ <ProfileSignupFlow
  uid={uid}
  profile={profile}
  onProfileRefresh={refreshAll}
- onSkip={() => setSignupFlowSkipped(true)}
+ // Skip and Done both drop the user into the actual app
+ // (Match is the canonical /app/ landing). Skip leaves
+ // reviewStatus = "draft" so the persistent header banner
+ // in AppLayout reminds them to come back and finish.
+ onSkip={() => {
+ setSignupFlowSkipped(true);
+ navigate("/app/match");
+ }}
  onDone={() => {
  setEditingPending(false);
  setSignupFlowSkipped(true);
+ navigate("/app/match");
  }}
  />
  );
  }
 
- // Legacy in-page wizard. Unchanged from before; this is what
- // users hitting /mynet via the sidebar after skipping see.
+ // Legacy in-page wizard. Wrapped in AppLayout so the new
+ // /app/ chrome (chats/saved panel + right rail, no legacy
+ // sidebar) renders around the form. The form itself is
+ // unchanged - just the surrounding chrome was swapped.
  return (
- <div className="min-h-dvh bg-background text-foreground">
- <Sidebar />
- <div
- className="transition-[padding] duration-200 ease-out"
- style={{ paddingLeft: "var(--sidebar-width, 0px)" }}
- >
- <main className="pt-12 pb-24">
- <MyNetWizard
+ <AppLayout>
+ <ProfileWizard
  uid={uid}
  profile={profile}
  onProfileRefresh={refreshAll}
@@ -633,23 +637,17 @@ const MyNet = () => {
  return r === "founder" || r === "partner" ? r : undefined;
  })()}
  />
- </main>
- <Footer />
- </div>
- <MobileBottomNav />
- </div>
+ </AppLayout>
  );
  }
 
 
  return (
- <div className="min-h-dvh bg-background text-foreground">
- <Sidebar />
- <div style={{ paddingLeft: "var(--sidebar-width, 0px)" }}>
- <main
- className={`pt-12 pb-24 ${
- !isAuthed ? "pointer-events-none select-none " : ""
- }`}
+ <AppLayout>
+ <div
+ className={
+ !isAuthed ? "pointer-events-none select-none" : undefined
+ }
  >
  <div className="container">
  {openProject && isAuthed ? (
@@ -720,7 +718,7 @@ const MyNet = () => {
  </div>
  </>
  ) : showDashboard ? (
- <MyNetDashboard
+ <ProfileDashboard
  profile={profile}
  projects={projects}
  onSubmitProfile={handleSubmitProfile}
@@ -790,7 +788,7 @@ const MyNet = () => {
 
  {displayProfile.reviewStatus === "accepted" && (
  <Link
- to="/match"
+ to="/app/match"
  className="block rounded-sm border border-gold bg-card p-6 hover:border-gold transition-colors group"
  >
  <div className="flex items-center justify-between gap-4">
@@ -1002,17 +1000,16 @@ const MyNet = () => {
  </>
  )}
  </div>
- </main>
  </div>
 
  {!loading && !user && <AuthGate />}
 
- {/* First-visit 3-step coach-mark overlay. Keyed per-user via
- localStorage so it pops exactly once per account. Skips
- itself on logged-out / hydrating states. */}
- {user && <OnboardingTour userId={user.id} />}
-
- <Footer />
+ {/* OnboardingTour removed - the post-signup ProfileSignupFlow
+ already walks the user through the same content. Showing it
+ again here was redundant: by the time the user reaches this
+ editor surface they've either finished the wizard or skipped
+ it, and a "step 2 of 3, fill in the essentials" pop-up was
+ just noise. */}
 
  {isAuthed && dialogState.mode !== "closed" && (
  <ProjectDialog
@@ -1044,8 +1041,7 @@ const MyNet = () => {
  }
  />
  )}
- <MobileBottomNav />
- </div>
+ </AppLayout>
  );
 };
 
@@ -1110,4 +1106,4 @@ const Field = ({ label, value }: { label: string; value: string }) => (
 );
 
 
-export default MyNet;
+export default ProfileEdit;

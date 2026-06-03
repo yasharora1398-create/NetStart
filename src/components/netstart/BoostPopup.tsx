@@ -85,7 +85,7 @@ export const BoostPopup = () => {
  72 hours. One-time charge, no subscription.
  </p>
  <Link
- to="/boost"
+ to="/app/boost"
  onClick={dismiss}
  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
  >

@@ -33,32 +33,30 @@ type IconType = React.ComponentType;
 
 type Item = { to: string; label: string; icon: IconType };
 
-const HOME_ITEMS: Item[] = [
- { to: "/", label: "Home", icon: HomeIcon },
-];
-
+// Match is the canonical /app starting page, so it leads the list.
+// The marketing home (/) is intentionally NOT linked from the
+// sidebar - it's a public surface only, and signed-in users
+// shouldn't be pulled back into the marketing scroll from inside
+// the app.
 const APP_ITEMS: Item[] = [
- { to: "/mynet", label: "MyNet", icon: MyNetIcon },
- // Settings sits directly under MyNet because everything in it
- // (email, password, sign-out, delete account) edits the MyNet
- // identity the user just looked at.
- { to: "/settings", label: "Settings", icon: SettingsIcon },
- { to: "/match", label: "Match", icon: MatchIcon },
- { to: "/saved", label: "Saved", icon: SavedIcon },
- { to: "/chats", label: "Chat", icon: ChatIcon },
- // Reviews is public-read for everyone (signed-in or not); the
- // page itself gates the write action on signed-in state.
- { to: "/reviews", label: "Reviews", icon: ReviewsIcon },
- // Paid features hub: lists Boost, Verified, Spotlight with
- // mini card previews. Each card links to its own product page.
- { to: "/perks", label: "Paid features", icon: PerksIcon },
+ { to: "/app/match", label: "Match", icon: MatchIcon },
+ { to: "/app/profile", label: "Profile", icon: ProfileIcon },
+ { to: "/app/saved", label: "Saved", icon: SavedIcon },
+ { to: "/app/chats", label: "Chat", icon: ChatIcon },
+ // Upgrade (was "Paid features") hub: lists Boost, Verified,
+ // Spotlight with mini card previews. Each card links to its own
+ // product page.
+ { to: "/app/perks", label: "Upgrade", icon: PerksIcon },
+ // Settings is grouped with the account-management items at the
+ // bottom of the rail rather than next to the daily-use destinations.
+ { to: "/app/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const ABOUT_ITEMS: Item[] = [
- { to: "/how", label: "How it works", icon: HowItWorksIcon },
- { to: "/standards", label: "Standards", icon: StandardsIcon },
- { to: "/download", label: "Download", icon: DownloadIcon },
-];
+// About items (How it works, Standards, Download, Reviews) used to
+// live in the sidebar. They were moved to the home page as
+// prominent buttons because they're marketing surfaces, not
+// app-loop destinations - keeping them in the sidebar pulled the
+// signed-in user's eye away from the actual product.
 
 export const Sidebar = () => {
  const { mode, setMode } = useTheme();
@@ -150,9 +148,11 @@ export const Sidebar = () => {
  <ChevronLeft className="h-3.5 w-3.5" />
  </button>
 
- {/* Brand - logo image replaces the P8 square; the whole row is
- a Link to "/" so the brand mark works as a home affordance. */}
- <Link to="/" className="gs-brand gs-brand-link" aria-label="Polln8 home">
+ {/* Brand - clicking it inside the app sends the user back to
+ /app/match (the canonical signed-in start). The marketing
+ root (/) is logged-out only, so brand here should not pull
+ a signed-in user back into the marketing scroll. */}
+ <Link to="/app/match" className="gs-brand gs-brand-link" aria-label="Polln8 app home">
  <img
  src="/polln8-logo.png"
  alt=""
@@ -171,35 +171,20 @@ export const Sidebar = () => {
  available height (small viewports, lots of nav items, the
  Admin section added for operator users, etc.). */}
  <div className="gs-scroll">
- {/* Home - its own subsection so the home jump is a first-class
- item rather than relying on the brand mark alone. */}
- <div className="gs-section">
- <div className="gs-section-label">Home</div>
- {HOME_ITEMS.map((item) => (
- <SideLink key={item.to} item={item} end />
- ))}
- </div>
-
- {/* App - MyNet gets a name pill so the user sees whose net it
- is at a glance. Falls back to the email local-part when no
- name was set at signup. */}
+ {/* App section. "Home" was removed: the marketing root (/)
+ is logged-out only, and signed-in users start at /app/match
+ (the first item below) instead. Profile gets a name pill so
+ the user sees whose net it is at a glance, falling back to
+ the email local-part when no name was set at signup. */}
  <div className="gs-section">
  <div className="gs-section-label">App</div>
  {APP_ITEMS.map((item) => {
  const pill =
- item.to === "/mynet" && user
+ item.to === "/app/profile/edit" && user
  ? userDisplayName(user)
  : undefined;
  return <SideLink key={item.to} item={item} pill={pill} />;
  })}
- </div>
-
- {/* About */}
- <div className="gs-section">
- <div className="gs-section-label">About</div>
- {ABOUT_ITEMS.map((item) => (
- <SideLink key={item.to} item={item} />
- ))}
  </div>
 
  {/* Admin - only renders for the operator email. The Admin page
@@ -208,7 +193,7 @@ export const Sidebar = () => {
  <div className="gs-section">
  <div className="gs-section-label">Admin</div>
  <SideLink
- item={{ to: "/admin", label: "Dashboard", icon: AdminIcon }}
+ item={{ to: "/app/admin", label: "Dashboard", icon: AdminIcon }}
  />
  </div>
  )}
@@ -281,15 +266,10 @@ export const Sidebar = () => {
 // the user knows exactly which control re-opens the nav.
 import {
  Bookmark,
- Compass,
  Crown,
- Download as DownloadLucide,
  Flower2,
- Home as HomeLucide,
  MessageCircle,
  Settings as SettingsLucide,
- ShieldCheck,
- Star as StarLucide,
  User as UserLucide,
  Wrench,
 } from "lucide-react";
@@ -303,17 +283,12 @@ type RailItem = {
 };
 
 const RAIL_ITEMS: RailItem[] = [
- { to: "/", label: "Home", icon: <HomeLucide className="size-4" />, end: true },
- { to: "/mynet", label: "MyNet", icon: <UserLucide className="size-4" /> },
- { to: "/settings", label: "Settings", icon: <SettingsLucide className="size-4" /> },
- { to: "/match", label: "Match", icon: <Flower2 className="size-4" /> },
- { to: "/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
- { to: "/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
- { to: "/reviews", label: "Reviews", icon: <StarLucide className="size-4" /> },
- { to: "/perks", label: "Paid features", icon: <Crown className="size-4" /> },
- { to: "/how", label: "How it works", icon: <Compass className="size-4" /> },
- { to: "/standards", label: "Standards", icon: <ShieldCheck className="size-4" /> },
- { to: "/download", label: "Download", icon: <DownloadLucide className="size-4" /> },
+ { to: "/app/match", label: "Match", icon: <Flower2 className="size-4" /> },
+ { to: "/app/profile/edit", label: "Profile", icon: <UserLucide className="size-4" /> },
+ { to: "/app/saved", label: "Saved", icon: <Bookmark className="size-4" /> },
+ { to: "/app/chats", label: "Chat", icon: <MessageCircle className="size-4" /> },
+ { to: "/app/perks", label: "Upgrade", icon: <Crown className="size-4" /> },
+ { to: "/app/settings", label: "Settings", icon: <SettingsLucide className="size-4" /> },
 ];
 
 const CollapsedRail = ({
@@ -324,7 +299,7 @@ const CollapsedRail = ({
  showAdmin: boolean;
 }) => {
  const items: RailItem[] = showAdmin
- ? [...RAIL_ITEMS, { to: "/admin", label: "Admin", icon: <Wrench className="size-4" /> }]
+ ? [...RAIL_ITEMS, { to: "/app/admin", label: "Admin", icon: <Wrench className="size-4" /> }]
  : RAIL_ITEMS;
 
  return (
@@ -389,7 +364,7 @@ const CollapsedRail = ({
 // route (without it, "/" matches everything because every path starts
 // with /). Other items don't need it since they're top-level.
 // `pill` renders a small label on the right of the item - used to
-// show the signed-in user's name next to MyNet.
+// show the signed-in user's name next to Profile.
 const SideLink = ({
  item,
  end = false,
@@ -430,7 +405,7 @@ const userDisplayName = (user: { email?: string | null; user_metadata?: Record<s
 
 // ============== ICONS - verbatim paths from Sidebar.html ==============
 
-function MyNetIcon() {
+function ProfileIcon() {
  return (
  <svg
  viewBox="0 0 16 16"
@@ -485,39 +460,6 @@ function ChatIcon() {
  );
 }
 
-function HowItWorksIcon() {
- return (
- <svg
- viewBox="0 0 16 16"
- fill="none"
- stroke="currentColor"
- strokeWidth={1.4}
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <circle cx="8" cy="8" r="5.6" />
- <path d="M6.4 6.4 a1.6 1.6 0 1 1 2.4 1.4 c-0.5 0.3 -0.8 0.6 -0.8 1.2" />
- <circle cx="8" cy="11.4" r="0.5" fill="currentColor" stroke="none" />
- </svg>
- );
-}
-
-function StandardsIcon() {
- return (
- <svg
- viewBox="0 0 16 16"
- fill="none"
- stroke="currentColor"
- strokeWidth={1.4}
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M8 2 L13 4 v3.5 c0 3.2 -2.2 5.6 -5 6.5 c-2.8 -0.9 -5 -3.3 -5 -6.5 V4 Z" />
- <path d="M5.8 8.1 L7.4 9.6 L10.4 6.6" />
- </svg>
- );
-}
-
 function SavedIcon() {
  return (
  <svg
@@ -529,24 +471,6 @@ function SavedIcon() {
  strokeLinejoin="round"
  >
  <path d="M4 2.5 H12 V13.5 L8 10.7 L4 13.5 Z" />
- </svg>
- );
-}
-
-function ReviewsIcon() {
- // Five-point star drawn in the same stroke-only style as the
- // rest of the sidebar icons so it inherits the active/inactive
- // colour like SavedIcon, ChatIcon, etc.
- return (
- <svg
- viewBox="0 0 16 16"
- fill="none"
- stroke="currentColor"
- strokeWidth={1.4}
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M8 2 L9.8 6 L14 6.4 L10.8 9.2 L11.8 13.4 L8 11.1 L4.2 13.4 L5.2 9.2 L2 6.4 L6.2 6 Z" />
  </svg>
  );
 }
@@ -566,23 +490,6 @@ function PerksIcon() {
  >
  <path d="M2.5 5 L5 9 L8 4 L11 9 L13.5 5 L12.5 12 H3.5 Z" />
  <path d="M3.5 12 H12.5" />
- </svg>
- );
-}
-
-function DownloadIcon() {
- return (
- <svg
- viewBox="0 0 16 16"
- fill="none"
- stroke="currentColor"
- strokeWidth={1.4}
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M8 2.5 V10" />
- <path d="M5 7 L8 10 L11 7" />
- <path d="M3 12.5 H13" />
  </svg>
  );
 }
@@ -614,22 +521,6 @@ function MoonIcon() {
  strokeLinejoin="round"
  >
  <path d="M13 9.5 A5.5 5.5 0 1 1 6.5 3 A4.4 4.4 0 0 0 13 9.5 Z" />
- </svg>
- );
-}
-
-function HomeIcon() {
- return (
- <svg
- viewBox="0 0 16 16"
- fill="none"
- stroke="currentColor"
- strokeWidth={1.4}
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M2.5 7.5 L8 2.5 L13.5 7.5 V13 a0.8 0.8 0 0 1 -0.8 0.8 H3.3 a0.8 0.8 0 0 1 -0.8 -0.8 Z" />
- <path d="M6.5 13.8 V9.5 H9.5 V13.8" />
  </svg>
  );
 }

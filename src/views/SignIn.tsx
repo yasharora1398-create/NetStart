@@ -97,8 +97,8 @@ const SignIn = () => {
  // homepage Sign in CTA don't bounce back home. The location.state.from
  // value is preserved on the "Create an account" link below for users
  // who pivot to signup.
- const redirectTo = "/mynet";
- const fromState = (location.state as { from?: string } | null)?.from ?? "/mynet";
+ const redirectTo = "/app/profile/edit";
+ const fromState = (location.state as { from?: string } | null)?.from ?? "/app/profile/edit";
 
  useEffect(() => {
  if (!loading && user) navigate(redirectTo, { replace: true });

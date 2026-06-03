@@ -133,7 +133,7 @@ const Boost = () => {
  <AppLayout>
  <div className="container max-w-6xl py-6 md:py-10">
  <Link
- to="/match"
+ to="/app/match"
  className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-6"
  >
  <ArrowLeft className="h-3.5 w-3.5" />
@@ -216,7 +216,7 @@ const Boost = () => {
  {/* Upsell to the combo SKU. Same border tone as the gold
  hero button so it reads as a related action, not noise. */}
  <Link
- to="/spotlight"
+ to="/app/spotlight"
  className="mt-5 inline-flex items-center gap-2 rounded-sm border border-gold bg-card px-3 py-2 text-xs text-foreground hover:bg-gold hover:text-primary-foreground transition-colors"
  >
  <span>

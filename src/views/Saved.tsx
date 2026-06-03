@@ -210,8 +210,8 @@ const Saved = () => {
  needsSetup={needsSetup}
  authTitle="Sign in to see your saves"
  authBody="Saved people and projects live with your account so you can come back to them across devices."
- setupTitle="Finish setting up MyNet to start saving."
- setupBody="Your shortlist unlocks once your MyNet profile is set up. It only takes a minute."
+ setupTitle="Finish setting up your profile to start saving."
+ setupBody="Your shortlist unlocks once your profile is set up. It only takes a minute."
  >
  <div className="container py-10">
  <header className="mb-8">
@@ -364,8 +364,8 @@ const SavedProjectCard = ({
  <Link
  to={
  project.isPolln8Recommended
- ? `/chats/${project.ownerId}?via=${project.id}`
- : `/chats/${project.ownerId}`
+ ? `/app/chats/${project.ownerId}?via=${project.id}`
+ : `/app/chats/${project.ownerId}`
  }
  >
  <MessageCircle className="size-3.5" />
@@ -454,7 +454,7 @@ const SavedCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  </div>
  <div className="flex flex-row gap-2 sm:flex-col">
  <Button asChild variant="outline" size="sm">
- <Link to={`/chats/${candidate.userId}`}>
+ <Link to={`/app/chats/${candidate.userId}`}>
  <MessageCircle className="size-3.5" />
  <span className="ml-1 hidden sm:inline">Message</span>
  </Link>

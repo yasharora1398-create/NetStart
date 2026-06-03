@@ -142,7 +142,7 @@ export const SpotlightModal = () => {
  </span>
  </div>
 
- <Link to="/spotlight" onClick={dismiss} className="w-full max-w-sm">
+ <Link to="/app/spotlight" onClick={dismiss} className="w-full max-w-sm">
  <Button variant="gold" size="lg" className="w-full">
  Get Spotlight
  <ArrowRight className="h-4 w-4" />

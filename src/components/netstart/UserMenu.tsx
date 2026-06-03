@@ -59,7 +59,7 @@ export const UserMenu = () => {
  </Link>
  </DropdownMenuItem>
  <DropdownMenuItem asChild className="cursor-pointer">
- <Link to="/settings">
+ <Link to="/app/settings">
  <SettingsIcon className="mr-2 h-4 w-4" />
  Settings
  </Link>

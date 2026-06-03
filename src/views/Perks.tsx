@@ -30,9 +30,6 @@ const Perks = () => {
  {/* HERO --------------------------------------------------- */}
  <FadeUp>
  <header className="mb-12 md:mb-16 max-w-3xl">
- <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-gold mb-4">
- Paid features
- </p>
  <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[0.95] mb-5">
  Tiny prices.
  <br />
@@ -56,7 +53,7 @@ const Perks = () => {
  name="Boost"
  price="50¢"
  priceNote="USD · 72 hours"
- href="/boost"
+ href="/app/boost"
  description="Pin your card to position #1 of the opposite-role Match deck for 72 hours. Every viewer in the window sees you first. Then the pin expires automatically."
  highlight={["#1 position", "72-hour window", "Green outline on card"]}
  hideMockOnMobile
@@ -68,7 +65,7 @@ const Perks = () => {
  name="Verified"
  price="50¢"
  priceNote="USD · permanent"
- href="/verified"
+ href="/app/verified"
  description="A blue check next to your name everywhere on Polln8, plus your Match card gets the green outline and 'Recommended by Polln8' header strip. One charge, badge forever."
  highlight={[
  "Blue badge everywhere",
@@ -83,7 +80,7 @@ const Perks = () => {
  name="Spotlight"
  price="75¢"
  priceNote="USD · both at once"
- href="/spotlight"
+ href="/app/spotlight"
  description="The combo SKU. Boost + Verified bundled into one charge for 25% off versus buying each separately. 72-hour pin AND the permanent blue badge, paid for once."
  highlight={[
  "Boost + Verified, bundled",

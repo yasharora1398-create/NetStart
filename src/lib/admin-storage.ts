@@ -72,7 +72,7 @@ export const getAnalytics = async (): Promise<{
 };
 
 // ────────────────────────────────────────────────────────────────
-// Signups + MyNet status
+// Signups + Profile status
 // ────────────────────────────────────────────────────────────────
 
 // "Just signed up" = profile exists (auto-created by handle_new_user

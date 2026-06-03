@@ -131,7 +131,7 @@ const Spotlight = () => {
  <AppLayout>
  <div className="container max-w-6xl py-6 md:py-10">
  <Link
- to="/match"
+ to="/app/match"
  className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-6"
  >
  <ArrowLeft className="h-3.5 w-3.5" />
@@ -239,7 +239,7 @@ const Spotlight = () => {
  icon={<VerifiedBadge size="md" />}
  eyebrow="The Verified half"
  title="The blue check, permanently"
- body={`A small blue checkmark renders next to your name everywhere on Polln8 (public profile, chat header, MyNet dashboard). Your card also gets the green outline + "Recommended by Polln8" header strip in Match.`}
+ body={`A small blue checkmark renders next to your name everywhere on Polln8 (public profile, chat header, Profile dashboard). Your card also gets the green outline + "Recommended by Polln8" header strip in Match.`}
  bullets={[
  "Blue badge next to your name, everywhere",
  'Green outline + "Recommended by Polln8" ribbon on your card',
@@ -371,7 +371,7 @@ const Spotlight = () => {
  <FadeUp>
  <div className="mt-10 grid sm:grid-cols-2 gap-3 text-sm text-muted-foreground">
  <Link
- to="/boost"
+ to="/app/boost"
  className="rounded-sm border border-border bg-card p-4 hover:border-gold transition-colors"
  >
  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -382,7 +382,7 @@ const Spotlight = () => {
  </p>
  </Link>
  <Link
- to="/verified"
+ to="/app/verified"
  className="rounded-sm border border-border bg-card p-4 hover:border-[#1d9bf0] transition-colors"
  >
  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">

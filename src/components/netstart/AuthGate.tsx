@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
  * gate decides which of three things to render:
  * " authLoading -> a quiet placeholder (no flash of gate)
  * " !signedIn -> "Members only" overlay with Sign in / Sign up
- * " needsSetup -> "Finish setting up MyNet" overlay with a
- * single Go-to-MyNet CTA
+ * " needsSetup -> "Finish setting up Profile" overlay with a
+ * single Go-to-Profile CTA
  * " otherwise -> children (the page itself)
  *
  * Copy can be overridden via `authTitle`/`authBody` (unauth state)
@@ -45,10 +45,10 @@ type AuthGateProps = {
 
 const DEFAULT_AUTH_TITLE = "This is for members only.";
 const DEFAULT_AUTH_BODY =
- "Sign in or create an account to use MyNet, save people, and run searches against your network.";
-const DEFAULT_SETUP_TITLE = "Finish setting up MyNet.";
+ "Sign in or create an account to manage your profile, save people, and run searches against your network.";
+const DEFAULT_SETUP_TITLE = "Finish setting up your profile.";
 const DEFAULT_SETUP_BODY =
- "Your account is ready, but MyNet still needs your profile. Set it up so you can match, save, and chat.";
+ "Your account is ready, but we still need your profile. Set it up so you can match, save, and chat.";
 
 export const AuthGate = ({
  authLoading,
@@ -93,7 +93,7 @@ export const AuthGate = ({
  }
 
  // Legacy standalone-overlay mode. Shows the unauth message with
- // optional title/body override (the way Match/MyNet/u call it).
+ // optional title/body override (the way Match/Profile/u call it).
  return (
  <Overlay
  variant="auth"
@@ -173,9 +173,9 @@ const Overlay = ({
  </Link>
  </div>
  ) : (
- <Link to="/mynet" className="block">
+ <Link to="/app/profile/edit" className="block">
  <Button variant="gold" size="lg" className="w-full h-12">
- Go to MyNet
+ Go to Profile
  </Button>
  </Link>
  )}

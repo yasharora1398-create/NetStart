@@ -3,17 +3,20 @@
  * Marketing homepage. One purpose: get a stranger to sign up.
  *
  * Structure: hero, problem, proof-mockups (WhySection), role split,
- * stats, how-it-works, explore grid, FAQ, final CTA.
+ * stats, how-it-works, explore grid, about-links, FAQ, final CTA.
+ *
+ * No sidebar on this page - the sidebar is an app-shell affordance
+ * that belongs under /app/* where signed-in users live. The
+ * marketing surface is wide and centered, with HomeAuthStrip
+ * pinned top-right for sign-in / sign-up.
  *
  * Interactive flourishes that stay on purpose - they make the site
  * feel high-tech without being template-y once paired with the
- * rewritten conversational copy:
- * - Cursor-following gold glow on the hero
- * - Parallax grid lines under the hero
- * - Per-word stagger reveal on the headline
- * - Magnetic CTAs (gently pulled toward the cursor)
- * - TiltCard 3D hover on the cards
- * - CountUp on the four-stat row
+ * conversational copy:
+ *   - Per-word stagger reveal on the headline
+ *   - Magnetic CTAs (gently pulled toward the cursor)
+ *   - TiltCard 3D hover on the cards
+ *   - CountUp on the four-stat row
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@/lib/router-compat";
@@ -26,7 +29,6 @@ import { FadeUp } from "@/components/netstart/FadeUp";
 import WhySection from "@/components/marketing/WhySection";
 import MobileHome from "@/components/marketing/MobileHome";
 import { BoostPopup } from "@/components/netstart/BoostPopup";
-import { Sidebar } from "@/components/netstart/Sidebar";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -205,7 +207,7 @@ const HERO_WORDS: string[] = ["Cofounders", "found", "efficiently."];
 
 const Home = () => {
  // Keeps the theme toggle's choice respected even though this page
- // doesn't expose its own theme control.
+ // doesn't expose its own theme control inline.
  useTheme();
 
  return (
@@ -217,21 +219,12 @@ const Home = () => {
 
  {/* Tablet + desktop: the full marketing site. Hidden on phones
  so the mobile layout owns the viewport without competing
- sections fighting for space.
-
- Sidebar is the same expanded nav the rest of the app uses
- (not the old thin IconRail) so the home page matches /match,
- /mynet, /perks, etc. Sidebar owns the --sidebar-width CSS
- variable so the main content pads correctly when the user
- collapses the sidebar. */}
+ sections fighting for space. No sidebar - this is a logged-out
+ marketing surface; the sidebar lives under /app/*. */}
  <div className="hidden md:block min-h-dvh bg-background text-foreground overflow-x-clip">
- <Sidebar />
  <HomeAuthStrip />
 
- <main
- className="transition-[padding] duration-300 ease-out"
- style={{ paddingLeft: "var(--sidebar-width, 248px)" }}
- >
+ <main>
  <Hero />
  <Problem />
  <ProofIntro />
@@ -240,6 +233,7 @@ const Home = () => {
  <SocialProof />
  <HowItWorks />
  <ExploreGrid />
+ <AboutLinks />
  <FAQ />
  <FinalCTA />
  </main>
@@ -247,10 +241,9 @@ const Home = () => {
  <Footer />
  </div>
 
- {/* Floating bottom-right boost promo - desktop only. On
- mobile the corresponding promo lives on /match as the
- full-screen SpotlightModal, so showing a competing small
- popup here was confusing. */}
+ {/* Floating bottom-right boost promo - desktop only. On mobile
+ the corresponding promo lives on /app/match as the
+ full-screen SpotlightModal. */}
  <div className="hidden md:block">
  <BoostPopup />
  </div>
@@ -278,9 +271,10 @@ const Hero = () => {
  return () => window.clearTimeout(t);
  }, []);
 
- // Cursor-following glow + parallax grid. We write CSS variables
- // on the section so the gradient + grid background can read them
- // without React re-rendering on every mousemove.
+ // Cursor-following CSS variable hook. The hero used to paint a
+ // gold glow + parallax grid against these; the visuals were pulled
+ // for being too noisy, but the hook stays so the section reads
+ // mouse movement if we add a treatment back later.
  const sectionRef = useRef<HTMLElement | null>(null);
  useEffect(() => {
  const el = sectionRef.current;
@@ -300,7 +294,7 @@ const Hero = () => {
  return (
  <section
  ref={sectionRef}
- className="relative px-4 sm:px-8 pt-24 pb-32 md:pt-32 md:pb-40"
+ className="relative px-4 sm:px-8 pt-24 pb-32 md:pt-32 md:pb-40 overflow-hidden lg:min-h-[85vh] lg:flex lg:items-center"
  style={
  {
  "--mx": "50%",
@@ -308,10 +302,42 @@ const Hero = () => {
  } as React.CSSProperties
  }
  >
- {/* Decorative cursor-glow + grid removed - the hero is fully
- opaque now. No translucent overlays. */}
+ {/* Moths + flowers illustration. Absolutely positioned so it
+ spans the FULL height of the hero section (top edge to
+ bottom edge, padding included). w-auto preserves its
+ aspect ratio against h-full; the natural width may overflow
+ the right edge - the parent has overflow-hidden so the
+ page width doesn't grow. Desktop only - hidden below lg so
+ the mobile/small-laptop hero stays text-only. */}
+ {/* Scaled to ~85% of section height (was 100% which left the
+ opaque flowers / moths overlapping the headline on narrower
+ viewports) and nudged a bit further off the right edge so
+ the densely-painted bottom-right corner sits flush with the
+ page edge instead of competing with the text column. */}
+ <img
+ src="/hero-moth.png"
+ alt=""
+ width={2380}
+ height={1728}
+ className="hidden lg:block absolute top-[52%] -translate-y-1/2 w-auto max-w-none object-contain select-none pointer-events-none"
+ style={{
+ // Image sized off the VIEWPORT, not the section. clamp()
+ // gives it a sensible floor (so a 1280-wide laptop still
+ // looks like the screenshot you liked) and a ceiling (so
+ // it doesn't dominate on a 4K monitor). Height is the
+ // primary axis; width auto preserves the aspect ratio.
+ height: "clamp(590px, 78vh, 1000px)",
+ right: "-8%",
+ }}
+ draggable={false}
+ />
 
- <div className="mx-auto max-w-5xl">
+ {/* Text column. max-w-2xl keeps the headline + paragraph from
+ colliding with the image on the right. mx-auto + max-w-7xl
+ keeps the column anchored to the same content gutter as the
+ rest of the page. */}
+ <div className="relative mx-auto w-full max-w-7xl">
+ <div className="max-w-2xl lg:max-w-xl xl:max-w-2xl">
  <h1 className="font-display text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-tight mb-6 font-bold">
  {HERO_WORDS.flatMap((w, i) => {
  const word = (
@@ -345,27 +371,31 @@ const Hero = () => {
 
  <div className="flex flex-wrap items-center gap-3">
  <Magnetic strength={10}>
- <Link to={isAuthed ? "/mynet" : "/signup"}>
+ <Link to={isAuthed ? "/app/match" : "/signup"}>
  <Button variant="gold" size="xl" className="group">
- {isAuthed ? "Open MyNet" : "Get started"}
+ {isAuthed ? "Open app" : "Sign up"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
  </Button>
  </Link>
  </Magnetic>
  <Magnetic strength={6}>
- <Link to={isAuthed ? "/match" : "/how"}>
+ <Link to={isAuthed ? "/app/match" : "/how"}>
  <Button variant="outlineGold" size="xl">
  {isAuthed ? "Open Match" : "How it works"}
  </Button>
  </Link>
  </Magnetic>
+ {!isAuthed && (
  <Link
- to={isAuthed ? "/saved" : "/match"}
+ to="/signin"
  className="text-sm text-muted-foreground hover:text-gold transition-colors"
  >
- {isAuthed ? "Your saved candidates" : "Or peek at the deck"}
+ I already have an account
  </Link>
+ )}
  </div>
+ </div>
+
  </div>
  </section>
  );
@@ -463,7 +493,7 @@ const RoleSplit = () => {
  </ul>
  <div className="flex flex-wrap items-center gap-3">
  <Magnetic strength={6}>
- <Link to={isAuthed ? "/mynet" : "/signup"}>
+ <Link to={isAuthed ? "/app/profile/edit" : "/signup"}>
  <Button variant="outlineGold" size="lg" className="group/btn">
  {isAuthed ? "Edit your project" : "Post a project"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
@@ -500,7 +530,7 @@ const RoleSplit = () => {
  </ul>
  <div className="flex flex-wrap items-center gap-3">
  <Magnetic strength={6}>
- <Link to={isAuthed ? "/match" : "/signup"}>
+ <Link to={isAuthed ? "/app/match" : "/signup"}>
  <Button variant="outlineGold" size="lg" className="group/btn">
  {isAuthed ? "Open Match" : "Find a project"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
@@ -508,7 +538,7 @@ const RoleSplit = () => {
  </Link>
  </Magnetic>
  <Link
- to="/saved"
+ to="/app/saved"
  className="text-sm text-muted-foreground hover:text-gold transition-colors"
  >
  Your saved
@@ -527,9 +557,9 @@ const BulletItem = ({ children }: { children: React.ReactNode }) => (
 );
 
 // ─── SOCIAL PROOF ──────────────────────────────────────────────────
-// Four hard numbers in a row. Each fades in with a slight
-// clear as the section enters the viewport; the numbers themselves
-// count from zero to value (CountUp).
+// Four hard numbers in a row. Each fades in with a slight stagger
+// as the section enters the viewport; the numbers themselves count
+// from zero to value (CountUp).
 const SocialProof = () => {
  const stats: { value: number; prefix: string; suffix: string; label: string }[] = [
  { value: 100, prefix: "", suffix: "%", label: "Reviewed by a human" },
@@ -647,9 +677,9 @@ const HowItWorks = () => {
 
  <div className="mt-10 flex flex-wrap items-center gap-3">
  <Magnetic strength={6}>
- <Link to={isAuthed ? "/mynet" : "/signup"}>
+ <Link to={isAuthed ? "/app/profile/edit" : "/signup"}>
  <Button variant="outlineGold" size="lg" className="group/btn">
- {isAuthed ? "Go to MyNet" : "Start step one"}
+ {isAuthed ? "Go to Profile" : "Start step one"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
  </Button>
  </Link>
@@ -678,10 +708,10 @@ const ExploreGrid = () => {
  }> = [
  isAuthed
  ? {
- to: "/mynet",
- title: "Your MyNet",
+ to: "/app/profile/edit",
+ title: "Your Profile",
  body: "Edit your profile, projects, and connections.",
- cta: "Open MyNet",
+ cta: "Open Profile",
  }
  : {
  to: "/signup",
@@ -690,44 +720,32 @@ const ExploreGrid = () => {
  cta: "Sign up",
  },
  {
- to: "/match",
+ to: "/app/match",
  title: "Browse the deck",
  body: "Swipe through founders and the projects they're building.",
  cta: "Open Match",
  },
  {
- to: "/saved",
+ to: "/app/saved",
  title: "Saved candidates",
  body: "Your bookmarked matches in one place.",
  cta: "View saved",
  },
  {
- to: "/chats",
+ to: "/app/chats",
  title: "Conversations",
  body: "Mutual matches unlock chat. No DM spam.",
  cta: "Open chats",
  },
  {
- to: "/standards",
- title: "The bar",
- body: "What every member commits to before joining.",
- cta: "Read standards",
- },
- {
- to: "/how",
- title: "How it works",
- body: "Three minutes, end to end. No surprises.",
- cta: "See the flow",
- },
- {
- to: "/download",
- title: "Mobile",
- body: "Swipe matches on your phone. iOS + Android.",
- cta: "Download",
+ to: "/app/perks",
+ title: "Upgrade",
+ body: "Boost, Verified, Spotlight. One-time prices.",
+ cta: "See upgrades",
  },
  isAuthed
  ? {
- to: "/settings",
+ to: "/app/settings",
  title: "Settings",
  body: "Manage your account, theme, and sign-out.",
  cta: "Open settings",
@@ -769,6 +787,65 @@ const ExploreGrid = () => {
  </span>
  </Link>
  </TiltCard>
+ ))}
+ </div>
+ </div>
+ </section>
+ );
+};
+
+// ─── ABOUT LINKS ───────────────────────────────────────────────────
+// Four prominent buttons that used to live in the sidebar's About
+// section. Pulled onto the home page so the sidebar can stay
+// app-focused; this is the canonical "learn more before signing
+// up" row.
+const AboutLinks = () => {
+ const links: Array<{ to: string; label: string; body: string }> = [
+ {
+ to: "/how",
+ label: "How it works",
+ body: "Three minutes, end to end. No surprises.",
+ },
+ {
+ to: "/standards",
+ label: "Standards",
+ body: "The bar every member commits to before joining.",
+ },
+ {
+ to: "/reviews",
+ label: "Reviews",
+ body: "What members have said about the network.",
+ },
+ {
+ to: "/download",
+ label: "Download",
+ body: "Swipe matches on your phone. iOS and Android.",
+ },
+ ];
+ return (
+ <section className="border-y border-border bg-card px-4 sm:px-8 py-20 md:py-24">
+ <div className="mx-auto max-w-5xl">
+ <h2 className="font-display text-2xl sm:text-3xl md:text-4xl mb-8 leading-[1.05] font-bold">
+ Learn more before you sign up.
+ </h2>
+ <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+ {links.map((l) => (
+ <Link
+ key={l.to}
+ to={l.to}
+ className="group flex h-full flex-col rounded-sm border border-border bg-background p-5 transition-colors hover:border-gold"
+ >
+ <span className="font-display text-xl mb-2 leading-tight font-semibold text-foreground group-hover:text-gold transition-colors">
+ {l.label}
+ </span>
+ <span className="text-sm text-muted-foreground leading-relaxed mb-4">
+ {l.body}
+ </span>
+ <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-gold">
+ Open
+ <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+ </span>
+ </Link>
  ))}
  </div>
  </div>
@@ -855,39 +932,20 @@ const FinalCTA = () => {
  </p>
  <div className="flex flex-wrap justify-center gap-3">
  <Magnetic strength={10}>
- <Link to={isAuthed ? "/mynet" : "/signup"}>
- <Button variant="outlineGold" size="xl" className="group">
- {isAuthed ? "Open MyNet" : "Get started"}
+ <Link to={isAuthed ? "/app/match" : "/signup"}>
+ <Button variant="gold" size="xl" className="group">
+ {isAuthed ? "Open app" : "Sign up"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
  </Button>
  </Link>
  </Magnetic>
  <Magnetic strength={4}>
- <Link to={isAuthed ? "/match" : "/signin"}>
+ <Link to={isAuthed ? "/app/match" : "/signin"}>
  <Button variant="ghost" size="xl">
  {isAuthed ? "Open Match" : "I already have an account"}
  </Button>
  </Link>
  </Magnetic>
- </div>
- <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
- <Link to="/how" className="hover:text-gold transition-colors">
- How it works
- </Link>
- <Link to="/standards" className="hover:text-gold transition-colors">
- Standards
- </Link>
- <Link to="/download" className="hover:text-gold transition-colors">
- Download
- </Link>
- <Link to="/match" className="hover:text-gold transition-colors">
- Browse the deck
- </Link>
- {isAuthed && (
- <Link to="/settings" className="hover:text-gold transition-colors">
- Settings
- </Link>
- )}
  </div>
  </FadeUp>
  </div>

@@ -21,7 +21,6 @@ import { ProfileCard } from "./ProfileCard";
 import { CandidateCard } from "./CandidateCard";
 import { ProjectCard } from "./ProjectCard";
 import { BoostActiveBanner } from "./BoostActiveBanner";
-import { VerifiedBanner } from "./VerifiedBanner";
 import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
 import type { ProfileSubmission } from "./ProfileCard";
 import {
@@ -85,7 +84,7 @@ const initials = (name: string): string => {
  .join("");
 };
 
-export const MyNetDashboard = ({
+export const ProfileDashboard = ({
  profile,
  projects,
  onSubmitProfile,
@@ -109,7 +108,7 @@ export const MyNetDashboard = ({
  const [editing, setEditing] = useState(false);
  // The current user's most recent active boost row (null if none).
  // Polled on mount + every 2 minutes so the banner disappears at
- // the right time even if the user stays on MyNet through the
+ // the right time even if the user stays on Profile through the
  // expiry. The banner itself does its own per-minute countdown.
  const [activeBoost, setActiveBoost] = useState<ActiveBoost | null>(null);
  useEffect(() => {
@@ -144,22 +143,13 @@ export const MyNetDashboard = ({
 
  return (
  <>
- {/* Verified banner: permanent. Renders for any user whose
- profiles.is_verified = true. Sits above the boost banner
- (verified is permanent identity, boost is a 72h promo)
- so the blue check is the first thing they see when they
- land on MyNet after paying. */}
- {profile.isVerified ? (
- <div className="mb-8">
- <VerifiedBanner
- profile={profile}
- project={boostPreviewProject}
- />
- </div>
- ) : null}
+ {/* Verified banner removed - the user already knows they're
+ verified (the blue check appears on their profile, their
+ card, and the Verified badge in the chrome). A whole
+ banner repeating the news every visit was redundant. */}
 
  {/* Boost banner: only renders for the 72-hour window after the
- user pays. Sits at the very top of MyNet so they land on it
+ user pays. Sits at the very top of Profile so they land on it
  immediately after returning from /boost. Self-hides the
  moment the timer hits zero. */}
  {activeBoost ? (

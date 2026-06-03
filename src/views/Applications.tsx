@@ -9,7 +9,6 @@
  * shows their outgoing pitches.
  */
 import { useEffect, useState } from "react";
-import { Inbox } from "lucide-react";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
@@ -50,19 +49,13 @@ const Applications = () => {
  needsSetup={needsSetup}
  authTitle="Sign in to see applications"
  authBody="Track every pitch you've sent and every application your projects receive."
- setupTitle="Finish setting up MyNet to track applications."
- setupBody="Your application pipeline unlocks once your MyNet profile is set up. It only takes a minute."
+ setupTitle="Finish setting up your profile to track applications."
+ setupBody="Your application pipeline unlocks once your profile is set up. It only takes a minute."
  >
  <div className="container py-10">
  <header className="mb-8">
- <div className="mb-3 inline-flex items-center gap-2 rounded-sm border border-gold bg-gold px-3 py-1.5">
- <Inbox className="size-3 text-white" />
- <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white">
- Applications
- </span>
- </div>
  <h1 className="mb-2 font-display text-4xl leading-[1.05] md:text-5xl">
- Pipeline.
+ Pipeline
  </h1>
  <p className="max-w-xl text-muted-foreground">
  Pitches you've sent and applications landing on your projects, all

@@ -1,5 +1,5 @@
 /**
- * Shared "intro gate" persistence. Each tab/cover/title page on MyNet,
+ * Shared "intro gate" persistence. Each tab/cover/title page on Profile,
  * Match, Chats, and Saved used to render its explainer screen on every
  * visit; per-tab sessionStorage made it once-per-tab. The user wanted
  * it once-per-DEVICE - so the dismissal is now stored in localStorage,

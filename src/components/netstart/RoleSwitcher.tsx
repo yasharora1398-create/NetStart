@@ -1,5 +1,5 @@
 /**
- * Role switcher for the MyNet page. Two-segment toggle (Founder /
+ * Role switcher for the Profile page. Two-segment toggle (Founder /
  * Partner); clicking the *other* role opens a confirmation dialog
  * before committing the change. The change goes through
  * `setRole`, which writes to `user_metadata.role` on the auth user.

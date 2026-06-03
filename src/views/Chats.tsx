@@ -346,11 +346,11 @@ const Chats = () => {
 
  if (!opened) {
  // Chat intro: mirror split - StepChat mockup left, text + a
- // stacked single-column rules list right. Inverse of the MyNet
+ // stacked single-column rules list right. Inverse of the Profile
  // intro so the four tabs read differently when clicked through
  // in sequence.
  return (
- <AppLayout>
+ <AppLayout hideLeftPanel>
  <div className="container py-12 md:py-16">
  <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
  <div className="relative w-full max-w-full overflow-hidden order-2 lg:order-1">
@@ -407,15 +407,15 @@ const Chats = () => {
  }
 
  return (
- <AppLayout>
+ <AppLayout hideLeftPanel>
  <AuthGate
  authLoading={loading}
  signedIn={Boolean(user)}
  needsSetup={needsSetup}
  authTitle="Sign in to chat"
  authBody="Conversations live with your account so we can keep the thread going across devices."
- setupTitle="Finish setting up MyNet to chat."
- setupBody="Chat unlocks once your MyNet profile is set up. It only takes a minute."
+ setupTitle="Finish setting up your profile to chat."
+ setupBody="Chat unlocks once your profile is set up. It only takes a minute."
  >
  {/* Full-bleed chat surface. Negative margins escape every
  ancestor that adds padding (AppLayout's <main> pt-12 +
@@ -458,7 +458,7 @@ const Chats = () => {
  selectedId={routeContactId ?? null}
  currentUserId={user?.id ?? null}
  loading={loadingThreads}
- onSelect={(id) => navigate(`/chats/${id}`)}
+ onSelect={(id) => navigate(`/app/chats/${id}`)}
  /* The header in the list itself gets a collapse
  button so users on desktop have a familiar
  "tuck this panel away" affordance. */
@@ -508,7 +508,7 @@ const Chats = () => {
  setThreads((prev) =>
  prev.filter((t) => t.contactId !== selected.contactId),
  );
- navigate("/chats");
+ navigate("/app/chats");
  }}
  />
  ) : loadError ? (

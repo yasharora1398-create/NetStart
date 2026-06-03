@@ -7,7 +7,7 @@ import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
 import { getAvatarUrl } from "@/lib/mynet-storage";
 import type { Profile, Project } from "@/lib/mynet-types";
 
-// Permanent banner shown at the top of MyNet for any user whose
+// Permanent banner shown at the top of Profile for any user whose
 // profile.is_verified = true. Mirrors the BoostActiveBanner pattern
 // (split: copy on the left, preview card on the right) but with no
 // countdown - verified is a one-time, never-expires perk.
@@ -57,7 +57,7 @@ export const VerifiedBanner = ({ profile, project }: Props) => {
  </dl>
 
  <Link
- to="/match"
+ to="/app/match"
  className="inline-flex items-center gap-2 text-sm font-medium text-[#1d9bf0] hover:underline"
  >
  See your card live in Match

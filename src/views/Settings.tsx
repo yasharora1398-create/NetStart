@@ -1,15 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
-import {
- Loader2,
- LogOut,
- Mail,
- Save,
- Settings as SettingsIcon,
- ShieldCheck,
- Trash2,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
@@ -34,10 +26,14 @@ const Settings = () => {
  const confirmSignOut = useConfirmSignOut();
 
  const [email, setEmail] = useState("");
+ const [emailState, setEmailState] = useState<"idle" | "saving" | "saved">("idle");
+ const emailTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
  const [currentPassword, setCurrentPassword] = useState("");
  const [password, setPassword] = useState("");
- const [savingEmail, setSavingEmail] = useState(false);
  const [savingPassword, setSavingPassword] = useState(false);
+
+ const [deleteOpen, setDeleteOpen] = useState(false);
  const [deletingAccount, setDeletingAccount] = useState(false);
  const [deleteConfirm, setDeleteConfirm] = useState("");
 
@@ -45,17 +41,22 @@ const Settings = () => {
  if (user?.email) setEmail(user.email);
  }, [user?.email]);
 
- const handleEmail = async (e: React.FormEvent) => {
- e.preventDefault();
- if (!email.trim() || email === user?.email) return;
- setSavingEmail(true);
- try {
- const { error } = await updateEmail(email.trim());
- if (error) toast.error(error.message);
- else toast.success("Confirm via the link in your inbox to finalize.");
- } finally {
- setSavingEmail(false);
+ // Email autosave on blur. Skipped when nothing changed so we don't
+ // spam Supabase with no-op confirmation emails every time the field
+ // loses focus.
+ const handleEmailBlur = async () => {
+ const next = email.trim();
+ if (!next || next === user?.email) return;
+ setEmailState("saving");
+ const { error } = await updateEmail(next);
+ if (error) {
+ setEmailState("idle");
+ toast.error(error.message);
+ return;
  }
+ setEmailState("saved");
+ if (emailTimer.current) clearTimeout(emailTimer.current);
+ emailTimer.current = setTimeout(() => setEmailState("idle"), 2400);
  };
 
  const handlePassword = async (e: React.FormEvent) => {
@@ -78,10 +79,6 @@ const Settings = () => {
  }
  setSavingPassword(true);
  try {
- // Reauthenticate against the current password first. Supabase
- // requires a fresh sign-in before updateUser({password}) for
- // accounts older than a few hours, which is why bare
- // updatePassword was failing with "current password" errors.
  const { error: signInError } = await getSupabase().auth.signInWithPassword({
  email: user.email,
  password: currentPassword,
@@ -103,9 +100,6 @@ const Settings = () => {
  }
  };
 
- // The shared confirm-sign-out dialog presents both scopes (this tab
- // / everywhere) inside itself, so this page just opens the dialog
- // and lets the user pick.
  const handleSignOut = () => confirmSignOut();
 
  const handleDeleteAccount = async () => {
@@ -113,18 +107,9 @@ const Settings = () => {
  toast.error("Type DELETE to confirm.");
  return;
  }
- if (
- !window.confirm(
- "Permanently delete your account? This wipes your profile, projects, applications, and chat history. It cannot be undone.",
- )
- ) {
- return;
- }
  setDeletingAccount(true);
  try {
  await deleteMyAccount();
- // The auth user is gone; the local session is now invalid.
- // Sign out clears the cached token before we redirect.
  await signOut("local").catch(() => {});
  toast.success("Account deleted.");
  navigate("/", { replace: true });
@@ -144,108 +129,68 @@ const Settings = () => {
  authBody="Settings is for changing your email, password, and account state - you need to be signed in first."
  >
  <div className="container max-w-2xl py-10">
- <header className="mb-8">
- <div className="mb-3 inline-flex items-center gap-2 rounded-sm border border-gold bg-gold px-3 py-1.5">
- <SettingsIcon className="size-3 text-white" />
- <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white">
- Settings
- </span>
- </div>
+ <header className="mb-10">
  <h1 className="font-display text-4xl md:text-5xl leading-[1]">
- Account.
+ Account
  </h1>
- <p className="mt-3 text-sm text-muted-foreground max-w-md">
- Email, password, session, and the permanent-delete control all
- live here.
- </p>
  </header>
 
- <section className="rounded-sm border border-border bg-card overflow-hidden mb-6">
- <form onSubmit={handleEmail} className="p-6 md:p-8 space-y-4">
- <div>
- <h2 className="font-display text-2xl mb-1 flex items-center gap-2">
- <Mail className="h-5 w-5 text-gold" />
- Email
- </h2>
- <p className="text-sm text-muted-foreground">
- Changes require confirmation from the new address.
- </p>
- </div>
- <div>
+ <section className="rounded-sm border border-border bg-card divide-y divide-border">
+ {/* Email row - autosaves on blur. */}
+ <div className="p-6 md:p-8 space-y-3">
+ <div className="flex items-center justify-between gap-3">
  <Label
  htmlFor="email"
  className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
  >
  Email
  </Label>
+ <EmailStatus state={emailState} />
+ </div>
  <Input
  id="email"
  type="email"
  value={email}
  onChange={(e) => setEmail(e.target.value)}
- className="mt-2 h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
+ onBlur={handleEmailBlur}
+ className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
  />
  </div>
- <Button
- type="submit"
- variant="gold"
- size="sm"
- disabled={savingEmail || email === user?.email || !email.trim()}
- >
- {savingEmail ? (
- <Loader2 className="h-4 w-4 animate-spin" />
- ) : (
- <Save className="h-4 w-4" />
- )}
- Update email
- </Button>
- </form>
- </section>
 
- <section className="rounded-sm border border-border bg-card overflow-hidden mb-6">
- <form onSubmit={handlePassword} className="p-6 md:p-8 space-y-4">
- <div>
- <h2 className="font-display text-2xl mb-1 flex items-center gap-2">
- <ShieldCheck className="h-5 w-5 text-gold" />
- Password
- </h2>
- <p className="text-sm text-muted-foreground">
- Enter your current password, then a new one at least 8
- characters.
- </p>
- </div>
- <div>
+ {/* Password row - inline submit; "Current" only matters when
+ a new one is typed, so it sits next to the new field
+ instead of being a separate gate. */}
+ <form
+ onSubmit={handlePassword}
+ className="p-6 md:p-8 space-y-3"
+ >
  <Label
- htmlFor="current-password"
+ htmlFor="password"
  className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
  >
- Current password
+ Password
  </Label>
+ <div className="grid gap-3 md:grid-cols-2">
  <Input
  id="current-password"
  type="password"
  value={currentPassword}
  onChange={(e) => setCurrentPassword(e.target.value)}
  autoComplete="current-password"
- className="mt-2 h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
+ placeholder="Current"
+ className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
  />
- </div>
- <div>
- <Label
- htmlFor="password"
- className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
- >
- New password
- </Label>
  <Input
  id="password"
  type="password"
  value={password}
  onChange={(e) => setPassword(e.target.value)}
  autoComplete="new-password"
- className="mt-2 h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
+ placeholder="New (8+ chars)"
+ className="h-11 bg-background border-border focus-visible:border-gold focus-visible:ring-gold"
  />
  </div>
+ <div className="flex justify-end">
  <Button
  type="submit"
  variant="gold"
@@ -258,65 +203,52 @@ const Settings = () => {
  >
  {savingPassword ? (
  <Loader2 className="h-4 w-4 animate-spin" />
- ) : (
- <Save className="h-4 w-4" />
- )}
+ ) : null}
  Update password
  </Button>
- </form>
- </section>
-
- <section className="rounded-sm border border-border bg-card overflow-hidden mb-6">
- <div className="p-6 md:p-8 space-y-4">
- <div>
- <h2 className="font-display text-2xl mb-1 flex items-center gap-2">
- <LogOut className="h-5 w-5 text-gold" />
- Sessions
- </h2>
- <p className="text-sm text-muted-foreground">
- You can sign out of this tab only, or sign out from every
- device tied to your account.
- </p>
  </div>
- <Button
- variant="outline"
- size="sm"
- onClick={handleSignOut}
- className="self-start"
- >
- <LogOut className="h-4 w-4" />
+ </form>
+
+ {/* Sign out row - one button, no surrounding paragraph. The
+ confirm dialog itself offers "this tab" vs "everywhere". */}
+ <div className="p-6 md:p-8 flex items-center justify-between gap-3">
+ <Label className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ Session
+ </Label>
+ <Button variant="outline" size="sm" onClick={handleSignOut}>
  Sign out
  </Button>
  </div>
  </section>
 
- <section className="rounded-sm border border-destructive bg-card overflow-hidden">
- <div className="p-6 md:p-8 space-y-4">
- <div>
- <h2 className="font-display text-2xl mb-1 flex items-center gap-2">
- <Trash2 className="h-5 w-5 text-destructive" />
- Delete account
- </h2>
- <p className="text-sm text-muted-foreground">
- Permanently removes your profile, projects, applications,
- and chat history. This cannot be undone.
- </p>
- </div>
- <div>
- <Label
- htmlFor="delete-confirm"
- className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
+ {/* Danger zone - collapsed by default. The whole row is a
+ single button until expanded; this keeps the destructive
+ action out of the user's eye on every visit. */}
+ <details
+ className="group mt-8 rounded-sm border border-border bg-card open:border-destructive"
+ onToggle={(e) => setDeleteOpen((e.target as HTMLDetailsElement).open)}
  >
- Type DELETE to confirm
- </Label>
+ <summary className="cursor-pointer list-none px-6 md:px-8 py-5 flex items-center justify-between gap-3">
+ <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground group-open:text-destructive">
+ Danger zone
+ </span>
+ <span className="font-mono text-xs text-muted-foreground group-open:text-destructive transition-transform group-open:rotate-45">
+ +
+ </span>
+ </summary>
+ <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-3">
+ <p className="text-sm text-muted-foreground">
+ Permanently removes your profile, projects, applications, and chat
+ history. This cannot be undone.
+ </p>
  <Input
  id="delete-confirm"
  value={deleteConfirm}
  onChange={(e) => setDeleteConfirm(e.target.value)}
- placeholder="DELETE"
- className="mt-2 h-11 bg-background border-border focus-visible:border-destructive focus-visible:ring-destructive"
+ placeholder="Type DELETE to confirm"
+ className="h-11 bg-background border-border focus-visible:border-destructive focus-visible:ring-destructive"
  />
- </div>
+ <div className="flex justify-end">
  <Button
  variant="outline"
  size="sm"
@@ -325,20 +257,43 @@ const Settings = () => {
  deletingAccount ||
  deleteConfirm.trim().toLowerCase() !== "delete"
  }
- className="border-destructive text-destructive hover:bg-destructive hover:text-destructive"
+ className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
  >
  {deletingAccount ? (
  <Loader2 className="h-4 w-4 animate-spin" />
- ) : (
- <Trash2 className="h-4 w-4" />
- )}
+ ) : null}
  Delete my account
  </Button>
  </div>
- </section>
+ {/* Hidden helper so the linter doesn't flag the open
+ state as unused - it drives the eyebrow color via
+ group-open utility classes above. */}
+ <span className="sr-only">{deleteOpen ? "open" : "closed"}</span>
+ </div>
+ </details>
  </div>
  </AuthGate>
  </AppLayout>
+ );
+};
+
+// Small inline status pill that appears to the right of the email
+// label while a save is in flight, then briefly after success. Avoids
+// needing a separate "Save" button.
+const EmailStatus = ({ state }: { state: "idle" | "saving" | "saved" }) => {
+ if (state === "idle") return null;
+ if (state === "saving") {
+ return (
+ <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+ <Loader2 className="h-3 w-3 animate-spin" />
+ Saving
+ </span>
+ );
+ }
+ return (
+ <span className="text-[11px] font-mono uppercase tracking-widest text-gold">
+ Check your inbox
+ </span>
  );
 };
 

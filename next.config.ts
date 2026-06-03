@@ -78,16 +78,20 @@ const config: NextConfig = {
         permanent: false,
       },
 
-      // Phone UAs hitting the signed-in web app pages (match / saved /
-      // chats / mynet / applications) get bounced to the Expo mobile
-      // bundle, which is the real phone experience for those screens.
-      // `/` itself is NOT in this list: it renders MobileHome (the
-      // mobile marketing page) for first-time phone visitors. Marketing
-      // + auth pages (/how, /standards, /signin, /signup, etc.) also
-      // stay on web so the sign-up flow keeps working in a phone
-      // browser.
+      // Phone UAs hitting either the legacy bare paths (/match etc.)
+      // or the new /app/* paths get bounced to the Expo mobile bundle.
+      // Both shapes are listed so a phone user can't accidentally land
+      // in the desktop layout regardless of which URL they followed.
+      // The bare-path entries also stay as the source-of-truth for
+      // anyone with old bookmarks.
       {
         source: "/match",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/",
+        permanent: false,
+      },
+      {
+        source: "/app/match",
         has: [{ type: "header", key: "user-agent", value: phoneUA }],
         destination: "/m/",
         permanent: false,
@@ -99,7 +103,19 @@ const config: NextConfig = {
         permanent: false,
       },
       {
+        source: "/app/saved",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/saved",
+        permanent: false,
+      },
+      {
         source: "/chats",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/threads",
+        permanent: false,
+      },
+      {
+        source: "/app/chats",
         has: [{ type: "header", key: "user-agent", value: phoneUA }],
         destination: "/m/threads",
         permanent: false,
@@ -111,7 +127,19 @@ const config: NextConfig = {
         permanent: false,
       },
       {
+        source: "/app/chats/:id",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/chat/:id",
+        permanent: false,
+      },
+      {
         source: "/mynet",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/mynet",
+        permanent: false,
+      },
+      {
+        source: "/app/mynet",
         has: [{ type: "header", key: "user-agent", value: phoneUA }],
         destination: "/m/mynet",
         permanent: false,
@@ -123,7 +151,19 @@ const config: NextConfig = {
         permanent: false,
       },
       {
+        source: "/app/applications",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/applications",
+        permanent: false,
+      },
+      {
         source: "/settings",
+        has: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/m/settings",
+        permanent: false,
+      },
+      {
+        source: "/app/settings",
         has: [{ type: "header", key: "user-agent", value: phoneUA }],
         destination: "/m/settings",
         permanent: false,
@@ -132,6 +172,96 @@ const config: NextConfig = {
         source: "/u/:id",
         has: [{ type: "header", key: "user-agent", value: phoneUA }],
         destination: "/m/u/:id",
+        permanent: false,
+      },
+
+      // ---- Desktop bookmark redirects ----
+      // The signed-in app moved from / to /app/. These rules catch
+      // anyone with an old bookmark (or any external link) hitting
+      // the bare /mynet etc. and forwards them to the new home.
+      // Phone UAs are excluded via `missing` so the rules above (which
+      // route to /m/*) win for phone visitors. permanent: false because
+      // the move is still recent and we may iterate; flip to true once
+      // settled.
+      {
+        source: "/match",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/match",
+        permanent: false,
+      },
+      {
+        source: "/mynet",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/profile/edit",
+        permanent: false,
+      },
+      // /app/mynet was the original signed-in editor route. Replaced
+      // by /app/profile/edit; this redirect catches anyone still
+      // landing on the old URL (notifications, bookmarks).
+      {
+        source: "/app/mynet",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/profile/edit",
+        permanent: false,
+      },
+      {
+        source: "/saved",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/saved",
+        permanent: false,
+      },
+      {
+        source: "/chats",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/chats",
+        permanent: false,
+      },
+      {
+        source: "/chats/:id",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/chats/:id",
+        permanent: false,
+      },
+      {
+        source: "/settings",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/settings",
+        permanent: false,
+      },
+      {
+        source: "/applications",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/applications",
+        permanent: false,
+      },
+      {
+        source: "/perks",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/perks",
+        permanent: false,
+      },
+      {
+        source: "/boost",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/boost",
+        permanent: false,
+      },
+      {
+        source: "/verified",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/verified",
+        permanent: false,
+      },
+      {
+        source: "/spotlight",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/spotlight",
+        permanent: false,
+      },
+      {
+        source: "/admin",
+        missing: [{ type: "header", key: "user-agent", value: phoneUA }],
+        destination: "/app/admin",
         permanent: false,
       },
     ];

@@ -335,7 +335,7 @@ export const ChatConversation = ({
  // or founder, so try the founder RPC first (cheap; returns null
  // fast when not a founder), then fall back to the candidate row.
  // Extracted so the realtime subscription below can re-fire it when
- // the counterparty edits their MyNet profile mid-conversation.
+ // the counterparty edits their profile mid-conversation.
  const loadProfile = useCallback(async () => {
  try {
  const f = await getPublicFounder(contactId).catch(() => null);
@@ -779,7 +779,7 @@ const Header = ({
 }) => (
  <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
  <Link
- to="/chats"
+ to="/app/chats"
  className="md:hidden"
  aria-label="Back to threads"
  >

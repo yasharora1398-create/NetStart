@@ -1,6 +1,6 @@
 // Light wrapper around getProfile that yields just the review
 // status. Used by every AppLayout-wrapped page that needs to gate
-// its content on whether the user's MyNet profile has been
+// its content on whether the user's Profile profile has been
 // approved (status="accepted"). Returns `null` while loading so
 // callers can hold the gate until the answer lands.
 import { useEffect, useState } from "react";

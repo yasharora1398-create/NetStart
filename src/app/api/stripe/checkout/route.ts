@@ -76,10 +76,10 @@ export async function POST(request: Request) {
  // is local to that page.
  const returnPath =
  purpose === "verified"
- ? "/verified"
+ ? "/app/verified"
  : purpose === "spotlight"
- ? "/spotlight"
- : "/boost";
+ ? "/app/spotlight"
+ : "/app/boost";
 
  try {
  const session = await getStripe().checkout.sessions.create({

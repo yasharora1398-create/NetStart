@@ -234,7 +234,7 @@ export const LOCATION_OPTIONS: string[] = [
 ];
 
 // Broad business / startup skill categories. Drives the Skills
-// dropdown in the MyNet setup wizard, the MyNet edit view, the
+// dropdown in the Profile setup wizard, the Profile edit view, the
 // project criteria, and the Match filters. Kept intentionally broad
 // (a couple dozen top-level functions, not 200 framework names) so
 // the picker reads as a quick "which side of the org do you cover?"
@@ -254,7 +254,7 @@ export const SKILLS_OPTIONS: string[] = [
 ];
 
 // C-level role a partner wants to play in their next venture.
-// Only meaningful on the partner-side of MyNet; founders ignore
+// Only meaningful on the partner-side of Profile; founders ignore
 // this field. Renders as a pill on the partner's Match card.
 export const PARTNER_ROLE_OPTIONS: ReadonlyArray<{
  value: "CTO" | "CPO" | "CMO" | "CRO" | "CDO" | "COO" | "CFO";

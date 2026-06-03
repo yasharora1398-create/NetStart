@@ -87,8 +87,8 @@ const Index = () => {
  </p>
  <div className="flex flex-wrap items-center gap-4">
  {user ? (
- <Link to="/mynet">
- <PrimaryButton>Open MyNet</PrimaryButton>
+ <Link to="/app/profile/edit">
+ <PrimaryButton>Open Profile</PrimaryButton>
  </Link>
  ) : (
  <>
@@ -164,8 +164,8 @@ const Index = () => {
  </div>
  <div className="flex flex-col gap-2.5 min-w-[220px]">
  {user ? (
- <Link to="/mynet">
- <CtaButton primary label="Open MyNet" sub="Continue" />
+ <Link to="/app/profile/edit">
+ <CtaButton primary label="Open Profile" sub="Continue" />
  </Link>
  ) : (
  <>

@@ -1,6 +1,6 @@
 /**
  * Mobile-only bottom tab bar. Four tabs (Match / Saved / Chat /
- * MyNet) that mirror the IA of the native mobile app, so the web
+ * Profile) that mirror the IA of the native mobile app, so the web
  * experience on a phone matches what a user expects from the app.
  *
  * Collapsable: the chevron pushes the bar off the right edge of
@@ -36,7 +36,7 @@ const TABS: Tab[] = [
  { to: "/match", label: "Match", icon: Flower2 },
  { to: "/saved", label: "Saved", icon: Bookmark },
  { to: "/chats", label: "Chat", icon: MessageCircle },
- { to: "/mynet", label: "MyNet", icon: User },
+ { to: "/mynet", label: "Profile", icon: User },
 ];
 
 export const MobileBottomNav = () => {

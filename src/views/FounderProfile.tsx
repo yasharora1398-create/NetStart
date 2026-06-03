@@ -165,7 +165,7 @@ const FounderProfile = () => {
  <AppLayout>
  <div className="container max-w-6xl py-6 md:py-8">
  <Link
- to="/match"
+ to="/app/match"
  className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-4"
  >
  <ArrowLeft className="h-3.5 w-3.5" />
@@ -296,7 +296,7 @@ const FounderProfile = () => {
 
  {/* Message CTA - bottom of left column for non-owners. */}
  {!isOwner && user && id ? (
- <Link to={`/chats/${id}`} className="inline-block">
+ <Link to={`/app/chats/${id}`} className="inline-block">
  <Button variant="gold" size="lg">
  <MessageCircle className="h-4 w-4" />
  Message {founder.fullName.split(" ")[0] || "founder"}

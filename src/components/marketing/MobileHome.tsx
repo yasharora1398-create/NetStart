@@ -292,7 +292,7 @@ const MobileHome = () => {
         </h2>
         <p className="text-base leading-relaxed text-muted-foreground text-center mb-10 max-w-prose mx-auto">
           {isAuthed
-            ? "Jump into Match, edit MyNet, or check your chats."
+            ? "Jump into Match, edit Profile, or check your chats."
             : "Sign in to start matching. Sign up if you're new."}
         </p>
         <Link

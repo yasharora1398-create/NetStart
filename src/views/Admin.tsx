@@ -5,8 +5,8 @@
  * Two tabs:
  * • Overview - visitor analytics (24h/7d/30d unique views) + line
  * graph of last 30 days, plus a table of all
- * signups with their MyNet completion status.
- * • Review queue - pending MyNet submissions as collapsible cards.
+ * signups with their Profile completion status.
+ * • Review queue - pending Profile submissions as collapsible cards.
  * Click a name to expand the full submitted info,
  * then accept or decline.
  *
@@ -351,7 +351,7 @@ const OverviewTab = () => {
  <th className="px-5 py-3 font-normal">Name</th>
  <th className="px-5 py-3 font-normal">Email</th>
  <th className="px-5 py-3 font-normal">Signed up</th>
- <th className="px-5 py-3 font-normal">MyNet</th>
+ <th className="px-5 py-3 font-normal">Profile</th>
  </tr>
  </thead>
  <tbody>
@@ -370,7 +370,7 @@ const OverviewTab = () => {
  {formatDate(row.createdAt)}
  </td>
  <td className="px-5 py-3">
- <MyNetBadge row={row} />
+ <ProfileBadge row={row} />
  </td>
  </tr>
  ))}
@@ -395,7 +395,7 @@ const StatCard = ({ label, value }: { label: string; value: number }) => (
  </div>
 );
 
-const MyNetBadge = ({ row }: { row: SignupRow }) => {
+const ProfileBadge = ({ row }: { row: SignupRow }) => {
  if (!row.mynetSubmitted) {
  return (
  <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-border text-[11px] text-muted-foreground">
@@ -538,7 +538,7 @@ const ReviewTab = () => {
  <MothEmptyState
  variant="queue"
  title="Queue is clear."
- sub="No pending submissions right now. New ones land here as people finish MyNet."
+ sub="No pending submissions right now. New ones land here as people finish Profile."
  />
  </div>
  ) : (
@@ -755,7 +755,7 @@ const RejectDialog = ({
  </h3>
  <p className="text-sm text-muted-foreground mb-5">
  Give {target.fullName || target.email} a short reason. They'll see it
- on their MyNet page.
+ on their Profile page.
  </p>
  <textarea
  value={reason}

@@ -1,6 +1,6 @@
 "use client";
 /**
- * Three-step first-visit overlay shown on MyNet. Walks new users
+ * Three-step first-visit overlay shown on Profile. Walks new users
  * through "what is this page", "what to fill in", "what happens
  * after submit" without them having to figure it out cold.
  *
@@ -9,7 +9,7 @@
  * so an impatient user can dismiss without re-popping later.
  *
  * Designed as a centered modal rather than positional coach-marks
- * because MyNet's layout shifts between wizard / dashboard / role-
+ * because Profile's layout shifts between wizard / dashboard / role-
  * switched states, and anchoring coach-marks reliably across all of
  * them would be fragile. The modal copy references the page's parts
  * by name instead.
@@ -30,8 +30,8 @@ type Step = {
 const STEPS: Step[] = [
  {
  badge: "Step 1 of 3",
- title: "Welcome to MyNet.",
- body: "MyNet is the profile other members see when matching. The more honest you are about your background, skills, and what you're looking for, the better the matches you get.",
+ title: "Welcome to Profile.",
+ body: "Profile is the profile other members see when matching. The more honest you are about your background, skills, and what you're looking for, the better the matches you get.",
  cta: "Got it",
  },
  {

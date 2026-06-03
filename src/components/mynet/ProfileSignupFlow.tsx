@@ -46,9 +46,9 @@ import {
 import { cn } from "@/lib/utils";
 
 // Full-screen post-signup setup. Lives ONLY here - the legacy
-// MyNetWizard is what returning / skipped users see via the
+// ProfileWizard is what returning / skipped users see via the
 // sidebar. This component is intentionally lean: 5 question
-// slides + intro + done, top progress bar + "Skip MyNet" link,
+// slides + intro + done, top progress bar + "Skip Profile" link,
 // Next / Previous at the bottom.
 //
 // Layout: fixed inset with uniform margin so the card matches the
@@ -106,7 +106,7 @@ const AVAILABILITY_OPTIONS: ReadonlyArray<{
  },
 ];
 
-export const MyNetSignupFlow = ({
+export const ProfileSignupFlow = ({
  uid,
  profile,
  onProfileRefresh,
@@ -244,7 +244,7 @@ export const MyNetSignupFlow = ({
  className="fixed inset-0 z-40 bg-background"
  role="dialog"
  aria-modal="true"
- aria-label="Set up MyNet"
+ aria-label="Set up Profile"
  >
  {/* The card. Uniform inset on every edge so the card's
  aspect ratio mirrors the viewport (minus the margin
@@ -252,12 +252,16 @@ export const MyNetSignupFlow = ({
  edges. */}
  <div
  className={cn(
- "absolute inset-4 sm:inset-6 md:inset-10 rounded-2xl border-2 border-gold bg-card shadow-2xl flex flex-col overflow-hidden",
+ // Tighter symmetric inset and wider horizontal frame so the
+ // card actually fills the screen well on desktop instead of
+ // sitting in a tiny middle column. The background shows
+ // around the edges as before.
+ "absolute inset-x-4 inset-y-4 sm:inset-x-8 sm:inset-y-6 md:inset-x-16 md:inset-y-8 lg:inset-x-24 lg:inset-y-12 rounded-2xl border-2 border-gold bg-card shadow-2xl flex flex-col overflow-hidden",
  "transition-opacity duration-300",
  mounted ? "opacity-100" : "opacity-0",
  )}
  >
- {/* Top bar: progress (left) + Skip MyNet (right). */}
+ {/* Top bar: progress (left) + Skip Profile (right). */}
  <div className="flex items-center justify-between gap-4 px-5 sm:px-8 pt-5">
  <div className="flex-1 min-w-0">
  {progress ? (
@@ -283,7 +287,7 @@ export const MyNetSignupFlow = ({
  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
  >
  <X className="h-3.5 w-3.5" />
- Skip MyNet
+ Skip for now
  </button>
  ) : null}
  </div>
@@ -294,7 +298,7 @@ export const MyNetSignupFlow = ({
  <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-8 sm:py-12">
  <div
  key={currentSlide}
- className="max-w-xl mx-auto w-full animate-slide-in-right"
+ className="max-w-2xl lg:max-w-3xl mx-auto w-full animate-slide-in-right"
  >
  {currentSlide === "intro" ? (
  <IntroSlide />
@@ -536,11 +540,11 @@ const IntroSlide = () => (
  <div className="text-center">
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
  <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-white">
- Welcome to MyNet
+ Welcome to Profile
  </span>
  </div>
  <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1] mb-5">
- This is <em className="text-gradient-gold not-italic">MyNet.</em>
+ This is <em className="text-gradient-gold not-italic">Profile.</em>
  </h1>
  <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto mb-3">
  Your profile on Polln8. It&apos;s how every founder discovers you,
@@ -558,14 +562,14 @@ const DoneSlide = ({ onContinue }: { onContinue: () => void }) => (
  <ArrowRight className="h-8 w-8" strokeWidth={2.4} />
  </div>
  <h2 className="font-display text-3xl sm:text-4xl leading-tight mb-3">
- MyNet is live.
+ Profile is live.
  </h2>
  <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-8">
  Submitted for review. We&apos;ll get you into the deck in under a
  day. Let&apos;s find your person.
  </p>
  <Button variant="gold" size="lg" onClick={onContinue} className="min-h-[44px]">
- Open MyNet
+ Open Match
  <ArrowRight className="h-4 w-4" />
  </Button>
  </div>
@@ -619,7 +623,7 @@ const PhotoPicker = ({
 );
 
 // 3-way availability row. Same semantics as the AvailabilityPicker
-// in MyNetDashboard but laid out vertically with the hint inline
+// in ProfileDashboard but laid out vertically with the hint inline
 // so the user understands each option's effect before they pick.
 const AvailabilityRow = ({
  value,
@@ -660,4 +664,4 @@ const AvailabilityRow = ({
  </div>
 );
 
-export default MyNetSignupFlow;
+export default ProfileSignupFlow;

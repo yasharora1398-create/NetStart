@@ -83,7 +83,7 @@ export const Nav = () => {
  Download
  </a>
  <NavLink
- to="/mynet"
+ to="/app/profile/edit"
  onClick={closeMobile}
  className={({ isActive }) =>
  `transition-colors ${
@@ -91,11 +91,11 @@ export const Nav = () => {
  }`
  }
  >
- MyNet
+ Profile
  </NavLink>
  {user && (
  <NavLink
- to="/match"
+ to="/app/match"
  onClick={closeMobile}
  className={({ isActive }) =>
  `transition-colors ${
@@ -108,7 +108,7 @@ export const Nav = () => {
  )}
  {user && isAdmin && (
  <NavLink
- to="/admin"
+ to="/app/admin"
  onClick={closeMobile}
  className={({ isActive }) =>
  `transition-colors ${
@@ -137,7 +137,7 @@ export const Nav = () => {
  {loading ? null : user ? (
  <>
  <NavLink
- to="/chats"
+ to="/app/chats"
  aria-label="Chats"
  className={({ isActive }) =>
  `relative h-9 w-9 flex items-center justify-center rounded-sm border transition-colors ${

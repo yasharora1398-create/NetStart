@@ -107,7 +107,7 @@ const formatBytes = (bytes: number): string => {
 const errMsg = (e: unknown): string =>
  e instanceof Error ? e.message : "Something went wrong.";
 
-export const MyNetWizard = ({
+export const ProfileWizard = ({
  uid,
  profile,
  onProfileRefresh,
@@ -847,12 +847,12 @@ const Intro = ({
  <div className="max-w-5xl mx-auto text-center animate-slide-in-right">
  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-gold bg-gold mb-6">
  <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-white">
- {rejected ? "Resubmit your profile" : "Welcome to MyNet"}
+ {rejected ? "Resubmit your profile" : "Welcome to Profile"}
  </span>
  </div>
 
  <h1 className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.95] mb-6">
- This is <em className="text-gradient-gold not-italic">MyNet.</em>
+ This is <em className="text-gradient-gold not-italic">Profile.</em>
  </h1>
 
  <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto mb-4 leading-relaxed">

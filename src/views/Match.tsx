@@ -25,7 +25,6 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
-import { StepMatch } from "@/components/mockups/Steps";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +46,10 @@ import {
  LOCATION_OPTIONS,
  SKILLS_OPTIONS,
 } from "@/lib/options";
-import { readIntroOpened, writeIntroOpened } from "@/lib/introGate";
+// (Match used to gate the deck behind a one-time intro screen.
+// Removed when /app/match became the canonical starting page for
+// signed-in users - landing should drop you straight on the deck,
+// Tinder-style.)
 import {
  getAvatarUrl,
  getProfile,
@@ -78,16 +80,6 @@ const initials = (name: string): string => {
 };
 
 const Match = () => {
- // Intro gate: only shown the first time the user opens Match on
- // this device. The dismissal is sticky in localStorage so reloads
- // and new tabs land straight on the deck.
- const [opened, setOpenedState] = useState<boolean>(() =>
- readIntroOpened("match"),
- );
- const setOpened = (next: boolean) => {
- writeIntroOpened("match", next);
- setOpenedState(next);
- };
  const { user, loading } = useAuth();
  const [profile, setProfile] = useState<Profile | null>(null);
  const [hasProjects, setHasProjects] = useState(false);
@@ -116,6 +108,14 @@ const Match = () => {
 
  const isAuthed = Boolean(user) && !loading;
  const isAccepted = profile?.reviewStatus === "accepted";
+
+ // Non-accepted signed-in users (draft / pending / rejected) now
+ // see an intro splash that explains Match + that they can't save
+ // or chat without an approved profile, then click through to the
+ // deck. Stored only in component state so the splash returns next
+ // visit - it's a quick re-confirmation each time, not a one-time
+ // event.
+ const [introContinued, setIntroContinued] = useState(false);
 
  // Unauth visitors pick a role on a title page before they see the
  // deck. Lives in component state (not localStorage) so they re-pick
@@ -153,18 +153,45 @@ const Match = () => {
  ? "partner"
  : "looker";
 
- const Locked = (
- <div className="rounded-sm border border-gold bg-card p-12 text-center max-w-2xl mx-auto">
- <h1 className="font-display text-3xl mb-3">Almost there.</h1>
- <p className="text-muted-foreground mb-6">
- Match opens up once your profile has been accepted. Hop back to MyNet
- to finish setting up.
+ // Pre-deck splash for any signed-in user whose profile isn't
+ // accepted yet. They CAN browse the deck (Continue), but the
+ // copy makes it explicit that save / chat won't work until the
+ // profile is finished + reviewed. Two buttons: peek the deck or
+ // jump back to the editor.
+ const Intro = (
+ <div className="rounded-sm border border-gold bg-card p-8 md:p-12 max-w-2xl mx-auto">
+ <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-gold mb-3">
+ Welcome to Match
  </p>
- <Link to="/mynet">
- <Button variant="gold" size="lg">
- Go to MyNet
+ <h1 className="font-display text-3xl md:text-4xl mb-4 leading-[1.05]">
+ The ranked deck of people building right now.
+ </h1>
+ <p className="text-sm md:text-base text-muted-foreground mb-3 leading-relaxed">
+ Match shows you partners (if you're a founder) or projects (if
+ you're a partner), one card at a time, ranked against what you
+ actually want to ship next.
+ </p>
+ <p className="text-sm md:text-base text-foreground mb-8 leading-relaxed">
+ Heads up: your profile isn't finished yet, so you can{" "}
+ <strong>browse</strong> but you can't{" "}
+ <strong>save</strong> or <strong>chat</strong> with anyone until
+ you wrap up your profile and the reviewer accepts you.
+ </p>
+ <div className="flex flex-col sm:flex-row gap-3">
+ <Button
+ variant="gold"
+ size="lg"
+ onClick={() => setIntroContinued(true)}
+ className="flex-1 sm:flex-none"
+ >
+ Continue to Match
+ </Button>
+ <Link to="/app/profile/edit" className="flex-1 sm:flex-none">
+ <Button variant="outline" size="lg" className="w-full">
+ Finish your profile
  </Button>
  </Link>
+ </div>
  </div>
  );
 
@@ -281,89 +308,26 @@ const Match = () => {
  );
  }
 
- if (!opened) {
- // Match intro: hero stacked. Centered title + body up top, the
- // anonymous StepMatch deck mockup huge below, then a single
- // 4-column strip of facts at the bottom.
  return (
  <AppLayout>
- <div className="container py-12 md:py-16">
- <div className="max-w-3xl mb-12 md:mb-16">
- <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] mb-6 font-bold">
- Match.
- </h1>
- <div className="text-base sm:text-lg text-muted-foreground leading-relaxed space-y-4">
- <p>
- The ranked deck. Founders see partners ordered against
- their active project&apos;s criteria. Partners see
- projects ordered against what they&apos;ve built and the
- work they&apos;d want to ship next.
- </p>
- <p>
- Three actions per card: save for later, pass, or send a
- chat request. No fourth bucket and no maybes. Chat opens
- only when the other side accepts back.
- </p>
- </div>
- </div>
-
- <div className="relative w-full max-w-full overflow-hidden mb-16">
- <div className="relative left-1/2 w-fit -translate-x-1/2 pointer-events-none">
- <StepMatch anonymous />
- </div>
- </div>
-
- <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
- {[
- { t: "Ranked, not feed-spam", b: "Profile and project text get embedded; cards order by real similarity to what you built." },
- { t: "Three actions per card", b: "Save, pass, request. No likes, no maybes. Every card is a decision." },
- { t: "Mutual before chat", b: "Both sides have to accept before a thread opens. No cold DMs." },
- { t: "Undo the last swipe", b: "Tap undo in the top bar to bring the last card back if you misclicked." },
- ].map((d) => (
- <div
- key={d.t}
- className="rounded-sm border border-border bg-card p-4"
- >
- <h3 className="font-display text-base mb-1.5 font-semibold">{d.t}</h3>
- <p className="text-xs text-muted-foreground leading-relaxed">{d.b}</p>
- </div>
- ))}
- </div>
-
- <Button
- variant="gold"
- size="xl"
- onClick={() => setOpened(true)}
- className="group"
- >
- Open Match
- <ChevronLeft className="h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
- </Button>
- </div>
- </AppLayout>
- );
- }
-
- return (
- <AppLayout>
- <div className="container">
- <header className="mb-6 md:mb-10">
- <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1] mb-3 md:mb-4">
+ {/* Centered deck shell. The header was previously a large
+ hero ("Find your partner." etc.) - trimmed to a single
+ small eyebrow so the swipe card itself owns the visual
+ weight. Tinder-like: the deck is what you came for, not
+ the page chrome. */}
+ <div className="mx-auto w-full max-w-4xl px-4 sm:px-6">
+ <header className="mb-4 md:mb-6">
+ <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
  {userMode === "partner"
- ? "Find your partner."
- : "Find a project."}
- </h1>
- <p className="text-muted-foreground max-w-xl text-sm md:text-base">
- {userMode === "partner"
- ? "Vetted partners, one at a time. Accept the ones you want to talk to and pass the rest."
- : "Founders building right now. Browse one by one and apply when something fits."}
+ ? "Partners ranked for your project"
+ : "Projects ranked for your skills"}
  </p>
  </header>
 
  {loadingMode && isAuthed ? (
  <Loading />
- ) : isAuthed && !isAccepted ? (
- Locked
+ ) : isAuthed && !isAccepted && !introContinued ? (
+ Intro
  ) : userMode === "partner" ? (
  <PartnerView />
  ) : (
@@ -596,7 +560,7 @@ const PartnerView = () => {
  </div>
  {hasMultipleProjects ? (
  <Link
- to="/mynet"
+ to="/app/profile/edit"
  className="text-[11px] font-mono uppercase tracking-widest text-gold hover:underline"
  >
  Switch project
@@ -644,11 +608,11 @@ const PartnerView = () => {
  candidate={c}
  onSave={async () => {
  if (!user) {
- navigate("/saved");
+ navigate("/app/saved");
  return;
  }
  if (!activeProjectId) {
- toast.error("Finish your active project in MyNet first");
+ toast.error("Finish your active project in Profile first");
  return;
  }
  try {
@@ -666,10 +630,10 @@ const PartnerView = () => {
  }}
  onChat={() => {
  if (!user) {
- navigate("/chats");
+ navigate("/app/chats");
  return;
  }
- navigate(`/chats/${c.userId}`);
+ navigate(`/app/chats/${c.userId}`);
  }}
  />
  ))}
@@ -991,17 +955,17 @@ const CandidateActions = ({
  // 'sign in to save' message, which is friendlier than dropping
  // them straight on the sign-in form with no context.
  if (!user) {
- navigate("/saved");
+ navigate("/app/saved");
  return;
  }
  // Saves attach to a project. Without one published & marked
- // active in MyNet, there's nowhere to store the save "" so the
+ // active in Profile, there's nowhere to store the save "" so the
  // old behavior silently lost data. Block the action and tell the
  // founder exactly what to do.
  if (!activeProjectId) {
- toast.error("Finish your active project in MyNet first", {
+ toast.error("Finish your active project in Profile first", {
  description:
- "Partners are ranked against your active project's criteria - and saves attach to it. Publish a project in MyNet, then mark it active.",
+ "Partners are ranked against your active project's criteria - and saves attach to it. Publish a project in Profile, then mark it active.",
  });
  return;
  }
@@ -1023,11 +987,11 @@ const CandidateActions = ({
  // 'sign in to chat' message so the user learns what's behind
  // the action before they're asked to sign up.
  if (!user) {
- navigate("/chats");
+ navigate("/app/chats");
  return;
  }
  onClose();
- navigate(`/chats/${candidate.userId}`);
+ navigate(`/app/chats/${candidate.userId}`);
  };
 
  return (
@@ -1092,6 +1056,21 @@ const CandidateActions = ({
  ) : (
  <Bookmark className="h-6 w-6" />
  )}
+ </button>
+
+ {/* View profile - opens this person's full public profile.
+ Separate from the chrome's right-rail Profile icon (which
+ opens YOUR profile) by context: this button only appears
+ inside the per-card action sheet, attached to a specific
+ candidate. */}
+ <button
+ type="button"
+ onClick={() => navigate(`/u/${candidate.userId}`)}
+ aria-label={`View ${candidate.fullName || "this person"}'s profile`}
+ title="View profile"
+ className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold hover:shadow-md"
+ >
+ <User className="h-6 w-6" />
  </button>
 
  {/* Message "" primary action */}
@@ -1336,7 +1315,7 @@ const LookerView = () => {
  isOwn={Boolean(user?.id && p.ownerId === user.id)}
  onSave={() => {
  if (!user) {
- navigate("/saved");
+ navigate("/app/saved");
  return;
  }
  void addSavedProject(p);
@@ -1344,12 +1323,12 @@ const LookerView = () => {
  }}
  onChat={() => {
  if (!user) {
- navigate("/chats");
+ navigate("/app/chats");
  return;
  }
  const target = p.isPolln8Recommended
- ? `/chats/${p.ownerId}?via=${p.id}`
- : `/chats/${p.ownerId}`;
+ ? `/app/chats/${p.ownerId}?via=${p.id}`
+ : `/app/chats/${p.ownerId}`;
  navigate(target);
  }}
  />
@@ -1666,7 +1645,7 @@ const Polln8ProjectActions = ({
  // Unauth: bounce to /saved so the AuthGate message explains
  // what the saved tab does. Skips dropping them on /signin cold.
  if (!user) {
- navigate("/saved");
+ navigate("/app/saved");
  return;
  }
  if (saved) {
@@ -1683,7 +1662,7 @@ const Polln8ProjectActions = ({
  // chat needs an account, instead of dropping them on /signin
  // with no context.
  if (!user) {
- navigate("/chats");
+ navigate("/app/chats");
  return;
  }
  // Self-chat guard: you posted this recommendation; there's
@@ -1697,7 +1676,7 @@ const Polln8ProjectActions = ({
  // ?via stamps the chat_contacts row with the recommendation's
  // project id so the requester's DMs show the polln8 founder
  // name + photo instead of the admin owner.
- navigate(`/chats/${project.ownerId}?via=${project.id}`);
+ navigate(`/app/chats/${project.ownerId}?via=${project.id}`);
  };
 
  const website = project.polln8FounderWebsite;
@@ -1831,7 +1810,7 @@ const ProjectInfoPanel = ({
  // Unauth: bounce to /saved so the AuthGate explains saves;
  // dropping straight to /signin loses the context of why.
  if (!user) {
- navigate("/saved");
+ navigate("/app/saved");
  return;
  }
  if (saved) {
@@ -1847,7 +1826,7 @@ const ProjectInfoPanel = ({
  // Unauth: bounce to /chats so the AuthGate explains chat;
  // dropping straight to /signin loses the context of why.
  if (!user) {
- navigate("/chats");
+ navigate("/app/chats");
  return;
  }
  // Self-chat guard: own project (incl. own polln8 rec) - nobody
@@ -1862,8 +1841,8 @@ const ProjectInfoPanel = ({
  // the project id as ?via so the first message gets stamped with
  // the alias on chat_contacts.
  const target = project.isPolln8Recommended
- ? `/chats/${project.ownerId}?via=${project.id}`
- : `/chats/${project.ownerId}`;
+ ? `/app/chats/${project.ownerId}?via=${project.id}`
+ : `/app/chats/${project.ownerId}`;
  navigate(target);
  };
 

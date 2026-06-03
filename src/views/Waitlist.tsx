@@ -119,7 +119,7 @@ const Waitlist = () => {
  else. The /admin page itself also gates on isAdmin. */}
  {isAdmin && (
  <Link
- to="/admin"
+ to="/app/admin"
  className="text-sm font-medium text-primary transition-opacity"
  >
  Admin
@@ -148,10 +148,10 @@ const Waitlist = () => {
  <ThemeToggle mode={mode} onToggle={toggle} />
  {user ? (
  <Link
- to="/mynet"
+ to="/app/profile/edit"
  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground transition-opacity"
  >
- Edit MyNet
+ Edit Profile
  <ArrowRight className="h-3.5 w-3.5" />
  </Link>
  ) : (
@@ -202,7 +202,7 @@ const Waitlist = () => {
  </p>
  <div className="flex flex-wrap items-center gap-4">
  <Link
- to={user ? "/mynet" : "/signup"}
+ to={user ? "/app/profile/edit" : "/signup"}
  className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm md:text-base font-semibold text-primary-foreground transition-all hover:gap-3"
  
  >
@@ -352,11 +352,11 @@ const Waitlist = () => {
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link
- to={user ? "/mynet" : "/signup"}
+ to={user ? "/app/profile/edit" : "/signup"}
  className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover:gap-3"
  
  >
- {user ? "Edit MyNet" : "Get started"}
+ {user ? "Edit Profile" : "Get started"}
  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
  </Link>
  <p className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">

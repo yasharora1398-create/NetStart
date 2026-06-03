@@ -504,7 +504,7 @@
  flex: 1;
  }
  /* Right-aligned pill inside a sidebar item (used for the user's
- name next to MyNet). Squashes long names with ellipsis so it
+ name next to Profile). Squashes long names with ellipsis so it
  never breaks the sidebar layout. Opaque primary-green chip with
  white text so it reads as a real status pill in both themes. */
  .glass-sidebar .gs-pill {
