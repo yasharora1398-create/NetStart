@@ -26,8 +26,9 @@
  */
 import { useEffect } from "react";
 import { NavLink } from "@/lib/router-compat";
-import { Flower2, User } from "lucide-react";
+import { Flower2, Moon, Star, Sun, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/hooks/useTheme";
 
 const RAIL_WIDTH = "64px";
 
@@ -42,6 +43,10 @@ type RailItem = {
 const ITEMS: RailItem[] = [
  { to: "/app/match", label: "Match", icon: Flower2 },
  { to: "/app/profile", label: "Your profile", icon: User },
+ // Reviews lives at the marketing root (/reviews), not under
+ // /app/, because it's an About-style page. Linking to the
+ // marketing path keeps a single canonical surface for it.
+ { to: "/reviews", label: "Reviews", icon: Star },
 ];
 
 export const AppRightRail = () => {
@@ -72,7 +77,43 @@ export const AppRightRail = () => {
  {ITEMS.map((item) => (
  <RailLink key={item.to} item={item} />
  ))}
+
+ {/* Theme toggle pinned to the bottom-right corner of the
+ viewport (which is just the bottom of this rail since the
+ rail is the right edge). mt-auto pushes it past the nav
+ items so the spacing between Reviews and the toggle grows
+ to fill the rail. */}
+ <ThemeToggleRail />
  </aside>
+ );
+};
+
+// Theme toggle styled to match the rest of the rail's icon buttons
+// (same h-11 w-11 circle, same hover behaviour, tooltip slides out
+// to the left). Pinned to bottom via mt-auto on the wrapping span.
+const ThemeToggleRail = () => {
+ const { mode, toggle } = useTheme();
+ const goingTo = mode === "dark" ? "light" : "dark";
+ const Icon = mode === "dark" ? Sun : Moon;
+ return (
+ <button
+ type="button"
+ onClick={toggle}
+ aria-label={`Switch to ${goingTo} mode`}
+ className="group relative mt-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-all duration-200 hover:border-emerald-500 hover:text-emerald-600"
+ >
+ <Icon className="h-4 w-4" strokeWidth={1.8} />
+ <span
+ aria-hidden
+ className={cn(
+ "pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-foreground shadow-md",
+ "opacity-0 translate-x-1 transition-all duration-200",
+ "group-hover:opacity-100 group-hover:translate-x-0",
+ )}
+ >
+ {`Switch to ${goingTo}`}
+ </span>
+ </button>
  );
 };
 

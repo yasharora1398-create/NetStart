@@ -19,8 +19,8 @@
  *   - CountUp on the four-stat row
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link } from "@/lib/router-compat";
-import { ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "@/lib/router-compat";
+import { ArrowRight, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/netstart/Footer";
@@ -210,6 +210,25 @@ const Home = () => {
  // doesn't expose its own theme control inline.
  useTheme();
 
+ // Signed-in users skip the marketing page entirely - Tinder-style.
+ // If they hit polln8.com while authenticated, drop them straight
+ // into the app (/app/match). Phone-UA visitors will get bounced to
+ // the mobile bundle by the existing next.config redirect on
+ // /app/match. Loading state holds back navigation until auth
+ // hydrates so we don't ping-pong on a stale `null` user.
+ const { user, loading: authLoading } = useAuth();
+ const navigate = useNavigate();
+ useEffect(() => {
+ if (authLoading) return;
+ if (user) navigate("/app/match", { replace: true });
+ }, [user, authLoading, navigate]);
+
+ // While auth is hydrating, render nothing instead of flashing the
+ // marketing page (which would then yank away as the redirect
+ // fires). Once we know the user is signed in, also render nothing
+ // because the navigate above is about to take them away.
+ if (authLoading || user) return null;
+
  return (
  <>
  {/* Mobile: dedicated condensed home page. Renders for narrow
@@ -382,6 +401,18 @@ const Hero = () => {
  <Link to={isAuthed ? "/app/match" : "/how"}>
  <Button variant="outlineGold" size="xl">
  {isAuthed ? "Open Match" : "How it works"}
+ </Button>
+ </Link>
+ </Magnetic>
+ {/* Reviews CTA right in the hero so a first-time
+ visitor can read social proof one click in - no
+ scrolling required. Outline-only so the gold
+ "Sign up" stays the single primary action. */}
+ <Magnetic strength={4}>
+ <Link to="/reviews">
+ <Button variant="outline" size="xl" className="gap-2">
+ <Star className="h-4 w-4 text-gold" />
+ Reviews
  </Button>
  </Link>
  </Magnetic>
