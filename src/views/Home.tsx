@@ -257,6 +257,26 @@ const Home = () => {
  <FinalCTA />
  </main>
 
+ {/* Fazier launch badge - sits between the marketing scroll
+ and the Footer. Home-page only so it doesn't appear on
+ every /app/* surface. Opens in a new tab. The badge
+ image is served by Fazier so it auto-updates when our
+ launch state changes (Featured / #1 of the day / etc.). */}
+ <div className="flex justify-center py-8 border-t border-border">
+ <a
+ href="https://fazier.com/launches/polln8.com"
+ target="_blank"
+ rel="noopener noreferrer"
+ aria-label="Polln8 on Fazier"
+ >
+ <img
+ src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral"
+ width={250}
+ alt="Fazier badge"
+ />
+ </a>
+ </div>
+
  <Footer />
  </div>
 

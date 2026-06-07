@@ -15,6 +15,7 @@
  */
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "@/lib/router-compat";
+import { BackButton } from "@/components/netstart/BackButton";
 import {
  ArrowLeft,
  Camera,
@@ -162,6 +163,7 @@ const Admin = () => {
  </header>
 
  <main className="mx-auto max-w-6xl px-5 md:px-8 pt-10 pb-24">
+ <BackButton to="/app/profile" label="Back to profile" />
  <h1 className="font-display text-4xl md:text-5xl tracking-[-0.03em] mb-8">
  Admin
  </h1>

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { BackButton } from "@/components/netstart/BackButton";
 import { ApplicationsPanel } from "@/components/mynet/ApplicationsPanel";
 import { useAuth } from "@/context/AuthContext";
 import { useReviewStatus } from "@/hooks/useReviewStatus";
@@ -53,6 +54,7 @@ const Applications = () => {
  setupBody="Your application pipeline unlocks once your profile is set up. It only takes a minute."
  >
  <div className="container py-10">
+ <BackButton to="/app/match" label="Back to match" />
  <header className="mb-8">
  <h1 className="mb-2 font-display text-4xl leading-[1.05] md:text-5xl">
  Pipeline

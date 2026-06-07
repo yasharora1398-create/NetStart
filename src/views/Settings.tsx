@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { BackButton } from "@/components/netstart/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -129,6 +130,7 @@ const Settings = () => {
  authBody="Settings is for changing your email, password, and account state - you need to be signed in first."
  >
  <div className="container max-w-2xl py-10">
+ <BackButton to="/app/profile" label="Back to profile" />
  <header className="mb-10">
  <h1 className="font-display text-4xl md:text-5xl leading-[1]">
  Account

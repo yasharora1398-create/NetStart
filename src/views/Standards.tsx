@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight } from "lucide-react";
 import { Sidebar } from "@/components/netstart/Sidebar";
+import { BackButton } from "@/components/netstart/BackButton";
 
 const PRINCIPLES = [
  {
@@ -78,6 +79,7 @@ const Standards = () => (
  style={{ paddingLeft: "var(--sidebar-width, 248px)" }}
  >
  <div className="max-w-4xl mx-auto px-6 md:px-10 pt-6 pb-20 md:pt-10 md:pb-24">
+ <BackButton to="/" label="Back to home" />
  <Reveal>
  <h1 className="font-display text-5xl md:text-7xl tracking-[-0.04em] leading-[0.95] mb-8">
  Three rules.<br />Nothing else.

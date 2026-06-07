@@ -12,6 +12,7 @@ import {
  XCircle,
 } from "lucide-react";
 import { Link, useNavigate } from "@/lib/router-compat";
+import { BackButton } from "@/components/netstart/BackButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -627,6 +628,9 @@ const ProfileEdit = () => {
  // unchanged - just the surrounding chrome was swapped.
  return (
  <AppLayout>
+ <div className="container max-w-5xl pt-2">
+ <BackButton to="/app/profile" label="Back to profile" />
+ </div>
  <ProfileWizard
  uid={uid}
  profile={profile}
@@ -650,6 +654,7 @@ const ProfileEdit = () => {
  }
  >
  <div className="container">
+ <BackButton to="/app/profile" label="Back to profile" />
  {openProject && isAuthed ? (
  <>
  <button

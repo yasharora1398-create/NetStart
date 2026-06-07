@@ -5,6 +5,7 @@ import { Loader2, Pencil, Star, User, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
+import { BackButton } from "@/components/netstart/BackButton";
 import { Button } from "@/components/ui/button";
 import {
  Dialog,
@@ -95,6 +96,7 @@ const Reviews = () => {
  return (
  <AppLayout>
  <div className="container max-w-4xl py-6 md:py-10">
+ <BackButton to="/" label="Back to home" />
  <header className="mb-6">
  <h1 className="font-display text-3xl sm:text-4xl leading-tight">
  Reviews

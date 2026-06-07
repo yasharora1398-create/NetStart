@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
+import { BackButton } from "@/components/netstart/BackButton";
 import { FadeUp } from "@/components/netstart/FadeUp";
 import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const Perks = () => {
  // mobile bottom tab bar would just be noise here.
  <AppLayout hideBottomNav>
  <div className="container max-w-6xl py-8 md:py-12">
+ <BackButton to="/app/profile" label="Back to profile" />
  {/* HERO --------------------------------------------------- */}
  <FadeUp>
  <header className="mb-12 md:mb-16 max-w-3xl">

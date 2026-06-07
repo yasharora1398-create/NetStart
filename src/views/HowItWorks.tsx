@@ -10,6 +10,7 @@ import {
  StepChat,
 } from "@/components/mockups/Steps";
 import { Sidebar } from "@/components/netstart/Sidebar";
+import { BackButton } from "@/components/netstart/BackButton";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 // Sidebar shows everywhere now; /how is treated as an internal
@@ -122,6 +123,7 @@ const HowItWorks = () => {
  style={SHOW_SIDEBAR ? { paddingLeft: "var(--sidebar-width, 0px)" } : undefined}
  >
  <div className="mx-auto w-full max-w-5xl px-6 md:px-10 pt-12 pb-20 md:pt-16 md:pb-24">
+ <BackButton to="/" label="Back to home" />
  <Reveal>
  <div className="text-center lg:text-left">
  <h1 className="font-display text-4xl md:text-6xl tracking-[-0.04em] leading-[0.95] mb-6">

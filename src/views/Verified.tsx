@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router-compat";
+import { BackButton } from "@/components/netstart/BackButton";
 import {
  ArrowLeft,
  ArrowRight,
@@ -141,13 +142,7 @@ const Verified = () => {
  return (
  <AppLayout>
  <div className="container max-w-6xl py-6 md:py-10">
- <Link
- to="/app/match"
- className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-6"
- >
- <ArrowLeft className="h-3.5 w-3.5" />
- Back to Match
- </Link>
+ <BackButton to="/app/perks" label="Back to upgrades" />
 
  {/* HERO ------------------------------------------------------ */}
  <header className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-10 md:gap-14 items-center mb-16 md:mb-24">
