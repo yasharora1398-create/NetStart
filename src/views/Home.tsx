@@ -270,16 +270,25 @@ const Home = () => {
  rel="noopener noreferrer"
  aria-label="Polln8 on Fazier"
  >
- {/* Badge theme follows the page palette. Fazier exposes
- theme=neutral (cream / light) and theme=dark - the src
- swaps live when the user flips the theme toggle. */}
+ {/* Two explicit branches (one per Fazier theme) so there's
+ no string-template ambiguity. key={mode} forces a fresh
+ <img> element on every toggle, bypassing any cached
+ entry the prior src may have left in browser memory. */}
+ {mode === "dark" ? (
  <img
- src={`https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=${
- mode === "dark" ? "dark" : "neutral"
- }`}
+ key="fazier-dark"
+ src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=dark"
  width={250}
  alt="Fazier badge"
  />
+ ) : (
+ <img
+ key="fazier-light"
+ src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral"
+ width={250}
+ alt="Fazier badge"
+ />
+ )}
  </a>
  </div>
 
