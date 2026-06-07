@@ -206,9 +206,10 @@ const CountUp = ({
 const HERO_WORDS: string[] = ["Cofounders", "found", "efficiently."];
 
 const Home = () => {
- // Keeps the theme toggle's choice respected even though this page
- // doesn't expose its own theme control inline.
- useTheme();
+ // Keeps the theme toggle's choice respected; `mode` drives the
+ // Fazier badge's theme query param below so the badge ink matches
+ // the current page palette.
+ const { mode } = useTheme();
 
  // Signed-in users skip the marketing page entirely - Tinder-style.
  // If they hit polln8.com while authenticated, drop them straight
@@ -269,8 +270,13 @@ const Home = () => {
  rel="noopener noreferrer"
  aria-label="Polln8 on Fazier"
  >
+ {/* Badge theme follows the page palette. Fazier exposes
+ theme=neutral (cream / light) and theme=dark - the src
+ swaps live when the user flips the theme toggle. */}
  <img
- src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral"
+ src={`https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=${
+ mode === "dark" ? "dark" : "neutral"
+ }`}
  width={250}
  alt="Fazier badge"
  />
