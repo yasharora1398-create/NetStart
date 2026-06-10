@@ -78,31 +78,49 @@ const ForumVignette = () => (
       </p>
     </div>
 
-    {/* The replies */}
+    {/* The replies - each one labeled with exactly how it wastes
+        your time: the service seller, the all-ideas guy who ghosts,
+        and the promising one who never writes back. */}
     <div className="space-y-2 pl-4 border-l border-border">
-      <div className="rounded-sm border border-border bg-card px-3.5 py-2.5 flex items-start gap-2.5">
-        <UserX className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+      <div className="rounded-sm border border-border bg-card px-3.5 py-2.5">
+        <div className="mb-1 flex items-center gap-2">
+          <UserX className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <p className="text-[11px] font-semibold leading-none">u/agency_mike</p>
+          <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.1em] text-muted-foreground">
+            Selling, not joining
+          </span>
+        </div>
         <p className="text-[12px] text-muted-foreground leading-relaxed">
-          "Great opportunity! I run a dev agency that can build your MVP
-          for $15k…"
+          "Great opportunity! My dev agency can build your MVP for
+          $15k…"
         </p>
       </div>
-      <div className="rounded-sm border border-border bg-card px-3.5 py-2.5 flex items-start gap-2.5">
-        <UserX className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+      <div className="rounded-sm border border-border bg-card px-3.5 py-2.5">
+        <div className="mb-1 flex items-center gap-2">
+          <UserX className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <p className="text-[11px] font-semibold leading-none">u/idea_guy_47</p>
+          <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.1em] text-muted-foreground">
+            All ideas, no work
+          </span>
+        </div>
         <p className="text-[12px] text-muted-foreground leading-relaxed">
-          "I have 10 ideas better than this, DM me" · no profile, no
-          work, no replies since
+          "I have 10 ideas better than this. DM me."
+        </p>
+        <p className="mt-1 text-[11px] italic text-muted-foreground leading-relaxed">
+          Empty profile, nothing ever shipped. You DM'd him. He never
+          answered.
         </p>
       </div>
       <div className="rounded-sm border border-dashed border-border px-3.5 py-2.5">
         <p className="text-[12px] text-muted-foreground leading-relaxed italic">
-          The promising one read your message 6 days ago.
+          And the one promising reply? Read your message 6 days ago.
+          Still nothing.
         </p>
       </div>
     </div>
 
     <p className="mt-4 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-      No review · no identity · no follow-through
+      Nobody screened · nobody verified · nobody replies
     </p>
   </div>
 );
