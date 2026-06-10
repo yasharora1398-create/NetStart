@@ -209,7 +209,17 @@ serve(async (req: Request) => {
   let failed = 0;
   const failures: string[] = [];
 
+  // Resend rate-limits free tier at 2 req/sec. Sleep 600ms between
+  // sends so a queue of N users finishes at ~1.7 req/sec, well
+  // under the limit. Paid tier (10 req/sec) doesn't need this but
+  // a few seconds of extra wall-clock is cheap insurance.
+  const sleep = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+  let isFirst = true;
+
   for (const row of due) {
+    if (!isFirst) await sleep(600);
+    isFirst = false;
     try {
       const { data: userResp, error: userErr } = await admin.auth.admin
         .getUserById(row.user_id);
