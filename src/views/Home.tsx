@@ -25,6 +25,7 @@ import { Link, useNavigate } from "@/lib/router-compat";
 import { ArrowRight, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { FadeUp } from "@/components/netstart/FadeUp";
 import { Footer } from "@/components/netstart/Footer";
 import { HomeAuthStrip } from "@/components/netstart/HomeAuthStrip";
 import HowItWorksShowcase from "@/components/marketing/HowItWorksShowcase";
@@ -289,6 +290,34 @@ const Hero = () => {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // Subtle scroll parallax on the moth illustration: it drifts up a
+  // touch slower than the page, which makes the hero feel layered
+  // without any added visuals. Skipped for reduced-motion and touch
+  // devices, same policy as Magnetic.
+  const mothRef = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const el = mothRef.current;
+        if (!el) return;
+        el.style.transform = `translateY(calc(-50% + ${
+          window.scrollY * -0.06
+        }px))`;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   // Cursor-following CSS variable hook. The hero used to paint a
   // gold glow + parallax grid against these; the visuals were pulled
   // for being too noisy, but the hook stays so the section reads
@@ -329,6 +358,7 @@ const Hero = () => {
           reference laptop), so it scales in lockstep with the
           headline instead of dancing to its own vh tune. */}
       <img
+        ref={mothRef}
         src="/hero-moth.png"
         alt=""
         width={2380}
@@ -378,7 +408,7 @@ const Hero = () => {
             what you actually want to build.
           </p>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <FadeUp delay={420} className="flex flex-wrap items-center gap-3">
             <Magnetic strength={10}>
               <Link to={isAuthed ? "/app/match" : "/signup"}>
                 <Button variant="gold" size="xl" className="group">
@@ -414,7 +444,7 @@ const Hero = () => {
                 I already have an account
               </Link>
             )}
-          </div>
+          </FadeUp>
         </div>
       </div>
     </section>
@@ -431,15 +461,18 @@ const RoleSplit = () => {
   return (
     <section className="relative border-y border-border bg-card px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-4 text-center leading-[1.05] font-bold">
-          Which one are you?
-        </h2>
-        <p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto text-center mb-12">
-          Founders find partners. Skilled people find startups that fit.
-          Same network, two doors.
-        </p>
+        <FadeUp>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-4 text-center leading-[1.05] font-bold">
+            Which one are you?
+          </h2>
+          <p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto text-center mb-12">
+            Founders find partners. Skilled people find startups that fit.
+            Same network, two doors.
+          </p>
+        </FadeUp>
 
         <div className="grid gap-5 md:grid-cols-2">
+          <FadeUp from="left" durationMs={800} className="h-full">
           <TiltCard intensity={4} className="group h-full">
             <article className="relative h-full rounded-sm border border-border bg-background p-8 transition-colors group-hover:border-gold">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
@@ -483,7 +516,9 @@ const RoleSplit = () => {
               </div>
             </article>
           </TiltCard>
+          </FadeUp>
 
+          <FadeUp from="right" durationMs={800} delay={150} className="h-full">
           <TiltCard intensity={4} className="group h-full">
             <article className="relative h-full rounded-sm border border-border bg-background p-8 transition-colors group-hover:border-gold">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold mb-3">
@@ -527,6 +562,7 @@ const RoleSplit = () => {
               </div>
             </article>
           </TiltCard>
+          </FadeUp>
         </div>
       </div>
     </section>

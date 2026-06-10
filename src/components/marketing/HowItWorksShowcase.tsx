@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { FadeUp } from "@/components/netstart/FadeUp";
 import {
   ReviewCardMockup,
   MatchesCardMockup,
@@ -61,13 +62,15 @@ const HowItWorksShowcase = () => {
   return (
     <section className="border-y border-border bg-card px-4 sm:px-8 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-4 max-w-3xl leading-[1.05] font-bold">
-          How it works.
-        </h2>
-        <p className="text-base text-muted-foreground leading-relaxed max-w-2xl mb-12">
-          Three steps from stranger to teammate. Click a step to watch
-          exactly what happens on screen.
-        </p>
+        <FadeUp>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl mb-4 max-w-3xl leading-[1.05] font-bold">
+            How it works.
+          </h2>
+          <p className="text-base text-muted-foreground leading-relaxed max-w-2xl mb-12">
+            Three steps from stranger to teammate. Click a step to watch
+            exactly what happens on screen.
+          </p>
+        </FadeUp>
 
         <div className="grid gap-8 lg:gap-14 lg:grid-cols-[40fr_60fr] items-center">
           {/* Left 40%: the three step boxes, stacked. The active one
@@ -77,13 +80,13 @@ const HowItWorksShowcase = () => {
             {STEPS.map((s, i) => {
               const isActive = i === active;
               return (
+                <FadeUp key={s.title} from="left" durationMs={800} delay={i * 120}>
                 <button
-                  key={s.title}
                   type="button"
                   onClick={() => setActive(i)}
                   aria-expanded={isActive}
                   className={cn(
-                    "text-left rounded-sm border bg-background p-6 transition-all duration-300 ease-out",
+                    "w-full text-left rounded-sm border bg-background p-6 transition-all duration-300 ease-out",
                     isActive
                       ? "border-gold scale-[1.02] shadow-sm"
                       : "border-border hover:border-gold/60 scale-100",
@@ -131,6 +134,7 @@ const HowItWorksShowcase = () => {
                     </div>
                   </div>
                 </button>
+                </FadeUp>
               );
             })}
           </div>
@@ -140,11 +144,18 @@ const HowItWorksShowcase = () => {
               loop restarts from its first frame. Hidden below lg -
               tablet portrait gets the text boxes only. */}
           <div className="hidden lg:flex items-center justify-center min-h-[480px]">
-            <div key={active} className="hiw-fade w-full flex justify-center">
-              {active === 0 && <ReviewCardMockup />}
-              {active === 1 && <MatchesCardMockup persona="partner" />}
-              {active === 2 && <RequestCardMockup persona="partner" />}
-            </div>
+            <FadeUp
+              from="right"
+              durationMs={800}
+              delay={200}
+              className="w-full flex justify-center"
+            >
+              <div key={active} className="hiw-fade w-full flex justify-center">
+                {active === 0 && <ReviewCardMockup />}
+                {active === 1 && <MatchesCardMockup persona="partner" />}
+                {active === 2 && <RequestCardMockup persona="partner" />}
+              </div>
+            </FadeUp>
           </div>
         </div>
       </div>

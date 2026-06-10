@@ -668,6 +668,91 @@
  to { opacity: 1; transform: translateY(0); }
  }
 
+ /* Interactive-demo micro-animations. All one-shot entrances are
+ only applied to elements that mount because of a STATE change
+ (both stage copies mount in the same render, keeping the
+ blurred base and the crisp clipped copy in lockstep). */
+ .demo-pop {
+ animation: demo-pop 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+ }
+ @keyframes demo-pop {
+ 0% { opacity: 0; transform: scale(0.5); }
+ 70% { transform: scale(1.08); }
+ 100% { opacity: 1; transform: scale(1); }
+ }
+ .demo-bubble-in {
+ animation: demo-bubble-in 320ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+ }
+ @keyframes demo-bubble-in {
+ from { opacity: 0; transform: translateY(10px) scale(0.96); }
+ to { opacity: 1; transform: none; }
+ }
+ .demo-typing-dot {
+ animation: demo-typing 1s ease-in-out infinite;
+ }
+ .demo-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+ .demo-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+ @keyframes demo-typing {
+ 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+ 30% { transform: translateY(-4px); opacity: 1; }
+ }
+ .demo-step-in {
+ animation: demo-step-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+ }
+ @keyframes demo-step-in {
+ from { opacity: 0; transform: translateX(36px); }
+ to { opacity: 1; transform: none; }
+ }
+ /* Action-menu icons stagger in; per-icon delay via --di. */
+ .demo-icon-in {
+ animation: demo-icon-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+ animation-delay: var(--di, 0ms);
+ }
+ @keyframes demo-icon-in {
+ from { opacity: 0; transform: translateY(10px) scale(0.7); }
+ to { opacity: 1; transform: none; }
+ }
+ /* Pulsing border ring on the tour's click target. Border only,
+ no shadow/halo per the site's no-glow rule. */
+ .demo-ring {
+ animation: demo-ring 1.6s ease-out infinite;
+ }
+ @keyframes demo-ring {
+ 0% { transform: scale(1); opacity: 0.7; }
+ 100% { transform: scale(1.05); opacity: 0; }
+ }
+
+ /* Directional scroll-reveal variants (class-based, used where the
+ FadeUp component isn't a fit). Same motion language as .reveal,
+ longer travel so the entrance reads on a fast scroll. */
+ .reveal-left {
+ opacity: 0;
+ transform: translateX(-40px);
+ transition:
+ opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+ transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+ }
+ .reveal-right {
+ opacity: 0;
+ transform: translateX(40px);
+ transition:
+ opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+ transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+ }
+ .reveal-scale {
+ opacity: 0;
+ transform: translateY(24px) scale(0.95);
+ transition:
+ opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+ transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+ }
+ .reveal-left.reveal-on,
+ .reveal-right.reveal-on,
+ .reveal-scale.reveal-on {
+ opacity: 1;
+ transform: none;
+ }
+
  /* Polln8 Review Card mockup animations - used by the
  ReviewCardMockup on the localhost homepage Why-section. The
  mockup auto-loops through rest -> reviewing -> approved so the
@@ -873,10 +958,31 @@
  .rc-ring,
  .rc-pulse,
  .rq-pulse-cta,
- .hiw-fade {
+ .hiw-fade,
+ .demo-pop,
+ .demo-bubble-in,
+ .demo-typing-dot,
+ .demo-step-in,
+ .demo-icon-in,
+ .demo-ring {
  animation: none !important;
  }
- .hiw-fade {
+ .hiw-fade,
+ .demo-pop,
+ .demo-bubble-in,
+ .demo-step-in,
+ .demo-icon-in {
+ opacity: 1 !important;
+ transform: none !important;
+ }
+ .demo-ring {
+ opacity: 0 !important;
+ }
+ .reveal,
+ .reveal-left,
+ .reveal-right,
+ .reveal-scale {
+ transition: none !important;
  opacity: 1 !important;
  transform: none !important;
  }

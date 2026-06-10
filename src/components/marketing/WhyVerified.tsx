@@ -215,12 +215,13 @@ const WhyVerified = () => {
           </p>
         </FadeUp>
 
-        {/* Comparison: open forum vs verified profile. */}
+        {/* Comparison: open forum vs verified profile, sliding in
+            from opposite sides. */}
         <div className="grid gap-5 lg:grid-cols-2 mb-16 items-stretch">
-          <FadeUp className="h-full">
+          <FadeUp from="left" durationMs={800} className="h-full">
             <ForumVignette />
           </FadeUp>
-          <FadeUp delay={150} className="h-full">
+          <FadeUp from="right" durationMs={800} delay={150} className="h-full">
             <VerifiedVignette />
           </FadeUp>
         </div>
@@ -228,7 +229,13 @@ const WhyVerified = () => {
         {/* Three pillars of what verification means. */}
         <div className="grid gap-4 md:grid-cols-3">
           {PILLARS.map((p, i) => (
-            <FadeUp key={p.title} delay={i * 120} className="h-full">
+            <FadeUp
+              key={p.title}
+              from="scale"
+              durationMs={800}
+              delay={i * 120}
+              className="h-full"
+            >
               <article className="h-full rounded-sm border border-border bg-card p-6">
                 <p className="font-display text-4xl text-gold mb-4 leading-none font-bold">
                   {String(i + 1).padStart(2, "0")}
