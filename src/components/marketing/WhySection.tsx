@@ -190,7 +190,9 @@ const MockupPlaceholder = () => (
 // -> approved, with a 1500ms breath at approved before resetting.
 type ReviewState = "rest" | "reviewing" | "approved";
 
-const ReviewCardMockup = () => {
+// Exported so HowItWorksShowcase (home page) can render the same
+// animations one-at-a-time in its click-to-switch layout.
+export const ReviewCardMockup = () => {
  const [state, setState] = useState<ReviewState>("rest");
  const timers = useRef<number[]>([]);
 
@@ -688,7 +690,7 @@ const ZARA_INFO: DeckInfoSheet = {
  ],
 };
 
-const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
+export const MatchesCardMockup = ({ persona }: { persona: Persona }) => {
  const isFounder = persona === "founder";
  // Partner POV (original): cards are founders posting projects.
  // Founder POV: cards are partners looking to join startups.
@@ -1274,7 +1276,7 @@ const REQUEST_PROFILE_FOUNDER = {
 const REQUEST_PITCH_FOUNDER =
  "I'm building a B2B clinic-ops platform - $8K MRR, real users, technical surface that needs an owner. Your devtools work looks like exactly what I need next to me. Free to chat this week?";
 
-const RequestCardMockup = ({ persona }: { persona: Persona }) => {
+export const RequestCardMockup = ({ persona }: { persona: Persona }) => {
  const isFounder = persona === "founder";
  const profile = isFounder ? REQUEST_PROFILE_FOUNDER : REQUEST_PROFILE_PARTNER;
  const pitch = isFounder ? REQUEST_PITCH_FOUNDER : REQUEST_PITCH_PARTNER;
