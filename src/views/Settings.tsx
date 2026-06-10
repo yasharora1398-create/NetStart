@@ -10,6 +10,7 @@ import { BackButton } from "@/components/netstart/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/context/AuthContext";
 import { deleteMyAccount } from "@/lib/mynet-storage";
 import { useConfirmSignOut } from "@/components/netstart/SignOutConfirm";
@@ -38,9 +39,64 @@ const Settings = () => {
  const [deletingAccount, setDeletingAccount] = useState(false);
  const [deleteConfirm, setDeleteConfirm] = useState("");
 
+ // Reminder-email preference. The cron at /api/cron/profile-reminders
+ // skips users with email_reminders_enabled = false. We read it on
+ // mount and write through to profiles whenever the user flips the
+ // switch - no save button. `null` while we're loading so the Switch
+ // doesn't briefly flash to the wrong position.
+ const [emailRemindersOn, setEmailRemindersOn] = useState<boolean | null>(
+ null,
+ );
+ const [savingReminders, setSavingReminders] = useState(false);
+
  useEffect(() => {
  if (user?.email) setEmail(user.email);
  }, [user?.email]);
+
+ // Pull the current preference from profiles when auth lands.
+ useEffect(() => {
+ if (!user?.id) return;
+ let cancelled = false;
+ getSupabase()
+ .from("profiles")
+ .select("email_reminders_enabled")
+ .eq("user_id", user.id)
+ .maybeSingle()
+ .then(({ data }) => {
+ if (cancelled) return;
+ // Default to true if the row is missing or the column is
+ // null (matches the migration default).
+ setEmailRemindersOn(data?.email_reminders_enabled !== false);
+ });
+ return () => {
+ cancelled = true;
+ };
+ }, [user?.id]);
+
+ const handleToggleReminders = async (next: boolean) => {
+ if (!user?.id) return;
+ // Optimistic flip so the switch feels immediate.
+ setEmailRemindersOn(next);
+ setSavingReminders(true);
+ const { error } = await getSupabase()
+ .from("profiles")
+ .update({ email_reminders_enabled: next })
+ .eq("user_id", user.id);
+ setSavingReminders(false);
+ if (error) {
+ // Revert + tell the user. Toast wording stays vague because
+ // the underlying RLS / unique-constraint failure surface
+ // isn't useful to the end user.
+ setEmailRemindersOn(!next);
+ toast.error("Couldn't save your preference. Try again.");
+ } else {
+ toast.success(
+ next
+ ? "Reminder emails turned on."
+ : "Reminder emails turned off.",
+ );
+ }
+ };
 
  // Email autosave on blur. Skipped when nothing changed so we don't
  // spam Supabase with no-op confirmation emails every time the field
@@ -210,6 +266,38 @@ const Settings = () => {
  </Button>
  </div>
  </form>
+
+ {/* Reminder-email opt-out. Same shape as the Session row -
+ label on the left, control on the right. The Switch is
+ held back until we know the current preference (null
+ state) so it doesn't flash to ON, then snap to OFF, when
+ a user who had unsubscribed re-opens Settings. */}
+ <div className="p-6 md:p-8 flex items-center justify-between gap-3">
+ <div className="min-w-0">
+ <Label
+ htmlFor="email-reminders"
+ className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground"
+ >
+ Reminder emails
+ </Label>
+ <p className="mt-1 text-xs text-muted-foreground max-w-xs">
+ Weekly nudge to finish setting up your profile.
+ Off here means you won&apos;t hear from us until
+ you toggle it back on or click an unsubscribe link
+ in a past email.
+ </p>
+ </div>
+ {emailRemindersOn !== null ? (
+ <Switch
+ id="email-reminders"
+ checked={emailRemindersOn}
+ disabled={savingReminders}
+ onCheckedChange={(v) => void handleToggleReminders(v)}
+ />
+ ) : (
+ <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+ )}
+ </div>
 
  {/* Sign out row - one button, no surrounding paragraph. The
  confirm dialog itself offers "this tab" vs "everywhere". */}

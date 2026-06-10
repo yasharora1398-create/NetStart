@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { BackButton } from "@/components/netstart/BackButton";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import {
  MothEmptyState,
  type MothVariant,
@@ -462,16 +463,13 @@ const SavedCandidateCard = ({ candidate }: { candidate: Candidate }) => {
  </Link>
  </Button>
  {candidate.linkedinUrl ? (
- <Button asChild variant="ghost" size="sm">
- <a
- href={candidate.linkedinUrl}
- target="_blank"
- rel="noreferrer noopener"
+ <LinkedInLink
+ url={candidate.linkedinUrl}
+ className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm font-medium text-foreground hover:bg-accent"
  >
  <Linkedin className="size-3.5" />
  <span className="ml-1 hidden sm:inline">LinkedIn</span>
- </a>
- </Button>
+ </LinkedInLink>
  ) : null}
  <Button asChild variant="ghost" size="sm">
  <Link to={`/u/${candidate.userId}`}>

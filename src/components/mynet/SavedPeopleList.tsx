@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import {
  Dialog,
  DialogContent,
@@ -228,16 +229,14 @@ export const SavedPeopleList = ({ project, onUnsave }: SavedPeopleListProps) => 
  </p>
  )}
  {c.linkedinUrl && (
- <a
- href={c.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
+ <LinkedInLink
+ url={c.linkedinUrl}
  className="inline-flex items-center gap-1.5 text-[11px] text-gold hover:underline mt-2"
  >
  <Linkedin className="h-3 w-3" />
  LinkedIn
  <ExternalLink className="h-3 w-3 " />
- </a>
+ </LinkedInLink>
  )}
  </div>
  <Button

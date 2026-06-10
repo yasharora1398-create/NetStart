@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import {
  Sheet,
  SheetContent,
@@ -463,16 +464,14 @@ const PublicProfileBody = ({
  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold mb-3">
  Contact
  </p>
- <a
- href={candidate.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
+ <LinkedInLink
+ url={candidate.linkedinUrl}
  className="inline-flex items-center gap-2 text-sm text-gold hover:underline"
  >
  <Linkedin className="h-4 w-4" />
  {candidate.linkedinUrl}
  <ExternalLink className="h-3 w-3 " />
- </a>
+ </LinkedInLink>
  </section>
  )}
  </div>

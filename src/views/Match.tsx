@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
 import { AuthGate } from "@/components/netstart/AuthGate";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -996,18 +997,17 @@ const CandidateActions = ({
 
  return (
  <div className="flex flex-col items-center gap-3">
- {/* LinkedIn */}
+ {/* LinkedIn - gated via LinkedInLink. Accepted users get the
+ real <a>; everyone else gets the same circle visually but
+ a no-op click that toasts the unlock requirement. */}
  {candidate.linkedinUrl ? (
- <a
- href={candidate.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
- aria-label="Open LinkedIn"
- title="LinkedIn"
+ <LinkedInLink
+ url={candidate.linkedinUrl}
+ ariaLabel="Open LinkedIn"
  className="flex h-16 w-16 items-center justify-center rounded-full border border-gold bg-card text-gold shadow-sm transition-all hover:bg-gold hover:text-primary-foreground hover:border-gold hover:shadow-md"
  >
  <Linkedin className="h-6 w-6" />
- </a>
+ </LinkedInLink>
  ) : (
  <span
  aria-label="LinkedIn unavailable"
@@ -1917,16 +1917,14 @@ const ProjectInfoPanel = ({
  </a>
  ) : null}
  {founder.linkedinUrl ? (
- <a
- href={founder.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
+ <LinkedInLink
+ url={founder.linkedinUrl}
  className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline"
  >
  <Linkedin className="h-3.5 w-3.5" />
  LinkedIn
  <ExternalLink className="h-3 w-3 " />
- </a>
+ </LinkedInLink>
  ) : null}
  </div>
  ) : null}
@@ -2263,16 +2261,13 @@ const CandidateStrip = ({
  </span>
  )}
  {candidate.linkedinUrl ? (
- <a
- href={candidate.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
- aria-label="LinkedIn"
- title="LinkedIn"
+ <LinkedInLink
+ url={candidate.linkedinUrl}
+ ariaLabel="LinkedIn"
  className="flex h-9 w-9 items-center justify-center rounded-full border border-gold bg-card text-gold transition-colors hover:bg-gold hover:text-primary-foreground"
  >
  <Linkedin className="h-4 w-4" />
- </a>
+ </LinkedInLink>
  ) : (
  <span
  aria-label="No LinkedIn"

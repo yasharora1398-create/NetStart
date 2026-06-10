@@ -44,6 +44,7 @@ import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import { Button } from "@/components/ui/button";
 import {
  DropdownMenu,
@@ -812,15 +813,13 @@ const Header = ({
  <SearchIcon className="size-4" />
  </Button>
  {profile?.linkedinUrl ? (
- <Button asChild variant="ghost" size="icon" aria-label="Open LinkedIn">
- <a
- href={profile.linkedinUrl}
- target="_blank"
- rel="noreferrer noopener"
+ <LinkedInLink
+ url={profile.linkedinUrl}
+ ariaLabel="Open LinkedIn"
+ className="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-accent"
  >
  <Linkedin className="size-4" />
- </a>
- </Button>
+ </LinkedInLink>
  ) : null}
  <Button asChild variant="ghost" size="icon" aria-label="Open profile">
  <Link to={`/u/${contactId}`}>

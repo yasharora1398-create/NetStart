@@ -14,6 +14,7 @@ import {
  MothEmptyState,
  type MothVariant,
 } from "@/components/netstart/MothEmptyState";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
  getAvatarUrl,
@@ -270,16 +271,14 @@ export const ApplicationsPanel = ({
  )}
  <div className="flex flex-wrap items-center gap-2 mt-3">
  {app.candidate.linkedinUrl && (
- <a
- href={app.candidate.linkedinUrl}
- target="_blank"
- rel="noopener noreferrer"
+ <LinkedInLink
+ url={app.candidate.linkedinUrl}
  className="inline-flex items-center gap-1.5 text-[11px] text-gold hover:underline"
  >
  <Linkedin className="h-3 w-3" />
  LinkedIn
  <ExternalLink className="h-3 w-3 " />
- </a>
+ </LinkedInLink>
  )}
  {app.status !== "accepted" && (
  <Button
@@ -374,16 +373,14 @@ export const ApplicationsPanel = ({
  <p className="text-sm">{app.founderFullName}</p>
  )}
  {app.founderLinkedin && (
- <a
- href={app.founderLinkedin}
- target="_blank"
- rel="noopener noreferrer"
+ <LinkedInLink
+ url={app.founderLinkedin}
  className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline mt-1"
  >
  <Linkedin className="h-3 w-3" />
  {app.founderLinkedin}
  <ExternalLink className="h-3 w-3 " />
- </a>
+ </LinkedInLink>
  )}
  </div>
  )}

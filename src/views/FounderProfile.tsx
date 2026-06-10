@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 
 import { AppLayout } from "@/components/netstart/AppLayout";
+import { LinkedInLink } from "@/components/netstart/LinkedInLink";
 import { AuthGate } from "@/components/netstart/AuthGate";
 import { MothEmptyState } from "@/components/netstart/MothEmptyState";
 import { VerifiedBadge } from "@/components/netstart/VerifiedBadge";
@@ -319,13 +320,16 @@ const FounderProfile = () => {
  />
  ) : null}
  {founder.linkedinUrl ? (
- <ExternalLinkRow
- icon={
+ <li>
+ <LinkedInLink
+ url={founder.linkedinUrl}
+ className="inline-flex items-center gap-2 text-xs text-foreground hover:text-primary transition-colors max-w-full"
+ >
  <Linkedin className="h-3.5 w-3.5 text-gold flex-shrink-0" />
- }
- label="LinkedIn"
- href={founder.linkedinUrl}
- />
+ <span className="truncate">LinkedIn</span>
+ <ExternalLink className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+ </LinkedInLink>
+ </li>
  ) : null}
  {!founder.websiteUrl && !founder.linkedinUrl ? (
  <li className="text-xs text-muted-foreground italic">
